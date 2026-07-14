@@ -1,8 +1,7 @@
 use actix_web::web;
 
-mod handlers;
+mod routes;
 
-pub fn router() -> actix_web::Scope {
-    web::scope("/rpc")
-        .route("/hello", web::get().to(handlers::hello))
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(web::scope("/rpc").configure(routes::root::routes));
 }
