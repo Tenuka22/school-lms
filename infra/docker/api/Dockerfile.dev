@@ -6,4 +6,4 @@ COPY . .
 
 RUN cargo install cargo-watch
 
-CMD ["cargo", "watch", "-p", "-x", "run"]
+CMD ["cargo", "watch", "-p", "-w", "/app", "-w", "/packages", "-x", "run"]
