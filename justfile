@@ -3,9 +3,10 @@ set shell := ["powershell", "-c"]
 COMPOSE_DEV := "infra/docker/compose/docker-compose.dev.yml"
 COMPOSE_PROD := "infra/docker/compose/docker-compose.prod.yml"
 
-# Development — pass any docker compose subcommand (default: up)
-dev *args="up":
-	docker compose -f {{COMPOSE_DEV}} {{args}}
+# Development — run API with cargo watch and Web with bun dev locally
+dev:
+	Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd apps/api; cargo watch -x run"
+	cd apps/web; bun run dev
 
 # Production — pass any docker compose subcommand (default: up)
 prod *args="up":
