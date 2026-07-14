@@ -1,12 +1,8 @@
-use actix_web::{App, HttpResponse, HttpServer, Responder, web};
-
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
-}
+use actix_web::{App, HttpServer};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().route("/", web::get().to(hello)))
+    HttpServer::new(|| App::new().service(rpc::router()))
         .bind(("127.0.0.1", 3001))?
         .run()
         .await
