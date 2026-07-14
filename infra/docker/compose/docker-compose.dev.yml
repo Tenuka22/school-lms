@@ -4,14 +4,13 @@ services:
 
   api:
     build:
-      context: ../../../apps/api
-      dockerfile: ../../infra/docker/api/Dockerfile.dev
+      context: ../../../
+      dockerfile: infra/docker/api/Dockerfile.dev
     container_name: lms-api-dev
     ports:
       - "3001:3001"
     volumes:
-      - ../../../apps/api:/app
-      - ../../../packages:/packages
+      - ../../../apps/api:/app/apps/api
       - cargo-cache:/usr/local/cargo/registry
     environment:
       RUST_LOG: debug

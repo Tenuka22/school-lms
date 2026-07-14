@@ -2,9 +2,10 @@ FROM rust:latest
 
 WORKDIR /app
 
-COPY packages/ /packages/
-COPY apps/api/ /app/
+COPY apps/api/ ./apps/api/
 
-RUN cargo install cargo-watch
+WORKDIR /app/apps/api
 
-CMD ["cargo", "watch", "-p", "-w", "/app", "-w", "/packages", "-x", "run"]
+RUN cargo build
+
+CMD ["cargo", "run"]
