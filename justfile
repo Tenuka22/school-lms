@@ -19,17 +19,17 @@ clean:
 
 # ── API (Rust) ──────────────────────────────────────────
 
-# Check Rust formatting
+# Check Rust formatting (api + rpc)
 check-api:
-	cd apps/api; cargo fmt --check
+	cd apps/api; cargo fmt --check --all
 
-# Lint Rust code
+# Lint Rust code (api + rpc)
 lint-api:
-	cd apps/api; cargo clippy -- -D warnings
+	cd apps/api; cargo clippy --all -- -D warnings
 
-# Run Rust tests
+# Run Rust tests (api + rpc)
 test-api:
-	cd apps/api; cargo test
+	cd apps/api; cargo test --workspace
 
 # ── Web (Bun) ───────────────────────────────────────────
 
