@@ -54,7 +54,9 @@ See `JUSTFILE.md` or run `just` for all available commands.
    gh pr create --base dev --head feature/my-feature --title "..." --body "..."
    ```
 
-4. **CI runs** automatically (lint, test, build).  
+4. **CI runs** automatically — see `docs/git/CI.md` for the full pipeline.  
+   - **api**: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test`
+   - **web**: `bun run lint`, `bun run typecheck`, `bun run check`
    - Required checks must pass (`ci` status check).  
    - At least one approval is required (code‑owner for `main`‑bound PRs).
 
