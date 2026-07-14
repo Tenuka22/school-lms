@@ -1,77 +1,66 @@
 set shell := ["powershell", "-c"]
 
-COMPOSE_DEV := "infra/docker/compose/docker-compose.dev.yml"
 COMPOSE_PROD := "infra/docker/compose/docker-compose.prod.yml"
 
-# Development — pass any docker compose subcommand (default: up)
-dev *args="up":
-	docker compose -f {{COMPOSE_DEV}} {{args}}
+# Development — run API and Web concurrently in the same terminal
+[parallel]
+dev: dev-api dev-web
 
-# Production — pass any docker compose subcommand (default: up)
-prod *args="up":
-	docker compose -f {{COMPOSE_PROD}} {{args}}
+dev-api:
+	cd apps/api; cargo watch -x run
+
+dev-web:
+	cd apps/web; bun run dev
+
+# Production — build and run with Docker
+prod-build:
+	docker compose -f {{COMPOSE_PROD}} build
+
+prod-up:
+	docker compose -f {{COMPOSE_PROD}} up -d
 
 # Stop all and prune Docker system
 clean:
-	docker compose -f {{COMPOSE_DEV}} down -v
 	docker compose -f {{COMPOSE_PROD}} down -v
 	docker system prune -f
 
 # ── API (Rust) ──────────────────────────────────────────
+fmt-api:
+	cd apps/api; cargo fmt --all
 
-# Check Rust formatting
 check-api:
-	cd apps/api; cargo fmt --check
+	cd apps/api; cargo fmt --check --all
 
-# Lint Rust code
 lint-api:
-	cd apps/api; cargo clippy -- -D warnings
+	cd apps/api; cargo clippy --all -- -D warnings
 
-# Run Rust tests
 test-api:
-	cd apps/api; cargo test
+	cd apps/api; cargo test --workspace
 
 # ── Web (Bun) ───────────────────────────────────────────
+fmt-web:
+	cd apps/web; bun run format
 
-# Lint web code
 lint-web:
 	cd apps/web; bun run lint
 
-# Typecheck web code
 typecheck-web:
 	cd apps/web; bun run typecheck
 
-# Check web formatting
 check-web:
 	cd apps/web; bun run check
 
-# Run web tests
 test-web:
 	cd apps/web; bun run test
 
 # ── Combined ────────────────────────────────────────────
-
-# Run all linters (API + Web)
+fmt: fmt-api fmt-web
 lint: lint-api lint-web
-
-# Run all typechecks
 typecheck: typecheck-web
-
-# Run all format checks (API + Web)
 check: check-api check-web
-
-# Run all tests (API + Web)
 test: test-api test-web
 
-# CI pipeline for API (matches .github/workflows/ci.yml)
-ci-api: check-api lint-api test-api
+ci: check lint test
 
-# CI pipeline for Web (matches .github/workflows/ci.yml)
-ci-web: check-web lint-web typecheck-web
-
-# Run full CI pipeline
-ci: ci-api ci-web
-
-# List all available commands
 default:
 	@just --list

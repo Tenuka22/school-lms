@@ -1,0 +1,13 @@
+**/.git
+**/.github
+**/*.md
+**/docs
+infra/docker
+packages
+.dockerignore
+justfile
+README.md
+CONTRIBUTING.md
+LICENSE
+SECURITY.md
+CODE_OF_CONDUCT.md
