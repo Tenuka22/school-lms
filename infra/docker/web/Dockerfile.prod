@@ -1,0 +1,11 @@
+FROM oven/bun:latest AS builder
+WORKDIR /app
+COPY apps/web/package.json apps/web/bun.lockb ./
+RUN bun install
+COPY apps/web/ .
+RUN bun run build
+
+FROM oven/bun:latest
+WORKDIR /app
+COPY --from=builder /app/dist /app/dist
+CMD ["bun", "run", "dist/server/index.mjs"]

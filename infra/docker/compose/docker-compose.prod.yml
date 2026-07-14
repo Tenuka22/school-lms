@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: ../../..
+      dockerfile: infra/docker/api/Dockerfile.prod
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - RUST_LOG=info
+    networks:
+      - lms-network
+
+  web:
+    build:
+      context: ../../..
+      dockerfile: infra/docker/web/Dockerfile.prod
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - lms-network
+
+networks:
+  lms-network:
