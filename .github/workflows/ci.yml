@@ -5,8 +5,27 @@ on:
     branches: [main, dev]
 
 jobs:
-  ci:
+  api:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
     steps:
       - uses: actions/checkout@v4
-      - run: echo "CI placeholder — will be properly set up later"
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo fmt --check
+      - run: cargo clippy -- -D warnings
+      - run: cargo test
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run check
