@@ -3,9 +3,14 @@ set shell := ["powershell", "-c"]
 COMPOSE_DEV := "infra/docker/compose/docker-compose.dev.yml"
 COMPOSE_PROD := "infra/docker/compose/docker-compose.prod.yml"
 
-# Development — run API with cargo watch and Web with bun dev locally
-dev:
-	Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd apps/api; cargo watch -x run"
+# Development — run API and Web concurrently in the same terminal
+[parallel]
+dev: dev-api dev-web
+
+dev-api:
+	cd apps/api; cargo watch -x run
+
+dev-web:
 	cd apps/web; bun run dev
 
 # Production — pass any docker compose subcommand (default: up)
