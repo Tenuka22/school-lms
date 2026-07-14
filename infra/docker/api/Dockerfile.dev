@@ -2,7 +2,8 @@ FROM rust:latest
 
 WORKDIR /app
 
-COPY . .
+COPY packages/ /packages/
+COPY apps/api/ /app/
 
 RUN cargo install cargo-watch
 
