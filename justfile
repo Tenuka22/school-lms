@@ -1,6 +1,5 @@
 set shell := ["powershell", "-c"]
 
-COMPOSE_DEV := "infra/docker/compose/docker-compose.dev.yml"
 COMPOSE_PROD := "infra/docker/compose/docker-compose.prod.yml"
 
 # Development — run API and Web concurrently in the same terminal
@@ -13,17 +12,22 @@ dev-api:
 dev-web:
 	cd apps/web; bun run dev
 
-# Production — pass any docker compose subcommand (default: up)
-prod *args="up":
-	docker compose -f {{COMPOSE_PROD}} {{args}}
+# Production — build and run with Docker
+prod-build:
+	docker compose -f {{COMPOSE_PROD}} build
+
+prod-up:
+	docker compose -f {{COMPOSE_PROD}} up -d
 
 # Stop all and prune Docker system
 clean:
-	docker compose -f {{COMPOSE_DEV}} down -v
 	docker compose -f {{COMPOSE_PROD}} down -v
 	docker system prune -f
 
 # ── API (Rust) ──────────────────────────────────────────
+fmt-api:
+	cd apps/api; cargo fmt --all
+
 check-api:
 	cd apps/api; cargo fmt --check --all
 
@@ -34,6 +38,9 @@ test-api:
 	cd apps/api; cargo test --workspace
 
 # ── Web (Bun) ───────────────────────────────────────────
+fmt-web:
+	cd apps/web; bun run format
+
 lint-web:
 	cd apps/web; bun run lint
 
@@ -47,14 +54,13 @@ test-web:
 	cd apps/web; bun run test
 
 # ── Combined ────────────────────────────────────────────
+fmt: fmt-api fmt-web
 lint: lint-api lint-web
 typecheck: typecheck-web
 check: check-api check-web
 test: test-api test-web
 
-ci-api: check-api lint-api test-api
-ci-web: check-web lint-web typecheck-web
-ci: ci-api ci-web
+ci: check lint test
 
 default:
 	@just --list
