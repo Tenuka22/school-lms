@@ -1,5 +1,0 @@
-reviews:
-  target_branches:
-    - main
-    - dev
-  review_status: true
