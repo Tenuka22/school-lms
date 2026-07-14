@@ -1,3 +1,5 @@
+name: school-lms
+
 services:
 
   api:
@@ -9,6 +11,7 @@ services:
       - "3001:3001"
     volumes:
       - ../../../apps/api:/app
+      - ../../../packages:/packages
       - cargo-cache:/usr/local/cargo/registry
     environment:
       RUST_LOG: debug
