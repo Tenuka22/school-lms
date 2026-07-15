@@ -1,7 +1,8 @@
+mod config;
+
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
 use dotenvy::from_filename;
-use std::env;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -10,21 +11,22 @@ async fn main() -> std::io::Result<()> {
         .ok();
     env_logger::init();
 
-    log::info!("Logger initialized");
+    let cfg = config::Config::from_env().unwrap_or_else(|e| {
+        log::error!("Failed to load configuration: {e}");
+        std::process::exit(1);
+    });
 
-    let config = db::DatabaseConfig {
-        host: env::var("POSTGRES_HOST").expect("POSTGRES_HOST missing"),
+    log::info!("Configuration loaded: {cfg}");
 
-        port: env::var("POSTGRES_PORT").expect("POSTGRES_PORT missing"),
-
-        username: env::var("POSTGRES_USER").expect("POSTGRES_USER missing"),
-
-        password: env::var("POSTGRES_PASSWORD").expect("POSTGRES_PASSWORD missing"),
-
-        database: env::var("POSTGRES_DB").expect("POSTGRES_DB missing"),
+    let db_cfg = db::DatabaseConfig {
+        host: cfg.postgres_host.clone(),
+        port: cfg.postgres_port.to_string(),
+        username: cfg.postgres_user.clone(),
+        password: cfg.password().to_string(),
+        database: cfg.postgres_database.clone(),
     };
 
-    let db = db::get_connection(config)
+    let db = db::get_connection(db_cfg)
         .await
         .expect("Database connection failed");
 
