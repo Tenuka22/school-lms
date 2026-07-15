@@ -17,14 +17,13 @@ infra/docker/
 
 ## Development
 
-Run with `just dev up` (or manually: `docker compose -f infra/docker/compose/docker-compose.dev.yml up`).
+Run with `just dev`.
 
 ### Services
 
-| Service | Image Base | Container Name | Host Port | Source |
-|---------|-----------|----------------|-----------|--------|
-| **web** | `oven/bun:latest` | `lms-web-dev` | `3000` | `apps/web` |
-| **api** | `rust:latest` | `lms-api-dev` | `3001` | `apps/api` |
+| Service  | Image Base            | Container Name                 | Host Port | Source |
+|----------|-----------------------|--------------------------------|-----------|--------|
+| postgres | `postgres:17`         | `school-lms-postgres-dev`      | `5432`    | —      |
 
 ### Web (`Dockerfile.dev`)
 
@@ -55,10 +54,35 @@ All services share the `lms-network` bridge network.
 
 ## Production
 
-The prod Dockerfiles and compose file are in place but currently empty — the prod configuration is pending implementation. Once set up, run with:
+### Running with `just prod`
 
 ```sh
-just prod up
+just prod
+```
+
+This starts two tasks in parallel:
+1. **`prod-infra`** — `docker compose -f .../docker-compose.prod.yml up -d` (postgres)
+2. **`prod-api`** — `cargo run` (API server directly on the host)
+
+### Services
+
+| Service  | Image               | Container Name                  | Host Port | Purpose             |
+|----------|---------------------|---------------------------------|-----------|---------------------|
+| postgres | `postgres:17`       | `school-lms-postgres-prod`      | `5432`    | Database            |
+| api      | Custom build        | —                               | `3001`    | API server (Docker) |
+| web      | Custom build        | —                               | `3000`    | Web app (Docker)    |
+
+### Environment
+
+The API server loads `apps/api/.env.production` at startup. The same file is referenced by `docker-compose.prod.yml` for the postgres service.
+
+### Docker-only Deployment
+
+To run everything (including the API) in Docker:
+
+```sh
+just prod-build
+docker compose -f infra/docker/compose/docker-compose.prod.yml up -d
 ```
 
 ## Dockerfiles Reference

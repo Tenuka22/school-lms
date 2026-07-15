@@ -1,10 +1,20 @@
 set shell := ["powershell", "-c"]
 
+COMPOSE_DEV  := "infra/docker/compose/docker-compose.dev.yml"
 COMPOSE_PROD := "infra/docker/compose/docker-compose.prod.yml"
 
-# Development — run API and Web concurrently in the same terminal
+# Development — run infrastructure, API and Web concurrently
 [parallel]
-dev: dev-api dev-web
+dev: dev-infra dev-api dev-web
+
+dev-infra:
+	docker compose -f {{COMPOSE_DEV}} up
+
+dev-down:
+	docker compose -f {{COMPOSE_DEV}} down -v
+
+dev-build:
+	docker compose -f {{COMPOSE_DEV}} build
 
 dev-api:
 	cd apps/api; cargo watch -x run
@@ -12,12 +22,21 @@ dev-api:
 dev-web:
 	cd apps/web; bun run dev
 
-# Production — build and run with Docker
+# Production — run infrastructure (Docker) and API server in parallel
+[parallel]
+prod: prod-infra prod-api
+
+prod-infra:
+	docker compose -f {{COMPOSE_PROD}} up -d
+
+prod-api:
+	cd apps/api; cargo run
+
 prod-build:
 	docker compose -f {{COMPOSE_PROD}} build
 
-prod-up:
-	docker compose -f {{COMPOSE_PROD}} up -d
+prod-down:
+	docker compose -f {{COMPOSE_PROD}} down -v
 
 # Stop all and prune Docker system
 clean:
