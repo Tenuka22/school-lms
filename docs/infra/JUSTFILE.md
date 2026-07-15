@@ -35,6 +35,23 @@
 | `just test`                  | Run all tests (API + Web)                 |
 | `just ci`                    | Full CI pipeline (API + Web)              |
 
+## Pre-push Hook
+
+A `pre-push` hook at `.githooks/pre-push` runs `just ci` (fmt check, lint, test) before every `git push`.
+The hook is version-controlled, so it's shared with everyone who clones the repo.
+
+### Setup on a fresh clone
+
+```sh
+git config core.hooksPath .githooks
+```
+
+### Run manually
+
+```sh
+prek run --hook-type pre-push
+```
+
 ## Environment Files
 
 | Environment | File                     | Loaded By             |

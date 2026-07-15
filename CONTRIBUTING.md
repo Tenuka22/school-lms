@@ -5,6 +5,10 @@
 - [just](https://github.com/casey/just#installation)
 - [Rust & Cargo](https://rustup.rs/) (for API)
 - [Bun](https://bun.sh/) (for Web)
+- Configure the pre-push hook:
+  ```sh
+  git config core.hooksPath .githooks
+  ```
 
 ## Development Environment
 
@@ -37,7 +41,7 @@ just prod-up      # run containers in detached mode
 
 1. **Create a feature branch** off `dev`.
 2. **Make your changes** and commit locally.
-3. **Run CI checks** before pushing:
+3. **Pre-push hook** runs `just ci` automatically when you run `git push` (configured via `.githooks/pre-push`). You can also run it manually:
    ```sh
    just ci
    ```
