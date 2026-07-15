@@ -5,8 +5,10 @@ use std::env;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    from_filename(".env.production").ok();
+    from_filename(".env.local").or_else(|_| from_filename(".env.production")).ok();
     env_logger::init();
+
+    log::info!("Logger initialized");
 
     let config = db::DatabaseConfig {
         host: env::var("POSTGRES_HOST").expect("POSTGRES_HOST missing"),
