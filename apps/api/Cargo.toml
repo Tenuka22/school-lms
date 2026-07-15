@@ -5,4 +5,6 @@ edition = "2024"
 
 [dependencies]
 actix-web = "4.14.0"
+dotenvy = "0.15.7"
 rpc = { path = "rpc" }
+db = { path = "db" }

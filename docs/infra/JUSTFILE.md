@@ -1,19 +1,22 @@
-# Justfile — Docker Compose commands
+# Justfile — Commands Reference
 
 ## Usage
 
-| Command                | Description                                  |
-|------------------------|----------------------------------------------|
-| `just dev`             | Start dev environment (`docker compose up`)  |
-| `just dev down`        | Stop dev environment                         |
-| `just dev logs -f`     | Follow dev logs                              |
-| `just dev build`       | Build dev images                             |
-| `just dev ps`          | List dev containers                          |
-| `just dev restart`     | Restart dev containers                       |
-| `just prod`            | Start prod environment                       |
-| `just prod down`       | Stop prod environment                        |
-| `just clean`           | Stop all and prune Docker system             |
-| `just`                 | List all available commands                  |
+| Command                | Description                                              |
+|------------------------|----------------------------------------------------------|
+| `just dev`             | Start infra (Docker) + API + Web in parallel             |
+| `just dev-infra`       | Start dev infrastructure (`docker compose up -d`)        |
+| `just dev-down`        | Stop and remove dev containers                           |
+| `just dev-build`       | Build dev Docker images                                  |
+| `just dev-api`         | Run the API server with hot-reload (`cargo watch`)       |
+| `just dev-web`         | Run the Web dev server (`bun run dev`)                   |
+| `just prod`            | Start infra (Docker) + API server in parallel            |
+| `just prod-infra`      | Start production infrastructure (postgres)               |
+| `just prod-api`        | Run the API server directly (`cargo run`)                |
+| `just prod-build`      | Build Docker images for production                       |
+| `just prod-down`       | Stop and remove production containers                    |
+| `just clean`           | Stop all containers and prune Docker system              |
+| `just`                 | List all available commands                              |
 
 ## CI / Code Quality Commands
 
@@ -30,10 +33,12 @@
 | `just typecheck`             | Run all typechecks                        |
 | `just check`                 | Run all format checks (API + Web)         |
 | `just test`                  | Run all tests (API + Web)                 |
-| `just ci-api`                | Full API CI pipeline                      |
-| `just ci-web`                | Full Web CI pipeline                      |
 | `just ci`                    | Full CI pipeline (API + Web)              |
 
-Any `docker compose` subcommand can be passed as an argument:
-- `just dev up -d` → `docker compose -f compose.dev.yml up -d`
-- `just prod logs --tail=50` → `docker compose -f compose.prod.yml logs --tail=50`
+## Environment Files
+
+| Environment | File                     | Loaded By             |
+|-------------|--------------------------|-----------------------|
+| Development | `apps/api/.env.local`    | Docker Compose (dev)  |
+| Production  | `apps/api/.env.production` | API server + Docker Compose (prod) |
+
