@@ -1,3 +1,4 @@
+use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
 use dotenvy::from_filename;
 use std::env;
@@ -5,6 +6,7 @@ use std::env;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     from_filename(".env.production").ok();
+    env_logger::init();
 
     let config = db::DatabaseConfig {
         host: env::var("POSTGRES_HOST").expect("POSTGRES_HOST missing"),
@@ -27,8 +29,11 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Schema sync failed");
 
+    log::info!("Starting server on 0.0.0.0:3001");
+
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
             .app_data(web::Data::new(db.clone()))
             .configure(rpc::configure)
     })
