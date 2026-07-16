@@ -79,11 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ): Promise<T> => {
     const result = await fn()
 
-    if (
-      result.error &&
-      result.response?.status === 401 &&
-      refreshToken
-    ) {
+    if (result.error && result.response?.status === 401 && refreshToken) {
       const newAccess = await getAccessToken()
       const newRefresh = await getRefreshToken()
       if (newAccess && newRefresh) {

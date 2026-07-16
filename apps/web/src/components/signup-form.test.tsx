@@ -27,10 +27,10 @@ describe("SignupForm", () => {
       </QueryClientProvider>
     )
     const form = container.querySelector("form")
-    
+
     // Create a mock for preventDefault
     const preventDefault = vi.fn()
-    
+
     // Trigger submit
     fireEvent.submit(form!, {
       preventDefault,

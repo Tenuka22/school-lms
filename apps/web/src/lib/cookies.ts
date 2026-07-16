@@ -30,16 +30,24 @@ export const setAuthCookies = createIsomorphicFn()
     const refreshExpires = new Date(refreshExpiresAt * 1000).toUTCString()
     document.cookie = `refresh_token=${encodeURIComponent(refreshToken)}; expires=${refreshExpires}; path=/; SameSite=Lax`
   })
-  .server(async (accessToken, refreshToken, accessExpiresAt, refreshExpiresAt) => {
-    const { setCookie } = await import("@tanstack/react-start/server")
-    setCookie("access_token", accessToken, { expires: new Date(accessExpiresAt * 1000) })
-    setCookie("refresh_token", refreshToken, { expires: new Date(refreshExpiresAt * 1000) })
-  })
+  .server(
+    async (accessToken, refreshToken, accessExpiresAt, refreshExpiresAt) => {
+      const { setCookie } = await import("@tanstack/react-start/server")
+      setCookie("access_token", accessToken, {
+        expires: new Date(accessExpiresAt * 1000),
+      })
+      setCookie("refresh_token", refreshToken, {
+        expires: new Date(refreshExpiresAt * 1000),
+      })
+    }
+  )
 
 export const deleteAuthCookies = createIsomorphicFn()
   .client(() => {
-    document.cookie = "access_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
-    document.cookie = "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
+    document.cookie =
+      "access_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
+    document.cookie =
+      "refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
   })
   .server(async () => {
     const { setCookie } = await import("@tanstack/react-start/server")
