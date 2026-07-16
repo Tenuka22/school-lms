@@ -6,44 +6,36 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, Qu
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, verify_password};
 use crate::auth::types::{AuthResponse, LoginRequest};
+use crate::error::{ApiError, ErrorResponse};
 
+#[utoipa::path(
+    post,
+    path = "/api/auth/login",
+    request_body = LoginRequest,
+    responses(
+        (status = 200, description = "Login successful", body = AuthResponse),
+        (status = 401, description = "Invalid credentials", body = ErrorResponse),
+        (status = 500, description = "Internal server error", body = ErrorResponse),
+    ),
+)]
 pub async fn login(
     db: web::Data<DatabaseConnection>,
     body: web::Json<LoginRequest>,
     jwt_secret: web::Data<JwtSecret>,
-) -> HttpResponse {
-    let existing = match user::Entity::find()
+) -> Result<HttpResponse, ApiError> {
+    let user = user::Entity::find()
         .filter(user::Column::Email.eq(&body.email))
         .one(db.as_ref())
-        .await
-    {
-        Ok(u) => u,
-        Err(e) => {
-            log::error!("DB error finding user: {e}");
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"error": "internal error"}));
-        }
-    };
+        .await?
+        .ok_or_else(|| ApiError::Unauthorized("invalid email or password".into()))?;
 
-    let user = match existing {
-        Some(u) => u,
-        None => {
-            return HttpResponse::Unauthorized()
-                .json(serde_json::json!({"error": "invalid email or password"}));
-        }
-    };
+    let valid = verify_password(&body.password, &user.password_hash).map_err(|e| {
+        log::error!("Password verification error: {e}");
+        ApiError::Internal("internal error".into())
+    })?;
 
-    match verify_password(&body.password, &user.password_hash) {
-        Ok(true) => {}
-        Ok(false) => {
-            return HttpResponse::Unauthorized()
-                .json(serde_json::json!({"error": "invalid email or password"}));
-        }
-        Err(e) => {
-            log::error!("Password verification error: {e}");
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"error": "internal error"}));
-        }
+    if !valid {
+        return Err(ApiError::Unauthorized("invalid email or password".into()));
     }
 
     let (raw_refresh, refresh_hash) = generate_refresh_token();
@@ -61,23 +53,15 @@ pub async fn login(
         ..Default::default()
     };
 
-    if let Err(e) = new_session.insert(db.as_ref()).await {
-        log::error!("Failed to create session: {e}");
-        return HttpResponse::InternalServerError()
-            .json(serde_json::json!({"error": "internal error"}));
-    }
+    new_session.insert(db.as_ref()).await?;
 
-    let access_token = match create_access_token(user.id, &jwt_secret.0) {
-        Ok(t) => t,
-        Err(e) => {
-            log::error!("JWT creation error: {e}");
-            return HttpResponse::InternalServerError()
-                .json(serde_json::json!({"error": "internal error"}));
-        }
-    };
+    let access_token = create_access_token(user.id, &jwt_secret.0).map_err(|e| {
+        log::error!("JWT creation error: {e}");
+        ApiError::Internal("internal error".into())
+    })?;
 
-    HttpResponse::Ok().json(AuthResponse {
+    Ok(HttpResponse::Ok().json(AuthResponse {
         access_token,
         refresh_token: raw_refresh,
-    })
+    }))
 }

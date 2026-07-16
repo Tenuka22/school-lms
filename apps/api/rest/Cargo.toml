@@ -15,4 +15,6 @@ rand = "0.8"
 sha2 = "0.10"
 hex = "0.4"
 log = "0.4"
+utoipa = { version = "5", features = ["chrono", "uuid", "actix_extras"] }
+utoipa-scalar = { version = "0.3", features = ["actix-web"] }
 db = { path = "../db" }

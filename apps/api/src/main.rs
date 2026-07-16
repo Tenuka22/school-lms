@@ -7,7 +7,6 @@ use rest::JwtSecret;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    from_filename(".env").ok();
     from_filename(".env.local").ok();
     from_filename(".env.production").ok();
     env_logger::init();
