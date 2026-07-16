@@ -3,10 +3,10 @@
 import { useForm } from "@tanstack/react-form"
 import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { useMutation } from "@tanstack/react-query"
-import { useNavigate } from "@tanstack/react-router"
+import { useNavigate, Link } from "@tanstack/react-router"
 import { toast } from "sonner"
 import { registerMutation } from "@/lib/api-client/@tanstack/react-query.gen"
-import { type RegisterError } from "@/lib/api-client/types.gen"
+import type { RegisterError } from "@/lib/api-client/types.gen"
 import { useAuth } from "@/lib/auth"
 import { vRegisterRequest } from "@/lib/api-client/valibot.gen"
 import { cn } from "@/lib/utils"
@@ -27,7 +27,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Link } from "@tanstack/react-router"
 
 export function SignupForm({ className }: { className?: string }) {
   const navigate = useNavigate()
