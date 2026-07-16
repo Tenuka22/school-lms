@@ -44,7 +44,7 @@ pub fn generate_refresh_token() -> (String, String) {
     let mut bytes = [0u8; 32];
     rand::rngs::OsRng.fill_bytes(&mut bytes);
     let raw = hex::encode(bytes);
-    let hash = hex::encode(Sha256::digest(&bytes));
+    let hash = hash_refresh_token(&raw);
     (raw, hash)
 }
 
