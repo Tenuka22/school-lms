@@ -9,12 +9,23 @@ use sea_orm::{
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, hash_refresh_token};
 use crate::auth::types::{AuthResponse, RefreshRequest};
+use crate::error::{ApiError, ErrorResponse};
 
+#[utoipa::path(
+    post,
+    path = "/api/auth/refresh",
+    request_body = RefreshRequest,
+    responses(
+        (status = 200, description = "Token refreshed successfully", body = AuthResponse),
+        (status = 401, description = "Invalid or reused refresh token", body = ErrorResponse),
+        (status = 500, description = "Internal server error", body = ErrorResponse),
+    ),
+)]
 pub async fn refresh(
     db: web::Data<DatabaseConnection>,
     body: web::Json<RefreshRequest>,
     jwt_secret: web::Data<JwtSecret>,
-) -> HttpResponse {
+) -> Result<HttpResponse, ApiError> {
     let token_hash = hash_refresh_token(&body.refresh_token);
     let secret = jwt_secret.0.clone();
 
@@ -70,20 +81,17 @@ pub async fn refresh(
         .await;
 
     match result {
-        Ok((access_token, raw_refresh)) => HttpResponse::Ok().json(AuthResponse {
+        Ok((access_token, raw_refresh)) => Ok(HttpResponse::Ok().json(AuthResponse {
             access_token,
             refresh_token: raw_refresh,
-        }),
+        })),
         Err(TransactionError::Transaction(e)) | Err(TransactionError::Connection(e)) => {
             let msg = e.to_string();
-            if msg.contains("reused") {
-                return HttpResponse::Unauthorized().json(serde_json::json!({"error": msg}));
-            }
-            if msg == "invalid refresh token" {
-                return HttpResponse::Unauthorized().json(serde_json::json!({"error": msg}));
+            if msg.contains("reused") || msg == "invalid refresh token" {
+                return Err(ApiError::Unauthorized(msg));
             }
             log::error!("Refresh transaction failed: {e}");
-            HttpResponse::InternalServerError().json(serde_json::json!({"error": "internal error"}))
+            Err(ApiError::Internal("internal error".into()))
         }
     }
 }
