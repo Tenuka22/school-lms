@@ -1,5 +1,6 @@
 mod config;
 
+use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
 use dotenvy::from_filename;
@@ -57,11 +58,20 @@ async fn main() -> std::io::Result<()> {
     let data = web::Data::new(db.clone());
 
     let port = cfg.server_port;
-    log::info!("Starting server on 0.0.0.0:{port}");
+    let frontend_url = cfg.frontend_url.clone();
+    log::info!("Starting server on 0.0.0.0:{port} with allowed origin: {frontend_url}");
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin(&frontend_url)
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+            .allowed_headers(vec![actix_web::http::header::AUTHORIZATION, actix_web::http::header::CONTENT_TYPE])
+            .supports_credentials()
+            .max_age(3600);
+
         App::new()
             .wrap(Logger::default())
+            .wrap(cors)
             .app_data(data.clone())
             .app_data(jwt_data.clone())
             .configure(rest::configure)
