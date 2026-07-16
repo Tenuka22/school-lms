@@ -1,6 +1,7 @@
 "use client"
 
 import { useForm } from "@tanstack/react-form"
+import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
@@ -48,6 +49,7 @@ export function LoginForm({ className }: { className?: string }) {
       email: "",
       password: "",
     },
+    validatorAdapter: valibotValidator,
     validators: {
       onSubmit: vLoginRequest,
     },
@@ -69,6 +71,7 @@ export function LoginForm({ className }: { className?: string }) {
         <form
           id="login-form"
           onSubmit={(e) => {
+            console.log("Form onSubmit triggered")
             e.preventDefault()
             form.handleSubmit()
           }}
@@ -142,6 +145,10 @@ export function LoginForm({ className }: { className?: string }) {
               form="login-form"
               className="w-full"
               disabled={mutation.isPending}
+              onClick={(e) => {
+                e.preventDefault()
+                form.handleSubmit()
+              }}
             >
               {mutation.isPending ? "Logging in..." : "Login"}
             </Button>

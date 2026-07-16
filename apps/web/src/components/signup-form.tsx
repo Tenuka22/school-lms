@@ -1,6 +1,7 @@
 "use client"
 
 import { useForm } from "@tanstack/react-form"
+import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
@@ -48,6 +49,7 @@ export function SignupForm({ className }: { className?: string }) {
       email: "",
       password: "",
     },
+    validatorAdapter: valibotValidator,
     validators: {
       onSubmit: vRegisterRequest,
     },
@@ -69,6 +71,7 @@ export function SignupForm({ className }: { className?: string }) {
         <form
           id="signup-form"
           onSubmit={(e) => {
+            console.log("Form onSubmit triggered")
             e.preventDefault()
             form.handleSubmit()
           }}
@@ -134,6 +137,10 @@ export function SignupForm({ className }: { className?: string }) {
               form="signup-form"
               className="w-full"
               disabled={mutation.isPending}
+              onClick={(e) => {
+                e.preventDefault()
+                form.handleSubmit()
+              }}
             >
               {mutation.isPending ? "Creating account..." : "Create Account"}
             </Button>
