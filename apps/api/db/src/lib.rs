@@ -1,6 +1,9 @@
 pub mod entity;
+pub mod rbac;
+
 use sea_orm::{Database, DatabaseConnection, DbErr};
 
+#[derive(Clone)]
 pub struct DatabaseConfig {
     pub host: String,
     pub port: String,
