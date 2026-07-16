@@ -1,8 +1,14 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
+import { Toaster } from "sonner"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 import appCss from "../styles.css?url"
+import { AuthProvider } from "@/lib/auth"
+import "@/lib/api"
+
+const queryClient = new QueryClient()
 
 export const Route = createRootRoute({
   head: () => ({
@@ -41,7 +47,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryClientProvider>
+        <Toaster position="top-center" richColors />
         <TanStackDevtools
           config={{
             position: "bottom-right",

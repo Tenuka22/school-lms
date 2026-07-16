@@ -10,6 +10,7 @@ pub struct Config {
     pub postgres_database: String,
     pub server_port: u16,
     pub jwt_secret: String,
+    pub frontend_url: String,
 }
 
 impl Config {
@@ -30,6 +31,8 @@ impl Config {
                 .map_err(|e| format!("SERVER_PORT is not a valid port: {e}"))?,
             jwt_secret: env::var("JWT_SECRET")
                 .map_err(|_| "JWT_SECRET must be set (add to .env file)")?,
+            frontend_url: env::var("FRONTEND_URL")
+                .unwrap_or_else(|_| "http://localhost:3000".into()),
         })
     }
 
@@ -48,6 +51,7 @@ impl fmt::Display for Config {
             .field("postgres_database", &self.postgres_database)
             .field("server_port", &self.server_port)
             .field("jwt_secret", &"****")
+            .field("frontend_url", &self.frontend_url)
             .finish()
     }
 }

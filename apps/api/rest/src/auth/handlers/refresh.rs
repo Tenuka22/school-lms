@@ -58,12 +58,13 @@ pub async fn refresh(
 
                 let (raw_refresh, refresh_hash) = generate_refresh_token();
                 let now = Utc::now();
+                let session_expires = now + Duration::days(30);
 
                 let new_session = session::ActiveModel {
                     user_id: Set(user_id),
                     refresh_token_hash: Set(refresh_hash),
                     issued_at: Set(now),
-                    expires_at: Set(now + Duration::days(30)),
+                    expires_at: Set(session_expires),
                     revoked_at: Set(None),
                     user_agent: Set(None),
                     ip: Set(None),
@@ -75,15 +76,16 @@ pub async fn refresh(
                 let access_token =
                     create_access_token(user_id, &secret).map_err(|e| DbErr::Custom(e))?;
 
-                Ok((access_token, raw_refresh))
+                Ok((access_token, raw_refresh, session_expires.timestamp()))
             })
         })
         .await;
 
     match result {
-        Ok((access_token, raw_refresh)) => Ok(HttpResponse::Ok().json(AuthResponse {
+        Ok((access_token, raw_refresh, expires_at)) => Ok(HttpResponse::Ok().json(AuthResponse {
             access_token,
             refresh_token: raw_refresh,
+            expires_at,
         })),
         Err(TransactionError::Transaction(e)) | Err(TransactionError::Connection(e)) => {
             let msg = e.to_string();

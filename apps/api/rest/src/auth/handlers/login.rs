@@ -63,5 +63,6 @@ pub async fn login(
     Ok(HttpResponse::Ok().json(AuthResponse {
         access_token,
         refresh_token: raw_refresh,
+        expires_at: session_expires.timestamp(),
     }))
 }
