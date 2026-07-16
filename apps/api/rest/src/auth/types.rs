@@ -1,23 +1,24 @@
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct RegisterRequest {
     pub email: String,
     pub password: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct RefreshRequest {
     pub refresh_token: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct AuthResponse {
     pub access_token: String,
     pub refresh_token: String,

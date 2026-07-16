@@ -3,13 +3,14 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, Set,
 };
 use serde::Serialize;
+use utoipa::ToSchema;
 
 pub enum CounterTarget {
     Normal,
     Secure,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct CounterResponse {
     pub name: String,
     pub value: i32,

@@ -1,5 +1,7 @@
 mod auth;
 mod counter;
+pub mod docs;
+pub mod error;
 
 use actix_web::web;
 
@@ -13,6 +15,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             ))
             .wrap(auth::AuthMiddleware)
             .configure(counter::routes)
-            .service(web::scope("/auth").configure(auth::routes)),
+            .service(web::scope("/auth").configure(auth::routes))
+            .configure(docs::routes),
     );
 }
