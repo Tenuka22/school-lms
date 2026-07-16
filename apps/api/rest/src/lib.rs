@@ -1,0 +1,18 @@
+mod auth;
+mod counter;
+
+use actix_web::web;
+
+pub use auth::{AuthMiddleware, Claims, JwtSecret};
+
+pub fn configure(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/api")
+            .wrap(actix_web::middleware::NormalizePath::new(
+                actix_web::middleware::TrailingSlash::Trim,
+            ))
+            .wrap(auth::AuthMiddleware)
+            .configure(counter::routes)
+            .service(web::scope("/auth").configure(auth::routes)),
+    );
+}

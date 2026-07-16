@@ -8,7 +8,8 @@ pub struct Config {
     pub postgres_user: String,
     postgres_password: String,
     pub postgres_database: String,
-    pub rust_log: String,
+    pub server_port: u16,
+    pub jwt_secret: String,
 }
 
 impl Config {
@@ -23,7 +24,12 @@ impl Config {
             postgres_password: env::var("POSTGRES_PASSWORD")
                 .map_err(|_| "POSTGRES_PASSWORD must be set")?,
             postgres_database: env::var("POSTGRES_DB").map_err(|_| "POSTGRES_DB must be set")?,
-            rust_log: env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
+            server_port: env::var("SERVER_PORT")
+                .unwrap_or_else(|_| "3001".into())
+                .parse()
+                .map_err(|e| format!("SERVER_PORT is not a valid port: {e}"))?,
+            jwt_secret: env::var("JWT_SECRET")
+                .map_err(|_| "JWT_SECRET must be set (add to .env file)")?,
         })
     }
 
@@ -40,7 +46,8 @@ impl fmt::Display for Config {
             .field("postgres_user", &self.postgres_user)
             .field("postgres_password", &"****")
             .field("postgres_database", &self.postgres_database)
-            .field("rust_log", &self.rust_log)
+            .field("server_port", &self.server_port)
+            .field("jwt_secret", &"****")
             .finish()
     }
 }
