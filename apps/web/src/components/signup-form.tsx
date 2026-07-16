@@ -1,7 +1,6 @@
 "use client"
 
 import { useForm } from "@tanstack/react-form"
-import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate, Link } from "@tanstack/react-router"
 import { toast } from "sonner"
@@ -48,7 +47,6 @@ export function SignupForm({ className }: { className?: string }) {
       email: "",
       password: "",
     },
-    validatorAdapter: valibotValidator,
     validators: {
       onSubmit: vRegisterRequest,
     },
