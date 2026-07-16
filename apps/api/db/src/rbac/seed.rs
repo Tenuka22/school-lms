@@ -36,6 +36,7 @@ pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
         ("counter:secure:increment", "counter", "secure:increment"),
         ("course:list", "course", "list"),
         ("announcement:read", "announcement", "read"),
+        ("file:upload", "file", "upload"),
         ("*:*", "*", "*"),
     ];
 

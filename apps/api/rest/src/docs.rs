@@ -8,6 +8,7 @@ use utoipa_scalar::{Scalar, Servable};
 use crate::auth::handlers::{login, logout, logout_all, refresh, register};
 use crate::counter;
 use crate::error::ErrorResponse;
+use crate::uploads;
 
 #[derive(Serialize, ToSchema)]
 pub struct MessageResponse {
@@ -31,6 +32,7 @@ pub struct MessageResponse {
         counter::increment_counter,
         counter::get_secure_counter,
         counter::increment_secure_counter,
+        uploads::upload_file,
     ),
     components(
         schemas(
@@ -39,6 +41,7 @@ pub struct MessageResponse {
             crate::auth::types::RefreshRequest,
             crate::auth::types::AuthResponse,
             crate::counter::service::CounterResponse,
+            crate::uploads::UploadResponse,
             ErrorResponse,
             MessageResponse,
         )

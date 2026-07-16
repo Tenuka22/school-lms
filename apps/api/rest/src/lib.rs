@@ -1,5 +1,7 @@
 mod auth;
 mod counter;
+pub mod storage;
+mod uploads;
 pub mod docs;
 pub mod error;
 
@@ -15,6 +17,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             ))
             .wrap(auth::AuthMiddleware)
             .configure(counter::routes)
+            .configure(uploads::routes)
             .service(web::scope("/auth").configure(auth::routes))
             .configure(docs::routes),
     );

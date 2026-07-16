@@ -5,6 +5,7 @@ use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
 use dotenvy::from_filename;
 use rest::JwtSecret;
+use rest::storage::Storage;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -53,9 +54,15 @@ async fn main() -> std::io::Result<()> {
         log::warn!("RBAC seeding failed: {e}");
     }
 
+    let storage = Storage::from_env().await;
+    if let Err(e) = storage.ensure_bucket().await {
+        log::warn!("MinIO bucket setup failed (continuing): {e}");
+    }
+
     let jwt_secret = cfg.jwt_secret.clone();
     let jwt_data = web::Data::new(JwtSecret(jwt_secret.clone()));
     let data = web::Data::new(db.clone());
+    let storage_data = web::Data::new(storage);
 
     let port = cfg.server_port;
     let frontend_url = cfg.frontend_url.clone();
@@ -77,6 +84,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .app_data(data.clone())
             .app_data(jwt_data.clone())
+            .app_data(storage_data.clone())
             .configure(rest::configure)
     })
     .bind(("0.0.0.0", port))?

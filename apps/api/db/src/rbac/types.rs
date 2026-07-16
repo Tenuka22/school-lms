@@ -39,6 +39,7 @@ pub enum Permission {
     CounterSecureIncrement,
     CourseList,
     AnnouncementRead,
+    FileUpload,
     All,
 }
 
@@ -53,6 +54,7 @@ impl Permission {
             Permission::CounterSecureIncrement => "counter:secure:increment",
             Permission::CourseList => "course:list",
             Permission::AnnouncementRead => "announcement:read",
+            Permission::FileUpload => "file:upload",
             Permission::All => "*:*",
         }
     }

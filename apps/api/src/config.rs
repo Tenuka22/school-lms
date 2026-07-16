@@ -11,6 +11,11 @@ pub struct Config {
     pub server_port: u16,
     pub jwt_secret: String,
     pub frontend_url: String,
+    pub minio_endpoint: String,
+    pub minio_access_key: String,
+    minio_secret_key: String,
+    pub minio_bucket: String,
+    pub minio_region: String,
 }
 
 impl Config {
@@ -33,6 +38,14 @@ impl Config {
                 .map_err(|_| "JWT_SECRET must be set (add to .env file)")?,
             frontend_url: env::var("FRONTEND_URL")
                 .unwrap_or_else(|_| "http://localhost:3000".into()),
+            minio_endpoint: env::var("MINIO_ENDPOINT")
+                .unwrap_or_else(|_| "http://localhost:9000".into()),
+            minio_access_key: env::var("MINIO_ACCESS_KEY")
+                .unwrap_or_else(|_| "minioadmin".into()),
+            minio_secret_key: env::var("MINIO_SECRET_KEY")
+                .unwrap_or_else(|_| "minioadmin".into()),
+            minio_bucket: env::var("MINIO_BUCKET").unwrap_or_else(|_| "school-lms".into()),
+            minio_region: env::var("MINIO_REGION").unwrap_or_else(|_| "us-east-1".into()),
         })
     }
 
@@ -52,6 +65,10 @@ impl fmt::Display for Config {
             .field("server_port", &self.server_port)
             .field("jwt_secret", &"****")
             .field("frontend_url", &self.frontend_url)
+            .field("minio_endpoint", &self.minio_endpoint)
+            .field("minio_access_key", &self.minio_access_key)
+            .field("minio_bucket", &self.minio_bucket)
+            .field("minio_region", &self.minio_region)
             .finish()
     }
 }
