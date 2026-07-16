@@ -10,7 +10,8 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\"",
     "check": "prettier --check \"**/*.{ts,tsx,js,jsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "openapi-ts": "openapi-ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -26,6 +27,7 @@
     "@tanstack/router-plugin": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
     "pino": "^10.3.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -36,6 +38,7 @@
     "valibot": "^1.4.2"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.99.0",
     "@tanstack/devtools-vite": "latest",
     "@tanstack/eslint-config": "latest",
     "@testing-library/dom": "^10.4.1",
