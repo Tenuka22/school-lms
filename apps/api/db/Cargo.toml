@@ -8,4 +8,5 @@ chrono = "0.4.45"
 log = "0.4"
 sea-orm = { version = "2.0.0-rc", features = [ "sqlx-postgres", "runtime-tokio-native-tls", "macros","schema-sync","with-json","with-chrono","with-uuid" ,"entity-registry"] }
 serde = "1.0.228"
-uuid = "1.23.5"
+uuid = { version = "1.23.5", features = ["v4"] }
+utoipa = { version = "5", features = ["chrono", "uuid"] }

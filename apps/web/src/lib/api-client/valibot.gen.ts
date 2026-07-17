@@ -30,6 +30,16 @@ export const vMessageResponse = v.object({
     message: v.string()
 });
 
+export const vModel = v.object({
+    batch_code: v.string(),
+    batch_name: v.string(),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    created_by: v.nullish(v.pipe(v.string(), v.uuid())),
+    enrollment_type: v.string(),
+    id: v.optional(v.pipe(v.string(), v.uuid())),
+    status: v.optional(v.string())
+});
+
 export const vRefreshRequest = v.object({
     refresh_token: v.string()
 });
@@ -124,6 +134,38 @@ export const vIncrementCounterPath = v.object({
  * Counter incremented
  */
 export const vIncrementCounterResponse = vCounterResponse;
+
+export const vCreateBatchBody = vModel;
+
+export const vDeleteBatchPath = v.object({
+    id: v.pipe(v.string(), v.uuid())
+});
+
+export const vGetBatchPath = v.object({
+    id: v.pipe(v.string(), v.uuid())
+});
+
+export const vUpdateBatchBody = v.unknown();
+
+export const vUpdateBatchPath = v.object({
+    id: v.pipe(v.string(), v.uuid())
+});
+
+export const vCreateEnrollmentBody = vModel;
+
+export const vDeleteEnrollmentPath = v.object({
+    id: v.pipe(v.string(), v.uuid())
+});
+
+export const vGetEnrollmentPath = v.object({
+    id: v.pipe(v.string(), v.uuid())
+});
+
+export const vUpdateEnrollmentBody = v.unknown();
+
+export const vUpdateEnrollmentPath = v.object({
+    id: v.pipe(v.string(), v.uuid())
+});
 
 /**
  * multipart/form-data with `file` field

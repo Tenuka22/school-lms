@@ -28,6 +28,16 @@ export type MessageResponse = {
     message: string;
 };
 
+export type Model = {
+    batch_code: string;
+    batch_name: string;
+    created_at?: Date;
+    created_by?: string | null;
+    enrollment_type: string;
+    id?: string;
+    status?: string;
+};
+
 export type RefreshRequest = {
     refresh_token: string;
 };
@@ -358,6 +368,354 @@ export type IncrementCounterResponses = {
 };
 
 export type IncrementCounterResponse = IncrementCounterResponses[keyof IncrementCounterResponses];
+
+export type ListBatchesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/enrollment-batches';
+};
+
+export type ListBatchesErrors = {
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type ListBatchesError = ListBatchesErrors[keyof ListBatchesErrors];
+
+export type ListBatchesResponses = {
+    /**
+     * List of enrollment batches
+     */
+    200: unknown;
+};
+
+export type CreateBatchData = {
+    body: Model;
+    path?: never;
+    query?: never;
+    url: '/api/enrollment-batches';
+};
+
+export type CreateBatchErrors = {
+    /**
+     * Bad request
+     */
+    400: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type CreateBatchError = CreateBatchErrors[keyof CreateBatchErrors];
+
+export type CreateBatchResponses = {
+    /**
+     * Batch created
+     */
+    201: unknown;
+};
+
+export type DeleteBatchData = {
+    body?: never;
+    path: {
+        /**
+         * Batch ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/enrollment-batches/{id}';
+};
+
+export type DeleteBatchErrors = {
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Batch not found
+     */
+    404: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type DeleteBatchError = DeleteBatchErrors[keyof DeleteBatchErrors];
+
+export type DeleteBatchResponses = {
+    /**
+     * Batch deleted
+     */
+    200: unknown;
+};
+
+export type GetBatchData = {
+    body?: never;
+    path: {
+        /**
+         * Batch ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/enrollment-batches/{id}';
+};
+
+export type GetBatchErrors = {
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Batch not found
+     */
+    404: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type GetBatchError = GetBatchErrors[keyof GetBatchErrors];
+
+export type GetBatchResponses = {
+    /**
+     * Batch retrieved
+     */
+    200: unknown;
+};
+
+export type UpdateBatchData = {
+    body: unknown;
+    path: {
+        /**
+         * Batch ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/enrollment-batches/{id}';
+};
+
+export type UpdateBatchErrors = {
+    /**
+     * Bad request
+     */
+    400: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Batch not found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type UpdateBatchError = UpdateBatchErrors[keyof UpdateBatchErrors];
+
+export type UpdateBatchResponses = {
+    /**
+     * Batch updated
+     */
+    200: unknown;
+};
+
+export type ListEnrollmentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/g1-enrollments';
+};
+
+export type ListEnrollmentsErrors = {
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type ListEnrollmentsError = ListEnrollmentsErrors[keyof ListEnrollmentsErrors];
+
+export type ListEnrollmentsResponses = {
+    /**
+     * List of G1 enrollments
+     */
+    200: unknown;
+};
+
+export type CreateEnrollmentData = {
+    body: Model;
+    path?: never;
+    query?: never;
+    url: '/api/g1-enrollments';
+};
+
+export type CreateEnrollmentErrors = {
+    /**
+     * Bad request
+     */
+    400: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type CreateEnrollmentError = CreateEnrollmentErrors[keyof CreateEnrollmentErrors];
+
+export type CreateEnrollmentResponses = {
+    /**
+     * Enrollment created
+     */
+    201: unknown;
+};
+
+export type DeleteEnrollmentData = {
+    body?: never;
+    path: {
+        /**
+         * Enrollment ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-enrollments/{id}';
+};
+
+export type DeleteEnrollmentErrors = {
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Enrollment not found
+     */
+    404: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type DeleteEnrollmentError = DeleteEnrollmentErrors[keyof DeleteEnrollmentErrors];
+
+export type DeleteEnrollmentResponses = {
+    /**
+     * Enrollment deleted
+     */
+    200: unknown;
+};
+
+export type GetEnrollmentData = {
+    body?: never;
+    path: {
+        /**
+         * Enrollment ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-enrollments/{id}';
+};
+
+export type GetEnrollmentErrors = {
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Enrollment not found
+     */
+    404: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type GetEnrollmentError = GetEnrollmentErrors[keyof GetEnrollmentErrors];
+
+export type GetEnrollmentResponses = {
+    /**
+     * Enrollment retrieved
+     */
+    200: unknown;
+};
+
+export type UpdateEnrollmentData = {
+    body: unknown;
+    path: {
+        /**
+         * Enrollment ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-enrollments/{id}';
+};
+
+export type UpdateEnrollmentErrors = {
+    /**
+     * Bad request
+     */
+    400: ErrorResponse;
+    /**
+     * Insufficient permissions
+     */
+    403: ErrorResponse;
+    /**
+     * Enrollment not found
+     */
+    404: ErrorResponse;
+    /**
+     * Internal server error
+     */
+    500: ErrorResponse;
+};
+
+export type UpdateEnrollmentError = UpdateEnrollmentErrors[keyof UpdateEnrollmentErrors];
+
+export type UpdateEnrollmentResponses = {
+    /**
+     * Enrollment updated
+     */
+    200: unknown;
+};
 
 export type UploadFileData = {
     /**

@@ -7,7 +7,9 @@ use utoipa_scalar::{Scalar, Servable};
 
 use crate::auth::handlers::{login, logout, logout_all, me, refresh, register};
 use crate::counter;
+use crate::enrollment_batches;
 use crate::error::ErrorResponse;
+use crate::g1_enrollments;
 use crate::uploads;
 
 #[derive(Serialize, ToSchema)]
@@ -34,6 +36,16 @@ pub struct MessageResponse {
         counter::get_secure_counter,
         counter::increment_secure_counter,
         uploads::upload_file,
+        g1_enrollments::handlers::list::list_enrollments,
+        g1_enrollments::handlers::get::get_enrollment,
+        g1_enrollments::handlers::create::create_enrollment,
+        g1_enrollments::handlers::update::update_enrollment,
+        g1_enrollments::handlers::delete::delete_enrollment,
+        enrollment_batches::handlers::list::list_batches,
+        enrollment_batches::handlers::get::get_batch,
+        enrollment_batches::handlers::create::create_batch,
+        enrollment_batches::handlers::update::update_batch,
+        enrollment_batches::handlers::delete::delete_batch,
     ),
     components(
         schemas(
@@ -44,6 +56,8 @@ pub struct MessageResponse {
             crate::auth::types::UserResponse,
             crate::counter::service::CounterResponse,
             crate::uploads::UploadResponse,
+            db::entity::g1_enrollments::Model,
+            db::entity::enrollment_batches::Model,
             ErrorResponse,
             MessageResponse,
         )

@@ -78,6 +78,44 @@ export const MessageResponseSchema = {
     }
 } as const;
 
+export const ModelSchema = {
+    type: 'object',
+    required: [
+        'batch_code',
+        'batch_name',
+        'enrollment_type'
+    ],
+    properties: {
+        batch_code: {
+            type: 'string'
+        },
+        batch_name: {
+            type: 'string'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time'
+        },
+        created_by: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        enrollment_type: {
+            type: 'string'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid'
+        },
+        status: {
+            type: 'string'
+        }
+    }
+} as const;
+
 export const RefreshRequestSchema = {
     type: 'object',
     required: [
