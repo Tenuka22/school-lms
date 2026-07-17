@@ -10,12 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StudentManagementIndexRouteImport } from './routes/student-management/index'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as StudentManagementEnrollmentG1RouteImport } from './routes/student-management/enrollment/g1'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentManagementIndexRoute = StudentManagementIndexRouteImport.update({
+  id: '/student-management/',
+  path: '/student-management/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -28,35 +35,65 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/auth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentManagementEnrollmentG1Route =
+  StudentManagementEnrollmentG1RouteImport.update({
+    id: '/student-management/enrollment/g1',
+    path: '/student-management/enrollment/g1',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/student-management/': typeof StudentManagementIndexRoute
+  '/student-management/enrollment/g1': typeof StudentManagementEnrollmentG1Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/student-management': typeof StudentManagementIndexRoute
+  '/student-management/enrollment/g1': typeof StudentManagementEnrollmentG1Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/student-management/': typeof StudentManagementIndexRoute
+  '/student-management/enrollment/g1': typeof StudentManagementEnrollmentG1Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/sign-in' | '/auth/sign-up'
+  fullPaths:
+    | '/'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
+    | '/student-management/'
+    | '/student-management/enrollment/g1'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/sign-in' | '/auth/sign-up'
-  id: '__root__' | '/' | '/auth/sign-in' | '/auth/sign-up'
+  to:
+    | '/'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
+    | '/student-management'
+    | '/student-management/enrollment/g1'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
+    | '/student-management/'
+    | '/student-management/enrollment/g1'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
+  StudentManagementIndexRoute: typeof StudentManagementIndexRoute
+  StudentManagementEnrollmentG1Route: typeof StudentManagementEnrollmentG1Route
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +103,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student-management/': {
+      id: '/student-management/'
+      path: '/student-management'
+      fullPath: '/student-management/'
+      preLoaderRoute: typeof StudentManagementIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -82,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student-management/enrollment/g1': {
+      id: '/student-management/enrollment/g1'
+      path: '/student-management/enrollment/g1'
+      fullPath: '/student-management/enrollment/g1'
+      preLoaderRoute: typeof StudentManagementEnrollmentG1RouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +140,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
+  StudentManagementIndexRoute: StudentManagementIndexRoute,
+  StudentManagementEnrollmentG1Route: StudentManagementEnrollmentG1Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
