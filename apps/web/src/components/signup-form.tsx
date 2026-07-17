@@ -4,9 +4,7 @@ import { useForm } from "@tanstack/react-form"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate, Link } from "@tanstack/react-router"
 import { toast } from "sonner"
-import { registerMutation } from "@/lib/api-client/@tanstack/react-query.gen"
-import type { RegisterError } from "@/lib/api-client/types.gen"
-import { useAuth } from "@/lib/auth"
+import { registerAction } from "@/lib/server/auth"
 import { vRegisterRequest } from "@/lib/api-client/valibot.gen"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -29,16 +27,17 @@ import { Input } from "@/components/ui/input"
 
 export function SignupForm({ className }: { className?: string }) {
   const navigate = useNavigate()
-  const { login } = useAuth()
   const mutation = useMutation({
-    ...registerMutation(),
-    onSuccess: (data) => {
-      login(data.access_token, data.refresh_token, Number(data.expires_at))
+    mutationFn: async (values: { email: string; password: string }) => {
+      const result = await registerAction({ data: values })
+      if (!result.ok) throw new Error("Registration failed")
+    },
+    onSuccess: () => {
       toast.success("Account created successfully!")
       navigate({ to: "/" })
     },
-    onError: (error: RegisterError) => {
-      toast.error(error.error)
+    onError: (error: Error) => {
+      toast.error(error.message)
     },
   })
 
@@ -51,9 +50,7 @@ export function SignupForm({ className }: { className?: string }) {
       onSubmit: vRegisterRequest,
     },
     onSubmit: async ({ value }) => {
-      mutation.mutate({
-        body: { email: value.email, password: value.password },
-      })
+      mutation.mutate(value)
     },
   })
 

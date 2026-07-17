@@ -2,12 +2,11 @@
 
 import * as React from "react"
 import { useLocation } from "@tanstack/react-router"
-import { IconUsers, IconCommand, IconLifebuoy, IconSend } from "@tabler/icons-react"
+import { IconUsers, IconCommand } from "@tabler/icons-react"
 
 import { NavSwitcher, type NavMode } from "@/components/nav/nav-switcher"
 import { NavMain } from "@/components/nav/nav-main"
 import { NavProjects } from "@/components/nav/nav-projects"
-import { NavSecondary } from "@/components/nav/nav-secondary"
 import { NavUser } from "@/components/nav/nav-user"
 import {
   Sidebar,
@@ -48,11 +47,6 @@ const STUDENT_MANAGEMENT_NAV = {
   projects: [],
 }
 
-const SHARED_SECONDARY = [
-  { title: "Support", url: "#", icon: <IconLifebuoy /> },
-  { title: "Feedback", url: "#", icon: <IconSend /> },
-]
-
 function getModeData(modeId: string) {
   if (modeId === "students-management") return STUDENT_MANAGEMENT_NAV
   return { navMain: [], projects: [] }
@@ -63,7 +57,10 @@ function getActiveMode(pathname: string): NavMode {
   return MODES[0]
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  user,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { user?: { email: string; sub: string } | null }) {
   const { pathname } = useLocation()
   const activeMode = getActiveMode(pathname)
   const modeData = getModeData(activeMode.id)
@@ -78,10 +75,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {modeData.projects.length > 0 && (
           <NavProjects projects={modeData.projects} />
         )}
-        <NavSecondary items={SHARED_SECONDARY} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

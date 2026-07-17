@@ -15,5 +15,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .route(
             "/logout-all",
             web::post().to(handlers::logout_all::logout_all),
-        );
+        )
+        .route("/me", web::get().to(handlers::me::me));
 }

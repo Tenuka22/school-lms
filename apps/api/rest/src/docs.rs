@@ -5,7 +5,7 @@ use utoipa::openapi::security::{Http, HttpAuthScheme, SecurityScheme};
 use utoipa::{Modify, OpenApi, ToSchema};
 use utoipa_scalar::{Scalar, Servable};
 
-use crate::auth::handlers::{login, logout, logout_all, refresh, register};
+use crate::auth::handlers::{login, logout, logout_all, me, refresh, register};
 use crate::counter;
 use crate::error::ErrorResponse;
 use crate::uploads;
@@ -28,6 +28,7 @@ pub struct MessageResponse {
         refresh::refresh,
         logout::logout,
         logout_all::logout_all,
+        me::me,
         counter::get_counter,
         counter::increment_counter,
         counter::get_secure_counter,
@@ -40,6 +41,7 @@ pub struct MessageResponse {
             crate::auth::types::LoginRequest,
             crate::auth::types::RefreshRequest,
             crate::auth::types::AuthResponse,
+            crate::auth::types::UserResponse,
             crate::counter::service::CounterResponse,
             crate::uploads::UploadResponse,
             ErrorResponse,

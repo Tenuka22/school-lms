@@ -4,9 +4,7 @@ import { useForm } from "@tanstack/react-form"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate, Link } from "@tanstack/react-router"
 import { toast } from "sonner"
-import { loginMutation } from "@/lib/api-client/@tanstack/react-query.gen"
-import type { LoginError } from "@/lib/api-client/types.gen"
-import { useAuth } from "@/lib/auth"
+import { loginAction } from "@/lib/server/auth"
 import { vLoginRequest } from "@/lib/api-client/valibot.gen"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -29,16 +27,17 @@ import { Input } from "@/components/ui/input"
 
 export function LoginForm({ className }: { className?: string }) {
   const navigate = useNavigate()
-  const { login } = useAuth()
   const mutation = useMutation({
-    ...loginMutation(),
-    onSuccess: (data) => {
-      login(data.access_token, data.refresh_token, Number(data.expires_at))
+    mutationFn: async (values: { email: string; password: string }) => {
+      const result = await loginAction({ data: values })
+      if (!result.ok) throw new Error("Login failed")
+    },
+    onSuccess: () => {
       toast.success("Welcome back! Logging you in...")
       navigate({ to: "/" })
     },
-    onError: (error: LoginError) => {
-      toast.error(error.error)
+    onError: (error: Error) => {
+      toast.error(error.message)
     },
   })
 
@@ -51,9 +50,7 @@ export function LoginForm({ className }: { className?: string }) {
       onSubmit: vLoginRequest,
     },
     onSubmit: async ({ value }) => {
-      mutation.mutate({
-        body: { email: value.email, password: value.password },
-      })
+      mutation.mutate(value)
     },
   })
 

@@ -5,9 +5,7 @@ import { Toaster } from "sonner"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 
 import appCss from "../styles.css?url"
-import { AuthProvider } from "@/lib/auth"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import "@/lib/api"
 
 const queryClient = new QueryClient()
 
@@ -50,7 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <AuthProvider>{children}</AuthProvider>
+          {children}
         </TooltipProvider>
         </QueryClientProvider>
         <Toaster position="top-center" richColors />

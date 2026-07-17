@@ -24,3 +24,9 @@ pub struct AuthResponse {
     pub refresh_token: String,
     pub expires_at: i64,
 }
+
+#[derive(Serialize, ToSchema)]
+pub struct UserResponse {
+    pub id: i32,
+    pub email: String,
+}
