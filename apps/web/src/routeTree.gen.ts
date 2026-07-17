@@ -9,21 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as StudentManagementIndexRouteImport } from './routes/student-management/index'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as StudentManagementEnrollmentG1RouteImport } from './routes/student-management/enrollment/g1'
+import { Route as AuthenticatedStudentManagementIndexRouteImport } from './routes/_authenticated/student-management/index'
+import { Route as AuthenticatedStudentManagementEnrollmentG1RouteImport } from './routes/_authenticated/student-management/enrollment/g1'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StudentManagementIndexRoute = StudentManagementIndexRouteImport.update({
-  id: '/student-management/',
-  path: '/student-management/',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
   id: '/auth/sign-up',
@@ -35,34 +35,41 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/auth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StudentManagementEnrollmentG1Route =
-  StudentManagementEnrollmentG1RouteImport.update({
+const AuthenticatedStudentManagementIndexRoute =
+  AuthenticatedStudentManagementIndexRouteImport.update({
+    id: '/student-management/',
+    path: '/student-management/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementEnrollmentG1Route =
+  AuthenticatedStudentManagementEnrollmentG1RouteImport.update({
     id: '/student-management/enrollment/g1',
     path: '/student-management/enrollment/g1',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/student-management/': typeof StudentManagementIndexRoute
-  '/student-management/enrollment/g1': typeof StudentManagementEnrollmentG1Route
+  '/student-management/': typeof AuthenticatedStudentManagementIndexRoute
+  '/student-management/enrollment/g1': typeof AuthenticatedStudentManagementEnrollmentG1Route
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/student-management': typeof StudentManagementIndexRoute
-  '/student-management/enrollment/g1': typeof StudentManagementEnrollmentG1Route
+  '/': typeof AuthenticatedIndexRoute
+  '/student-management': typeof AuthenticatedStudentManagementIndexRoute
+  '/student-management/enrollment/g1': typeof AuthenticatedStudentManagementEnrollmentG1Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/student-management/': typeof StudentManagementIndexRoute
-  '/student-management/enrollment/g1': typeof StudentManagementEnrollmentG1Route
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/student-management/': typeof AuthenticatedStudentManagementIndexRoute
+  '/_authenticated/student-management/enrollment/g1': typeof AuthenticatedStudentManagementEnrollmentG1Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -74,43 +81,42 @@ export interface FileRouteTypes {
     | '/student-management/enrollment/g1'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/'
     | '/student-management'
     | '/student-management/enrollment/g1'
   id:
     | '__root__'
-    | '/'
+    | '/_authenticated'
     | '/auth/sign-in'
     | '/auth/sign-up'
-    | '/student-management/'
-    | '/student-management/enrollment/g1'
+    | '/_authenticated/'
+    | '/_authenticated/student-management/'
+    | '/_authenticated/student-management/enrollment/g1'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
-  StudentManagementIndexRoute: typeof StudentManagementIndexRoute
-  StudentManagementEnrollmentG1Route: typeof StudentManagementEnrollmentG1Route
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/student-management/': {
-      id: '/student-management/'
-      path: '/student-management'
-      fullPath: '/student-management/'
-      preLoaderRoute: typeof StudentManagementIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/auth/sign-up': {
       id: '/auth/sign-up'
@@ -126,22 +132,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/student-management/enrollment/g1': {
-      id: '/student-management/enrollment/g1'
+    '/_authenticated/student-management/': {
+      id: '/_authenticated/student-management/'
+      path: '/student-management'
+      fullPath: '/student-management/'
+      preLoaderRoute: typeof AuthenticatedStudentManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/enrollment/g1': {
+      id: '/_authenticated/student-management/enrollment/g1'
       path: '/student-management/enrollment/g1'
       fullPath: '/student-management/enrollment/g1'
-      preLoaderRoute: typeof StudentManagementEnrollmentG1RouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedStudentManagementEnrollmentG1RouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedStudentManagementIndexRoute: typeof AuthenticatedStudentManagementIndexRoute
+  AuthenticatedStudentManagementEnrollmentG1Route: typeof AuthenticatedStudentManagementEnrollmentG1Route
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedStudentManagementIndexRoute:
+    AuthenticatedStudentManagementIndexRoute,
+  AuthenticatedStudentManagementEnrollmentG1Route:
+    AuthenticatedStudentManagementEnrollmentG1Route,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
-  StudentManagementIndexRoute: StudentManagementIndexRoute,
-  StudentManagementEnrollmentG1Route: StudentManagementEnrollmentG1Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
