@@ -1,4 +1,5 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import { ThemeProvider } from "@/components/theme-provider"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { Toaster } from "sonner"
@@ -41,14 +42,16 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+        <ThemeProvider defaultTheme="system" storageKey="theme">
           {children}
+        </ThemeProvider>
         </TooltipProvider>
         </QueryClientProvider>
         <Toaster position="top-center" richColors />
