@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useLocation } from "@tanstack/react-router"
-import { IconUsers, IconCommand, IconTerminal2, IconRobot, IconBook, IconSettings, IconLifebuoy, IconSend, IconFrame, IconChartPie, IconMap } from "@tabler/icons-react"
+import { IconUsers, IconCommand, IconLifebuoy, IconSend } from "@tabler/icons-react"
 
 import { NavSwitcher, type NavMode } from "@/components/nav/nav-switcher"
 import { NavMain } from "@/components/nav/nav-main"
@@ -33,59 +33,6 @@ const MODES: NavMode[] = [
   },
 ]
 
-const DASHBOARD_NAV = {
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: <IconTerminal2 />,
-      isActive: true,
-      items: [
-        { title: "History", url: "#" },
-        { title: "Starred", url: "#" },
-        { title: "Settings", url: "#" },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: <IconRobot />,
-      items: [
-        { title: "Genesis", url: "#" },
-        { title: "Explorer", url: "#" },
-        { title: "Quantum", url: "#" },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: <IconBook />,
-      items: [
-        { title: "Introduction", url: "#" },
-        { title: "Get Started", url: "#" },
-        { title: "Tutorials", url: "#" },
-        { title: "Changelog", url: "#" },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: <IconSettings />,
-      items: [
-        { title: "General", url: "#" },
-        { title: "Team", url: "#" },
-        { title: "Billing", url: "#" },
-        { title: "Limits", url: "#" },
-      ],
-    },
-  ],
-  projects: [
-    { name: "Design Engineering", url: "#", icon: <IconFrame /> },
-    { name: "Sales & Marketing", url: "#", icon: <IconChartPie /> },
-    { name: "Travel", url: "#", icon: <IconMap /> },
-  ],
-}
-
 const STUDENT_MANAGEMENT_NAV = {
   navMain: [
     {
@@ -106,15 +53,9 @@ const SHARED_SECONDARY = [
   { title: "Feedback", url: "#", icon: <IconSend /> },
 ]
 
-const USER = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
-}
-
 function getModeData(modeId: string) {
   if (modeId === "students-management") return STUDENT_MANAGEMENT_NAV
-  return DASHBOARD_NAV
+  return { navMain: [], projects: [] }
 }
 
 function getActiveMode(pathname: string): NavMode {
@@ -133,14 +74,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSwitcher modes={MODES} activeMode={activeMode} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={modeData.navMain} />
+        {modeData.navMain.length > 0 && <NavMain items={modeData.navMain} />}
         {modeData.projects.length > 0 && (
           <NavProjects projects={modeData.projects} />
         )}
         <NavSecondary items={SHARED_SECONDARY} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={USER} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   )

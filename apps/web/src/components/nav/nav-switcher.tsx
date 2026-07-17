@@ -7,6 +7,7 @@ import { ChevronsUpDown } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -75,25 +76,27 @@ export function NavSwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Modes
-            </DropdownMenuLabel>
-            {modes.map((mode, index) => (
-              <DropdownMenuItem
-                key={mode.id}
-                onClick={() => onSelect(mode)}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <mode.logo className="size-3.5 shrink-0" />
-                </div>
-                <div className="grid flex-1 text-start">
-                  <span className="font-medium">{mode.name}</span>
-                  <span className="text-xs text-muted-foreground">{mode.description}</span>
-                </div>
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Modes
+              </DropdownMenuLabel>
+              {modes.map((mode, index) => (
+                <DropdownMenuItem
+                  key={mode.id}
+                  onClick={() => onSelect(mode)}
+                  className="gap-2 p-2"
+                >
+                  <div className="flex size-6 items-center justify-center rounded-md border">
+                    <mode.logo className="size-3.5 shrink-0" />
+                  </div>
+                  <div className="grid flex-1 text-start">
+                    <span className="font-medium">{mode.name}</span>
+                    <span className="text-xs text-muted-foreground">{mode.description}</span>
+                  </div>
+                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
           </DropdownMenuContent>
         </DropdownMenu>

@@ -25,13 +25,16 @@ import { IconSelector, IconSparkles, IconRosetteDiscountCheck, IconCreditCard, I
 export function NavUser({
   user,
 }: {
-  user: {
+  user?: {
     name: string
     email: string
     avatar: string
   }
 }) {
   const { isMobile } = useSidebar()
+
+  if (!user) return null
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
