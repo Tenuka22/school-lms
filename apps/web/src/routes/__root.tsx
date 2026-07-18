@@ -3,12 +3,11 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { Toaster } from "sonner"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { QueryClientProvider } from "@tanstack/react-query"
 
 import appCss from "../styles.css?url"
 import { TooltipProvider } from "@/components/ui/tooltip"
-
-const queryClient = new QueryClient()
+import { queryClient } from "@/router"
 
 export const Route = createRootRoute({
   head: () => ({

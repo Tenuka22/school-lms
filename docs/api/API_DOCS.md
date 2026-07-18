@@ -2,69 +2,102 @@
 
 ## Overview
 
-The REST API uses [utoipa](https://crates.io/crates/utoipa) to auto-generate an
-OpenAPI 3.1 spec. The spec is served in two ways:
+The REST API uses [apistos](https://github.com/netwo-io/apistos) to auto-generate an
+OpenAPI 3.0 spec. The spec is served in two ways:
 
 | Endpoint              | Description                                    |
 |-----------------------|------------------------------------------------|
-| `GET /api/openapi.json` | Raw OpenAPI JSON spec, generated in-memory    |
-| `GET /api/docs`       | Interactive [Scalar](https://scalar.com/) UI   |
+| `GET /openapi.json` | Raw OpenAPI JSON spec, generated in-memory    |
+| `GET /docs`         | Interactive [Scalar](https://scalar.com/) UI   |
 
 ## How It Works
 
-### ApiDoc struct (`rest/src/docs.rs`)
+### Setup (`api/src/main.rs`)
 
-All endpoints, request bodies, response schemas, and security schemes are
-declared in the `#[derive(OpenApi)]` struct:
+The `Spec` struct holds the API metadata and is passed to `App::document()`:
 
 ```rust
-#[derive(OpenApi)]
-#[openapi(
-    info(title = "School LMS API", version = "0.1.0"),
-    paths(endpoint_a, endpoint_b, /* ... */),
-    components(schemas(RequestA, ResponseB, /* ... */)),
-    modifiers(&SecurityAddon),
-)]
-pub struct ApiDoc;
+let spec = Spec {
+    info: Info {
+        title: "School LMS API".to_string(),
+        version: "0.1.0".to_string(),
+        description: Some("School Learning Management System API".to_string()),
+        ..Default::default()
+    },
+    ..Default::default()
+};
+
+App::new()
+    .document(spec)
+    .wrap(Logger::default())
+    .wrap(cors)
+    // ... app_data, configure ...
+    .build_with(
+        "/openapi.json",
+        BuildConfig::default().with(ScalarConfig::new(&"/docs")),
+    )
 ```
 
-### Path annotations
+### Handler annotations
 
-Every handler function carries a `#[utoipa::path(...)]` attribute that
-documents its method, path, request body, response codes, and security
-requirements:
+Every handler function carries a `#[api_operation(...)]` attribute that
+documents its tag, summary, and security requirements:
 
 ```rust
-#[utoipa::path(
-    post,
-    path = "/api/auth/login",
-    request_body = LoginRequest,
-    responses(
-        (status = 200, description = "Login successful", body = AuthResponse),
-        (status = 401, description = "Invalid credentials", body = ErrorResponse),
-    ),
-)]
-pub async fn login(...) -> Result<HttpResponse, ApiError> { ... }
+#[api_operation(tag = "auth")]
+pub async fn login(
+    db: web::Data<DatabaseConnection>,
+    body: Json<LoginRequest>,
+) -> Result<Json<AuthResponse>, ApiError> { ... }
 ```
 
 ### Security scheme
 
-All endpoints that require authentication (counter, logout-all) declare a
-`security("bearer_auth")` attribute. The `SecurityAddon` modifier adds a
-**Bearer JWT** scheme to the global components section.
+The **Bearer JWT** security scheme is auto-documented via the `ApiSecurity` derive on
+`AuthenticatedUser` (`rest/src/auth/middleware.rs`). Handlers that take `AuthenticatedUser`
+as a parameter are automatically marked as requiring bearer auth.
+
+### Schema registration
+
+Types are auto-registered when they appear as handler parameters or return types.
+No manual schema list is needed. Types derive both `JsonSchema` and `ApiComponent`:
+
+```rust
+#[derive(Deserialize, Serialize, JsonSchema, ApiComponent)]
+pub struct LoginRequest {
+    pub email: String,
+    pub password: String,
+}
+```
+
+### Error codes
+
+Error status codes are documented via `ApiErrorComponent` on `ApiError`:
+
+```rust
+#[derive(Debug, ApiErrorComponent)]
+#[openapi_error(
+    status(code = 400),
+    status(code = 401),
+    status(code = 403),
+    status(code = 404),
+    status(code = 409),
+    status(code = 500),
+)]
+pub enum ApiError { ... }
+```
 
 ## Adding a new endpoint
 
-1. Add a handler function with `#[utoipa::path(...)]` — include every response
-   code and its body type.
-2. Ensure request/response types derive `ToSchema`.
-3. Register the function in the `paths(...)` list of `#[derive(OpenApi)]`.
-4. Register any new types in the `schemas(...)` list.
-5. Add the route in the appropriate `routes()` function.
+1. Add a handler function with `#[api_operation(tag = "...")]`.
+2. Ensure request/response types derive `JsonSchema` and `ApiComponent`.
+3. Register the route using `apistos::web::*` instead of `actix_web::web::*`.
+4. Use `Json<T>`, `CreatedJson<T>`, or `NoContent` return types from `apistos::actix`.
 
 ## Dependencies
 
-| Crate             | Version | Purpose                     |
-|-------------------|---------|-----------------------------|
-| `utoipa`          | 5       | OpenAPI generation          |
-| `utoipa-scalar`   | 0.3     | Scalar UI integration       |
+| Crate                      | Version | Purpose                     |
+|----------------------------|---------|-----------------------------|
+| `apistos`                  | 0.6     | OpenAPI generation          |
+| `apistos-schemars`         | 0.8     | JSON Schema derivation      |
+| `apistos-scalar`           | 0.6     | Scalar UI integration       |

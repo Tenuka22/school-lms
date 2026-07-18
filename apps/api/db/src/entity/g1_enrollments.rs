@@ -1,7 +1,8 @@
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc, NaiveDate};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 use super::enums::{EnrollmentStatus, MediumOfInstruction, Gender, Nationality, Religion, G1Category};
 
 fn default_id() -> Uuid {
@@ -16,8 +17,8 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, ToSchema)]
-#[schema(as = G1Enrollment)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[schemars(rename = "G1Enrollment")]
 #[sea_orm(table_name = "g1_enrollments")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -70,16 +71,12 @@ pub struct Model {
     #[serde(default)]
     pub overseas_arrival_date: Option<NaiveDate>,
     #[serde(default)]
-    #[schema(value_type = f64, nullable = true)]
     pub interview_score: Option<Decimal>,
     #[serde(default)]
-    #[schema(value_type = f64, nullable = true)]
     pub category_score: Option<Decimal>,
     #[serde(default)]
-    #[schema(value_type = f64, nullable = true)]
     pub distance_score: Option<Decimal>,
     #[serde(default)]
-    #[schema(value_type = f64, nullable = true)]
     pub total_score: Option<Decimal>,
     #[serde(default)]
     pub rank: Option<i32>,

@@ -16,8 +16,8 @@ rand = "0.8"
 sha2 = "0.10"
 hex = "0.4"
 log = "0.4"
-utoipa = { version = "5", features = ["chrono", "uuid", "actix_extras"] }
-utoipa-scalar = { version = "0.3", features = ["actix-web"] }
+apistos = { version = "0.6", features = ["extras", "scalar"] }
+schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid"] }
 aws-config = "1"
 aws-sdk-s3 = "1"
 uuid = { version = "1.23.5", features = ["v4"] }

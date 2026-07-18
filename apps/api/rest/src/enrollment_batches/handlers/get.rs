@@ -1,4 +1,5 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use db::entity::enrollment_batches;
 use sea_orm::{DatabaseConnection, EntityTrait};
 use uuid::Uuid;
@@ -7,27 +8,12 @@ use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
-#[utoipa::path(
-    get,
-    path = "/api/enrollment-batches/{id}",
-    params(
-        ("id" = Uuid, Path, description = "Batch ID"),
-    ),
-    responses(
-        (status = 200, description = "Batch retrieved", body = db::entity::enrollment_batches::Model),
-        (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
-        (status = 404, description = "Batch not found", body = crate::error::ErrorResponse),
-        (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "enrollment-batches", operation_id = "get-batch")]
 pub async fn get_batch(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
     id: web::Path<Uuid>,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<enrollment_batches::Model>, ApiError> {
     auth.require_permission(Permission::All)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
@@ -36,5 +22,5 @@ pub async fn get_batch(
         .await?
         .ok_or_else(|| ApiError::NotFound("batch not found".into()))?;
 
-    Ok(HttpResponse::Ok().json(batch))
+    Ok(Json(batch))
 }

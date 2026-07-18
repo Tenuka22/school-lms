@@ -2,6 +2,11 @@
 
 import type { LoginResponse, RefreshResponse, RegisterResponse } from './types.gen';
 
+export const registerResponseTransformer = async (data: any): Promise<RegisterResponse> => {
+    data.expires_at = BigInt(data.expires_at.toString());
+    return data;
+};
+
 const authResponseSchemaResponseTransformer = (data: any) => {
     data.expires_at = BigInt(data.expires_at.toString());
     return data;
@@ -13,11 +18,6 @@ export const loginResponseTransformer = async (data: any): Promise<LoginResponse
 };
 
 export const refreshResponseTransformer = async (data: any): Promise<RefreshResponse> => {
-    data = authResponseSchemaResponseTransformer(data);
-    return data;
-};
-
-export const registerResponseTransformer = async (data: any): Promise<RegisterResponse> => {
     data = authResponseSchemaResponseTransformer(data);
     return data;
 };

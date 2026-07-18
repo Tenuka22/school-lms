@@ -1,8 +1,9 @@
 use super::enums::{BatchStatus, EnrollmentType};
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
 fn default_id() -> Uuid {
     uuid::Uuid::new_v4()
@@ -16,8 +17,8 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, ToSchema)]
-#[schema(as = EnrollmentBatch)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[schemars(rename = "EnrollmentBatch")]
 #[sea_orm(table_name = "enrollment_batches")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]

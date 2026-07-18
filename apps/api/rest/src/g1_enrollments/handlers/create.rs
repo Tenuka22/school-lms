@@ -1,4 +1,6 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::actix::CreatedJson;
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::{enrollment_batches, g1_enrollments, g1_enrollments_audit};
 use db::entity::enums::AuditOperation;
@@ -11,25 +13,12 @@ use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
-#[utoipa::path(
-    post,
-    path = "/api/g1-enrollments",
-    request_body = db::entity::g1_enrollments::Model,
-    responses(
-        (status = 201, description = "Enrollment created", body = db::entity::g1_enrollments::Model),
-        (status = 400, description = "Bad request", body = crate::error::ErrorResponse),
-        (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
-        (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "g1-enrollments", operation_id = "create-enrollment")]
 pub async fn create_enrollment(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
-    body: web::Json<g1_enrollments::Model>,
-) -> Result<HttpResponse, ApiError> {
+    body: Json<g1_enrollments::Model>,
+) -> Result<CreatedJson<g1_enrollments::Model>, ApiError> {
     auth.require_permission(Permission::All)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
@@ -68,5 +57,5 @@ pub async fn create_enrollment(
     .insert(db.as_ref())
     .await?;
 
-    Ok(HttpResponse::Created().json(saved))
+    Ok(CreatedJson(saved))
 }

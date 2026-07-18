@@ -1,4 +1,5 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use db::entity::g1_enrollments;
 use sea_orm::{DatabaseConnection, EntityTrait};
 use uuid::Uuid;
@@ -7,27 +8,12 @@ use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
-#[utoipa::path(
-    get,
-    path = "/api/g1-enrollments/{id}",
-    params(
-        ("id" = Uuid, Path, description = "Enrollment ID"),
-    ),
-    responses(
-        (status = 200, description = "Enrollment retrieved", body = db::entity::g1_enrollments::Model),
-        (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
-        (status = 404, description = "Enrollment not found", body = crate::error::ErrorResponse),
-        (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "g1-enrollments", operation_id = "get-enrollment")]
 pub async fn get_enrollment(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
     id: web::Path<Uuid>,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<g1_enrollments::Model>, ApiError> {
     auth.require_permission(Permission::All)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
@@ -36,5 +22,5 @@ pub async fn get_enrollment(
         .await?
         .ok_or_else(|| ApiError::NotFound("enrollment not found".into()))?;
 
-    Ok(HttpResponse::Ok().json(enrollment))
+    Ok(Json(enrollment))
 }

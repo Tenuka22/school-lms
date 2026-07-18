@@ -3,6 +3,10 @@ mod config;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
+use apistos::app::{BuildConfig, OpenApiWrapper};
+use apistos::info::Info;
+use apistos::spec::Spec;
+use apistos::ScalarConfig;
 use dotenvy::from_filename;
 use rest::JwtSecret;
 use rest::storage::Storage;
@@ -69,6 +73,16 @@ async fn main() -> std::io::Result<()> {
     log::info!("Starting server on 0.0.0.0:{port} with allowed origin: {frontend_url}");
 
     HttpServer::new(move || {
+        let spec = Spec {
+            info: Info {
+                title: "School LMS API".to_string(),
+                version: "0.1.0".to_string(),
+                description: Some("School Learning Management System API".to_string()),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
         let cors = Cors::default()
             .allowed_origin(&frontend_url)
             .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
@@ -80,12 +94,17 @@ async fn main() -> std::io::Result<()> {
             .max_age(3600);
 
         App::new()
+            .document(spec)
             .wrap(Logger::default())
             .wrap(cors)
             .app_data(data.clone())
             .app_data(jwt_data.clone())
             .app_data(storage_data.clone())
             .configure(rest::configure)
+            .build_with(
+                "/openapi.json",
+                BuildConfig::default().with(ScalarConfig::new(&"/docs")),
+            )
     })
     .bind(("0.0.0.0", port))?
     .run()

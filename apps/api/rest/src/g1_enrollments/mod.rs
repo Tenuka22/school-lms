@@ -1,6 +1,6 @@
 pub mod handlers;
 
-use actix_web::web;
+use apistos::web;
 
 use handlers::{create, delete, get, list, update};
 

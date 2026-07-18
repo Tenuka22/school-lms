@@ -1,20 +1,22 @@
 use actix_multipart::form::tempfile::TempFile;
 use actix_multipart::form::MultipartForm;
-use actix_web::{HttpResponse, web};
+use actix_web::web::Json;
+use apistos::api_operation;
+use apistos::web;
 use serde::Serialize;
-use utoipa::ToSchema;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use crate::storage::Storage;
 use db::rbac::Permission;
 
-#[derive(Debug, MultipartForm)]
+#[derive(Debug, MultipartForm, schemars::JsonSchema, apistos::ApiComponent)]
 pub struct UploadForm {
+    #[schemars(skip)]
     pub file: TempFile,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, schemars::JsonSchema, apistos::ApiComponent)]
 pub struct UploadResponse {
     pub key: String,
     pub url: String,
@@ -22,24 +24,12 @@ pub struct UploadResponse {
     pub size: usize,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/uploads",
-    request_body(content = String, description = "multipart/form-data with `file` field", content_type = "multipart/form-data"),
-    responses(
-        (status = 200, description = "File uploaded", body = UploadResponse),
-        (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
-        (status = 500, description = "Upload failed", body = crate::error::ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "uploads", operation_id = "upload-file")]
 pub async fn upload_file(
-    storage: web::Data<Storage>,
+    storage: actix_web::web::Data<Storage>,
     auth: AuthenticatedUser,
     MultipartForm(form): MultipartForm<UploadForm>,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<UploadResponse>, ApiError> {
     auth.require_permission(Permission::FileUpload)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
@@ -83,7 +73,7 @@ pub async fn upload_file(
 
     let url = storage.public_url(&key);
 
-    Ok(HttpResponse::Ok().json(UploadResponse {
+    Ok(Json(UploadResponse {
         key,
         url,
         file_name,

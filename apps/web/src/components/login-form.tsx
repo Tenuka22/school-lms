@@ -75,7 +75,7 @@ export function LoginForm({ className }: { className?: string }) {
             <FieldGroup>
               {mutation.error && (
                 <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
-                  {mutation.error.error}
+                  {mutation.error.message}
                 </div>
               )}
               <form.Field

@@ -32,7 +32,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { logoutAction } from "@/lib/server/auth"
-import { IconSelector, IconSparkles, IconRosetteDiscountCheck, IconCreditCard, IconBell, IconLogout } from "@tabler/icons-react"
+import { IconSelector, IconLogout } from "@tabler/icons-react"
 
 export function NavUser({
   user,

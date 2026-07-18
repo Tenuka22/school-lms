@@ -1,12 +1,15 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::actix::CreatedJson;
+use apistos::api_operation;
+use apistos::ApiComponent;
 use chrono::Utc;
 use db::entity::enrollment_batches;
 use db::entity::enums::{BatchStatus, EnrollmentType};
+use schemars::JsonSchema;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
 };
 use serde::Deserialize;
-use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
@@ -25,32 +28,18 @@ fn generate_batch_name(enrollment_type: &EnrollmentType, year: i16) -> String {
     }
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct CreateBatchBody {
     pub enrollment_type: EnrollmentType,
     pub year: i16,
 }
 
-#[utoipa::path(
-    post,
-    path = "/api/enrollment-batches",
-    request_body = CreateBatchBody,
-    responses(
-        (status = 201, description = "Batch created", body = db::entity::enrollment_batches::Model),
-        (status = 400, description = "Bad request", body = crate::error::ErrorResponse),
-        (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
-        (status = 409, description = "Conflict", body = crate::error::ErrorResponse),
-        (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "enrollment-batches", operation_id = "create-batch")]
 pub async fn create_batch(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
-    body: web::Json<CreateBatchBody>,
-) -> Result<HttpResponse, ApiError> {
+    body: Json<CreateBatchBody>,
+) -> Result<CreatedJson<enrollment_batches::Model>, ApiError> {
     auth.require_permission(Permission::All)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
@@ -84,5 +73,5 @@ pub async fn create_batch(
     let active: enrollment_batches::ActiveModel = data.into();
     let saved = active.insert(db.as_ref()).await?;
 
-    Ok(HttpResponse::Created().json(saved))
+    Ok(CreatedJson(saved))
 }

@@ -1,4 +1,5 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::{g1_enrollments, g1_enrollments_audit};
 use db::entity::enums::AuditOperation;
@@ -10,27 +11,12 @@ use crate::docs::MessageResponse;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
-#[utoipa::path(
-    delete,
-    path = "/api/g1-enrollments/{id}",
-    params(
-        ("id" = Uuid, Path, description = "Enrollment ID"),
-    ),
-    responses(
-        (status = 200, description = "Enrollment deleted", body = MessageResponse),
-        (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
-        (status = 404, description = "Enrollment not found", body = crate::error::ErrorResponse),
-        (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "g1-enrollments", operation_id = "delete-enrollment")]
 pub async fn delete_enrollment(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
     id: web::Path<Uuid>,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<MessageResponse>, ApiError> {
     auth.require_permission(Permission::All)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
@@ -61,5 +47,5 @@ pub async fn delete_enrollment(
     .insert(db.as_ref())
     .await?;
 
-    Ok(HttpResponse::Ok().json(MessageResponse { message: "enrollment deleted".into() }))
+    Ok(Json(MessageResponse { message: "enrollment deleted".into() }))
 }

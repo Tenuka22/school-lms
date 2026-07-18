@@ -25,7 +25,10 @@ function AuthenticatedLayout() {
           <SidebarTrigger className="-ms-1" />
           <Separator orientation="vertical" className="me-2 h-4" />
         </header>
+        <div className="p-4 size-full">
+
         <Outlet />
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

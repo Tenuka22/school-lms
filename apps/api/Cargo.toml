@@ -18,7 +18,8 @@ hex = "0.4"
 uuid = { version = "1.23.5", features = ["v4"] }
 chrono = "0.4.45"
 sea-orm = "2.0.0-rc"
-utoipa = { version = "5", features = ["chrono", "uuid"] }
+
+apistos = { version = "0.6", features = ["scalar"] }
 actix-cors = "0.7.0"
 rest = { path = "rest" }
 db = { path = "db" }

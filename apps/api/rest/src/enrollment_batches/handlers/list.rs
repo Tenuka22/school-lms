@@ -1,4 +1,5 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use db::entity::enrollment_batches;
 use sea_orm::{DatabaseConnection, EntityTrait};
 
@@ -6,25 +7,14 @@ use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
-#[utoipa::path(
-    get,
-    path = "/api/enrollment-batches",
-    responses(
-        (status = 200, description = "List of enrollment batches", body = Vec<db::entity::enrollment_batches::Model>),
-        (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
-        (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "enrollment-batches", operation_id = "list-batches")]
 pub async fn list_batches(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<Vec<enrollment_batches::Model>>, ApiError> {
     auth.require_permission(Permission::All)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let batches = enrollment_batches::Entity::find().all(db.as_ref()).await?;
-    Ok(HttpResponse::Ok().json(batches))
+    Ok(Json(batches))
 }

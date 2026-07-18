@@ -1,15 +1,24 @@
 use std::fmt;
 
 use actix_web::{HttpResponse, http::StatusCode};
+use apistos::ApiErrorComponent;
+use schemars::JsonSchema;
 use serde::Serialize;
-use utoipa::ToSchema;
 
-#[derive(Debug, Serialize, ToSchema)]
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct ErrorResponse {
     pub error: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, ApiErrorComponent)]
+#[openapi_error(
+    status(code = 400),
+    status(code = 401),
+    status(code = 403),
+    status(code = 404),
+    status(code = 409),
+    status(code = 500),
+)]
 pub enum ApiError {
     BadRequest(String),
     Unauthorized(String),

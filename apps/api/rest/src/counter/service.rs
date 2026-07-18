@@ -2,15 +2,16 @@ use db::entity::{counter, secure_counter};
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, Set,
 };
+use apistos::ApiComponent;
+use schemars::JsonSchema;
 use serde::Serialize;
-use utoipa::ToSchema;
 
 pub enum CounterTarget {
     Normal,
     Secure,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, JsonSchema, ApiComponent)]
 pub struct CounterResponse {
     pub name: String,
     pub value: i32,

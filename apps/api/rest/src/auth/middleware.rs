@@ -11,6 +11,7 @@ use actix_web::{
     error::{ErrorForbidden, ErrorInternalServerError},
     web,
 };
+use apistos::ApiSecurity;
 use jsonwebtoken::{DecodingKey, Validation, decode};
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
@@ -26,6 +27,8 @@ pub struct Claims {
     pub iat: usize,
 }
 
+#[derive(ApiSecurity)]
+#[openapi_security(scheme(security_type(http(scheme = "bearer", bearer_format = "JWT"))))]
 pub struct AuthenticatedUser {
     pub user_id: Option<i32>,
     pub permissions: Vec<String>,

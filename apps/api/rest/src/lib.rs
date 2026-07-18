@@ -7,7 +7,7 @@ mod uploads;
 pub mod docs;
 pub mod error;
 
-use actix_web::web;
+use apistos::web;
 
 pub use auth::{AuthMiddleware, Claims, JwtSecret};
 
@@ -22,7 +22,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .configure(g1_enrollments::routes)
             .configure(enrollment_batches::routes)
             .configure(uploads::routes)
-            .service(web::scope("/auth").configure(auth::routes))
-            .configure(docs::routes),
+            .service(web::scope("/auth").configure(auth::routes)),
     );
 }

@@ -1,31 +1,32 @@
+use apistos::ApiComponent;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct RegisterRequest {
     pub email: String,
     pub password: String,
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct LoginRequest {
     pub email: String,
     pub password: String,
 }
 
-#[derive(Deserialize, ToSchema)]
+#[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct RefreshRequest {
     pub refresh_token: String,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, JsonSchema, ApiComponent)]
 pub struct AuthResponse {
     pub access_token: String,
     pub refresh_token: String,
     pub expires_at: i64,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, JsonSchema, ApiComponent)]
 pub struct UserResponse {
     pub id: i32,
     pub email: String,

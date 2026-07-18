@@ -1,4 +1,6 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::actix::CreatedJson;
+use apistos::api_operation;
 use chrono::{Duration, Utc};
 use db::entity::{session, user};
 use db::rbac::{ADMIN_EMAIL, assign_user_role};
@@ -7,24 +9,14 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, Qu
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, hash_password};
 use crate::auth::types::{AuthResponse, RegisterRequest};
-use crate::error::{ApiError, ErrorResponse};
+use crate::error::ApiError;
 
-#[utoipa::path(
-    post,
-    path = "/api/auth/register",
-    request_body = RegisterRequest,
-    responses(
-        (status = 201, description = "User registered successfully", body = AuthResponse),
-        (status = 400, description = "Validation error", body = ErrorResponse),
-        (status = 409, description = "Email already registered", body = ErrorResponse),
-        (status = 500, description = "Internal server error", body = ErrorResponse),
-    ),
-)]
+#[api_operation(tag = "auth", operation_id = "register")]
 pub async fn register(
     db: web::Data<DatabaseConnection>,
-    body: web::Json<RegisterRequest>,
+    body: Json<RegisterRequest>,
     jwt_secret: web::Data<JwtSecret>,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<CreatedJson<AuthResponse>, ApiError> {
     if body.email.is_empty() {
         return Err(ApiError::BadRequest("email is required".into()));
     }
@@ -93,9 +85,10 @@ pub async fn register(
 
     let access_expires_at = (now + Duration::minutes(15)).timestamp();
 
-    Ok(HttpResponse::Created().json(AuthResponse {
+    Ok(CreatedJson(AuthResponse {
         access_token,
         refresh_token: raw_refresh,
         expires_at: access_expires_at,
     }))
 }
+

@@ -1,27 +1,17 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use db::entity::user;
 use sea_orm::{DatabaseConnection, EntityTrait};
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::auth::types::UserResponse;
-use crate::error::{ApiError, ErrorResponse};
+use crate::error::ApiError;
 
-#[utoipa::path(
-    get,
-    path = "/api/auth/me",
-    responses(
-        (status = 200, description = "Current user", body = UserResponse),
-        (status = 401, description = "Unauthorized", body = ErrorResponse),
-        (status = 404, description = "User not found", body = ErrorResponse),
-    ),
-    security(
-        ("bearer_auth" = [])
-    ),
-)]
+#[api_operation(tag = "auth", operation_id = "me")]
 pub async fn me(
     db: web::Data<DatabaseConnection>,
     auth_user: AuthenticatedUser,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<UserResponse>, ApiError> {
     let user_id = auth_user
         .user_id
         .ok_or_else(|| ApiError::Unauthorized("not authenticated".into()))?;
@@ -31,7 +21,7 @@ pub async fn me(
         .await?
         .ok_or_else(|| ApiError::NotFound("user not found".into()))?;
 
-    Ok(HttpResponse::Ok().json(UserResponse {
+    Ok(Json(UserResponse {
         id: user.id,
         email: user.email,
     }))
