@@ -5,7 +5,7 @@ import * as v from 'valibot';
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
 import type { CreateBatchData, CreateBatchErrors, CreateBatchResponses, CreateEnrollmentData, CreateEnrollmentErrors, CreateEnrollmentResponses, DeleteBatchData, DeleteBatchErrors, DeleteBatchResponses, DeleteEnrollmentData, DeleteEnrollmentErrors, DeleteEnrollmentResponses, GetBatchData, GetBatchErrors, GetBatchResponses, GetCounterData, GetCounterErrors, GetCounterResponses, GetEnrollmentData, GetEnrollmentErrors, GetEnrollmentResponses, GetSecureCounterData, GetSecureCounterErrors, GetSecureCounterResponses, IncrementCounterData, IncrementCounterErrors, IncrementCounterResponses, IncrementSecureCounterData, IncrementSecureCounterErrors, IncrementSecureCounterResponses, ListBatchesData, ListBatchesErrors, ListBatchesResponses, ListEnrollmentsData, ListEnrollmentsErrors, ListEnrollmentsResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, RefreshData, RefreshErrors, RefreshResponses, RegisterData, RegisterErrors, RegisterResponses, UpdateBatchData, UpdateBatchErrors, UpdateBatchResponses, UpdateEnrollmentData, UpdateEnrollmentErrors, UpdateEnrollmentResponses, UploadFileData, UploadFileErrors, UploadFileResponses } from './types.gen';
-import { vCreateBatchBody, vCreateEnrollmentBody, vDeleteBatchPath, vDeleteEnrollmentPath, vGetBatchPath, vGetCounterPath, vGetCounterResponse, vGetEnrollmentPath, vGetSecureCounterPath, vGetSecureCounterResponse, vIncrementCounterPath, vIncrementCounterResponse, vIncrementSecureCounterPath, vIncrementSecureCounterResponse, vLoginBody, vLoginResponse, vLogoutAllResponse, vLogoutBody, vLogoutResponse, vMeResponse, vRefreshBody, vRefreshResponse, vRegisterBody, vRegisterResponse, vUpdateBatchBody, vUpdateBatchPath, vUpdateEnrollmentBody, vUpdateEnrollmentPath, vUploadFileBody, vUploadFileResponse } from './valibot.gen';
+import { vCreateBatchBody2, vCreateBatchResponse, vCreateEnrollmentBody, vCreateEnrollmentResponse, vDeleteBatchPath, vDeleteBatchResponse, vDeleteEnrollmentPath, vDeleteEnrollmentResponse, vGetBatchPath, vGetBatchResponse, vGetCounterPath, vGetCounterResponse, vGetEnrollmentPath, vGetEnrollmentResponse, vGetSecureCounterPath, vGetSecureCounterResponse, vIncrementCounterPath, vIncrementCounterResponse, vIncrementSecureCounterPath, vIncrementSecureCounterResponse, vListBatchesResponse, vListEnrollmentsResponse, vLoginBody, vLoginResponse, vLogoutAllResponse, vLogoutBody, vLogoutResponse, vMeResponse, vRefreshBody, vRefreshResponse, vRegisterBody, vRegisterResponse, vUpdateBatchBody2, vUpdateBatchPath, vUpdateBatchResponse, vUpdateEnrollmentBody, vUpdateEnrollmentPath, vUpdateEnrollmentResponse, vUploadFileBody, vUploadFileResponse } from './valibot.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -159,6 +159,7 @@ export const listBatches = <ThrowOnError extends boolean = false>(options?: Opti
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vListBatchesResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/enrollment-batches',
     ...options
@@ -166,10 +167,11 @@ export const listBatches = <ThrowOnError extends boolean = false>(options?: Opti
 
 export const createBatch = <ThrowOnError extends boolean = false>(options: Options<CreateBatchData, ThrowOnError>): RequestResult<CreateBatchResponses, CreateBatchErrors, ThrowOnError> => (options.client ?? client).post<CreateBatchResponses, CreateBatchErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
-        body: vCreateBatchBody,
+        body: vCreateBatchBody2,
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vCreateBatchResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/enrollment-batches',
     ...options,
@@ -185,6 +187,7 @@ export const deleteBatch = <ThrowOnError extends boolean = false>(options: Optio
         path: vDeleteBatchPath,
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vDeleteBatchResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/enrollment-batches/{id}',
     ...options
@@ -196,6 +199,7 @@ export const getBatch = <ThrowOnError extends boolean = false>(options: Options<
         path: vGetBatchPath,
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetBatchResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/enrollment-batches/{id}',
     ...options
@@ -203,10 +207,11 @@ export const getBatch = <ThrowOnError extends boolean = false>(options: Options<
 
 export const updateBatch = <ThrowOnError extends boolean = false>(options: Options<UpdateBatchData, ThrowOnError>): RequestResult<UpdateBatchResponses, UpdateBatchErrors, ThrowOnError> => (options.client ?? client).put<UpdateBatchResponses, UpdateBatchErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
-        body: vUpdateBatchBody,
+        body: vUpdateBatchBody2,
         path: vUpdateBatchPath,
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vUpdateBatchResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/enrollment-batches/{id}',
     ...options,
@@ -222,6 +227,7 @@ export const listEnrollments = <ThrowOnError extends boolean = false>(options?: 
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vListEnrollmentsResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/g1-enrollments',
     ...options
@@ -233,6 +239,7 @@ export const createEnrollment = <ThrowOnError extends boolean = false>(options: 
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vCreateEnrollmentResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/g1-enrollments',
     ...options,
@@ -248,6 +255,7 @@ export const deleteEnrollment = <ThrowOnError extends boolean = false>(options: 
         path: vDeleteEnrollmentPath,
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vDeleteEnrollmentResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/g1-enrollments/{id}',
     ...options
@@ -259,6 +267,7 @@ export const getEnrollment = <ThrowOnError extends boolean = false>(options: Opt
         path: vGetEnrollmentPath,
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetEnrollmentResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/g1-enrollments/{id}',
     ...options
@@ -270,6 +279,7 @@ export const updateEnrollment = <ThrowOnError extends boolean = false>(options: 
         path: vUpdateEnrollmentPath,
         query: v.optional(v.never())
     }), data),
+    responseValidator: async (data) => await v.parseAsync(vUpdateEnrollmentResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/g1-enrollments/{id}',
     ...options,

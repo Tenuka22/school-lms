@@ -73,10 +73,11 @@ pub async fn refresh(
 
                 new_session.insert(txn).await?;
 
+                let access_expires_at = (now + Duration::minutes(15)).timestamp();
                 let access_token =
                     create_access_token(user_id, &secret).map_err(|e| DbErr::Custom(e))?;
 
-                Ok((access_token, raw_refresh, session_expires.timestamp()))
+                Ok((access_token, raw_refresh, access_expires_at))
             })
         })
         .await;

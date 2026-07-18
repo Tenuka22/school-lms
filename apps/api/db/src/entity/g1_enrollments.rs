@@ -17,6 +17,7 @@ fn default_now() -> DateTime<Utc> {
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, ToSchema)]
+#[schema(as = G1Enrollment)]
 #[sea_orm(table_name = "g1_enrollments")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -26,21 +27,16 @@ pub struct Model {
     pub student_id: Option<Uuid>,
     pub batch_id: Uuid,
     #[serde(default = "default_enrollment_status")]
-    #[schema(value_type = String)]
     pub enrollment_status: EnrollmentStatus,
-    #[schema(value_type = String)]
     pub medium_of_instruction: MediumOfInstruction,
     pub full_name: String,
     pub name_with_initials: String,
     pub date_of_birth: NaiveDate,
-    #[schema(value_type = String)]
     pub gender: Gender,
     #[serde(default)]
     pub birth_certificate_number: Option<String>,
-    #[schema(value_type = String)]
     pub nationality: Nationality,
     #[serde(default)]
-    #[schema(value_type = String)]
     pub religion: Option<Religion>,
     #[serde(default)]
     pub birth_certificate_verified: bool,
@@ -60,7 +56,6 @@ pub struct Model {
     pub alternative_age_certificate: bool,
     #[serde(default)]
     pub alternative_age_certificate_ref: Option<String>,
-    #[schema(value_type = String)]
     pub category: G1Category,
     #[serde(default)]
     pub sibling_student_id: Option<Uuid>,
@@ -75,16 +70,16 @@ pub struct Model {
     #[serde(default)]
     pub overseas_arrival_date: Option<NaiveDate>,
     #[serde(default)]
-    #[schema(value_type = f64)]
+    #[schema(value_type = f64, nullable = true)]
     pub interview_score: Option<Decimal>,
     #[serde(default)]
-    #[schema(value_type = f64)]
+    #[schema(value_type = f64, nullable = true)]
     pub category_score: Option<Decimal>,
     #[serde(default)]
-    #[schema(value_type = f64)]
+    #[schema(value_type = f64, nullable = true)]
     pub distance_score: Option<Decimal>,
     #[serde(default)]
-    #[schema(value_type = f64)]
+    #[schema(value_type = f64, nullable = true)]
     pub total_score: Option<Decimal>,
     #[serde(default)]
     pub rank: Option<i32>,

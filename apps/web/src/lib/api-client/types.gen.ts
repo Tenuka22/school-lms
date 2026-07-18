@@ -10,33 +10,104 @@ export type AuthResponse = {
     refresh_token: string;
 };
 
+export type BatchStatus = 'Open' | 'Closed' | 'Archived';
+
 export type CounterResponse = {
     name: string;
     value: number;
 };
 
+export type CreateBatchBody = {
+    enrollment_type: EnrollmentType;
+    year: number;
+};
+
+export type EnrollmentBatch = {
+    /**
+     * Machine-readable code (e.g., "G1-2026")
+     */
+    batch_code: string;
+    /**
+     * Human-readable name (e.g., "Grade 1 Admission 2026")
+     */
+    batch_name: string;
+    created_at?: string;
+    created_by?: string | null;
+    enrollment_type: EnrollmentType;
+    id?: string;
+    status?: BatchStatus;
+    year: number;
+};
+
+export type EnrollmentStatus = 'Draft' | 'Pending' | 'ProvisionallyApproved' | 'Approved' | 'Rejected' | 'Withdrawn' | 'Removed';
+
+export type EnrollmentType = 'G1';
+
 export type ErrorResponse = {
     error: string;
 };
+
+export type G1Category = 'CloseResident' | 'PastPupilChild' | 'Sibling' | 'MOEOrUGCStaffChild' | 'GovernmentTransferOfficerChild' | 'OverseasArrival' | 'ArmedForcesReserved';
+
+export type G1Enrollment = {
+    age_eligibility_verified?: boolean;
+    alternative_age_certificate?: boolean;
+    alternative_age_certificate_ref?: string | null;
+    approved_at?: string | null;
+    approved_by?: string | null;
+    armed_forces_parent_id?: string | null;
+    batch_id: string;
+    birth_certificate_number?: string | null;
+    birth_certificate_verified?: boolean;
+    category: G1Category;
+    category_score?: number | null;
+    category_verified?: boolean;
+    created_at?: string;
+    created_by?: string | null;
+    date_of_birth: string;
+    distance_score?: number | null;
+    enrollment_status?: EnrollmentStatus;
+    full_name: string;
+    gender: Gender;
+    id?: string;
+    interview_completed?: boolean;
+    interview_date?: string | null;
+    interview_score?: number | null;
+    medium_of_instruction: MediumOfInstruction;
+    name_with_initials: string;
+    nationality: Nationality;
+    overseas_arrival_date?: string | null;
+    past_pupil_parent_id?: string | null;
+    provisionally_approved_at?: string | null;
+    provisionally_approved_by?: string | null;
+    rank?: number | null;
+    rejection_reason?: string | null;
+    religion?: null | Religion;
+    residence_verified?: boolean;
+    sibling_student_id?: string | null;
+    staff_parent_id?: string | null;
+    student_id?: string | null;
+    submission_method?: string | null;
+    total_score?: number | null;
+    transfer_officer_parent_id?: string | null;
+    updated_at?: string;
+    updated_by?: string | null;
+};
+
+export type Gender = 'Male' | 'Female';
 
 export type LoginRequest = {
     email: string;
     password: string;
 };
 
+export type MediumOfInstruction = 'Sinhala' | 'Tamil';
+
 export type MessageResponse = {
     message: string;
 };
 
-export type Model = {
-    batch_code: string;
-    batch_name: string;
-    created_at?: Date;
-    created_by?: string | null;
-    enrollment_type: string;
-    id?: string;
-    status?: string;
-};
+export type Nationality = 'SriLankan' | 'DualCitizen' | 'Other';
 
 export type RefreshRequest = {
     refresh_token: string;
@@ -45,6 +116,37 @@ export type RefreshRequest = {
 export type RegisterRequest = {
     email: string;
     password: string;
+};
+
+export type Religion = 'Buddhism' | 'Hinduism' | 'Islam' | 'Christianity' | 'Catholicism' | 'Other';
+
+export type UpdateBatchBody = {
+    status: BatchStatus;
+};
+
+export type UpdateG1EnrollmentBody = {
+    age_eligibility_verified?: boolean | null;
+    alternative_age_certificate?: boolean | null;
+    alternative_age_certificate_ref?: string | null;
+    batch_id?: string | null;
+    birth_certificate_number?: string | null;
+    birth_certificate_verified?: boolean | null;
+    category?: null | G1Category;
+    category_verified?: boolean | null;
+    date_of_birth?: string | null;
+    enrollment_status?: null | EnrollmentStatus;
+    full_name?: string | null;
+    gender?: null | Gender;
+    interview_completed?: boolean | null;
+    interview_date?: string | null;
+    medium_of_instruction?: null | MediumOfInstruction;
+    name_with_initials?: string | null;
+    nationality?: null | Nationality;
+    rank?: number | null;
+    rejection_reason?: string | null;
+    religion?: null | Religion;
+    residence_verified?: boolean | null;
+    submission_method?: string | null;
 };
 
 export type UploadResponse = {
@@ -393,11 +495,13 @@ export type ListBatchesResponses = {
     /**
      * List of enrollment batches
      */
-    200: unknown;
+    200: Array<EnrollmentBatch>;
 };
 
+export type ListBatchesResponse = ListBatchesResponses[keyof ListBatchesResponses];
+
 export type CreateBatchData = {
-    body: Model;
+    body: CreateBatchBody;
     path?: never;
     query?: never;
     url: '/api/enrollment-batches';
@@ -428,8 +532,10 @@ export type CreateBatchResponses = {
     /**
      * Batch created
      */
-    201: unknown;
+    201: EnrollmentBatch;
 };
+
+export type CreateBatchResponse = CreateBatchResponses[keyof CreateBatchResponses];
 
 export type DeleteBatchData = {
     body?: never;
@@ -464,8 +570,10 @@ export type DeleteBatchResponses = {
     /**
      * Batch deleted
      */
-    200: unknown;
+    200: MessageResponse;
 };
+
+export type DeleteBatchResponse = DeleteBatchResponses[keyof DeleteBatchResponses];
 
 export type GetBatchData = {
     body?: never;
@@ -500,11 +608,13 @@ export type GetBatchResponses = {
     /**
      * Batch retrieved
      */
-    200: unknown;
+    200: EnrollmentBatch;
 };
 
+export type GetBatchResponse = GetBatchResponses[keyof GetBatchResponses];
+
 export type UpdateBatchData = {
-    body: unknown;
+    body: UpdateBatchBody;
     path: {
         /**
          * Batch ID
@@ -529,10 +639,6 @@ export type UpdateBatchErrors = {
      */
     404: ErrorResponse;
     /**
-     * Conflict
-     */
-    409: ErrorResponse;
-    /**
      * Internal server error
      */
     500: ErrorResponse;
@@ -544,8 +650,10 @@ export type UpdateBatchResponses = {
     /**
      * Batch updated
      */
-    200: unknown;
+    200: EnrollmentBatch;
 };
+
+export type UpdateBatchResponse = UpdateBatchResponses[keyof UpdateBatchResponses];
 
 export type ListEnrollmentsData = {
     body?: never;
@@ -571,11 +679,13 @@ export type ListEnrollmentsResponses = {
     /**
      * List of G1 enrollments
      */
-    200: unknown;
+    200: Array<G1Enrollment>;
 };
 
+export type ListEnrollmentsResponse = ListEnrollmentsResponses[keyof ListEnrollmentsResponses];
+
 export type CreateEnrollmentData = {
-    body: Model;
+    body: G1Enrollment;
     path?: never;
     query?: never;
     url: '/api/g1-enrollments';
@@ -602,8 +712,10 @@ export type CreateEnrollmentResponses = {
     /**
      * Enrollment created
      */
-    201: unknown;
+    201: G1Enrollment;
 };
+
+export type CreateEnrollmentResponse = CreateEnrollmentResponses[keyof CreateEnrollmentResponses];
 
 export type DeleteEnrollmentData = {
     body?: never;
@@ -638,8 +750,10 @@ export type DeleteEnrollmentResponses = {
     /**
      * Enrollment deleted
      */
-    200: unknown;
+    200: MessageResponse;
 };
+
+export type DeleteEnrollmentResponse = DeleteEnrollmentResponses[keyof DeleteEnrollmentResponses];
 
 export type GetEnrollmentData = {
     body?: never;
@@ -674,11 +788,13 @@ export type GetEnrollmentResponses = {
     /**
      * Enrollment retrieved
      */
-    200: unknown;
+    200: G1Enrollment;
 };
 
+export type GetEnrollmentResponse = GetEnrollmentResponses[keyof GetEnrollmentResponses];
+
 export type UpdateEnrollmentData = {
-    body: unknown;
+    body: UpdateG1EnrollmentBody;
     path: {
         /**
          * Enrollment ID
@@ -714,8 +830,10 @@ export type UpdateEnrollmentResponses = {
     /**
      * Enrollment updated
      */
-    200: unknown;
+    200: G1Enrollment;
 };
+
+export type UpdateEnrollmentResponse = UpdateEnrollmentResponses[keyof UpdateEnrollmentResponses];
 
 export type UploadFileData = {
     /**

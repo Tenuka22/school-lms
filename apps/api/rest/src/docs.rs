@@ -58,6 +58,9 @@ pub struct MessageResponse {
             crate::uploads::UploadResponse,
             db::entity::g1_enrollments::Model,
             db::entity::enrollment_batches::Model,
+            crate::g1_enrollments::handlers::update::UpdateG1EnrollmentBody,
+            crate::enrollment_batches::handlers::create::CreateBatchBody,
+            crate::enrollment_batches::handlers::update::UpdateBatchBody,
             ErrorResponse,
             MessageResponse,
         )

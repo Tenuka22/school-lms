@@ -90,11 +90,13 @@ export function DataGrid<TData>({
   )
 
   return (
+
+  <div className="size-full flex">
     <div
       data-slot="grid-wrapper"
       dir={dir}
       {...props}
-      className={cn("relative flex w-full flex-col", className)}
+      className={cn("relative flex flex-col flex-1 w-0", className)}
     >
       {searchState && <DataGridSearch {...searchState} />}
       <DataGridContextMenu
@@ -111,7 +113,7 @@ export function DataGrid<TData>({
         data-slot="grid"
         tabIndex={0}
         ref={dataGridRef}
-        className="relative grid select-none overflow-auto rounded-md border focus:outline-none"
+        className="relative flex flex-col select-none overflow-auto rounded-md border focus:outline-none"
         style={{
           ...columnSizeVars,
           maxHeight: `${height}px`,
@@ -123,6 +125,7 @@ export function DataGrid<TData>({
           data-slot="grid-header"
           ref={headerRef}
           className="sticky top-0 z-10 grid border-b bg-background"
+          style={{ width: table.getTotalSize() }}
         >
           {table.getHeaderGroups().map((headerGroup, rowIndex) => (
             <div
@@ -131,7 +134,7 @@ export function DataGrid<TData>({
               aria-rowindex={rowIndex + 1}
               data-slot="grid-header-row"
               tabIndex={-1}
-              className="flex w-full"
+              className="flex"
             >
               {headerGroup.headers.map((header, colIndex) => {
                 const sorting = table.getState().sorting
@@ -202,7 +205,8 @@ export function DataGrid<TData>({
           className="relative grid"
           style={{
             height: `${virtualTotalSize}px`,
-            contain: adjustLayout ? "layout paint" : "strict",
+            width: table.getTotalSize(),
+            contain: adjustLayout ? "layout paint" : "layout size",
           }}
         >
           {virtualItems.map((virtualItem) => {
@@ -277,5 +281,6 @@ export function DataGrid<TData>({
         )}
       </div>
     </div>
+  </div>
   )
 }

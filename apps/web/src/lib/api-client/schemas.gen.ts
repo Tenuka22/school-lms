@@ -21,6 +21,15 @@ export const AuthResponseSchema = {
     }
 } as const;
 
+export const BatchStatusSchema = {
+    type: 'string',
+    enum: [
+        'Open',
+        'Closed',
+        'Archived'
+    ]
+} as const;
+
 export const CounterResponseSchema = {
     type: 'object',
     required: [
@@ -38,6 +47,88 @@ export const CounterResponseSchema = {
     }
 } as const;
 
+export const CreateBatchBodySchema = {
+    type: 'object',
+    required: [
+        'enrollment_type',
+        'year'
+    ],
+    properties: {
+        enrollment_type: {
+            $ref: '#/components/schemas/EnrollmentType'
+        },
+        year: {
+            type: 'integer',
+            format: 'int32'
+        }
+    }
+} as const;
+
+export const EnrollmentBatchSchema = {
+    type: 'object',
+    required: [
+        'year',
+        'batch_code',
+        'batch_name',
+        'enrollment_type'
+    ],
+    properties: {
+        batch_code: {
+            type: 'string',
+            description: 'Machine-readable code (e.g., "G1-2026")'
+        },
+        batch_name: {
+            type: 'string',
+            description: 'Human-readable name (e.g., "Grade 1 Admission 2026")'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time'
+        },
+        created_by: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        enrollment_type: {
+            $ref: '#/components/schemas/EnrollmentType'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid'
+        },
+        status: {
+            $ref: '#/components/schemas/BatchStatus'
+        },
+        year: {
+            type: 'integer',
+            format: 'int32'
+        }
+    }
+} as const;
+
+export const EnrollmentStatusSchema = {
+    type: 'string',
+    enum: [
+        'Draft',
+        'Pending',
+        'ProvisionallyApproved',
+        'Approved',
+        'Rejected',
+        'Withdrawn',
+        'Removed'
+    ]
+} as const;
+
+export const EnrollmentTypeSchema = {
+    type: 'string',
+    enum: [
+        'G1'
+    ]
+} as const;
+
 export const ErrorResponseSchema = {
     type: 'object',
     required: [
@@ -48,6 +139,269 @@ export const ErrorResponseSchema = {
             type: 'string'
         }
     }
+} as const;
+
+export const G1CategorySchema = {
+    type: 'string',
+    enum: [
+        'CloseResident',
+        'PastPupilChild',
+        'Sibling',
+        'MOEOrUGCStaffChild',
+        'GovernmentTransferOfficerChild',
+        'OverseasArrival',
+        'ArmedForcesReserved'
+    ]
+} as const;
+
+export const G1EnrollmentSchema = {
+    type: 'object',
+    required: [
+        'batch_id',
+        'medium_of_instruction',
+        'full_name',
+        'name_with_initials',
+        'date_of_birth',
+        'gender',
+        'nationality',
+        'category'
+    ],
+    properties: {
+        age_eligibility_verified: {
+            type: 'boolean'
+        },
+        alternative_age_certificate: {
+            type: 'boolean'
+        },
+        alternative_age_certificate_ref: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        approved_at: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'date-time'
+        },
+        approved_by: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        armed_forces_parent_id: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        batch_id: {
+            type: 'string',
+            format: 'uuid'
+        },
+        birth_certificate_number: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        birth_certificate_verified: {
+            type: 'boolean'
+        },
+        category: {
+            $ref: '#/components/schemas/G1Category'
+        },
+        category_score: {
+            type: [
+                'number',
+                'null'
+            ],
+            format: 'double'
+        },
+        category_verified: {
+            type: 'boolean'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time'
+        },
+        created_by: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        date_of_birth: {
+            type: 'string',
+            format: 'date'
+        },
+        distance_score: {
+            type: [
+                'number',
+                'null'
+            ],
+            format: 'double'
+        },
+        enrollment_status: {
+            $ref: '#/components/schemas/EnrollmentStatus'
+        },
+        full_name: {
+            type: 'string'
+        },
+        gender: {
+            $ref: '#/components/schemas/Gender'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid'
+        },
+        interview_completed: {
+            type: 'boolean'
+        },
+        interview_date: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'date'
+        },
+        interview_score: {
+            type: [
+                'number',
+                'null'
+            ],
+            format: 'double'
+        },
+        medium_of_instruction: {
+            $ref: '#/components/schemas/MediumOfInstruction'
+        },
+        name_with_initials: {
+            type: 'string'
+        },
+        nationality: {
+            $ref: '#/components/schemas/Nationality'
+        },
+        overseas_arrival_date: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'date'
+        },
+        past_pupil_parent_id: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        provisionally_approved_at: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'date-time'
+        },
+        provisionally_approved_by: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        rank: {
+            type: [
+                'integer',
+                'null'
+            ],
+            format: 'int32'
+        },
+        rejection_reason: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        religion: {
+            oneOf: [
+                {
+                    type: 'null'
+                },
+                {
+                    $ref: '#/components/schemas/Religion'
+                }
+            ]
+        },
+        residence_verified: {
+            type: 'boolean'
+        },
+        sibling_student_id: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        staff_parent_id: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        student_id: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        submission_method: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        total_score: {
+            type: [
+                'number',
+                'null'
+            ],
+            format: 'double'
+        },
+        transfer_officer_parent_id: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time'
+        },
+        updated_by: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        }
+    }
+} as const;
+
+export const GenderSchema = {
+    type: 'string',
+    enum: [
+        'Male',
+        'Female'
+    ]
 } as const;
 
 export const LoginRequestSchema = {
@@ -66,6 +420,14 @@ export const LoginRequestSchema = {
     }
 } as const;
 
+export const MediumOfInstructionSchema = {
+    type: 'string',
+    enum: [
+        'Sinhala',
+        'Tamil'
+    ]
+} as const;
+
 export const MessageResponseSchema = {
     type: 'object',
     required: [
@@ -78,42 +440,13 @@ export const MessageResponseSchema = {
     }
 } as const;
 
-export const ModelSchema = {
-    type: 'object',
-    required: [
-        'batch_code',
-        'batch_name',
-        'enrollment_type'
-    ],
-    properties: {
-        batch_code: {
-            type: 'string'
-        },
-        batch_name: {
-            type: 'string'
-        },
-        created_at: {
-            type: 'string',
-            format: 'date-time'
-        },
-        created_by: {
-            type: [
-                'string',
-                'null'
-            ],
-            format: 'uuid'
-        },
-        enrollment_type: {
-            type: 'string'
-        },
-        id: {
-            type: 'string',
-            format: 'uuid'
-        },
-        status: {
-            type: 'string'
-        }
-    }
+export const NationalitySchema = {
+    type: 'string',
+    enum: [
+        'SriLankan',
+        'DualCitizen',
+        'Other'
+    ]
 } as const;
 
 export const RefreshRequestSchema = {
@@ -140,6 +473,196 @@ export const RegisterRequestSchema = {
         },
         password: {
             type: 'string'
+        }
+    }
+} as const;
+
+export const ReligionSchema = {
+    type: 'string',
+    enum: [
+        'Buddhism',
+        'Hinduism',
+        'Islam',
+        'Christianity',
+        'Catholicism',
+        'Other'
+    ]
+} as const;
+
+export const UpdateBatchBodySchema = {
+    type: 'object',
+    required: [
+        'status'
+    ],
+    properties: {
+        status: {
+            $ref: '#/components/schemas/BatchStatus'
+        }
+    }
+} as const;
+
+export const UpdateG1EnrollmentBodySchema = {
+    type: 'object',
+    properties: {
+        age_eligibility_verified: {
+            type: [
+                'boolean',
+                'null'
+            ]
+        },
+        alternative_age_certificate: {
+            type: [
+                'boolean',
+                'null'
+            ]
+        },
+        alternative_age_certificate_ref: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        batch_id: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'uuid'
+        },
+        birth_certificate_number: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        birth_certificate_verified: {
+            type: [
+                'boolean',
+                'null'
+            ]
+        },
+        category: {
+            oneOf: [
+                {
+                    type: 'null'
+                },
+                {
+                    $ref: '#/components/schemas/G1Category'
+                }
+            ]
+        },
+        category_verified: {
+            type: [
+                'boolean',
+                'null'
+            ]
+        },
+        date_of_birth: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'date'
+        },
+        enrollment_status: {
+            oneOf: [
+                {
+                    type: 'null'
+                },
+                {
+                    $ref: '#/components/schemas/EnrollmentStatus'
+                }
+            ]
+        },
+        full_name: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        gender: {
+            oneOf: [
+                {
+                    type: 'null'
+                },
+                {
+                    $ref: '#/components/schemas/Gender'
+                }
+            ]
+        },
+        interview_completed: {
+            type: [
+                'boolean',
+                'null'
+            ]
+        },
+        interview_date: {
+            type: [
+                'string',
+                'null'
+            ],
+            format: 'date'
+        },
+        medium_of_instruction: {
+            oneOf: [
+                {
+                    type: 'null'
+                },
+                {
+                    $ref: '#/components/schemas/MediumOfInstruction'
+                }
+            ]
+        },
+        name_with_initials: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        nationality: {
+            oneOf: [
+                {
+                    type: 'null'
+                },
+                {
+                    $ref: '#/components/schemas/Nationality'
+                }
+            ]
+        },
+        rank: {
+            type: [
+                'integer',
+                'null'
+            ],
+            format: 'int32'
+        },
+        rejection_reason: {
+            type: [
+                'string',
+                'null'
+            ]
+        },
+        religion: {
+            oneOf: [
+                {
+                    type: 'null'
+                },
+                {
+                    $ref: '#/components/schemas/Religion'
+                }
+            ]
+        },
+        residence_verified: {
+            type: [
+                'boolean',
+                'null'
+            ]
+        },
+        submission_method: {
+            type: [
+                'string',
+                'null'
+            ]
         }
     }
 } as const;

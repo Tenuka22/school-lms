@@ -243,15 +243,7 @@ function DataGridRowImpl<TData>({
               width: `calc(var(--col-${columnId}-size) * 1px)`,
             }}
           >
-            {typeof cell.column.columnDef.header === "function" ? (
-              <div
-                className={cn("size-full px-3 py-1.5", {
-                  "bg-primary/10": isRowSelected,
-                })}
-              >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </div>
-            ) : (
+            {cell.column.columnDef.meta?.cell?.variant ? (
               <DataGridCell
                 cell={cell}
                 tableMeta={tableMeta}
@@ -265,6 +257,14 @@ function DataGridRowImpl<TData>({
                 isActiveSearchMatch={isActiveSearchMatch}
                 readOnly={readOnly}
               />
+            ) : (
+              <div
+                className={cn("size-full px-3 py-1.5", {
+                  "bg-primary/10": isRowSelected,
+                })}
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </div>
             )}
           </div>
         )

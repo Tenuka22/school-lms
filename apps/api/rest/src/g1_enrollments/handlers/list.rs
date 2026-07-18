@@ -10,7 +10,7 @@ use db::rbac::Permission;
     get,
     path = "/api/g1-enrollments",
     responses(
-        (status = 200, description = "List of G1 enrollments"),
+        (status = 200, description = "List of G1 enrollments", body = Vec<db::entity::g1_enrollments::Model>),
         (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
         (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
     ),

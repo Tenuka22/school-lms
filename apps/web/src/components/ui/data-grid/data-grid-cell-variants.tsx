@@ -18,7 +18,16 @@ import {
 } from "@/lib/data-grid"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { apiClient } from "@/lib/api-client"
+import {
+  createBatchMutation,
+  listBatchesOptions,
+  listBatchesQueryKey,
+} from "@/lib/api-client/@tanstack/react-query.gen"
+import type { EnrollmentBatch } from "@/lib/api-client/types.gen"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -1278,6 +1287,11 @@ export function MultiSelectCell<TData>({
   )
 }
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+] as const
+
 export function DateCell<TData>({
   cell,
   tableMeta,
@@ -1303,13 +1317,192 @@ export function DateCell<TData>({
 
   const selectedDate = value ? (parseLocalDate(value) ?? undefined) : undefined
 
+  const cellOpts = cell.column.columnDef.meta?.cell
+  const dateCellOpts = cellOpts?.variant === "date" ? cellOpts : null
+  const pastYears = dateCellOpts?.pastYears ?? 100
+  const futureYears = dateCellOpts?.futureYears ?? 0
+
+  const [navMonth, setNavMonth] = React.useState(() => selectedDate ?? new Date())
+
   const onDateSelect = React.useCallback(
     (date: Date | undefined) => {
       if (!date || readOnly) return
-
       const formattedDate = formatDateToString(date)
       setValue(formattedDate)
       tableMeta?.onDataUpdate?.({ rowIndex, columnId, value: formattedDate })
+      tableMeta?.onCellEditingStop?.()
+    },
+    [tableMeta, rowIndex, columnId, readOnly],
+  )
+
+  const onOpenChange = React.useCallback(
+    (open: boolean, eventDetails?: { reason?: string; cancel?: () => void }) => {
+      if (!open && (eventDetails?.reason === "outside-press" || eventDetails?.reason === "focus-out")) {
+        eventDetails?.cancel?.()
+        return
+      }
+      if (open && !readOnly) {
+        tableMeta?.onCellEditingStart?.(rowIndex, columnId)
+      } else {
+        tableMeta?.onCellEditingStop?.()
+      }
+    },
+    [tableMeta, rowIndex, columnId, readOnly],
+  )
+
+  const onWrapperKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (isEditing && event.key === "Escape") {
+        event.preventDefault()
+        setValue(initialValue)
+        tableMeta?.onCellEditingStop?.()
+      } else if (isFocused && event.key === "Tab") {
+        event.preventDefault()
+        tableMeta?.onCellEditingStop?.({
+          direction: event.shiftKey ? "left" : "right",
+        })
+      }
+    },
+    [isEditing, isFocused, initialValue, tableMeta],
+  )
+
+  const onMonthChange = React.useCallback((value: string) => {
+    setNavMonth((prev) => {
+      const d = new Date(prev)
+      d.setMonth(Number(value))
+      return d
+    })
+  }, [])
+
+  const onYearChange = React.useCallback((value: string) => {
+    const year = Number(value)
+    if (isNaN(year)) return
+    setNavMonth((prev) => {
+      const d = new Date(prev)
+      d.setFullYear(year)
+      return d
+    })
+  }, [])
+
+  return (
+    <DataGridCellWrapper<TData>
+      ref={containerRef}
+      cell={cell}
+      tableMeta={tableMeta}
+      rowIndex={rowIndex}
+      columnId={columnId}
+      rowHeight={rowHeight}
+      isEditing={isEditing}
+      isFocused={isFocused}
+      isSelected={isSelected}
+      isSearchMatch={isSearchMatch}
+      isActiveSearchMatch={isActiveSearchMatch}
+      readOnly={readOnly}
+      onKeyDown={onWrapperKeyDown}
+    >
+      <Popover open={isEditing} onOpenChange={onOpenChange}>
+        <PopoverAnchor>
+          <span data-slot="grid-cell-content">
+            {formatDateForDisplay(value)}
+          </span>
+        </PopoverAnchor>
+        {isEditing && (
+          <PopoverContent
+            data-grid-cell-editor=""
+            align="start"
+            alignOffset={-8}
+            className="w-auto p-0"
+          >
+            <div className="flex items-center gap-1 border-b p-2">
+              <Select value={String(navMonth.getMonth())} onValueChange={onMonthChange}>
+                <SelectTrigger className="h-8 flex-1">
+                  <SelectValue children={(c) => Number(c)+1} />
+                </SelectTrigger>
+                <SelectContent>
+                  {MONTHS.map((month, i) => (
+                    <SelectItem key={i} value={String(i)}>{month}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={String(navMonth.getFullYear())} onValueChange={onYearChange}>
+                <SelectTrigger className="h-8 w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: pastYears + futureYears }, (_, i) => new Date().getFullYear() - pastYears + i).map((year) => (
+                    <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Calendar
+              autoFocus
+              mode="single"
+              month={navMonth}
+              onMonthChange={setNavMonth}
+              selected={selectedDate}
+              onSelect={onDateSelect}
+            />
+          </PopoverContent>
+        )}
+      </Popover>
+    </DataGridCellWrapper>
+  )
+}
+
+export function BatchSelectCell<TData>({
+  cell,
+  tableMeta,
+  rowIndex,
+  columnId,
+  rowHeight,
+  isFocused,
+  isEditing,
+  isSelected,
+  isSearchMatch,
+  isActiveSearchMatch,
+  readOnly,
+}: DataGridCellProps<TData>) {
+  const initialValue = cell.getValue() as string
+  const [value, setValue] = React.useState(initialValue)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const queryClient = useQueryClient()
+
+  const { data: allBatches } = useQuery({
+    ...listBatchesOptions({ client: apiClient }),
+  })
+
+  const createMutation = useMutation({
+    ...createBatchMutation({ client: apiClient }),
+    onSuccess: (data) => {
+      onValueChange(data.id!)
+      queryClient.invalidateQueries({ queryKey: listBatchesQueryKey() })
+    },
+  })
+
+  const currentYear = new Date().getFullYear()
+  const [createType] = React.useState("G1")
+  const [createYear, setCreateYear] = React.useState("")
+  const years = Array.from({ length: 10 }, (_, i) => currentYear + i)
+
+  const selected = allBatches?.find((b) => b.id === value)
+
+  const prevInitialValueRef = React.useRef(initialValue)
+  if (initialValue !== prevInitialValueRef.current) {
+    prevInitialValueRef.current = initialValue
+    setValue(initialValue)
+  }
+
+  const formatLabel = React.useCallback(
+    (batch: EnrollmentBatch) => `${batch.enrollment_type} ${batch.year} Admission`,
+    [],
+  )
+
+  const onValueChange = React.useCallback(
+    (newValue: string) => {
+      if (readOnly) return
+      setValue(newValue)
+      tableMeta?.onDataUpdate?.({ rowIndex, columnId, value: newValue })
       tableMeta?.onCellEditingStop?.()
     },
     [tableMeta, rowIndex, columnId, readOnly],
@@ -1359,26 +1552,82 @@ export function DateCell<TData>({
       onKeyDown={onWrapperKeyDown}
     >
       <Popover open={isEditing} onOpenChange={onOpenChange}>
-        <PopoverAnchor>
-          <span data-slot="grid-cell-content">
-            {formatDateForDisplay(value)}
-          </span>
+        <PopoverAnchor className="size-full">
+          {selected ? (
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-xs">{formatLabel(selected)}</span>
+              <span className="text-xs text-muted-foreground">{selected.batch_code}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">Select batch...</span>
+          )}
         </PopoverAnchor>
         {isEditing && (
           <PopoverContent
             data-grid-cell-editor=""
             align="start"
-            alignOffset={-8}
-            className="w-auto p-0"
+            className="w-80 p-1"
           >
-            <Calendar
-              autoFocus
-              captionLayout="dropdown"
-              mode="single"
-              defaultMonth={selectedDate ?? new Date()}
-              selected={selectedDate}
-              onSelect={onDateSelect}
-            />
+            <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
+              {allBatches?.map((batch) => (
+                <button
+                  key={batch.id}
+                  type="button"
+                  onClick={() => onValueChange(batch.id!)}
+                  className={cn(
+                    "rounded-lg border p-3 text-left transition-colors hover:bg-muted",
+                    batch.id === value && "border-primary bg-primary/5",
+                  )}
+                >
+                  <div className="font-medium text-sm">
+                    {formatLabel(batch)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {batch.batch_code}
+                  </div>
+                </button>
+              ))}
+              {allBatches?.length === 0 && (
+                <p className="p-3 text-sm text-muted-foreground">No batches available.</p>
+              )}
+            </div>
+
+            <div className="border-t p-2">
+              <p className="text-xs font-medium text-muted-foreground mb-2">Create new batch</p>
+              <div className="flex gap-2">
+                <Select value={createType} disabled>
+                  <SelectTrigger className="h-8 flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="G1">G1</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={createYear} onValueChange={(v) => v && setCreateYear(v)}>
+                  <SelectTrigger className="h-8 flex-1">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((y) => (
+                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  className="h-8"
+                  disabled={!createYear || createMutation.isPending}
+                  onClick={() =>
+                    createMutation.mutate({
+                      body: { enrollment_type: "G1", year: Number(createYear) },
+                      client: apiClient,
+                    })
+                  }
+                >
+                  {createMutation.isPending ? "..." : "Create"}
+                </Button>
+              </div>
+            </div>
           </PopoverContent>
         )}
       </Popover>

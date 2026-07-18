@@ -1,7 +1,8 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum Gender {
     #[sea_orm(string_value = "Male")]
@@ -10,7 +11,7 @@ pub enum Gender {
     Female,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum Religion {
     #[sea_orm(string_value = "Buddhism")]
@@ -27,7 +28,7 @@ pub enum Religion {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum Nationality {
     #[sea_orm(string_value = "SriLankan")]
@@ -38,7 +39,7 @@ pub enum Nationality {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum MediumOfInstruction {
     #[sea_orm(string_value = "Sinhala")]
@@ -47,7 +48,7 @@ pub enum MediumOfInstruction {
     Tamil,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum StudentStatus {
     #[sea_orm(string_value = "Active")]
@@ -58,7 +59,7 @@ pub enum StudentStatus {
     Removed,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum EnrollmentStatus {
     #[sea_orm(string_value = "Draft")]
@@ -77,7 +78,7 @@ pub enum EnrollmentStatus {
     Removed,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum BatchStatus {
     #[sea_orm(string_value = "Open")]
@@ -88,14 +89,14 @@ pub enum BatchStatus {
     Archived,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum EnrollmentType {
     #[sea_orm(string_value = "G1")]
     G1,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum G1Category {
     #[sea_orm(string_value = "CloseResident")]
@@ -114,7 +115,7 @@ pub enum G1Category {
     ArmedForcesReserved,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum DocumentType {
     #[sea_orm(string_value = "BirthCertificate")]
@@ -129,7 +130,7 @@ pub enum DocumentType {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum VerificationStatus {
     #[sea_orm(string_value = "Pending")]
@@ -140,7 +141,7 @@ pub enum VerificationStatus {
     Rejected,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum GuardianRelationship {
     #[sea_orm(string_value = "Father")]
@@ -151,7 +152,7 @@ pub enum GuardianRelationship {
     Guardian,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AuditOperation {
     #[sea_orm(string_value = "Insert")]

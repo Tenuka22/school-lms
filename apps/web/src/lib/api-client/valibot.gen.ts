@@ -12,33 +12,77 @@ export const vAuthResponse = v.object({
     refresh_token: v.string()
 });
 
+export const vBatchStatus = v.picklist([
+    'Open',
+    'Closed',
+    'Archived'
+]);
+
 export const vCounterResponse = v.object({
     name: v.string(),
     value: v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))
+});
+
+export const vEnrollmentStatus = v.picklist([
+    'Draft',
+    'Pending',
+    'ProvisionallyApproved',
+    'Approved',
+    'Rejected',
+    'Withdrawn',
+    'Removed'
+]);
+
+export const vEnrollmentType = v.picklist(['G1']);
+
+export const vCreateBatchBody = v.object({
+    enrollment_type: vEnrollmentType,
+    year: v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))
+});
+
+export const vEnrollmentBatch = v.object({
+    batch_code: v.string(),
+    batch_name: v.string(),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    created_by: v.nullish(v.pipe(v.string(), v.uuid())),
+    enrollment_type: vEnrollmentType,
+    id: v.optional(v.pipe(v.string(), v.uuid())),
+    status: v.optional(vBatchStatus),
+    year: v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))
 });
 
 export const vErrorResponse = v.object({
     error: v.string()
 });
 
+export const vG1Category = v.picklist([
+    'CloseResident',
+    'PastPupilChild',
+    'Sibling',
+    'MOEOrUGCStaffChild',
+    'GovernmentTransferOfficerChild',
+    'OverseasArrival',
+    'ArmedForcesReserved'
+]);
+
+export const vGender = v.picklist(['Male', 'Female']);
+
 export const vLoginRequest = v.object({
     email: v.string(),
     password: v.string()
 });
 
+export const vMediumOfInstruction = v.picklist(['Sinhala', 'Tamil']);
+
 export const vMessageResponse = v.object({
     message: v.string()
 });
 
-export const vModel = v.object({
-    batch_code: v.string(),
-    batch_name: v.string(),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp())),
-    created_by: v.nullish(v.pipe(v.string(), v.uuid())),
-    enrollment_type: v.string(),
-    id: v.optional(v.pipe(v.string(), v.uuid())),
-    status: v.optional(v.string())
-});
+export const vNationality = v.picklist([
+    'SriLankan',
+    'DualCitizen',
+    'Other'
+]);
 
 export const vRefreshRequest = v.object({
     refresh_token: v.string()
@@ -47,6 +91,89 @@ export const vRefreshRequest = v.object({
 export const vRegisterRequest = v.object({
     email: v.string(),
     password: v.string()
+});
+
+export const vReligion = v.picklist([
+    'Buddhism',
+    'Hinduism',
+    'Islam',
+    'Christianity',
+    'Catholicism',
+    'Other'
+]);
+
+export const vG1Enrollment = v.object({
+    age_eligibility_verified: v.optional(v.boolean()),
+    alternative_age_certificate: v.optional(v.boolean()),
+    alternative_age_certificate_ref: v.nullish(v.string()),
+    approved_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    approved_by: v.nullish(v.pipe(v.string(), v.uuid())),
+    armed_forces_parent_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    batch_id: v.pipe(v.string(), v.uuid()),
+    birth_certificate_number: v.nullish(v.string()),
+    birth_certificate_verified: v.optional(v.boolean()),
+    category: vG1Category,
+    category_score: v.nullish(v.number()),
+    category_verified: v.optional(v.boolean()),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    created_by: v.nullish(v.pipe(v.string(), v.uuid())),
+    date_of_birth: v.pipe(v.string(), v.isoDate()),
+    distance_score: v.nullish(v.number()),
+    enrollment_status: v.optional(vEnrollmentStatus),
+    full_name: v.string(),
+    gender: vGender,
+    id: v.optional(v.pipe(v.string(), v.uuid())),
+    interview_completed: v.optional(v.boolean()),
+    interview_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    interview_score: v.nullish(v.number()),
+    medium_of_instruction: vMediumOfInstruction,
+    name_with_initials: v.string(),
+    nationality: vNationality,
+    overseas_arrival_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    past_pupil_parent_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    provisionally_approved_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+    provisionally_approved_by: v.nullish(v.pipe(v.string(), v.uuid())),
+    rank: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
+    rejection_reason: v.nullish(v.string()),
+    religion: v.nullish(vReligion),
+    residence_verified: v.optional(v.boolean()),
+    sibling_student_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    staff_parent_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    student_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    submission_method: v.nullish(v.string()),
+    total_score: v.nullish(v.number()),
+    transfer_officer_parent_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    updated_at: v.optional(v.pipe(v.string(), v.isoTimestamp())),
+    updated_by: v.nullish(v.pipe(v.string(), v.uuid()))
+});
+
+export const vUpdateBatchBody = v.object({
+    status: vBatchStatus
+});
+
+export const vUpdateG1EnrollmentBody = v.object({
+    age_eligibility_verified: v.nullish(v.boolean()),
+    alternative_age_certificate: v.nullish(v.boolean()),
+    alternative_age_certificate_ref: v.nullish(v.string()),
+    batch_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    birth_certificate_number: v.nullish(v.string()),
+    birth_certificate_verified: v.nullish(v.boolean()),
+    category: v.nullish(vG1Category),
+    category_verified: v.nullish(v.boolean()),
+    date_of_birth: v.nullish(v.pipe(v.string(), v.isoDate())),
+    enrollment_status: v.nullish(vEnrollmentStatus),
+    full_name: v.nullish(v.string()),
+    gender: v.nullish(vGender),
+    interview_completed: v.nullish(v.boolean()),
+    interview_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    medium_of_instruction: v.nullish(vMediumOfInstruction),
+    name_with_initials: v.nullish(v.string()),
+    nationality: v.nullish(vNationality),
+    rank: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
+    rejection_reason: v.nullish(v.string()),
+    religion: v.nullish(vReligion),
+    residence_verified: v.nullish(v.boolean()),
+    submission_method: v.nullish(v.string())
 });
 
 export const vUploadResponse = v.object({
@@ -135,37 +262,87 @@ export const vIncrementCounterPath = v.object({
  */
 export const vIncrementCounterResponse = vCounterResponse;
 
-export const vCreateBatchBody = vModel;
+/**
+ * List of enrollment batches
+ */
+export const vListBatchesResponse = v.array(vEnrollmentBatch);
+
+export const vCreateBatchBody2 = vCreateBatchBody;
+
+/**
+ * Batch created
+ */
+export const vCreateBatchResponse = vEnrollmentBatch;
 
 export const vDeleteBatchPath = v.object({
     id: v.pipe(v.string(), v.uuid())
 });
 
+/**
+ * Batch deleted
+ */
+export const vDeleteBatchResponse = vMessageResponse;
+
 export const vGetBatchPath = v.object({
     id: v.pipe(v.string(), v.uuid())
 });
 
-export const vUpdateBatchBody = v.unknown();
+/**
+ * Batch retrieved
+ */
+export const vGetBatchResponse = vEnrollmentBatch;
+
+export const vUpdateBatchBody2 = vUpdateBatchBody;
 
 export const vUpdateBatchPath = v.object({
     id: v.pipe(v.string(), v.uuid())
 });
 
-export const vCreateEnrollmentBody = vModel;
+/**
+ * Batch updated
+ */
+export const vUpdateBatchResponse = vEnrollmentBatch;
+
+/**
+ * List of G1 enrollments
+ */
+export const vListEnrollmentsResponse = v.array(vG1Enrollment);
+
+export const vCreateEnrollmentBody = vG1Enrollment;
+
+/**
+ * Enrollment created
+ */
+export const vCreateEnrollmentResponse = vG1Enrollment;
 
 export const vDeleteEnrollmentPath = v.object({
     id: v.pipe(v.string(), v.uuid())
 });
 
+/**
+ * Enrollment deleted
+ */
+export const vDeleteEnrollmentResponse = vMessageResponse;
+
 export const vGetEnrollmentPath = v.object({
     id: v.pipe(v.string(), v.uuid())
 });
 
-export const vUpdateEnrollmentBody = v.unknown();
+/**
+ * Enrollment retrieved
+ */
+export const vGetEnrollmentResponse = vG1Enrollment;
+
+export const vUpdateEnrollmentBody = vUpdateG1EnrollmentBody;
 
 export const vUpdateEnrollmentPath = v.object({
     id: v.pipe(v.string(), v.uuid())
 });
+
+/**
+ * Enrollment updated
+ */
+export const vUpdateEnrollmentResponse = vG1Enrollment;
 
 /**
  * multipart/form-data with `file` field

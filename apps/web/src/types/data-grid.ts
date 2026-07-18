@@ -37,6 +37,8 @@ export type CellOpts =
     }
   | {
       variant: "date"
+      pastYears?: number
+      futureYears?: number
     }
   | {
       variant: "url"
@@ -47,6 +49,9 @@ export type CellOpts =
       maxFiles?: number
       accept?: string
       multiple?: boolean
+    }
+  | {
+      variant: "batch-select"
     }
 
 export interface CellUpdate {

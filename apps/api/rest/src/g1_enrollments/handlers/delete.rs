@@ -6,6 +6,7 @@ use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
+use crate::docs::MessageResponse;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
@@ -16,7 +17,7 @@ use db::rbac::Permission;
         ("id" = Uuid, Path, description = "Enrollment ID"),
     ),
     responses(
-        (status = 200, description = "Enrollment deleted"),
+        (status = 200, description = "Enrollment deleted", body = MessageResponse),
         (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
         (status = 404, description = "Enrollment not found", body = crate::error::ErrorResponse),
         (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
@@ -60,5 +61,5 @@ pub async fn delete_enrollment(
     .insert(db.as_ref())
     .await?;
 
-    Ok(HttpResponse::Ok().json(serde_json::json!({"message": "enrollment deleted"})))
+    Ok(HttpResponse::Ok().json(MessageResponse { message: "enrollment deleted".into() }))
 }

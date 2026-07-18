@@ -91,9 +91,11 @@ pub async fn register(
         ApiError::Internal("internal error".into())
     })?;
 
+    let access_expires_at = (now + Duration::minutes(15)).timestamp();
+
     Ok(HttpResponse::Created().json(AuthResponse {
         access_token,
         refresh_token: raw_refresh,
-        expires_at: session_expires.timestamp(),
+        expires_at: access_expires_at,
     }))
 }

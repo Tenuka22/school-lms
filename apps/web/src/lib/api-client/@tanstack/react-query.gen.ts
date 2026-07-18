@@ -4,7 +4,7 @@ import { queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
 import { createBatch, createEnrollment, deleteBatch, deleteEnrollment, getBatch, getCounter, getEnrollment, getSecureCounter, incrementCounter, incrementSecureCounter, listBatches, listEnrollments, login, logout, logoutAll, me, type Options, refresh, register, updateBatch, updateEnrollment, uploadFile } from '../sdk.gen';
-import type { CreateBatchData, CreateBatchError, CreateEnrollmentData, CreateEnrollmentError, DeleteBatchData, DeleteBatchError, DeleteEnrollmentData, DeleteEnrollmentError, GetBatchData, GetBatchError, GetCounterData, GetCounterError, GetCounterResponse, GetEnrollmentData, GetEnrollmentError, GetSecureCounterData, GetSecureCounterError, GetSecureCounterResponse, IncrementCounterData, IncrementCounterError, IncrementCounterResponse, IncrementSecureCounterData, IncrementSecureCounterError, IncrementSecureCounterResponse, ListBatchesData, ListBatchesError, ListEnrollmentsData, ListEnrollmentsError, LoginData, LoginError, LoginResponse, LogoutAllData, LogoutAllError, LogoutAllResponse, LogoutData, LogoutError, LogoutResponse, MeData, MeError, MeResponse, RefreshData, RefreshError, RefreshResponse, RegisterData, RegisterError, RegisterResponse, UpdateBatchData, UpdateBatchError, UpdateEnrollmentData, UpdateEnrollmentError, UploadFileData, UploadFileError, UploadFileResponse } from '../types.gen';
+import type { CreateBatchData, CreateBatchError, CreateBatchResponse, CreateEnrollmentData, CreateEnrollmentError, CreateEnrollmentResponse, DeleteBatchData, DeleteBatchError, DeleteBatchResponse, DeleteEnrollmentData, DeleteEnrollmentError, DeleteEnrollmentResponse, GetBatchData, GetBatchError, GetBatchResponse, GetCounterData, GetCounterError, GetCounterResponse, GetEnrollmentData, GetEnrollmentError, GetEnrollmentResponse, GetSecureCounterData, GetSecureCounterError, GetSecureCounterResponse, IncrementCounterData, IncrementCounterError, IncrementCounterResponse, IncrementSecureCounterData, IncrementSecureCounterError, IncrementSecureCounterResponse, ListBatchesData, ListBatchesError, ListBatchesResponse, ListEnrollmentsData, ListEnrollmentsError, ListEnrollmentsResponse, LoginData, LoginError, LoginResponse, LogoutAllData, LogoutAllError, LogoutAllResponse, LogoutData, LogoutError, LogoutResponse, MeData, MeError, MeResponse, RefreshData, RefreshError, RefreshResponse, RegisterData, RegisterError, RegisterResponse, UpdateBatchData, UpdateBatchError, UpdateBatchResponse, UpdateEnrollmentData, UpdateEnrollmentError, UpdateEnrollmentResponse, UploadFileData, UploadFileError, UploadFileResponse } from '../types.gen';
 
 export const loginMutation = (options?: Partial<Options<LoginData>>): UseMutationOptions<LoginResponse, LoginError, Options<LoginData>> => {
     const mutationOptions: UseMutationOptions<LoginResponse, LoginError, Options<LoginData>> = {
@@ -184,7 +184,7 @@ export const incrementCounterMutation = (options?: Partial<Options<IncrementCoun
 
 export const listBatchesQueryKey = (options?: Options<ListBatchesData>) => createQueryKey('listBatches', options);
 
-export const listBatchesOptions = (options?: Options<ListBatchesData>) => queryOptions<unknown, ListBatchesError, unknown, ReturnType<typeof listBatchesQueryKey>>({
+export const listBatchesOptions = (options?: Options<ListBatchesData>) => queryOptions<ListBatchesResponse, ListBatchesError, ListBatchesResponse, ReturnType<typeof listBatchesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await listBatches({
             ...options,
@@ -197,8 +197,8 @@ export const listBatchesOptions = (options?: Options<ListBatchesData>) => queryO
     queryKey: listBatchesQueryKey(options)
 });
 
-export const createBatchMutation = (options?: Partial<Options<CreateBatchData>>): UseMutationOptions<unknown, CreateBatchError, Options<CreateBatchData>> => {
-    const mutationOptions: UseMutationOptions<unknown, CreateBatchError, Options<CreateBatchData>> = {
+export const createBatchMutation = (options?: Partial<Options<CreateBatchData>>): UseMutationOptions<CreateBatchResponse, CreateBatchError, Options<CreateBatchData>> => {
+    const mutationOptions: UseMutationOptions<CreateBatchResponse, CreateBatchError, Options<CreateBatchData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await createBatch({
                 ...options,
@@ -211,8 +211,8 @@ export const createBatchMutation = (options?: Partial<Options<CreateBatchData>>)
     return mutationOptions;
 };
 
-export const deleteBatchMutation = (options?: Partial<Options<DeleteBatchData>>): UseMutationOptions<unknown, DeleteBatchError, Options<DeleteBatchData>> => {
-    const mutationOptions: UseMutationOptions<unknown, DeleteBatchError, Options<DeleteBatchData>> = {
+export const deleteBatchMutation = (options?: Partial<Options<DeleteBatchData>>): UseMutationOptions<DeleteBatchResponse, DeleteBatchError, Options<DeleteBatchData>> => {
+    const mutationOptions: UseMutationOptions<DeleteBatchResponse, DeleteBatchError, Options<DeleteBatchData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await deleteBatch({
                 ...options,
@@ -227,7 +227,7 @@ export const deleteBatchMutation = (options?: Partial<Options<DeleteBatchData>>)
 
 export const getBatchQueryKey = (options: Options<GetBatchData>) => createQueryKey('getBatch', options);
 
-export const getBatchOptions = (options: Options<GetBatchData>) => queryOptions<unknown, GetBatchError, unknown, ReturnType<typeof getBatchQueryKey>>({
+export const getBatchOptions = (options: Options<GetBatchData>) => queryOptions<GetBatchResponse, GetBatchError, GetBatchResponse, ReturnType<typeof getBatchQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await getBatch({
             ...options,
@@ -240,8 +240,8 @@ export const getBatchOptions = (options: Options<GetBatchData>) => queryOptions<
     queryKey: getBatchQueryKey(options)
 });
 
-export const updateBatchMutation = (options?: Partial<Options<UpdateBatchData>>): UseMutationOptions<unknown, UpdateBatchError, Options<UpdateBatchData>> => {
-    const mutationOptions: UseMutationOptions<unknown, UpdateBatchError, Options<UpdateBatchData>> = {
+export const updateBatchMutation = (options?: Partial<Options<UpdateBatchData>>): UseMutationOptions<UpdateBatchResponse, UpdateBatchError, Options<UpdateBatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdateBatchResponse, UpdateBatchError, Options<UpdateBatchData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await updateBatch({
                 ...options,
@@ -256,7 +256,7 @@ export const updateBatchMutation = (options?: Partial<Options<UpdateBatchData>>)
 
 export const listEnrollmentsQueryKey = (options?: Options<ListEnrollmentsData>) => createQueryKey('listEnrollments', options);
 
-export const listEnrollmentsOptions = (options?: Options<ListEnrollmentsData>) => queryOptions<unknown, ListEnrollmentsError, unknown, ReturnType<typeof listEnrollmentsQueryKey>>({
+export const listEnrollmentsOptions = (options?: Options<ListEnrollmentsData>) => queryOptions<ListEnrollmentsResponse, ListEnrollmentsError, ListEnrollmentsResponse, ReturnType<typeof listEnrollmentsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await listEnrollments({
             ...options,
@@ -269,8 +269,8 @@ export const listEnrollmentsOptions = (options?: Options<ListEnrollmentsData>) =
     queryKey: listEnrollmentsQueryKey(options)
 });
 
-export const createEnrollmentMutation = (options?: Partial<Options<CreateEnrollmentData>>): UseMutationOptions<unknown, CreateEnrollmentError, Options<CreateEnrollmentData>> => {
-    const mutationOptions: UseMutationOptions<unknown, CreateEnrollmentError, Options<CreateEnrollmentData>> = {
+export const createEnrollmentMutation = (options?: Partial<Options<CreateEnrollmentData>>): UseMutationOptions<CreateEnrollmentResponse, CreateEnrollmentError, Options<CreateEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<CreateEnrollmentResponse, CreateEnrollmentError, Options<CreateEnrollmentData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await createEnrollment({
                 ...options,
@@ -283,8 +283,8 @@ export const createEnrollmentMutation = (options?: Partial<Options<CreateEnrollm
     return mutationOptions;
 };
 
-export const deleteEnrollmentMutation = (options?: Partial<Options<DeleteEnrollmentData>>): UseMutationOptions<unknown, DeleteEnrollmentError, Options<DeleteEnrollmentData>> => {
-    const mutationOptions: UseMutationOptions<unknown, DeleteEnrollmentError, Options<DeleteEnrollmentData>> = {
+export const deleteEnrollmentMutation = (options?: Partial<Options<DeleteEnrollmentData>>): UseMutationOptions<DeleteEnrollmentResponse, DeleteEnrollmentError, Options<DeleteEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<DeleteEnrollmentResponse, DeleteEnrollmentError, Options<DeleteEnrollmentData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await deleteEnrollment({
                 ...options,
@@ -299,7 +299,7 @@ export const deleteEnrollmentMutation = (options?: Partial<Options<DeleteEnrollm
 
 export const getEnrollmentQueryKey = (options: Options<GetEnrollmentData>) => createQueryKey('getEnrollment', options);
 
-export const getEnrollmentOptions = (options: Options<GetEnrollmentData>) => queryOptions<unknown, GetEnrollmentError, unknown, ReturnType<typeof getEnrollmentQueryKey>>({
+export const getEnrollmentOptions = (options: Options<GetEnrollmentData>) => queryOptions<GetEnrollmentResponse, GetEnrollmentError, GetEnrollmentResponse, ReturnType<typeof getEnrollmentQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
         const { data } = await getEnrollment({
             ...options,
@@ -312,8 +312,8 @@ export const getEnrollmentOptions = (options: Options<GetEnrollmentData>) => que
     queryKey: getEnrollmentQueryKey(options)
 });
 
-export const updateEnrollmentMutation = (options?: Partial<Options<UpdateEnrollmentData>>): UseMutationOptions<unknown, UpdateEnrollmentError, Options<UpdateEnrollmentData>> => {
-    const mutationOptions: UseMutationOptions<unknown, UpdateEnrollmentError, Options<UpdateEnrollmentData>> = {
+export const updateEnrollmentMutation = (options?: Partial<Options<UpdateEnrollmentData>>): UseMutationOptions<UpdateEnrollmentResponse, UpdateEnrollmentError, Options<UpdateEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<UpdateEnrollmentResponse, UpdateEnrollmentError, Options<UpdateEnrollmentData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await updateEnrollment({
                 ...options,

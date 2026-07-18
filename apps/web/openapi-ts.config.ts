@@ -10,7 +10,10 @@ export default defineConfig({
   output: "src/lib/api-client",
   plugins: [
     "@hey-api/typescript",
-    "@hey-api/transformers",
+    {
+      name: "@hey-api/transformers",
+      dates: false,
+    },
     {
       name: "@hey-api/schemas",
       type: "json",

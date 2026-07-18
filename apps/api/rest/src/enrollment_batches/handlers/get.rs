@@ -14,7 +14,7 @@ use db::rbac::Permission;
         ("id" = Uuid, Path, description = "Batch ID"),
     ),
     responses(
-        (status = 200, description = "Batch retrieved"),
+        (status = 200, description = "Batch retrieved", body = db::entity::enrollment_batches::Model),
         (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
         (status = 404, description = "Batch not found", body = crate::error::ErrorResponse),
         (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),

@@ -14,8 +14,9 @@ use db::rbac::Permission;
 #[utoipa::path(
     post,
     path = "/api/g1-enrollments",
+    request_body = db::entity::g1_enrollments::Model,
     responses(
-        (status = 201, description = "Enrollment created"),
+        (status = 201, description = "Enrollment created", body = db::entity::g1_enrollments::Model),
         (status = 400, description = "Bad request", body = crate::error::ErrorResponse),
         (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
         (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),

@@ -14,7 +14,7 @@ use db::rbac::Permission;
         ("id" = Uuid, Path, description = "Enrollment ID"),
     ),
     responses(
-        (status = 200, description = "Enrollment retrieved"),
+        (status = 200, description = "Enrollment retrieved", body = db::entity::g1_enrollments::Model),
         (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
         (status = 404, description = "Enrollment not found", body = crate::error::ErrorResponse),
         (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),

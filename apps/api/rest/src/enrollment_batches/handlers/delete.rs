@@ -4,6 +4,7 @@ use sea_orm::{DatabaseConnection, EntityTrait};
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
+use crate::docs::MessageResponse;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
@@ -14,7 +15,7 @@ use db::rbac::Permission;
         ("id" = Uuid, Path, description = "Batch ID"),
     ),
     responses(
-        (status = 200, description = "Batch deleted"),
+        (status = 200, description = "Batch deleted", body = MessageResponse),
         (status = 403, description = "Insufficient permissions", body = crate::error::ErrorResponse),
         (status = 404, description = "Batch not found", body = crate::error::ErrorResponse),
         (status = 500, description = "Internal server error", body = crate::error::ErrorResponse),
@@ -45,5 +46,5 @@ pub async fn delete_batch(
         .exec(db.as_ref())
         .await?;
 
-    Ok(HttpResponse::Ok().json(serde_json::json!({"message": "batch deleted"})))
+    Ok(HttpResponse::Ok().json(MessageResponse { message: "batch deleted".into() }))
 }

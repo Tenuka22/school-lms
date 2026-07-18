@@ -3,6 +3,7 @@
 import * as React from "react"
 
 import {
+  BatchSelectCell,
   CheckboxCell,
   DateCell,
   FileCell,
@@ -83,6 +84,9 @@ function DataGridCellImpl<TData>({
       break
     case "date":
       Comp = DateCell
+      break
+    case "batch-select":
+      Comp = BatchSelectCell
       break
     case "file":
       Comp = FileCell
