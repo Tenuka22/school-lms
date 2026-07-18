@@ -1,11 +1,12 @@
 use sea_orm::{ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
+use uuid::Uuid;
 
-use crate::entity::{permission, role, role_permission, user_role};
+use crate::entity::{user::permission, user::role, user::role_permission, user::user_role};
 use crate::rbac::types::Role;
 
 pub async fn get_user_permissions(
     db: &DatabaseConnection,
-    user_id: Option<i32>,
+    user_id: Option<Uuid>,
 ) -> Result<Vec<String>, DbErr> {
     let role_ids = match user_id {
         Some(uid) => {
@@ -50,7 +51,7 @@ pub async fn get_user_permissions(
     Ok(perms.into_iter().map(|p| p.name).collect())
 }
 
-pub async fn get_user_roles(db: &DatabaseConnection, user_id: i32) -> Result<Vec<Role>, DbErr> {
+pub async fn get_user_roles(db: &DatabaseConnection, user_id: Uuid) -> Result<Vec<Role>, DbErr> {
     let urs = user_role::Entity::find()
         .filter(user_role::Column::UserId.eq(user_id))
         .all(db)

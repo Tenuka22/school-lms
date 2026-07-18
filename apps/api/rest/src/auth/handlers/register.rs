@@ -91,4 +91,3 @@ pub async fn register(
         expires_at: access_expires_at,
     }))
 }
-

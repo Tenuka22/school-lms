@@ -6,6 +6,7 @@ use chrono::Duration;
 use jsonwebtoken::{EncodingKey, Header, encode};
 use rand::RngCore;
 use sha2::{Digest, Sha256};
+use uuid::Uuid;
 
 use crate::auth::Claims;
 
@@ -25,10 +26,10 @@ pub fn verify_password(password: &str, hash: &str) -> Result<bool, String> {
         .is_ok())
 }
 
-pub fn create_access_token(user_id: i32, secret: &str) -> Result<String, String> {
+pub fn create_access_token(user_id: Uuid, secret: &str) -> Result<String, String> {
     let now = chrono::Utc::now();
     let claims = Claims {
-        sub: user_id as i64,
+        sub: user_id.to_string(),
         exp: (now + Duration::minutes(15)).timestamp() as usize,
         iat: now.timestamp() as usize,
     };

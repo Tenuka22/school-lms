@@ -28,6 +28,6 @@ pub struct AuthResponse {
 
 #[derive(Serialize, JsonSchema, ApiComponent)]
 pub struct UserResponse {
-    pub id: i32,
+    pub id: String,
     pub email: String,
 }

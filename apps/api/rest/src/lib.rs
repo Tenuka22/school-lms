@@ -1,7 +1,7 @@
 mod auth;
 mod counter;
 mod enrollment_batches;
-mod g1_enrollments;
+mod g1_applications;
 pub mod storage;
 mod uploads;
 pub mod docs;
@@ -19,7 +19,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             ))
             .wrap(auth::AuthMiddleware)
             .configure(counter::routes)
-            .configure(g1_enrollments::routes)
+            .configure(g1_applications::routes)
             .configure(enrollment_batches::routes)
             .configure(uploads::routes)
             .service(web::scope("/auth").configure(auth::routes)),

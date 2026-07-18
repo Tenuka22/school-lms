@@ -18,6 +18,7 @@ hex = "0.4"
 uuid = { version = "1.23.5", features = ["v4"] }
 chrono = "0.4.45"
 sea-orm = "2.0.0-rc"
+num-traits = "0.2"
 
 apistos = { version = "0.6", features = ["scalar"] }
 actix-cors = "0.7.0"

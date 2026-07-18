@@ -6,6 +6,7 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction, DbErr, EntityTrait,
     QueryFilter, QuerySelect, Set, TransactionError, TransactionTrait, sea_query::LockType,
 };
+use uuid::Uuid;
 
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, hash_refresh_token};
@@ -91,7 +92,7 @@ pub async fn refresh(
     }
 }
 
-async fn revoke_all_user_sessions(txn: &DatabaseTransaction, user_id: i32) -> Result<(), DbErr> {
+async fn revoke_all_user_sessions(txn: &DatabaseTransaction, user_id: Uuid) -> Result<(), DbErr> {
     use sea_orm::sea_query::Expr;
 
     session::Entity::update_many()

@@ -22,7 +22,7 @@ pub async fn me(
         .ok_or_else(|| ApiError::NotFound("user not found".into()))?;
 
     Ok(Json(UserResponse {
-        id: user.id,
+        id: user.id.to_string(),
         email: user.email,
     }))
 }

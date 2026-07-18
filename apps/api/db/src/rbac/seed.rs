@@ -1,7 +1,7 @@
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
 use std::collections::HashMap;
 
-use crate::entity::{permission, role, role_permission};
+use crate::entity::{user::permission, user::role, user::role_permission};
 
 pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
     let roles = vec![
@@ -37,6 +37,19 @@ pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
         ("course:list", "course", "list"),
         ("announcement:read", "announcement", "read"),
         ("file:upload", "file", "upload"),
+        ("g1:application:create", "g1_application", "create"),
+        ("g1:application:read", "g1_application", "read"),
+        ("g1:application:update", "g1_application", "update"),
+        ("g1:application:delete", "g1_application", "delete"),
+        ("g1:application:submit", "g1_application", "submit"),
+        ("g1:application:verify", "g1_application", "verify"),
+        ("g1:application:mark", "g1_application", "mark"),
+        ("g1:application:generate-lists", "g1_application", "generate-lists"),
+        ("g1:document:upload", "g1_document", "upload"),
+        ("g1:document:verify", "g1_document", "verify"),
+        ("g1:appeal:create", "g1_appeal", "create"),
+        ("g1:appeal:review", "g1_appeal", "review"),
+        ("g1:report:read", "g1_report", "read"),
         ("*:*", "*", "*"),
     ];
 

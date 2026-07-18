@@ -1,0 +1,12 @@
+pub mod addresses;
+pub mod addresses_audit;
+pub mod audit_logs;
+pub mod counter;
+pub mod enrollment_batches;
+pub mod enums;
+pub mod guardians;
+pub mod guardians_audit;
+pub mod past_pupil_details;
+pub mod secure_counter;
+pub mod siblings;
+pub mod staff_details;

@@ -15,6 +15,7 @@ use apistos::ApiSecurity;
 use jsonwebtoken::{DecodingKey, Validation, decode};
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use db::rbac::Permission;
 
@@ -22,7 +23,7 @@ pub struct JwtSecret(pub String);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Claims {
-    pub sub: i64,
+    pub sub: String,
     pub exp: usize,
     pub iat: usize,
 }
@@ -30,7 +31,7 @@ pub struct Claims {
 #[derive(ApiSecurity)]
 #[openapi_security(scheme(security_type(http(scheme = "bearer", bearer_format = "JWT"))))]
 pub struct AuthenticatedUser {
-    pub user_id: Option<i32>,
+    pub user_id: Option<Uuid>,
     pub permissions: Vec<String>,
 }
 
@@ -57,9 +58,9 @@ impl FromRequest for AuthenticatedUser {
 
         Box::pin(async move {
             let db = db.ok_or_else(|| ErrorInternalServerError("DB not configured"))?;
-            let user_id = claims.map(|c| c.sub as i32);
+            let user_id = claims.map(|c| Uuid::parse_str(&c.sub).ok()).flatten();
 
-            let permissions = db::rbac::get_user_permissions(&db, user_id)
+            let permissions = db::rbac::get_user_permissions(&db, user_id.clone())
                 .await
                 .map_err(|e| {
                     log::error!("Failed to load permissions: {e}");
