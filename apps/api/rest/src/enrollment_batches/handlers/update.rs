@@ -46,6 +46,13 @@ pub async fn update_batch(
         status: Set(patch.status),
         created_at: Set(existing.created_at),
         created_by: Set(existing.created_by),
+        student_allocation: Set(existing.student_allocation),
+        proximity_weight: Set(existing.proximity_weight),
+        staff_weight: Set(existing.staff_weight),
+        sibling_weight: Set(existing.sibling_weight),
+        alumni_weight: Set(existing.alumni_weight),
+        govt_weight: Set(existing.govt_weight),
+        special_weight: Set(existing.special_weight),
     };
 
     let saved = active.update(db.as_ref()).await?;

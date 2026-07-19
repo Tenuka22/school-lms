@@ -16,6 +16,8 @@ use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
+
+
 fn generate_batch_code(enrollment_type: &EnrollmentType, year: i16) -> String {
     match enrollment_type {
         EnrollmentType::G1 => format!("G1-{year}"),
@@ -68,6 +70,13 @@ pub async fn create_batch(
         status: BatchStatus::Open,
         created_at: Utc::now(),
         created_by: None,
+        student_allocation: 200,
+        proximity_weight: 50,
+        staff_weight: 25,
+        sibling_weight: 14,
+        alumni_weight: 6,
+        govt_weight: 4,
+        special_weight: 1,
     };
 
     let active: enrollment_batches::ActiveModel = data.into();

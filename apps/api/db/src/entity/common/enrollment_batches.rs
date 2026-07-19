@@ -17,6 +17,34 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
+fn default_student_allocation() -> i32 {
+    200
+}
+
+fn default_proximity_weight() -> i16 {
+    50
+}
+
+fn default_staff_weight() -> i16 {
+    25
+}
+
+fn default_sibling_weight() -> i16 {
+    14
+}
+
+fn default_alumni_weight() -> i16 {
+    6
+}
+
+fn default_govt_weight() -> i16 {
+    4
+}
+
+fn default_special_weight() -> i16 {
+    1
+}
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
 #[schemars(rename = "EnrollmentBatch")]
 #[sea_orm(table_name = "enrollment_batches")]
@@ -37,6 +65,27 @@ pub struct Model {
     pub created_at: DateTime<Utc>,
     #[serde(default)]
     pub created_by: Option<Uuid>,
+
+    #[serde(default = "default_student_allocation")]
+    pub student_allocation: i32,
+
+    #[serde(default = "default_proximity_weight")]
+    pub proximity_weight: i16,
+
+    #[serde(default = "default_staff_weight")]
+    pub staff_weight: i16,
+
+    #[serde(default = "default_sibling_weight")]
+    pub sibling_weight: i16,
+
+    #[serde(default = "default_alumni_weight")]
+    pub alumni_weight: i16,
+
+    #[serde(default = "default_govt_weight")]
+    pub govt_weight: i16,
+
+    #[serde(default = "default_special_weight")]
+    pub special_weight: i16,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
