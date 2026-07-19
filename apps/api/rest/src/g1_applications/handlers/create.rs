@@ -1,27 +1,15 @@
-use std::str::FromStr;
-
 use actix_web::{web, web::Json};
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use chrono::{NaiveDate, Utc};
-use db::entity::common::enums::{ApplicationStatus, AuditOperation, BatchStatus};
-use db::entity::{
-    children, enrollment_batches, g1::applications, guardians, schools,
-};
-use num_traits::ToPrimitive;
-use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,
-    TransactionTrait,
-};
+use chrono::Utc;
+use db::entity::common::enums::{ApplicationStatus, AuditOperation, BatchStatus, EnrollmentStatus};
+use db::entity::{enrollment_batches, g1::applications};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
-
-const MIN_AGE_YEARS: i32 = 5;
-const AGE_CUTOFF_MONTH: u32 = 1;
-const AGE_CUTOFF_DAY: u32 = 31;
 
 #[api_operation(tag = "g1-applications", operation_id = "create-application")]
 pub async fn create_application(
@@ -45,55 +33,22 @@ pub async fn create_application(
         ));
     }
 
-    let existing = applications::Entity::find()
-        .filter(applications::Column::ChildId.eq(data.child_id))
-        .filter(applications::Column::SchoolId.eq(data.school_id))
-        .filter(applications::Column::AppliedYear.eq(data.applied_year))
-        .one(db.as_ref())
-        .await?;
-
-    if existing.is_some() {
-        return Err(ApiError::Conflict(
-            "application already exists for this child, school, and year".into(),
-        ));
-    }
-
-    let child = children::Entity::find_by_id(data.child_id)
-        .one(db.as_ref())
-        .await?
-        .ok_or_else(|| ApiError::BadRequest("child not found".into()))?;
-
-    let age_cutoff = NaiveDate::from_ymd_opt(
-        data.applied_year as i32 - MIN_AGE_YEARS,
-        AGE_CUTOFF_MONTH,
-        AGE_CUTOFF_DAY,
-    )
-    .ok_or_else(|| ApiError::BadRequest("invalid applied year".into()))?;
-
-    if child.date_of_birth > age_cutoff {
-        return Err(ApiError::BadRequest(
-            "child must be 5 years old by Jan 31 of admission year".into(),
-        ));
-    }
-
-    let _school = schools::Entity::find_by_id(data.school_id)
-        .one(db.as_ref())
-        .await?
-        .ok_or_else(|| ApiError::BadRequest("school not found".into()))?;
-
-    let _guardian = guardians::Entity::find_by_id(data.guardian_id)
-        .one(db.as_ref())
-        .await?
-        .ok_or_else(|| ApiError::BadRequest("guardian not found".into()))?;
-
     let now = Utc::now();
     let mut active: applications::ActiveModel = data.into();
     active.id = Set(Uuid::new_v4());
+    active.applied_year = Set(batch.year);
+    active.enrollment_status = Set(EnrollmentStatus::Pending);
     active.status = Set(ApplicationStatus::Draft);
     active.created_at = Set(now);
     active.updated_at = Set(now);
     active.created_by = Set(None);
     active.updated_by = Set(None);
+
+    let count = applications::Entity::find()
+        .filter(applications::Column::BatchId.eq(batch.id))
+        .count(db.as_ref())
+        .await?;
+    active.reference_no = Set(format!("{}-{:04}", batch.batch_code, count + 1));
 
     let saved = active.insert(db.as_ref()).await?;
 

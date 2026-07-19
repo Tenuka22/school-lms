@@ -3379,6 +3379,7 @@ dependencies = [
  "hex",
  "jsonwebtoken",
  "log",
+ "num-traits",
  "rand 0.8.7",
  "sea-orm",
  "serde",

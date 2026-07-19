@@ -7,12 +7,12 @@ import { Calendar as CalendarIcon, Plus } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
-import { createEnrollment, } from "@/lib/api-client/sdk.gen"
-import { getEnrollmentQueryKey, listBatchesOptions, listBatchesQueryKey, listEnrollmentsQueryKey, updateEnrollmentMutation } from "@/lib/api-client/@tanstack/react-query.gen"
+import { createApplication, } from "@/lib/api-client/sdk.gen"
+import { getApplicationQueryKey, listBatchesOptions, listBatchesQueryKey, listApplicationsQueryKey, updateApplicationMutation } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import {
-  vG1Enrollment,
-  vUpdateG1EnrollmentBody,
+  vG1Application,
+  vUpdateApplicationBody,
   vGender,
   vNationality,
   vG1Category,
@@ -50,7 +50,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import type { G1Enrollment } from "@/lib/api-client/types.gen"
+import type { G1Application } from "@/lib/api-client/types.gen"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
 
 const LABELS: Record<string, string> = {
@@ -95,7 +95,7 @@ function getBatchYears(batches?: { year: number }[]): number[] {
 interface G1EnrollmentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  enrollment?: G1Enrollment | null
+  enrollment?: G1Application | null
   onSuccess: () => void
 }
 
@@ -106,7 +106,7 @@ export function G1EnrollmentDialog({
   onSuccess,
 }: G1EnrollmentDialogProps) {
   const isEdit = !!enrollment
-  const updateEnrollment = useMutation(updateEnrollmentMutation({
+  const updateApplication = useMutation(updateApplicationMutation({
     client:apiClient
   }))
   const [createBatchOpen, setCreateBatchOpen] = useState(false)
@@ -132,6 +132,8 @@ export function G1EnrollmentDialog({
 
   const needsBatch = !!(selectedBatchYear && !selectedBatch)
 
+  const uid = () => crypto.randomUUID()
+
   const form = useForm({
     defaultValues: {
       full_name: enrollment?.full_name ?? "",
@@ -144,29 +146,34 @@ export function G1EnrollmentDialog({
       enrollment_status: enrollment?.enrollment_status ?? "Draft",
       religion: enrollment?.religion ?? null,
       batch_id: enrollment?.batch_id ?? "",
-    } as v.InferInput<typeof vG1Enrollment>,
+      applied_year: new Date().getFullYear(),
+      child_id: uid(),
+      guardian_id: uid(),
+      reference_no: `REF-${Date.now()}`,
+      school_id: "00000000-0000-0000-0000-000000000000",
+    } as v.InferInput<typeof vG1Application>,
     validators: {
-      onSubmit: isEdit ? vUpdateG1EnrollmentBody : vG1Enrollment,
+      onSubmit: isEdit ? vUpdateApplicationBody : vG1Application,
     },
     onSubmit: async ({ value }) => {
       try {
         if (isEdit && enrollment?.id) {
 
-          await updateEnrollment.mutateAsync({
+          await updateApplication.mutateAsync({
             body: value,
             path: { id: enrollment.id },
             client: apiClient,
           })
-          queryClient.invalidateQueries({ queryKey: getEnrollmentQueryKey({ path: { id: enrollment.id }, client: apiClient }) })
+          queryClient.invalidateQueries({ queryKey: getApplicationQueryKey({ path: { id: enrollment.id }, client: apiClient }) })
           toast.success("Enrollment updated")
         } else {
-          await createEnrollment({
-            body: { ...value, id: crypto.randomUUID() },
+          await createApplication({
+            body: { ...value, id: uid() },
             client: apiClient,
           })
           toast.success("Enrollment created")
         }
-        queryClient.invalidateQueries({ queryKey: listEnrollmentsQueryKey({ client: apiClient }) })
+        queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
         onOpenChange(false)
         onSuccess()
       } catch (err) {

@@ -5,6 +5,7 @@ use chrono::{Duration, Utc};
 use db::entity::{session, user};
 use db::rbac::{ADMIN_EMAIL, assign_user_role};
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use uuid::Uuid;
 
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, hash_password};
@@ -43,8 +44,11 @@ pub async fn register(
 
     let now = Utc::now();
     let new_user = user::ActiveModel {
+        id: Set(Uuid::new_v4()),
+        username: Set(body.email.clone()),
         email: Set(body.email.clone()),
         password_hash: Set(password_hash),
+        is_active: Set(true),
         created_at: Set(now),
         updated_at: Set(now),
         ..Default::default()

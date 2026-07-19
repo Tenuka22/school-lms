@@ -34,6 +34,13 @@ fn generate_batch_name(enrollment_type: &EnrollmentType, year: i16) -> String {
 pub struct CreateBatchBody {
     pub enrollment_type: EnrollmentType,
     pub year: i16,
+    pub student_allocation: Option<i32>,
+    pub proximity_weight: Option<i16>,
+    pub staff_weight: Option<i16>,
+    pub sibling_weight: Option<i16>,
+    pub alumni_weight: Option<i16>,
+    pub govt_weight: Option<i16>,
+    pub special_weight: Option<i16>,
 }
 
 #[api_operation(tag = "enrollment-batches", operation_id = "create-batch")]
@@ -70,13 +77,13 @@ pub async fn create_batch(
         status: BatchStatus::Open,
         created_at: Utc::now(),
         created_by: None,
-        student_allocation: 200,
-        proximity_weight: 50,
-        staff_weight: 25,
-        sibling_weight: 14,
-        alumni_weight: 6,
-        govt_weight: 4,
-        special_weight: 1,
+        student_allocation: input.student_allocation.unwrap_or(200),
+        proximity_weight: input.proximity_weight.unwrap_or(50),
+        staff_weight: input.staff_weight.unwrap_or(25),
+        sibling_weight: input.sibling_weight.unwrap_or(14),
+        alumni_weight: input.alumni_weight.unwrap_or(6),
+        govt_weight: input.govt_weight.unwrap_or(4),
+        special_weight: input.special_weight.unwrap_or(1),
     };
 
     let active: enrollment_batches::ActiveModel = data.into();

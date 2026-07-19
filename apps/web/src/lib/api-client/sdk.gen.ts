@@ -4,8 +4,8 @@ import * as v from 'valibot';
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CreateBatchData, CreateBatchErrors, CreateBatchResponses, CreateEnrollmentData, CreateEnrollmentErrors, CreateEnrollmentResponses, DeleteBatchData, DeleteBatchErrors, DeleteBatchResponses, DeleteEnrollmentData, DeleteEnrollmentErrors, DeleteEnrollmentResponses, GetBatchData, GetBatchErrors, GetBatchResponses, GetCounterData, GetCounterErrors, GetCounterResponses, GetEnrollmentData, GetEnrollmentErrors, GetEnrollmentResponses, GetSecureCounterData, GetSecureCounterErrors, GetSecureCounterResponses, IncrementCounterData, IncrementCounterErrors, IncrementCounterResponses, IncrementSecureCounterData, IncrementSecureCounterErrors, IncrementSecureCounterResponses, ListBatchesData, ListBatchesErrors, ListBatchesResponses, ListEnrollmentsData, ListEnrollmentsErrors, ListEnrollmentsResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, RefreshData, RefreshErrors, RefreshResponses, RegisterData, RegisterErrors, RegisterResponses, UpdateBatchData, UpdateBatchErrors, UpdateBatchResponses, UpdateEnrollmentData, UpdateEnrollmentErrors, UpdateEnrollmentResponses, UploadFileData, UploadFileErrors, UploadFileResponses } from './types.gen';
-import { vCreateBatchBody2, vCreateBatchResponse, vCreateEnrollmentBody, vCreateEnrollmentResponse, vDeleteBatchPath, vDeleteBatchResponse, vDeleteEnrollmentPath, vDeleteEnrollmentResponse, vGetBatchPath, vGetBatchResponse, vGetCounterPath, vGetCounterResponse, vGetEnrollmentPath, vGetEnrollmentResponse, vGetSecureCounterPath, vGetSecureCounterResponse, vIncrementCounterPath, vIncrementCounterResponse, vIncrementSecureCounterPath, vIncrementSecureCounterResponse, vListBatchesResponse, vListEnrollmentsQuery, vListEnrollmentsResponse, vLoginBody, vLoginResponse, vLogoutAllResponse, vLogoutBody, vLogoutResponse, vMeResponse, vRefreshBody, vRefreshResponse, vRegisterBody, vRegisterResponse, vUpdateBatchBody2, vUpdateBatchPath, vUpdateBatchResponse, vUpdateEnrollmentBody, vUpdateEnrollmentPath, vUpdateEnrollmentResponse, vUploadFileBody, vUploadFileResponse } from './valibot.gen';
+import type { CalculateMarksData, CalculateMarksErrors, CalculateMarksResponses, CreateApplicationData, CreateApplicationErrors, CreateApplicationResponses, CreateBatchData, CreateBatchErrors, CreateBatchResponses, DeleteApplicationData, DeleteApplicationErrors, DeleteApplicationResponses, DeleteBatchData, DeleteBatchErrors, DeleteBatchResponses, GenerateAdmissionListsData, GenerateAdmissionListsErrors, GenerateAdmissionListsResponses, GetApplicationData, GetApplicationErrors, GetApplicationResponses, GetBatchData, GetBatchErrors, GetBatchResponses, GetCounterData, GetCounterErrors, GetCounterResponses, GetSecureCounterData, GetSecureCounterErrors, GetSecureCounterResponses, IncrementCounterData, IncrementCounterErrors, IncrementCounterResponses, IncrementSecureCounterData, IncrementSecureCounterErrors, IncrementSecureCounterResponses, ListApplicationsData, ListApplicationsErrors, ListApplicationsResponses, ListBatchesData, ListBatchesErrors, ListBatchesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, RefreshData, RefreshErrors, RefreshResponses, RegisterData, RegisterErrors, RegisterResponses, SubmitApplicationData, SubmitApplicationErrors, SubmitApplicationResponses, UpdateApplicationData, UpdateApplicationErrors, UpdateApplicationResponses, UpdateBatchData, UpdateBatchErrors, UpdateBatchResponses, UploadFileData, UploadFileErrors, UploadFileResponses } from './types.gen';
+import { vCalculateMarksPath, vCalculateMarksResponse, vCreateApplicationBody, vCreateApplicationResponse, vCreateBatchBody2, vCreateBatchResponse, vDeleteApplicationPath, vDeleteApplicationResponse, vDeleteBatchPath, vDeleteBatchResponse, vGenerateAdmissionListsBody, vGenerateAdmissionListsResponse, vGetApplicationPath, vGetApplicationResponse, vGetBatchPath, vGetBatchResponse, vGetCounterPath, vGetCounterResponse, vGetSecureCounterPath, vGetSecureCounterResponse, vIncrementCounterPath, vIncrementCounterResponse, vIncrementSecureCounterPath, vIncrementSecureCounterResponse, vListApplicationsQuery, vListApplicationsResponse, vListBatchesResponse, vLoginBody, vLoginResponse, vLogoutAllResponse, vLogoutBody, vLogoutResponse, vMeResponse, vRefreshBody, vRefreshResponse, vRegisterBody, vRegisterResponse, vSubmitApplicationPath, vSubmitApplicationResponse, vUpdateApplicationBody, vUpdateApplicationPath, vUpdateApplicationResponse, vUpdateBatchBody2, vUpdateBatchPath, vUpdateBatchResponse, vUploadFileBody, vUploadFileResponse } from './valibot.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -69,27 +69,27 @@ export const incrementSecureCounter = <ThrowOnError extends boolean = false>(opt
     ...options
 });
 
-export const listEnrollments = <ThrowOnError extends boolean = false>(options?: Options<ListEnrollmentsData, ThrowOnError>): RequestResult<ListEnrollmentsResponses, ListEnrollmentsErrors, ThrowOnError> => (options?.client ?? client).get<ListEnrollmentsResponses, ListEnrollmentsErrors, ThrowOnError>({
+export const listApplications = <ThrowOnError extends boolean = false>(options?: Options<ListApplicationsData, ThrowOnError>): RequestResult<ListApplicationsResponses, ListApplicationsErrors, ThrowOnError> => (options?.client ?? client).get<ListApplicationsResponses, ListApplicationsErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
-        query: v.optional(vListEnrollmentsQuery)
+        query: v.optional(vListApplicationsQuery)
     }), data),
-    responseValidator: async (data) => await v.parseAsync(vListEnrollmentsResponse, data),
+    responseValidator: async (data) => await v.parseAsync(vListApplicationsResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/g1-enrollments',
+    url: '/api/g1-applications',
     ...options
 });
 
-export const createEnrollment = <ThrowOnError extends boolean = false>(options: Options<CreateEnrollmentData, ThrowOnError>): RequestResult<CreateEnrollmentResponses, CreateEnrollmentErrors, ThrowOnError> => (options.client ?? client).post<CreateEnrollmentResponses, CreateEnrollmentErrors, ThrowOnError>({
+export const createApplication = <ThrowOnError extends boolean = false>(options: Options<CreateApplicationData, ThrowOnError>): RequestResult<CreateApplicationResponses, CreateApplicationErrors, ThrowOnError> => (options.client ?? client).post<CreateApplicationResponses, CreateApplicationErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
-        body: vCreateEnrollmentBody,
+        body: vCreateApplicationBody,
         path: v.optional(v.never()),
         query: v.optional(v.never())
     }), data),
-    responseValidator: async (data) => await v.parseAsync(vCreateEnrollmentResponse, data),
+    responseValidator: async (data) => await v.parseAsync(vCreateApplicationResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/g1-enrollments',
+    url: '/api/g1-applications',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -97,39 +97,79 @@ export const createEnrollment = <ThrowOnError extends boolean = false>(options: 
     }
 });
 
-export const deleteEnrollment = <ThrowOnError extends boolean = false>(options: Options<DeleteEnrollmentData, ThrowOnError>): RequestResult<DeleteEnrollmentResponses, DeleteEnrollmentErrors, ThrowOnError> => (options.client ?? client).delete<DeleteEnrollmentResponses, DeleteEnrollmentErrors, ThrowOnError>({
+export const deleteApplication = <ThrowOnError extends boolean = false>(options: Options<DeleteApplicationData, ThrowOnError>): RequestResult<DeleteApplicationResponses, DeleteApplicationErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApplicationResponses, DeleteApplicationErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        path: vDeleteEnrollmentPath,
+        path: vDeleteApplicationPath,
         query: v.optional(v.never())
     }), data),
-    responseValidator: async (data) => await v.parseAsync(vDeleteEnrollmentResponse, data),
+    responseValidator: async (data) => await v.parseAsync(vDeleteApplicationResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/g1-enrollments/{id}',
+    url: '/api/g1-applications/{id}',
     ...options
 });
 
-export const getEnrollment = <ThrowOnError extends boolean = false>(options: Options<GetEnrollmentData, ThrowOnError>): RequestResult<GetEnrollmentResponses, GetEnrollmentErrors, ThrowOnError> => (options.client ?? client).get<GetEnrollmentResponses, GetEnrollmentErrors, ThrowOnError>({
+export const getApplication = <ThrowOnError extends boolean = false>(options: Options<GetApplicationData, ThrowOnError>): RequestResult<GetApplicationResponses, GetApplicationErrors, ThrowOnError> => (options.client ?? client).get<GetApplicationResponses, GetApplicationErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
-        path: vGetEnrollmentPath,
+        path: vGetApplicationPath,
         query: v.optional(v.never())
     }), data),
-    responseValidator: async (data) => await v.parseAsync(vGetEnrollmentResponse, data),
+    responseValidator: async (data) => await v.parseAsync(vGetApplicationResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/g1-enrollments/{id}',
+    url: '/api/g1-applications/{id}',
     ...options
 });
 
-export const updateEnrollment = <ThrowOnError extends boolean = false>(options: Options<UpdateEnrollmentData, ThrowOnError>): RequestResult<UpdateEnrollmentResponses, UpdateEnrollmentErrors, ThrowOnError> => (options.client ?? client).put<UpdateEnrollmentResponses, UpdateEnrollmentErrors, ThrowOnError>({
+export const updateApplication = <ThrowOnError extends boolean = false>(options: Options<UpdateApplicationData, ThrowOnError>): RequestResult<UpdateApplicationResponses, UpdateApplicationErrors, ThrowOnError> => (options.client ?? client).put<UpdateApplicationResponses, UpdateApplicationErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
-        body: vUpdateEnrollmentBody,
-        path: vUpdateEnrollmentPath,
+        body: vUpdateApplicationBody,
+        path: vUpdateApplicationPath,
         query: v.optional(v.never())
     }), data),
-    responseValidator: async (data) => await v.parseAsync(vUpdateEnrollmentResponse, data),
+    responseValidator: async (data) => await v.parseAsync(vUpdateApplicationResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/g1-enrollments/{id}',
+    url: '/api/g1-applications/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const submitApplication = <ThrowOnError extends boolean = false>(options: Options<SubmitApplicationData, ThrowOnError>): RequestResult<SubmitApplicationResponses, SubmitApplicationErrors, ThrowOnError> => (options.client ?? client).post<SubmitApplicationResponses, SubmitApplicationErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vSubmitApplicationPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vSubmitApplicationResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/submit',
+    ...options
+});
+
+export const calculateMarks = <ThrowOnError extends boolean = false>(options: Options<CalculateMarksData, ThrowOnError>): RequestResult<CalculateMarksResponses, CalculateMarksErrors, ThrowOnError> => (options.client ?? client).post<CalculateMarksResponses, CalculateMarksErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vCalculateMarksPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vCalculateMarksResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/calculate-marks',
+    ...options
+});
+
+export const generateAdmissionLists = <ThrowOnError extends boolean = false>(options: Options<GenerateAdmissionListsData, ThrowOnError>): RequestResult<GenerateAdmissionListsResponses, GenerateAdmissionListsErrors, ThrowOnError> => (options.client ?? client).post<GenerateAdmissionListsResponses, GenerateAdmissionListsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vGenerateAdmissionListsBody,
+        path: v.optional(v.never()),
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vGenerateAdmissionListsResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/generate-lists',
     ...options,
     headers: {
         'Content-Type': 'application/json',

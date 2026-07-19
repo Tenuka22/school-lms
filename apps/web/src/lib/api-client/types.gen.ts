@@ -4,6 +4,8 @@ export type ClientOptions = {
     baseUrl: string;
 };
 
+export type ApplicationStatus = 'Draft' | 'Submitted' | 'DocsPending' | 'UnderVerification' | 'Verified' | 'Marked' | 'Shortlisted' | 'Appealed' | 'Finalized' | 'Admitted' | 'Rejected' | 'Withdrawn';
+
 /**
  * AuthResponse
  */
@@ -27,7 +29,14 @@ export type CounterResponse = {
  * CreateBatchBody
  */
 export type CreateBatchBody = {
+    alumni_weight?: number | null;
     enrollment_type: EnrollmentType;
+    govt_weight?: number | null;
+    proximity_weight?: number | null;
+    sibling_weight?: number | null;
+    special_weight?: number | null;
+    staff_weight?: number | null;
+    student_allocation?: number | null;
     year: number;
 };
 
@@ -35,6 +44,7 @@ export type CreateBatchBody = {
  * EnrollmentBatch
  */
 export type EnrollmentBatch = {
+    alumni_weight?: number;
     /**
      * Machine-readable code (e.g., "G1-2026")
      */
@@ -46,8 +56,14 @@ export type EnrollmentBatch = {
     created_at?: string;
     created_by?: string | null;
     enrollment_type: EnrollmentType;
+    govt_weight?: number;
     id?: string;
+    proximity_weight?: number;
+    sibling_weight?: number;
+    special_weight?: number;
+    staff_weight?: number;
     status?: BatchStatus;
+    student_allocation?: number;
     year: number;
 };
 
@@ -55,57 +71,74 @@ export type EnrollmentStatus = 'Draft' | 'Pending' | 'ProvisionallyApproved' | '
 
 export type EnrollmentType = 'G1';
 
-export type G1Category = 'CloseResident' | 'PastPupilChild' | 'Sibling' | 'MOEOrUGCStaffChild' | 'GovernmentTransferOfficerChild' | 'OverseasArrival' | 'ArmedForcesReserved';
-
 /**
- * G1Enrollment
+ * G1Application
  */
-export type G1Enrollment = {
+export type G1Application = {
     age_eligibility_verified?: boolean;
     alternative_age_certificate?: boolean;
     alternative_age_certificate_ref?: string | null;
-    approved_at?: string | null;
-    approved_by?: string | null;
-    armed_forces_parent_id?: string | null;
+    applied_year: number;
     batch_id: string;
     birth_certificate_number?: string | null;
     birth_certificate_verified?: boolean;
     category: G1Category;
-    category_score?: string | null;
     category_verified?: boolean;
+    child_id: string;
     created_at?: string;
     created_by?: string | null;
     date_of_birth: string;
-    distance_score?: string | null;
     enrollment_status?: EnrollmentStatus;
+    finalized_at?: string | null;
     full_name: string;
     gender: Gender;
+    guardian_id: string;
     id?: string;
     interview_completed?: boolean;
     interview_date?: string | null;
-    interview_score?: string | null;
+    ip_address?: string | null;
+    list_category?: string | null;
     medium_of_instruction: MediumOfInstruction;
     name_with_initials: string;
     nationality: Nationality;
     overseas_arrival_date?: string | null;
-    past_pupil_parent_id?: string | null;
-    provisionally_approved_at?: string | null;
-    provisionally_approved_by?: string | null;
-    rank?: number | null;
+    rank_number?: number | null;
+    reference_no: string;
     rejection_reason?: string | null;
     religion?: Religion | null;
     residence_verified?: boolean;
-    sibling_student_id?: string | null;
-    staff_parent_id?: string | null;
+    school_id: string;
+    status?: ApplicationStatus;
     student_id?: string | null;
     submission_method?: string | null;
-    total_score?: string | null;
-    transfer_officer_parent_id?: string | null;
+    submitted_at?: string | null;
+    total_marks?: string | null;
     updated_at?: string;
     updated_by?: string | null;
+    user_agent?: string | null;
+    verified_at?: string | null;
+    verified_by?: string | null;
 };
 
+export type G1Category = 'CloseResident' | 'PastPupilChild' | 'Sibling' | 'MOEOrUGCStaffChild' | 'GovernmentTransferOfficerChild' | 'OverseasArrival' | 'ArmedForcesReserved';
+
 export type Gender = 'Male' | 'Female';
+
+/**
+ * GenerateListsRequest
+ */
+export type GenerateListsRequest = {
+    batch_id: string;
+};
+
+/**
+ * GenerateListsResponse
+ */
+export type GenerateListsResponse = {
+    batch_id: string;
+    schools: Array<SchoolListSummary>;
+    total_generated: number;
+};
 
 /**
  * LoginRequest
@@ -127,10 +160,10 @@ export type MessageResponse = {
 export type Nationality = 'SriLankan' | 'DualCitizen' | 'Other';
 
 /**
- * PaginatedEnrollmentsResponse
+ * PaginatedApplicationsResponse
  */
-export type PaginatedEnrollmentsResponse = {
-    items: Array<G1Enrollment>;
+export type PaginatedApplicationsResponse = {
+    items: Array<G1Application>;
     total: number;
 };
 
@@ -151,39 +184,25 @@ export type RegisterRequest = {
 
 export type Religion = 'Buddhism' | 'Hinduism' | 'Islam' | 'Christianity' | 'Catholicism' | 'Other';
 
+export type SchoolListSummary = {
+    main_list_count: number;
+    school_id: string;
+    school_name: string;
+    waiting_list_count: number;
+};
+
 /**
  * UpdateBatchBody
  */
 export type UpdateBatchBody = {
-    status: BatchStatus;
-};
-
-/**
- * UpdateG1EnrollmentBody
- */
-export type UpdateG1EnrollmentBody = {
-    age_eligibility_verified?: boolean | null;
-    alternative_age_certificate?: boolean | null;
-    alternative_age_certificate_ref?: string | null;
-    batch_id?: string | null;
-    birth_certificate_number?: string | null;
-    birth_certificate_verified?: boolean | null;
-    category?: G1Category | null;
-    category_verified?: boolean | null;
-    date_of_birth?: string | null;
-    enrollment_status?: EnrollmentStatus | null;
-    full_name?: string | null;
-    gender?: Gender | null;
-    interview_completed?: boolean | null;
-    interview_date?: string | null;
-    medium_of_instruction?: MediumOfInstruction | null;
-    name_with_initials?: string | null;
-    nationality?: Nationality | null;
-    rank?: number | null;
-    rejection_reason?: string | null;
-    religion?: Religion | null;
-    residence_verified?: boolean | null;
-    submission_method?: string | null;
+    alumni_weight?: number | null;
+    govt_weight?: number | null;
+    proximity_weight?: number | null;
+    sibling_weight?: number | null;
+    special_weight?: number | null;
+    staff_weight?: number | null;
+    status?: BatchStatus | null;
+    student_allocation?: number | null;
 };
 
 /**
@@ -208,7 +227,7 @@ export type UploadResponse = {
  */
 export type UserResponse = {
     email: string;
-    id: number;
+    id: string;
 };
 
 export type GetCounterData = {
@@ -391,7 +410,7 @@ export type IncrementSecureCounterResponses = {
 
 export type IncrementSecureCounterResponse = IncrementSecureCounterResponses[keyof IncrementSecureCounterResponses];
 
-export type ListEnrollmentsData = {
+export type ListApplicationsData = {
     body?: never;
     path?: never;
     query?: {
@@ -407,10 +426,10 @@ export type ListEnrollmentsData = {
         sort_by?: string | null;
         sort_order?: string | null;
     };
-    url: '/api/g1-enrollments';
+    url: '/api/g1-applications';
 };
 
-export type ListEnrollmentsErrors = {
+export type ListApplicationsErrors = {
     /**
      * Bad Request
      */
@@ -437,20 +456,20 @@ export type ListEnrollmentsErrors = {
     500: unknown;
 };
 
-export type ListEnrollmentsResponses = {
-    200: PaginatedEnrollmentsResponse;
+export type ListApplicationsResponses = {
+    200: PaginatedApplicationsResponse;
 };
 
-export type ListEnrollmentsResponse = ListEnrollmentsResponses[keyof ListEnrollmentsResponses];
+export type ListApplicationsResponse = ListApplicationsResponses[keyof ListApplicationsResponses];
 
-export type CreateEnrollmentData = {
-    body: G1Enrollment;
+export type CreateApplicationData = {
+    body: G1Application;
     path?: never;
     query?: never;
-    url: '/api/g1-enrollments';
+    url: '/api/g1-applications';
 };
 
-export type CreateEnrollmentErrors = {
+export type CreateApplicationErrors = {
     /**
      * Bad Request
      */
@@ -477,59 +496,60 @@ export type CreateEnrollmentErrors = {
     500: unknown;
 };
 
-export type CreateEnrollmentResponses = {
+export type CreateApplicationResponses = {
     /**
-     * G1Enrollment
+     * G1Application
      */
     201: {
         age_eligibility_verified?: boolean;
         alternative_age_certificate?: boolean;
         alternative_age_certificate_ref?: string | null;
-        approved_at?: string | null;
-        approved_by?: string | null;
-        armed_forces_parent_id?: string | null;
+        applied_year: number;
         batch_id: string;
         birth_certificate_number?: string | null;
         birth_certificate_verified?: boolean;
         category: G1Category;
-        category_score?: string | null;
         category_verified?: boolean;
+        child_id: string;
         created_at?: string;
         created_by?: string | null;
         date_of_birth: string;
-        distance_score?: string | null;
         enrollment_status?: EnrollmentStatus;
+        finalized_at?: string | null;
         full_name: string;
         gender: Gender;
+        guardian_id: string;
         id?: string;
         interview_completed?: boolean;
         interview_date?: string | null;
-        interview_score?: string | null;
+        ip_address?: string | null;
+        list_category?: string | null;
         medium_of_instruction: MediumOfInstruction;
         name_with_initials: string;
         nationality: Nationality;
         overseas_arrival_date?: string | null;
-        past_pupil_parent_id?: string | null;
-        provisionally_approved_at?: string | null;
-        provisionally_approved_by?: string | null;
-        rank?: number | null;
+        rank_number?: number | null;
+        reference_no: string;
         rejection_reason?: string | null;
         religion?: Religion | null;
         residence_verified?: boolean;
-        sibling_student_id?: string | null;
-        staff_parent_id?: string | null;
+        school_id: string;
+        status?: ApplicationStatus;
         student_id?: string | null;
         submission_method?: string | null;
-        total_score?: string | null;
-        transfer_officer_parent_id?: string | null;
+        submitted_at?: string | null;
+        total_marks?: string | null;
         updated_at?: string;
         updated_by?: string | null;
+        user_agent?: string | null;
+        verified_at?: string | null;
+        verified_by?: string | null;
     };
 };
 
-export type CreateEnrollmentResponse = CreateEnrollmentResponses[keyof CreateEnrollmentResponses];
+export type CreateApplicationResponse = CreateApplicationResponses[keyof CreateApplicationResponses];
 
-export type DeleteEnrollmentData = {
+export type DeleteApplicationData = {
     body?: never;
     path: {
         /**
@@ -538,10 +558,10 @@ export type DeleteEnrollmentData = {
         id: string;
     };
     query?: never;
-    url: '/api/g1-enrollments/{id}';
+    url: '/api/g1-applications/{id}';
 };
 
-export type DeleteEnrollmentErrors = {
+export type DeleteApplicationErrors = {
     /**
      * Bad Request
      */
@@ -568,13 +588,13 @@ export type DeleteEnrollmentErrors = {
     500: unknown;
 };
 
-export type DeleteEnrollmentResponses = {
+export type DeleteApplicationResponses = {
     200: MessageResponse;
 };
 
-export type DeleteEnrollmentResponse = DeleteEnrollmentResponses[keyof DeleteEnrollmentResponses];
+export type DeleteApplicationResponse = DeleteApplicationResponses[keyof DeleteApplicationResponses];
 
-export type GetEnrollmentData = {
+export type GetApplicationData = {
     body?: never;
     path: {
         /**
@@ -583,10 +603,10 @@ export type GetEnrollmentData = {
         id: string;
     };
     query?: never;
-    url: '/api/g1-enrollments/{id}';
+    url: '/api/g1-applications/{id}';
 };
 
-export type GetEnrollmentErrors = {
+export type GetApplicationErrors = {
     /**
      * Bad Request
      */
@@ -613,14 +633,14 @@ export type GetEnrollmentErrors = {
     500: unknown;
 };
 
-export type GetEnrollmentResponses = {
-    200: G1Enrollment;
+export type GetApplicationResponses = {
+    200: G1Application;
 };
 
-export type GetEnrollmentResponse = GetEnrollmentResponses[keyof GetEnrollmentResponses];
+export type GetApplicationResponse = GetApplicationResponses[keyof GetApplicationResponses];
 
-export type UpdateEnrollmentData = {
-    body: UpdateG1EnrollmentBody;
+export type UpdateApplicationData = {
+    body: G1Application;
     path: {
         /**
          * Uuid
@@ -628,10 +648,10 @@ export type UpdateEnrollmentData = {
         id: string;
     };
     query?: never;
-    url: '/api/g1-enrollments/{id}';
+    url: '/api/g1-applications/{id}';
 };
 
-export type UpdateEnrollmentErrors = {
+export type UpdateApplicationErrors = {
     /**
      * Bad Request
      */
@@ -658,11 +678,141 @@ export type UpdateEnrollmentErrors = {
     500: unknown;
 };
 
-export type UpdateEnrollmentResponses = {
-    200: G1Enrollment;
+export type UpdateApplicationResponses = {
+    200: G1Application;
 };
 
-export type UpdateEnrollmentResponse = UpdateEnrollmentResponses[keyof UpdateEnrollmentResponses];
+export type UpdateApplicationResponse = UpdateApplicationResponses[keyof UpdateApplicationResponses];
+
+export type SubmitApplicationData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/submit';
+};
+
+export type SubmitApplicationErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type SubmitApplicationResponses = {
+    200: G1Application;
+};
+
+export type SubmitApplicationResponse = SubmitApplicationResponses[keyof SubmitApplicationResponses];
+
+export type CalculateMarksData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/calculate-marks';
+};
+
+export type CalculateMarksErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type CalculateMarksResponses = {
+    200: G1Application;
+};
+
+export type CalculateMarksResponse = CalculateMarksResponses[keyof CalculateMarksResponses];
+
+export type GenerateAdmissionListsData = {
+    body: GenerateListsRequest;
+    path?: never;
+    query?: never;
+    url: '/api/g1-applications/generate-lists';
+};
+
+export type GenerateAdmissionListsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GenerateAdmissionListsResponses = {
+    200: GenerateListsResponse;
+};
+
+export type GenerateAdmissionListsResponse = GenerateAdmissionListsResponses[keyof GenerateAdmissionListsResponses];
 
 export type ListBatchesData = {
     body?: never;
@@ -743,6 +893,7 @@ export type CreateBatchResponses = {
      * EnrollmentBatch
      */
     201: {
+        alumni_weight?: number;
         /**
          * Machine-readable code (e.g., "G1-2026")
          */
@@ -754,8 +905,14 @@ export type CreateBatchResponses = {
         created_at?: string;
         created_by?: string | null;
         enrollment_type: EnrollmentType;
+        govt_weight?: number;
         id?: string;
+        proximity_weight?: number;
+        sibling_weight?: number;
+        special_weight?: number;
+        staff_weight?: number;
         status?: BatchStatus;
+        student_allocation?: number;
         year: number;
     };
 };

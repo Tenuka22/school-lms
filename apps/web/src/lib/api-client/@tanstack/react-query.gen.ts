@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { createBatch, createEnrollment, deleteBatch, deleteEnrollment, getBatch, getCounter, getEnrollment, getSecureCounter, incrementCounter, incrementSecureCounter, listBatches, listEnrollments, login, logout, logoutAll, me, type Options, refresh, register, updateBatch, updateEnrollment, uploadFile } from '../sdk.gen';
-import type { CreateBatchData, CreateBatchResponse, CreateEnrollmentData, CreateEnrollmentResponse, DeleteBatchData, DeleteBatchResponse, DeleteEnrollmentData, DeleteEnrollmentResponse, GetBatchData, GetBatchResponse, GetCounterData, GetCounterResponse, GetEnrollmentData, GetEnrollmentResponse, GetSecureCounterData, GetSecureCounterResponse, IncrementCounterData, IncrementCounterResponse, IncrementSecureCounterData, IncrementSecureCounterResponse, ListBatchesData, ListBatchesResponse, ListEnrollmentsData, ListEnrollmentsResponse, LoginData, LoginResponse, LogoutAllData, LogoutAllResponse, LogoutData, LogoutResponse, MeData, MeResponse, RefreshData, RefreshResponse, RegisterData, RegisterResponse, UpdateBatchData, UpdateBatchResponse, UpdateEnrollmentData, UpdateEnrollmentResponse, UploadFileData, UploadFileResponse } from '../types.gen';
+import { calculateMarks, createApplication, createBatch, deleteApplication, deleteBatch, generateAdmissionLists, getApplication, getBatch, getCounter, getSecureCounter, incrementCounter, incrementSecureCounter, listApplications, listBatches, login, logout, logoutAll, me, type Options, refresh, register, submitApplication, updateApplication, updateBatch, uploadFile } from '../sdk.gen';
+import type { CalculateMarksData, CalculateMarksResponse, CreateApplicationData, CreateApplicationResponse, CreateBatchData, CreateBatchResponse, DeleteApplicationData, DeleteApplicationResponse, DeleteBatchData, DeleteBatchResponse, GenerateAdmissionListsData, GenerateAdmissionListsResponse, GetApplicationData, GetApplicationResponse, GetBatchData, GetBatchResponse, GetCounterData, GetCounterResponse, GetSecureCounterData, GetSecureCounterResponse, IncrementCounterData, IncrementCounterResponse, IncrementSecureCounterData, IncrementSecureCounterResponse, ListApplicationsData, ListApplicationsResponse, ListBatchesData, ListBatchesResponse, LoginData, LoginResponse, LogoutAllData, LogoutAllResponse, LogoutData, LogoutResponse, MeData, MeResponse, RefreshData, RefreshResponse, RegisterData, RegisterResponse, SubmitApplicationData, SubmitApplicationResponse, UpdateApplicationData, UpdateApplicationResponse, UpdateBatchData, UpdateBatchResponse, UploadFileData, UploadFileResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -97,11 +97,11 @@ export const incrementSecureCounterMutation = (options?: Partial<Options<Increme
     return mutationOptions;
 };
 
-export const listEnrollmentsQueryKey = (options?: Options<ListEnrollmentsData>) => createQueryKey('listEnrollments', options);
+export const listApplicationsQueryKey = (options?: Options<ListApplicationsData>) => createQueryKey('listApplications', options);
 
-export const listEnrollmentsOptions = (options?: Options<ListEnrollmentsData>) => queryOptions<ListEnrollmentsResponse, DefaultError, ListEnrollmentsResponse, ReturnType<typeof listEnrollmentsQueryKey>>({
+export const listApplicationsOptions = (options?: Options<ListApplicationsData>) => queryOptions<ListApplicationsResponse, DefaultError, ListApplicationsResponse, ReturnType<typeof listApplicationsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await listEnrollments({
+        const { data } = await listApplications({
             ...options,
             ...queryKey[0],
             signal,
@@ -109,7 +109,7 @@ export const listEnrollmentsOptions = (options?: Options<ListEnrollmentsData>) =
         });
         return data;
     },
-    queryKey: listEnrollmentsQueryKey(options)
+    queryKey: listApplicationsQueryKey(options)
 });
 
 const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<Options>, page: K) => {
@@ -141,21 +141,21 @@ const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'hea
     return params as unknown as typeof page;
 };
 
-export const listEnrollmentsInfiniteQueryKey = (options?: Options<ListEnrollmentsData>): QueryKey<Options<ListEnrollmentsData>> => createQueryKey('listEnrollments', options, true);
+export const listApplicationsInfiniteQueryKey = (options?: Options<ListApplicationsData>): QueryKey<Options<ListApplicationsData>> => createQueryKey('listApplications', options, true);
 
-export const listEnrollmentsInfiniteOptions = (options?: Options<ListEnrollmentsData>) => {
-    const opts = infiniteQueryOptions<ListEnrollmentsResponse, DefaultError, InfiniteData<ListEnrollmentsResponse>, QueryKey<Options<ListEnrollmentsData>>, number | null | Pick<QueryKey<Options<ListEnrollmentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const listApplicationsInfiniteOptions = (options?: Options<ListApplicationsData>) => {
+    const opts = infiniteQueryOptions<ListApplicationsResponse, DefaultError, InfiniteData<ListApplicationsResponse>, QueryKey<Options<ListApplicationsData>>, number | null | Pick<QueryKey<Options<ListApplicationsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
     // @ts-ignore
     {
         queryFn: async ({ pageParam, queryKey, signal }) => {
             // @ts-ignore
-            const page: Pick<QueryKey<Options<ListEnrollmentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            const page: Pick<QueryKey<Options<ListApplicationsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
                 query: {
                     page: pageParam
                 }
             };
             const params = createInfiniteParams(queryKey, page);
-            const { data } = await listEnrollments({
+            const { data } = await listApplications({
                 ...options,
                 ...params,
                 signal,
@@ -163,15 +163,15 @@ export const listEnrollmentsInfiniteOptions = (options?: Options<ListEnrollments
             });
             return data;
         },
-        queryKey: listEnrollmentsInfiniteQueryKey(options)
+        queryKey: listApplicationsInfiniteQueryKey(options)
     });
     return opts as Omit<typeof opts, 'initialData'>;
 };
 
-export const createEnrollmentMutation = (options?: Partial<Options<CreateEnrollmentData>>): UseMutationOptions<CreateEnrollmentResponse, DefaultError, Options<CreateEnrollmentData>> => {
-    const mutationOptions: UseMutationOptions<CreateEnrollmentResponse, DefaultError, Options<CreateEnrollmentData>> = {
+export const createApplicationMutation = (options?: Partial<Options<CreateApplicationData>>): UseMutationOptions<CreateApplicationResponse, DefaultError, Options<CreateApplicationData>> => {
+    const mutationOptions: UseMutationOptions<CreateApplicationResponse, DefaultError, Options<CreateApplicationData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createEnrollment({
+            const { data } = await createApplication({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -182,10 +182,10 @@ export const createEnrollmentMutation = (options?: Partial<Options<CreateEnrollm
     return mutationOptions;
 };
 
-export const deleteEnrollmentMutation = (options?: Partial<Options<DeleteEnrollmentData>>): UseMutationOptions<DeleteEnrollmentResponse, DefaultError, Options<DeleteEnrollmentData>> => {
-    const mutationOptions: UseMutationOptions<DeleteEnrollmentResponse, DefaultError, Options<DeleteEnrollmentData>> = {
+export const deleteApplicationMutation = (options?: Partial<Options<DeleteApplicationData>>): UseMutationOptions<DeleteApplicationResponse, DefaultError, Options<DeleteApplicationData>> => {
+    const mutationOptions: UseMutationOptions<DeleteApplicationResponse, DefaultError, Options<DeleteApplicationData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await deleteEnrollment({
+            const { data } = await deleteApplication({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -196,11 +196,11 @@ export const deleteEnrollmentMutation = (options?: Partial<Options<DeleteEnrollm
     return mutationOptions;
 };
 
-export const getEnrollmentQueryKey = (options: Options<GetEnrollmentData>) => createQueryKey('getEnrollment', options);
+export const getApplicationQueryKey = (options: Options<GetApplicationData>) => createQueryKey('getApplication', options);
 
-export const getEnrollmentOptions = (options: Options<GetEnrollmentData>) => queryOptions<GetEnrollmentResponse, DefaultError, GetEnrollmentResponse, ReturnType<typeof getEnrollmentQueryKey>>({
+export const getApplicationOptions = (options: Options<GetApplicationData>) => queryOptions<GetApplicationResponse, DefaultError, GetApplicationResponse, ReturnType<typeof getApplicationQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getEnrollment({
+        const { data } = await getApplication({
             ...options,
             ...queryKey[0],
             signal,
@@ -208,13 +208,55 @@ export const getEnrollmentOptions = (options: Options<GetEnrollmentData>) => que
         });
         return data;
     },
-    queryKey: getEnrollmentQueryKey(options)
+    queryKey: getApplicationQueryKey(options)
 });
 
-export const updateEnrollmentMutation = (options?: Partial<Options<UpdateEnrollmentData>>): UseMutationOptions<UpdateEnrollmentResponse, DefaultError, Options<UpdateEnrollmentData>> => {
-    const mutationOptions: UseMutationOptions<UpdateEnrollmentResponse, DefaultError, Options<UpdateEnrollmentData>> = {
+export const updateApplicationMutation = (options?: Partial<Options<UpdateApplicationData>>): UseMutationOptions<UpdateApplicationResponse, DefaultError, Options<UpdateApplicationData>> => {
+    const mutationOptions: UseMutationOptions<UpdateApplicationResponse, DefaultError, Options<UpdateApplicationData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateEnrollment({
+            const { data } = await updateApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const submitApplicationMutation = (options?: Partial<Options<SubmitApplicationData>>): UseMutationOptions<SubmitApplicationResponse, DefaultError, Options<SubmitApplicationData>> => {
+    const mutationOptions: UseMutationOptions<SubmitApplicationResponse, DefaultError, Options<SubmitApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await submitApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const calculateMarksMutation = (options?: Partial<Options<CalculateMarksData>>): UseMutationOptions<CalculateMarksResponse, DefaultError, Options<CalculateMarksData>> => {
+    const mutationOptions: UseMutationOptions<CalculateMarksResponse, DefaultError, Options<CalculateMarksData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await calculateMarks({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const generateAdmissionListsMutation = (options?: Partial<Options<GenerateAdmissionListsData>>): UseMutationOptions<GenerateAdmissionListsResponse, DefaultError, Options<GenerateAdmissionListsData>> => {
+    const mutationOptions: UseMutationOptions<GenerateAdmissionListsResponse, DefaultError, Options<GenerateAdmissionListsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await generateAdmissionLists({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

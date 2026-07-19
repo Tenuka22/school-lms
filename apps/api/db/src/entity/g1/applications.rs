@@ -17,6 +17,10 @@ fn default_enrollment_status() -> EnrollmentStatus {
     EnrollmentStatus::Draft
 }
 
+fn default_reference_no() -> String {
+    format!("TMP-{}", uuid::Uuid::new_v4())
+}
+
 fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
@@ -30,12 +34,16 @@ pub struct Model {
     pub id: Uuid,
 
     #[sea_orm(unique)]
+    #[serde(default = "default_reference_no")]
     pub reference_no: String,
 
     pub applied_year: i16,
-    pub school_id: Uuid,
-    pub child_id: Uuid,
-    pub guardian_id: Uuid,
+    #[serde(default)]
+    pub school_id: Option<Uuid>,
+    #[serde(default)]
+    pub child_id: Option<Uuid>,
+    #[serde(default)]
+    pub guardian_id: Option<Uuid>,
 
     #[serde(default = "default_application_status")]
     pub status: ApplicationStatus,

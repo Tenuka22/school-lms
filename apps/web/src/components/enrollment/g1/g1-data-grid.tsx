@@ -14,11 +14,11 @@ import { Plus, Pencil, Trash2, LoaderCircle } from "lucide-react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import {
-  listEnrollmentsOptions,
-  listEnrollmentsQueryKey,
+  listApplicationsOptions,
+  listApplicationsQueryKey,
 } from "@/lib/api-client/@tanstack/react-query.gen"
-import { deleteEnrollment } from "@/lib/api-client/sdk.gen"
-import type { G1Enrollment } from "@/lib/api-client/types.gen"
+import { deleteApplication } from "@/lib/api-client/sdk.gen"
+import type { G1Application } from "@/lib/api-client/types.gen"
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
@@ -106,11 +106,14 @@ interface G1DatagridProps {
 const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
   const queryClient = useQueryClient()
 
+  const toNum = (v: string | number | undefined): number | null | undefined =>
+    v == null ? undefined : typeof v === "number" ? v : parseInt(v, 10) || undefined
+
   const queryOptions = React.useMemo(() => ({
     client: apiClient,
     query: {
-      page: search.page,
-      page_size: search.page_size,
+      page: toNum(search.page),
+      page_size: toNum(search.page_size),
       sort_by: search.sort_by,
       sort_order: search.sort_order,
       full_name: search.full_name,
@@ -123,27 +126,27 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
     },
   }), [search])
 
-  const { data } = useSuspenseQuery(listEnrollmentsOptions(queryOptions))
+  const { data } = useSuspenseQuery(listApplicationsOptions(queryOptions))
   const enrollments = data.items
   const total = data.total
 
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [editTarget, setEditTarget] = React.useState<G1Enrollment | null>(null)
+  const [editTarget, setEditTarget] = React.useState<G1Application | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<string | null>(null)
   const [deleting, setDeleting] = React.useState(false)
 
   const onSuccess = React.useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: listEnrollmentsQueryKey() })
+    queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey() })
   }, [queryClient])
 
   const handleDelete = React.useCallback(
     async (rowId: string) => {
       setDeleting(true)
       try {
-        await deleteEnrollment({ path: { id: rowId }, client: apiClient })
+        await deleteApplication({ path: { id: rowId }, client: apiClient })
         setDeleteTarget(null)
-        queryClient.invalidateQueries({ queryKey: listEnrollmentsQueryKey() })
+        queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey() })
         toast.success("Enrollment deleted")
       } catch (err) {
         const message = err instanceof Error ? err.message : "Delete failed"
@@ -160,7 +163,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
     setDialogOpen(true)
   }, [])
 
-  const handleEdit = React.useCallback((enrollment: G1Enrollment) => {
+  const handleEdit = React.useCallback((enrollment: G1Application) => {
     setEditTarget(enrollment)
     setDialogOpen(true)
   }, [])
@@ -185,7 +188,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
   }, [search])
 
   const pagination: PaginationState = React.useMemo(
-    () => ({ pageIndex: Math.max(0, search.page - 1), pageSize: search.page_size }),
+    () => ({ pageIndex: Math.max(0, (toNum(search.page) ?? 1) - 1), pageSize: toNum(search.page_size) ?? 10 }),
     [search.page, search.page_size],
   )
 
@@ -233,7 +236,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
     [pagination, navigate, search],
   )
 
-  const columns = React.useMemo<ColumnDef<G1Enrollment>[]>(
+  const columns = React.useMemo<ColumnDef<G1Application>[]>(
     () => [
       {
         accessorKey: "full_name",

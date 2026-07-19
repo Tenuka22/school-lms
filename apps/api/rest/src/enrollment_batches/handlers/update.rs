@@ -16,7 +16,14 @@ use db::rbac::Permission;
 
 #[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct UpdateBatchBody {
-    pub status: BatchStatus,
+    pub status: Option<BatchStatus>,
+    pub student_allocation: Option<i32>,
+    pub proximity_weight: Option<i16>,
+    pub staff_weight: Option<i16>,
+    pub sibling_weight: Option<i16>,
+    pub alumni_weight: Option<i16>,
+    pub govt_weight: Option<i16>,
+    pub special_weight: Option<i16>,
 }
 
 #[api_operation(tag = "enrollment-batches", operation_id = "update-batch")]
@@ -43,16 +50,16 @@ pub async fn update_batch(
         batch_code: Set(existing.batch_code),
         batch_name: Set(existing.batch_name),
         enrollment_type: Set(existing.enrollment_type),
-        status: Set(patch.status),
+        status: Set(patch.status.unwrap_or(existing.status)),
         created_at: Set(existing.created_at),
         created_by: Set(existing.created_by),
-        student_allocation: Set(existing.student_allocation),
-        proximity_weight: Set(existing.proximity_weight),
-        staff_weight: Set(existing.staff_weight),
-        sibling_weight: Set(existing.sibling_weight),
-        alumni_weight: Set(existing.alumni_weight),
-        govt_weight: Set(existing.govt_weight),
-        special_weight: Set(existing.special_weight),
+        student_allocation: Set(patch.student_allocation.unwrap_or(existing.student_allocation)),
+        proximity_weight: Set(patch.proximity_weight.unwrap_or(existing.proximity_weight)),
+        staff_weight: Set(patch.staff_weight.unwrap_or(existing.staff_weight)),
+        sibling_weight: Set(patch.sibling_weight.unwrap_or(existing.sibling_weight)),
+        alumni_weight: Set(patch.alumni_weight.unwrap_or(existing.alumni_weight)),
+        govt_weight: Set(patch.govt_weight.unwrap_or(existing.govt_weight)),
+        special_weight: Set(patch.special_weight.unwrap_or(existing.special_weight)),
     };
 
     let saved = active.update(db.as_ref()).await?;
