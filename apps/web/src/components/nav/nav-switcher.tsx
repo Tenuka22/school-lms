@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useNavigate } from "@tanstack/react-router"
-import { ChevronsUpDown } from "lucide-react"
+import { IconArrowsSort } from "@tabler/icons-react"
 
 import {
   DropdownMenu,
@@ -67,7 +67,7 @@ export function NavSwitcher({
               <span className="truncate font-medium">{activeMode.name}</span>
               <span className="truncate text-xs">{activeMode.description}</span>
             </div>
-            <ChevronsUpDown className="ml-auto" />
+            <IconArrowsSort className="ml-auto" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"

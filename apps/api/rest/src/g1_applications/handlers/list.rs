@@ -23,6 +23,7 @@ pub struct ListApplicationsQuery {
     pub category: Option<String>,
     pub medium_of_instruction: Option<String>,
     pub enrollment_status: Option<String>,
+    pub batch_id: Option<String>,
 }
 
 #[derive(Serialize, JsonSchema, ApiComponent)]
@@ -75,6 +76,11 @@ pub async fn list_applications(
     if let Some(ref status) = params.enrollment_status {
         if !status.is_empty() {
             query = query.filter(applications::Column::EnrollmentStatus.eq(status.clone()));
+        }
+    }
+    if let Some(ref batch_id) = params.batch_id {
+        if !batch_id.is_empty() {
+            query = query.filter(applications::Column::BatchId.eq(uuid::Uuid::parse_str(batch_id).unwrap_or_default()));
         }
     }
 

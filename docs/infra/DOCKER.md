@@ -69,8 +69,8 @@ This starts two tasks in parallel:
 | Service  | Image               | Container Name                  | Host Port | Purpose             |
 |----------|---------------------|---------------------------------|-----------|---------------------|
 | postgres | `postgres:17`       | `school-lms-postgres-prod`      | `5432`    | Database            |
-| api      | Custom build        | —                               | `3001`    | API server (Docker) |
-| web      | Custom build        | —                               | `3000`    | Web app (Docker)    |
+| api      | Custom build        | —                               | `8001`    | API server (Docker) |
+| web      | Custom build        | —                               | `8000`    | Web app (Docker)    |
 
 ### Environment
 

@@ -33,7 +33,7 @@ pub async fn update_batch(
     id: web::Path<Uuid>,
     body: Json<UpdateBatchBody>,
 ) -> Result<Json<enrollment_batches::Model>, ApiError> {
-    auth.require_permission(Permission::All)
+    auth.require_permission(Permission::EnrollmentBatchUpdate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let id = id.into_inner();

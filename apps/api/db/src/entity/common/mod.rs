@@ -7,6 +7,8 @@ pub mod enums;
 pub mod guardians;
 pub mod guardians_audit;
 pub mod past_pupil_details;
+pub mod schools;
 pub mod secure_counter;
 pub mod siblings;
 pub mod staff_details;
+pub mod workspace_addresses;

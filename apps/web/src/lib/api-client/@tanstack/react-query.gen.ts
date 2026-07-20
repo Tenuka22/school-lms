@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { calculateMarks, createApplication, createBatch, deleteApplication, deleteBatch, generateAdmissionLists, getApplication, getBatch, getCounter, getSecureCounter, incrementCounter, incrementSecureCounter, listApplications, listBatches, login, logout, logoutAll, me, type Options, refresh, register, submitApplication, updateApplication, updateBatch, uploadFile } from '../sdk.gen';
-import type { CalculateMarksData, CalculateMarksResponse, CreateApplicationData, CreateApplicationResponse, CreateBatchData, CreateBatchResponse, DeleteApplicationData, DeleteApplicationResponse, DeleteBatchData, DeleteBatchResponse, GenerateAdmissionListsData, GenerateAdmissionListsResponse, GetApplicationData, GetApplicationResponse, GetBatchData, GetBatchResponse, GetCounterData, GetCounterResponse, GetSecureCounterData, GetSecureCounterResponse, IncrementCounterData, IncrementCounterResponse, IncrementSecureCounterData, IncrementSecureCounterResponse, ListApplicationsData, ListApplicationsResponse, ListBatchesData, ListBatchesResponse, LoginData, LoginResponse, LogoutAllData, LogoutAllResponse, LogoutData, LogoutResponse, MeData, MeResponse, RefreshData, RefreshResponse, RegisterData, RegisterResponse, SubmitApplicationData, SubmitApplicationResponse, UpdateApplicationData, UpdateApplicationResponse, UpdateBatchData, UpdateBatchResponse, UploadFileData, UploadFileResponse } from '../types.gen';
+import { calculateMarks, createApplication, createBatch, createGuardian, createPastPupilDetail, createSibling, createStaffDetail, createWorkspaceAddress, deleteApplication, deleteBatch, generateAdmissionLists, getApplication, getApplicationDocuments, getApplicationGuardians, getApplicationSiblings, getApplicationWorkspaceAddresses, getBatch, getCounter, getGuardian, getSecureCounter, getWorkspaceAddress, incrementCounter, incrementSecureCounter, listApplications, listBatches, listGuardians, listPastPupilDetails, listSchools, listStaffDetails, listStudents, listWorkspaceAddresses, login, logout, logoutAll, me, type Options, presignedUploadUrl, refresh, register, saveApplicationDocuments, saveGuardians, saveSiblings, saveWizardStep, saveWorkspaceAddresses, submitApplication, updateApplication, updateBatch, updateGuardian, updateStudent, uploadFile } from '../sdk.gen';
+import type { CalculateMarksData, CalculateMarksResponse, CreateApplicationData, CreateApplicationResponse, CreateBatchData, CreateBatchResponse, CreateGuardianData, CreateGuardianResponse, CreatePastPupilDetailData, CreatePastPupilDetailResponse, CreateSiblingData, CreateSiblingResponse2, CreateStaffDetailData, CreateStaffDetailResponse, CreateWorkspaceAddressData, CreateWorkspaceAddressResponse, DeleteApplicationData, DeleteApplicationResponse, DeleteBatchData, DeleteBatchResponse, GenerateAdmissionListsData, GenerateAdmissionListsResponse, GetApplicationData, GetApplicationDocumentsData, GetApplicationDocumentsResponse, GetApplicationGuardiansData, GetApplicationGuardiansResponse2, GetApplicationResponse, GetApplicationSiblingsData, GetApplicationSiblingsResponse2, GetApplicationWorkspaceAddressesData, GetApplicationWorkspaceAddressesResponse2, GetBatchData, GetBatchResponse, GetCounterData, GetCounterResponse, GetGuardianData, GetGuardianResponse, GetSecureCounterData, GetSecureCounterResponse, GetWorkspaceAddressData, GetWorkspaceAddressResponse, IncrementCounterData, IncrementCounterResponse, IncrementSecureCounterData, IncrementSecureCounterResponse, ListApplicationsData, ListApplicationsResponse, ListBatchesData, ListBatchesResponse, ListGuardiansData, ListGuardiansResponse, ListPastPupilDetailsData, ListPastPupilDetailsResponse, ListSchoolsData, ListSchoolsResponse, ListStaffDetailsData, ListStaffDetailsResponse, ListStudentsData, ListStudentsResponse, ListWorkspaceAddressesData, ListWorkspaceAddressesResponse, LoginData, LoginResponse, LogoutAllData, LogoutAllResponse, LogoutData, LogoutResponse, MeData, MeResponse, PresignedUploadUrlData, PresignedUploadUrlResponse, RefreshData, RefreshResponse, RegisterData, RegisterResponse, SaveApplicationDocumentsData, SaveApplicationDocumentsResponse, SaveGuardiansData, SaveGuardiansResponse2, SaveSiblingsData, SaveSiblingsResponse2, SaveWizardStepData, SaveWizardStepResponse, SaveWorkspaceAddressesData, SaveWorkspaceAddressesResponse2, SubmitApplicationData, SubmitApplicationResponse, UpdateApplicationData, UpdateApplicationResponse, UpdateBatchData, UpdateBatchResponse, UpdateGuardianData, UpdateGuardianResponse, UpdateStudentData, UpdateStudentResponse, UploadFileData, UploadFileResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -267,6 +267,150 @@ export const generateAdmissionListsMutation = (options?: Partial<Options<Generat
     return mutationOptions;
 };
 
+export const saveWizardStepMutation = (options?: Partial<Options<SaveWizardStepData>>): UseMutationOptions<SaveWizardStepResponse, DefaultError, Options<SaveWizardStepData>> => {
+    const mutationOptions: UseMutationOptions<SaveWizardStepResponse, DefaultError, Options<SaveWizardStepData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await saveWizardStep({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApplicationGuardiansQueryKey = (options: Options<GetApplicationGuardiansData>) => createQueryKey('getApplicationGuardians', options);
+
+export const getApplicationGuardiansOptions = (options: Options<GetApplicationGuardiansData>) => queryOptions<GetApplicationGuardiansResponse2, DefaultError, GetApplicationGuardiansResponse2, ReturnType<typeof getApplicationGuardiansQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApplicationGuardians({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApplicationGuardiansQueryKey(options)
+});
+
+export const saveGuardiansMutation = (options?: Partial<Options<SaveGuardiansData>>): UseMutationOptions<SaveGuardiansResponse2, DefaultError, Options<SaveGuardiansData>> => {
+    const mutationOptions: UseMutationOptions<SaveGuardiansResponse2, DefaultError, Options<SaveGuardiansData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await saveGuardians({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApplicationWorkspaceAddressesQueryKey = (options: Options<GetApplicationWorkspaceAddressesData>) => createQueryKey('getApplicationWorkspaceAddresses', options);
+
+export const getApplicationWorkspaceAddressesOptions = (options: Options<GetApplicationWorkspaceAddressesData>) => queryOptions<GetApplicationWorkspaceAddressesResponse2, DefaultError, GetApplicationWorkspaceAddressesResponse2, ReturnType<typeof getApplicationWorkspaceAddressesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApplicationWorkspaceAddresses({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApplicationWorkspaceAddressesQueryKey(options)
+});
+
+export const saveWorkspaceAddressesMutation = (options?: Partial<Options<SaveWorkspaceAddressesData>>): UseMutationOptions<SaveWorkspaceAddressesResponse2, DefaultError, Options<SaveWorkspaceAddressesData>> => {
+    const mutationOptions: UseMutationOptions<SaveWorkspaceAddressesResponse2, DefaultError, Options<SaveWorkspaceAddressesData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await saveWorkspaceAddresses({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApplicationSiblingsQueryKey = (options: Options<GetApplicationSiblingsData>) => createQueryKey('getApplicationSiblings', options);
+
+export const getApplicationSiblingsOptions = (options: Options<GetApplicationSiblingsData>) => queryOptions<GetApplicationSiblingsResponse2, DefaultError, GetApplicationSiblingsResponse2, ReturnType<typeof getApplicationSiblingsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApplicationSiblings({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApplicationSiblingsQueryKey(options)
+});
+
+export const saveSiblingsMutation = (options?: Partial<Options<SaveSiblingsData>>): UseMutationOptions<SaveSiblingsResponse2, DefaultError, Options<SaveSiblingsData>> => {
+    const mutationOptions: UseMutationOptions<SaveSiblingsResponse2, DefaultError, Options<SaveSiblingsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await saveSiblings({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const createSiblingMutation = (options?: Partial<Options<CreateSiblingData>>): UseMutationOptions<CreateSiblingResponse2, DefaultError, Options<CreateSiblingData>> => {
+    const mutationOptions: UseMutationOptions<CreateSiblingResponse2, DefaultError, Options<CreateSiblingData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createSibling({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getApplicationDocumentsQueryKey = (options: Options<GetApplicationDocumentsData>) => createQueryKey('getApplicationDocuments', options);
+
+export const getApplicationDocumentsOptions = (options: Options<GetApplicationDocumentsData>) => queryOptions<GetApplicationDocumentsResponse, DefaultError, GetApplicationDocumentsResponse, ReturnType<typeof getApplicationDocumentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getApplicationDocuments({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getApplicationDocumentsQueryKey(options)
+});
+
+export const saveApplicationDocumentsMutation = (options?: Partial<Options<SaveApplicationDocumentsData>>): UseMutationOptions<SaveApplicationDocumentsResponse, DefaultError, Options<SaveApplicationDocumentsData>> => {
+    const mutationOptions: UseMutationOptions<SaveApplicationDocumentsResponse, DefaultError, Options<SaveApplicationDocumentsData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await saveApplicationDocuments({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const listBatchesQueryKey = (options?: Options<ListBatchesData>) => createQueryKey('listBatches', options);
 
 export const listBatchesOptions = (options?: Options<ListBatchesData>) => queryOptions<ListBatchesResponse, DefaultError, ListBatchesResponse, ReturnType<typeof listBatchesQueryKey>>({
@@ -329,6 +473,224 @@ export const updateBatchMutation = (options?: Partial<Options<UpdateBatchData>>)
     const mutationOptions: UseMutationOptions<UpdateBatchResponse, DefaultError, Options<UpdateBatchData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await updateBatch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listGuardiansQueryKey = (options?: Options<ListGuardiansData>) => createQueryKey('listGuardians', options);
+
+export const listGuardiansOptions = (options?: Options<ListGuardiansData>) => queryOptions<ListGuardiansResponse, DefaultError, ListGuardiansResponse, ReturnType<typeof listGuardiansQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listGuardians({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listGuardiansQueryKey(options)
+});
+
+export const createGuardianMutation = (options?: Partial<Options<CreateGuardianData>>): UseMutationOptions<CreateGuardianResponse, DefaultError, Options<CreateGuardianData>> => {
+    const mutationOptions: UseMutationOptions<CreateGuardianResponse, DefaultError, Options<CreateGuardianData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createGuardian({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getGuardianQueryKey = (options: Options<GetGuardianData>) => createQueryKey('getGuardian', options);
+
+export const getGuardianOptions = (options: Options<GetGuardianData>) => queryOptions<GetGuardianResponse, DefaultError, GetGuardianResponse, ReturnType<typeof getGuardianQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getGuardian({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getGuardianQueryKey(options)
+});
+
+export const updateGuardianMutation = (options?: Partial<Options<UpdateGuardianData>>): UseMutationOptions<UpdateGuardianResponse, DefaultError, Options<UpdateGuardianData>> => {
+    const mutationOptions: UseMutationOptions<UpdateGuardianResponse, DefaultError, Options<UpdateGuardianData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateGuardian({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listPastPupilDetailsQueryKey = (options?: Options<ListPastPupilDetailsData>) => createQueryKey('listPastPupilDetails', options);
+
+export const listPastPupilDetailsOptions = (options?: Options<ListPastPupilDetailsData>) => queryOptions<ListPastPupilDetailsResponse, DefaultError, ListPastPupilDetailsResponse, ReturnType<typeof listPastPupilDetailsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listPastPupilDetails({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPastPupilDetailsQueryKey(options)
+});
+
+export const createPastPupilDetailMutation = (options?: Partial<Options<CreatePastPupilDetailData>>): UseMutationOptions<CreatePastPupilDetailResponse, DefaultError, Options<CreatePastPupilDetailData>> => {
+    const mutationOptions: UseMutationOptions<CreatePastPupilDetailResponse, DefaultError, Options<CreatePastPupilDetailData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createPastPupilDetail({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listSchoolsQueryKey = (options?: Options<ListSchoolsData>) => createQueryKey('listSchools', options);
+
+export const listSchoolsOptions = (options?: Options<ListSchoolsData>) => queryOptions<ListSchoolsResponse, DefaultError, ListSchoolsResponse, ReturnType<typeof listSchoolsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listSchools({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listSchoolsQueryKey(options)
+});
+
+export const listStaffDetailsQueryKey = (options?: Options<ListStaffDetailsData>) => createQueryKey('listStaffDetails', options);
+
+export const listStaffDetailsOptions = (options?: Options<ListStaffDetailsData>) => queryOptions<ListStaffDetailsResponse, DefaultError, ListStaffDetailsResponse, ReturnType<typeof listStaffDetailsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listStaffDetails({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listStaffDetailsQueryKey(options)
+});
+
+export const createStaffDetailMutation = (options?: Partial<Options<CreateStaffDetailData>>): UseMutationOptions<CreateStaffDetailResponse, DefaultError, Options<CreateStaffDetailData>> => {
+    const mutationOptions: UseMutationOptions<CreateStaffDetailResponse, DefaultError, Options<CreateStaffDetailData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createStaffDetail({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listStudentsQueryKey = (options?: Options<ListStudentsData>) => createQueryKey('listStudents', options);
+
+export const listStudentsOptions = (options?: Options<ListStudentsData>) => queryOptions<ListStudentsResponse, DefaultError, ListStudentsResponse, ReturnType<typeof listStudentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listStudents({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listStudentsQueryKey(options)
+});
+
+export const updateStudentMutation = (options?: Partial<Options<UpdateStudentData>>): UseMutationOptions<UpdateStudentResponse, DefaultError, Options<UpdateStudentData>> => {
+    const mutationOptions: UseMutationOptions<UpdateStudentResponse, DefaultError, Options<UpdateStudentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateStudent({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listWorkspaceAddressesQueryKey = (options?: Options<ListWorkspaceAddressesData>) => createQueryKey('listWorkspaceAddresses', options);
+
+export const listWorkspaceAddressesOptions = (options?: Options<ListWorkspaceAddressesData>) => queryOptions<ListWorkspaceAddressesResponse, DefaultError, ListWorkspaceAddressesResponse, ReturnType<typeof listWorkspaceAddressesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listWorkspaceAddresses({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listWorkspaceAddressesQueryKey(options)
+});
+
+export const createWorkspaceAddressMutation = (options?: Partial<Options<CreateWorkspaceAddressData>>): UseMutationOptions<CreateWorkspaceAddressResponse, DefaultError, Options<CreateWorkspaceAddressData>> => {
+    const mutationOptions: UseMutationOptions<CreateWorkspaceAddressResponse, DefaultError, Options<CreateWorkspaceAddressData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createWorkspaceAddress({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getWorkspaceAddressQueryKey = (options: Options<GetWorkspaceAddressData>) => createQueryKey('getWorkspaceAddress', options);
+
+export const getWorkspaceAddressOptions = (options: Options<GetWorkspaceAddressData>) => queryOptions<GetWorkspaceAddressResponse, DefaultError, GetWorkspaceAddressResponse, ReturnType<typeof getWorkspaceAddressQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getWorkspaceAddress({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getWorkspaceAddressQueryKey(options)
+});
+
+export const presignedUploadUrlMutation = (options?: Partial<Options<PresignedUploadUrlData>>): UseMutationOptions<PresignedUploadUrlResponse, DefaultError, Options<PresignedUploadUrlData>> => {
+    const mutationOptions: UseMutationOptions<PresignedUploadUrlResponse, DefaultError, Options<PresignedUploadUrlData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await presignedUploadUrl({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

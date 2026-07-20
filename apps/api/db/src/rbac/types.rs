@@ -53,6 +53,10 @@ pub enum Permission {
     G1AppealCreate,
     G1AppealReview,
     G1ReportRead,
+    EnrollmentBatchCreate,
+    EnrollmentBatchRead,
+    EnrollmentBatchUpdate,
+    EnrollmentBatchDelete,
     All,
 }
 
@@ -81,6 +85,10 @@ impl Permission {
             Permission::G1AppealCreate => "g1:appeal:create",
             Permission::G1AppealReview => "g1:appeal:review",
             Permission::G1ReportRead => "g1:report:read",
+            Permission::EnrollmentBatchCreate => "enrollment-batch:create",
+            Permission::EnrollmentBatchRead => "enrollment-batch:read",
+            Permission::EnrollmentBatchUpdate => "enrollment-batch:update",
+            Permission::EnrollmentBatchDelete => "enrollment-batch:delete",
             Permission::All => "*:*",
         }
     }

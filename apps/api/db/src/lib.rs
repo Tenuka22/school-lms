@@ -1,5 +1,6 @@
 pub mod entity;
 pub mod rbac;
+pub mod seed;
 
 use sea_orm::{Database, DatabaseConnection, DbErr};
 

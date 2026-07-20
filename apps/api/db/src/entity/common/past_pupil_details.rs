@@ -1,4 +1,6 @@
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -6,13 +8,14 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
 #[sea_orm(table_name = "past_pupil_details")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub guardian_id: Uuid,
     pub school_id: Uuid,
+    pub student_id: Option<String>,
     pub highest_grade: Option<String>,
     pub year_left: Option<i16>,
     pub left_reason: Option<String>,
@@ -33,9 +36,9 @@ pub enum Relation {
     )]
     Guardian,
     #[sea_orm(
-        belongs_to = "super::super::g1::schools::Entity",
+        belongs_to = "super::schools::Entity",
         from = "Column::SchoolId",
-        to = "super::super::g1::schools::Column::Id"
+        to = "super::schools::Column::Id"
     )]
     School,
     #[sea_orm(has_many = "super::super::g1::join_past_pupil_details::Entity")]
@@ -48,7 +51,7 @@ impl Related<super::super::common::guardians::Entity> for Entity {
     }
 }
 
-impl Related<super::super::g1::schools::Entity> for Entity {
+impl Related<super::schools::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::School.def()
     }

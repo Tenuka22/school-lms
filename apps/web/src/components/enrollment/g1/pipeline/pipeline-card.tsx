@@ -4,13 +4,13 @@ import type { G1Application } from "@/lib/api-client/types.gen"
 interface PipelineCardProps {
   enrollment: G1Application
   laneStatus: string
-  onClick: () => void
+  onClick?: () => void
 }
 
 export function PipelineCard({ enrollment, laneStatus, onClick }: PipelineCardProps) {
   return (
     <Card
-      className="p-3 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all"
+      className={`p-3 transition-all ${onClick ? "cursor-pointer hover:ring-2 hover:ring-primary/30" : "cursor-default"}`}
       onClick={onClick}
     >
       <div className="text-xs text-muted-foreground font-mono">

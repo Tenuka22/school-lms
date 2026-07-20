@@ -1,19 +1,24 @@
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc, NaiveDate};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::super::common::enums::StaffEmploymentType;
+use super::super::common::enums::{StaffEmploymentType, StaffType};
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[schemars(rename = "StaffDetail")]
 #[sea_orm(table_name = "staff_details")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub guardian_id: Uuid,
     pub school_id: Uuid,
+    pub staff_type: Option<StaffType>,
+    pub employee_id: Option<String>,
     pub designation: Option<String>,
     pub employment_type: Option<StaffEmploymentType>,
     pub service_start_date: Option<NaiveDate>,
@@ -36,9 +41,9 @@ pub enum Relation {
     )]
     Guardian,
     #[sea_orm(
-        belongs_to = "super::super::g1::schools::Entity",
+        belongs_to = "super::schools::Entity",
         from = "Column::SchoolId",
-        to = "super::super::g1::schools::Column::Id"
+        to = "super::schools::Column::Id"
     )]
     School,
     #[sea_orm(has_many = "super::super::g1::join_staff_details::Entity")]
@@ -51,7 +56,7 @@ impl Related<super::super::common::guardians::Entity> for Entity {
     }
 }
 
-impl Related<super::super::g1::schools::Entity> for Entity {
+impl Related<super::schools::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::School.def()
     }

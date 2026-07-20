@@ -1,230 +1,181 @@
 "use client"
 
+import { useState, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import type { GuardianData } from "./wizard-shell"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { apiClient } from "@/lib/api-client"
+import { listGuardiansOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+import type { Guardian } from "@/lib/api-client/types.gen"
+import { IconLoader2, IconCheck, IconUser, IconX, IconPhone, IconId, IconBriefcase } from "@tabler/icons-react"
+import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
+
+export type GuardianFormData = string[]
 
 interface Props {
-  guardians: GuardianData[]
-  onChange: (guardians: GuardianData[]) => void
+  selectedIds: string[]
+  onDeselect: (id: string) => void
+  onSave: (guardianIds: string[]) => Promise<void>
   onBack: () => void
   onNext: () => void
 }
 
-function GuardianForm({
-  data,
-  index,
-  onChange,
-}: {
-  data: GuardianData
-  index: number
-  onChange: (g: GuardianData) => void
-}) {
-  const u = (partial: Partial<GuardianData>) => onChange({ ...data, ...partial })
+type FilterCategory = "staff" | "alumni" | "govt" | "all"
 
-  return (
-    <div className="space-y-4 border rounded-lg p-4">
-      <h4 className="font-medium">Guardian {index + 1}</h4>
-      <div className="space-y-2">
-        <Label>Relationship</Label>
-        <Select value={data.relationship} onValueChange={(val) => val && u({ relationship: val })}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Father">Father</SelectItem>
-            <SelectItem value="Mother">Mother</SelectItem>
-            <SelectItem value="Guardian">Guardian</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>Full Name</Label>
-        <Input value={data.full_name} onChange={(e) => u({ full_name: e.target.value })} placeholder="Full name" />
-      </div>
-      <div className="space-y-2">
-        <Label>NIC Number</Label>
-        <Input value={data.nic} onChange={(e) => u({ nic: e.target.value })} placeholder="XXXXXXXXXXX" />
-      </div>
-      <div className="space-y-2">
-        <Label>Phone</Label>
-        <Input value={data.phone} onChange={(e) => u({ phone: e.target.value })} placeholder="07XXXXXXXX" />
-      </div>
-      <div className="space-y-2">
-        <Label>Email</Label>
-        <Input type="email" value={data.email} onChange={(e) => u({ email: e.target.value })} placeholder="Optional" />
-      </div>
-      <div className="space-y-2">
-        <Label>Occupation</Label>
-        <Input value={data.occupation} onChange={(e) => u({ occupation: e.target.value })} placeholder="Optional" />
-      </div>
-      <div className="space-y-2">
-        <Label>Workplace</Label>
-        <Input value={data.workplace} onChange={(e) => u({ workplace: e.target.value })} placeholder="Optional" />
-      </div>
+const FILTERS: { key: FilterCategory; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "staff", label: "Staff" },
+  { key: "alumni", label: "Alumni" },
+  { key: "govt", label: "Govt" },
+]
 
-      <div className="border-t pt-4 space-y-3">
-        <p className="text-sm font-medium text-muted-foreground">Scoring Categories</p>
-        <div className="flex items-center gap-2">
-          <Checkbox id={`is_staff_${index}`} checked={data.is_staff} onCheckedChange={(v) => u({ is_staff: v === true })} />
-          <Label htmlFor={`is_staff_${index}`}>School Staff (25%)</Label>
-        </div>
-        {data.is_staff && (
-          <div className="ml-6 space-y-2 border-l-2 pl-4">
-            <div className="space-y-2">
-              <Label>Designation</Label>
-              <Input value={data.staff_designation} onChange={(e) => u({ staff_designation: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Employment Type</Label>
-              <Select value={data.staff_employment_type} onValueChange={(val) => val && u({ staff_employment_type: val })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Permanent">Permanent</SelectItem>
-                  <SelectItem value="Temporary">Temporary</SelectItem>
-                  <SelectItem value="Contract">Contract</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Service Start Date</Label>
-              <Input type="date" value={data.staff_service_start} onChange={(e) => u({ staff_service_start: e.target.value })} />
-            </div>
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Checkbox id={`is_alumni_${index}`} checked={data.is_alumni} onCheckedChange={(v) => u({ is_alumni: v === true })} />
-          <Label htmlFor={`is_alumni_${index}`}>Past Pupil / Alumni (6%)</Label>
-        </div>
-        {data.is_alumni && (
-          <div className="ml-6 space-y-2 border-l-2 pl-4">
-            <div className="space-y-2">
-              <Label>Highest Grade</Label>
-              <Select value={data.alumni_highest_grade} onValueChange={(val) => val && u({ alumni_highest_grade: val })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="GCE_AL">GCE A/L</SelectItem>
-                  <SelectItem value="GCE_OL">GCE O/L</SelectItem>
-                  <SelectItem value="Grade_11">Grade 11</SelectItem>
-                  <SelectItem value="Grade_10">Grade 10</SelectItem>
-                  <SelectItem value="Below">Below Grade 10</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Year Left</Label>
-              <Input value={data.alumni_year_left} onChange={(e) => u({ alumni_year_left: e.target.value })} placeholder="YYYY" />
-            </div>
-            <div className="space-y-2">
-              <Label>Left Reason</Label>
-              <Select value={data.alumni_left_reason} onValueChange={(val) => val && u({ alumni_left_reason: val })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Transferred">Transferred</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Checkbox id={`is_govt_${index}`} checked={data.is_govt_employee} onCheckedChange={(v) => u({ is_govt_employee: v === true })} />
-          <Label htmlFor={`is_govt_${index}`}>Government Employee (4%)</Label>
-        </div>
-        {data.is_govt_employee && (
-          <div className="ml-6 space-y-2 border-l-2 pl-4">
-            <div className="space-y-2">
-              <Label>Service Years</Label>
-              <Input type="number" value={data.govt_service_years} onChange={(e) => u({ govt_service_years: parseInt(e.target.value) || 0 })} />
-            </div>
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Checkbox id={`is_special_${index}`} checked={data.is_special} onCheckedChange={(v) => u({ is_special: v === true })} />
-          <Label htmlFor={`is_special_${index}`}>Special Circumstances (1%)</Label>
-        </div>
-        {data.is_special && (
-          <div className="ml-6 space-y-2 border-l-2 pl-4">
-            <div className="flex items-center gap-2">
-              <Checkbox id={`disability_${index}`} checked={data.disability} onCheckedChange={(v) => u({ disability: v === true })} />
-              <Label htmlFor={`disability_${index}`}>Disability</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox id={`conflict_${index}`} checked={data.conflict_area} onCheckedChange={(v) => u({ conflict_area: v === true })} />
-              <Label htmlFor={`conflict_${index}`}>Conflict Area</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox id={`single_parent_${index}`} checked={data.single_parent} onCheckedChange={(v) => u({ single_parent: v === true })} />
-              <Label htmlFor={`single_parent_${index}`}>Single Parent</Label>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, onNext }: Props) {
+  const [filter, setFilter] = useState<FilterCategory>("all")
+  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
 
-export function WizardStepGuardian({ guardians, onChange, onBack, onNext }: Props) {
-  const updateGuardian = (index: number, data: GuardianData) => {
-    const next = [...guardians]
-    next[index] = data
-    onChange(next)
+  const { data: guardians = [] } = useQuery(listGuardiansOptions({ client: apiClient }))
+  const guardianMap = useMemo(() => {
+    const m = new Map<string, Guardian>()
+    for (const g of guardians) m.set(g.id, g)
+    return m
+  }, [guardians])
+
+  const selectedGuardians = useMemo(() => {
+    return selectedIds.map((id) => guardianMap.get(id)).filter(Boolean) as Guardian[]
+  }, [selectedIds, guardianMap])
+
+  const filteredGuardians = useMemo(() => {
+    if (filter === "all") return selectedGuardians
+    return selectedGuardians.filter((g) => {
+      if (filter === "staff") return g.is_school_staff
+      if (filter === "alumni") return g.is_past_pupil
+      return g.is_govt_employee
+    })
+  }, [selectedGuardians, filter])
+
+  const handleNext = async () => {
+    setStatus("saving")
+    try {
+      await onSave(selectedIds)
+      setStatus("done")
+      setTimeout(() => onNext(), 400)
+    } catch (e) {
+      console.error("onSave failed:", e)
+      setStatus("idle")
+      toast.error("Failed to save. Please try again.")
+    }
   }
-
-  const addGuardian = () => {
-    if (guardians.length >= 2) return
-    onChange([
-      ...guardians,
-      {
-        tempId: crypto.randomUUID(),
-        relationship: "Mother",
-        full_name: "",
-        nic: "",
-        phone: "",
-        email: "",
-        occupation: "",
-        workplace: "",
-        workplace_address: "",
-        income: "",
-        is_staff: false,
-        staff_designation: "",
-        staff_employment_type: "Permanent",
-        staff_service_start: "",
-        is_alumni: false,
-        alumni_highest_grade: "",
-        alumni_year_left: "",
-        alumni_left_reason: "",
-        is_govt_employee: false,
-        govt_service_years: 0,
-        is_special: false,
-        disability: false,
-        conflict_area: false,
-        single_parent: false,
-      },
-    ])
-  }
-
-  const hasPrimaryName = guardians[0]?.full_name.trim().length > 0
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Step 2: Guardian Profile</CardTitle>
-        <CardDescription>Add guardian details and declare scoring categories.</CardDescription>
+        <CardTitle>Selected Guardians ({selectedIds.length})</CardTitle>
+        <CardDescription>Review and manage guardians assigned to this child.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {guardians.map((g, i) => (
-          <GuardianForm key={g.tempId} data={g} index={i} onChange={(d) => updateGuardian(i, d)} />
-        ))}
-        {guardians.length < 2 && (
-          <Button variant="outline" onClick={addGuardian}>Add Guardian</Button>
-        )}
-        <div className="flex justify-between pt-4">
+        <div className="flex gap-1.5">
+          {FILTERS.map((f) => (
+            <Badge
+              key={f.key}
+              variant={filter === f.key ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => setFilter(f.key)}
+            >
+              {f.label}
+            </Badge>
+          ))}
+        </div>
+
+        <ScrollArea className="h-[400px]">
+          <div className="grid grid-cols-2 gap-3">
+            {filteredGuardians.map((g) => (
+              <div
+                key={g.id}
+                className="relative rounded-lg border p-3 space-y-2"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => onDeselect(g.id)}
+                  aria-label={`Remove ${g.full_name}`}
+                  className="absolute top-1.5 right-1.5 size-6"
+                >
+                  <IconX className="size-3.5" />
+                </Button>
+                <div className="flex items-center gap-2.5">
+                  <div className="size-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <IconUser className="size-5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{g.full_name}</p>
+                    <p className="text-xs text-muted-foreground">{g.relationship_type}</p>
+                  </div>
+                </div>
+                <div className="space-y-1 text-xs">
+                  <p className="flex items-center gap-1.5 text-muted-foreground">
+                    <IconId className="size-3 shrink-0" />
+                    <span>{g.nic_number}</span>
+                  </p>
+                  <p className="flex items-center gap-1.5 text-muted-foreground">
+                    <IconPhone className="size-3 shrink-0" />
+                    <span>{g.contact_phone}</span>
+                  </p>
+                  {g.occupation && (
+                    <p className="flex items-center gap-1.5 text-muted-foreground">
+                      <IconBriefcase className="size-3 shrink-0" />
+                      <span className="truncate">{g.occupation}</span>
+                    </p>
+                  )}
+                  {g.workplace_name && (
+                    <p className="text-muted-foreground pl-5 truncate">{g.workplace_name}</p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {g.is_school_staff && (
+                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "staff") ?? ""}`}>
+                      Staff
+                    </span>
+                  )}
+                  {g.is_past_pupil && (
+                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "past_pupil") ?? ""}`}>
+                      Alumni
+                    </span>
+                  )}
+                  {g.is_govt_employee && (
+                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "govt") ?? ""}`}>
+                      Govt
+                    </span>
+                  )}
+                  {g.income_level && (
+                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("income_level", g.income_level) ?? ""}`}>
+                      {getEnumLabel("income_level", g.income_level)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+            {filteredGuardians.length === 0 && (
+              <div className="col-span-2">
+                <p className="text-sm text-muted-foreground text-center py-12">
+                  {selectedGuardians.length === 0
+                    ? "No guardians selected yet. Browse the directory on the left."
+                    : "No guardians match the current filter."}
+                </p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+
+        <div className="flex justify-between pt-4 border-t">
           <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={onNext} disabled={!hasPrimaryName}>Next</Button>
+          <Button onClick={handleNext} disabled={status !== "idle" || selectedIds.length === 0}>
+            {status === "saving" && <IconLoader2 className="size-4 mr-1.5 animate-spin" />}
+            {status === "done" && <IconCheck className="size-4 mr-1.5 text-green-600" />}
+            {status === "idle" ? "Next" : status === "saving" ? "Saving\u2026" : "Saved"}
+          </Button>
         </div>
       </CardContent>
     </Card>

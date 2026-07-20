@@ -1,9 +1,12 @@
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc, NaiveDate};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use super::super::common::enums::{Gender, Nationality, Religion, MediumOfInstruction, StudentStatus};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[schemars(rename = "Student")]
 #[sea_orm(table_name = "students")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]

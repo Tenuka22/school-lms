@@ -15,7 +15,7 @@ pub async fn delete_batch(
     auth: AuthenticatedUser,
     id: web::Path<Uuid>,
 ) -> Result<Json<MessageResponse>, ApiError> {
-    auth.require_permission(Permission::All)
+    auth.require_permission(Permission::EnrollmentBatchDelete)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let id = id.into_inner();

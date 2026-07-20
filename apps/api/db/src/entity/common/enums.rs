@@ -332,6 +332,17 @@ pub enum StaffEmploymentType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
+pub enum StaffType {
+    #[sea_orm(string_value = "Teacher")]
+    Teacher,
+    #[sea_orm(string_value = "Admin")]
+    Admin,
+    #[sea_orm(string_value = "Worker")]
+    Worker,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AppealType {
     #[sea_orm(string_value = "DistanceCalculation")]
     DistanceCalculation,
@@ -401,4 +412,27 @@ pub enum AuditAction {
     Mark,
     #[sea_orm(string_value = "APPEAL_DECIDE")]
     AppealDecide,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
+pub enum IncomeLevel {
+    #[serde(rename = "below_25000")]
+    #[sea_orm(string_value = "below_25000")]
+    Below25000,
+    #[serde(rename = "25000_50000")]
+    #[sea_orm(string_value = "25000_50000")]
+    Between25000And50000,
+    #[serde(rename = "50000_100000")]
+    #[sea_orm(string_value = "50000_100000")]
+    Between50000And100000,
+    #[serde(rename = "100000_200000")]
+    #[sea_orm(string_value = "100000_200000")]
+    Between100000And200000,
+    #[serde(rename = "200000_500000")]
+    #[sea_orm(string_value = "200000_500000")]
+    Between200000And500000,
+    #[serde(rename = "above_500000")]
+    #[sea_orm(string_value = "above_500000")]
+    Above500000,
 }

@@ -43,6 +43,10 @@ impl AuthenticatedUser {
         if has_wildcard || has_perm {
             Ok(())
         } else {
+            log::error!(
+                "Permission denied: user={:?} required={} permissions={:?}",
+                self.user_id, perm_str, self.permissions
+            );
             Err(ErrorForbidden("insufficient permissions"))
         }
     }

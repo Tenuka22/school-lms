@@ -1,4 +1,4 @@
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -10,7 +10,7 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table"
 import * as React from "react"
-import { Plus, Pencil, Trash2, LoaderCircle } from "lucide-react"
+import { IconPlus, IconPencil, IconTrash, IconLoader2 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import {
@@ -34,31 +34,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import * as v from "valibot"
 import { G1EnrollmentDialog } from "@/components/enrollment/g1/g1-enrollment-dialog"
-import type { G1SearchParams } from "@/routes/_authenticated/student-management/enrollment/g1"
+import { queryClient } from "@/router"
+import { vListApplicationsQuery } from "@/lib/api-client/valibot.gen"
+import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 
-const LABELS: Record<string, string> = {
-  Male: "Male",
-  Female: "Female",
-  SriLankan: "Sri Lankan",
-  DualCitizen: "Dual Citizen",
-  Other: "Other",
-  CloseResident: "Close Resident",
-  PastPupilChild: "Past Pupil Child",
-  Sibling: "Sibling",
-  MOEOrUGCStaffChild: "MOE or UGC Staff Child",
-  GovernmentTransferOfficerChild: "Government Transfer Officer Child",
-  OverseasArrival: "Overseas Arrival",
-  ArmedForcesReserved: "Armed Forces Reserved",
-  Sinhala: "Sinhala",
-  Tamil: "Tamil",
-  Draft: "Draft",
-  Pending: "Pending",
-  ProvisionallyApproved: "Provisionally Approved",
-  Approved: "Approved",
-  Rejected: "Rejected",
-  Withdrawn: "Withdrawn",
-  Removed: "Removed",
+type G1SearchParams = v.InferOutput<typeof vListApplicationsQuery>
+
+function EnumBadge({ column, value }: { column: string; value: string | null | undefined }) {
+  if (!value) return <span className="text-muted-foreground text-sm">—</span>
+  const label = getEnumLabel(column, value)
+  const style = getEnumStyle(column, value)
+  return <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${style ?? "bg-muted text-muted-foreground border-border"}`}>{label}</span>
 }
 
 const ENUM_OPTIONS = {
@@ -104,9 +92,7 @@ interface G1DatagridProps {
 }
 
 const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
-  const queryClient = useQueryClient()
-
-  const toNum = (v: string | number | undefined): number | null | undefined =>
+  const toNum = (v: string | number | null | undefined): number | null | undefined =>
     v == null ? undefined : typeof v === "number" ? v : parseInt(v, 10) || undefined
 
   const queryOptions = React.useMemo(() => ({
@@ -137,8 +123,8 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
   const [deleting, setDeleting] = React.useState(false)
 
   const onSuccess = React.useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey() })
-  }, [queryClient])
+    queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
+  }, [])
 
   const handleDelete = React.useCallback(
     async (rowId: string) => {
@@ -146,7 +132,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
       try {
         await deleteApplication({ path: { id: rowId }, client: apiClient })
         setDeleteTarget(null)
-        queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey() })
+        queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
         toast.success("Enrollment deleted")
       } catch (err) {
         const message = err instanceof Error ? err.message : "Delete failed"
@@ -155,7 +141,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         setDeleting(false)
       }
     },
-    [queryClient],
+    [],
   )
 
   const handleAdd = React.useCallback(() => {
@@ -261,7 +247,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Gender" />,
         enableColumnFilter: true,
         meta: { label: "Gender", variant: "select", options: ENUM_OPTIONS.gender },
-        cell: ({ getValue }) => LABELS[getValue() as string] ?? (getValue() as string),
+        cell: ({ getValue }) => <EnumBadge column="gender" value={getValue() as string} />,
         filterFn: "equals",
       },
       {
@@ -269,7 +255,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Nationality" />,
         enableColumnFilter: true,
         meta: { label: "Nationality", variant: "select", options: ENUM_OPTIONS.nationality },
-        cell: ({ getValue }) => LABELS[getValue() as string] ?? (getValue() as string),
+        cell: ({ getValue }) => <EnumBadge column="nationality" value={getValue() as string} />,
         filterFn: "equals",
       },
       {
@@ -277,7 +263,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Category" />,
         enableColumnFilter: true,
         meta: { label: "Category", variant: "select", options: ENUM_OPTIONS.category },
-        cell: ({ getValue }) => LABELS[getValue() as string] ?? (getValue() as string),
+        cell: ({ getValue }) => <EnumBadge column="category" value={getValue() as string} />,
         filterFn: "equals",
       },
       {
@@ -285,7 +271,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Medium" />,
         enableColumnFilter: true,
         meta: { label: "Medium", variant: "select", options: ENUM_OPTIONS.medium_of_instruction },
-        cell: ({ getValue }) => LABELS[getValue() as string] ?? (getValue() as string),
+        cell: ({ getValue }) => <EnumBadge column="medium_of_instruction" value={getValue() as string} />,
         filterFn: "equals",
       },
       {
@@ -293,7 +279,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Status" />,
         enableColumnFilter: true,
         meta: { label: "Status", variant: "select", options: ENUM_OPTIONS.enrollment_status },
-        cell: ({ getValue }) => LABELS[getValue() as string] ?? (getValue() as string),
+        cell: ({ getValue }) => <EnumBadge column="enrollment_status" value={getValue() as string} />,
         filterFn: "equals",
       },
       {
@@ -306,7 +292,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
               size="xs"
               onClick={() => handleEdit(row.original)}
             >
-              <Pencil className="size-4" />
+              <IconPencil className="size-4" />
             </Button>
             <AlertDialog
               open={deleteTarget === row.original.id}
@@ -324,7 +310,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
                 }
                 onClick={() => setDeleteTarget(row.original.id!)}
               >
-                <Trash2 className="size-4" />
+                <IconTrash className="size-4" />
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -342,7 +328,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
                     onClick={() => handleDelete(row.original.id!)}
                   >
                     {deleting ? (
-                      <LoaderCircle className="size-4 animate-spin" />
+                      <IconLoader2 className="size-4 animate-spin" />
                     ) : null}
                     Delete
                   </AlertDialogAction>
@@ -382,7 +368,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">G1 Enrollments</h2>
         <Button onClick={handleAdd}>
-          <Plus className="size-4" />
+          <IconPlus className="size-4" />
           Add Enrollment
         </Button>
       </div>

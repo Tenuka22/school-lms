@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-export function LoginForm({ className }: { className?: string }) {
+export function LoginForm({ className, redirect: redirectTo }: { className?: string; redirect?: string }) {
   const navigate = useNavigate()
   const mutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {
@@ -34,7 +34,7 @@ export function LoginForm({ className }: { className?: string }) {
     },
     onSuccess: () => {
       toast.success("Welcome back! Logging you in...")
-      navigate({ to: "/" })
+      navigate({ to: redirectTo ?? "/" })
     },
     onError: (error: Error) => {
       toast.error(error.message)
@@ -147,16 +147,12 @@ export function LoginForm({ className }: { className?: string }) {
               form="login-form"
               className="w-full"
               disabled={mutation.isPending}
-              onClick={(e) => {
-                e.preventDefault()
-                form.handleSubmit()
-              }}
             >
               {mutation.isPending ? "Logging in..." : "Login"}
             </Button>
             <FieldDescription className="w-full text-center">
               Don&apos;t have an account?{" "}
-              <Link to="/auth/sign-up" className="underline underline-offset-4">
+              <Link to="/auth/sign-up" search={{ redirect: redirectTo }} className="underline underline-offset-4">
                 Sign up
               </Link>
             </FieldDescription>

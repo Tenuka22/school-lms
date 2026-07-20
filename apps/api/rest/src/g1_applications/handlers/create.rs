@@ -1,10 +1,16 @@
+use std::str::FromStr;
+
 use actix_web::{web, web::Json};
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::{ApplicationStatus, AuditOperation, BatchStatus, EnrollmentStatus};
-use db::entity::{enrollment_batches, g1::applications};
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use db::entity::common::enums::{ApplicationStatus, AuditOperation, BatchStatus, EnrollmentStatus, IncomeLevel};
+use db::entity::{enrollment_batches, g1::applications, guardians, schools};
+use num_traits::ToPrimitive;
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
+    Set, TransactionTrait,
+};
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
@@ -266,7 +272,7 @@ pub async fn generate_admission_lists(
 
     for school in school_list {
         let marked_apps = applications::Entity::find()
-            .filter(applications::Column::SchoolId.eq(school.id))
+            .filter(applications::Column::SchoolId.eq(Some(school.id)))
             .filter(applications::Column::Status.eq(ApplicationStatus::Marked))
             .filter(applications::Column::AppliedYear.eq(batch.year))
             .all(db.as_ref())
@@ -364,7 +370,11 @@ async fn calculate_proximity_marks(
         return Ok(None);
     };
 
-    let school = schools::Entity::find_by_id(application.school_id)
+    let school_id = match application.school_id {
+        Some(id) => id,
+        None => return Ok(None),
+    };
+    let school = schools::Entity::find_by_id(school_id)
         .one(db)
         .await?
         .ok_or_else(|| ApiError::NotFound("school not found".into()))?;
@@ -426,7 +436,7 @@ async fn calculate_staff_marks(
             continue;
         }
 
-        if staff.school_id != application.school_id {
+        if Some(staff.school_id) != application.school_id {
             continue;
         }
 
@@ -481,7 +491,7 @@ async fn calculate_sibling_marks(
             continue;
         }
 
-        if sibling.school_id != application.school_id {
+        if Some(sibling.school_id) != application.school_id {
             continue;
         }
 
@@ -521,7 +531,7 @@ async fn calculate_alumni_marks(
             continue;
         }
 
-        if alumni.school_id != application.school_id {
+        if Some(alumni.school_id) != application.school_id {
             continue;
         }
 
@@ -543,7 +553,11 @@ async fn calculate_govt_marks(
     db: &DatabaseConnection,
     application: &applications::Model,
 ) -> Result<Option<f64>, ApiError> {
-    let guardian = guardians::Entity::find_by_id(application.guardian_id)
+    let guardian_id = match application.guardian_id {
+        Some(id) => id,
+        None => return Ok(None),
+    };
+    let guardian = guardians::Entity::find_by_id(guardian_id)
         .one(db)
         .await?
         .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?;
@@ -575,23 +589,21 @@ async fn calculate_special_marks(
     db: &DatabaseConnection,
     application: &applications::Model,
 ) -> Result<Option<f64>, ApiError> {
-    let child = children::Entity::find_by_id(application.child_id)
-        .one(db)
-        .await?
-        .ok_or_else(|| ApiError::NotFound("child not found".into()))?;
-
     let mut raw: f64 = 0.0;
 
-    if child.disability_status {
-        raw += 40.0;
-    }
+    let guardian_id = match application.guardian_id {
+        Some(id) => id,
+        None => return Ok(Some(raw.min(100.0) / 100.0 * 1.0)),
+    };
+    let guardian = match guardians::Entity::find_by_id(guardian_id).one(db).await {
+        Ok(Some(g)) => g,
+        _ => return Ok(Some(raw.min(100.0) / 100.0 * 1.0)),
+    };
 
-    let guardian = guardians::Entity::find_by_id(application.guardian_id)
-        .one(db)
-        .await?
-        .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?;
-
-    if guardian.income_level.unwrap_or_default().to_f64().unwrap_or(0.0) < 50000.0 {
+    let is_low_income = guardian.income_level.map_or(false, |v| {
+        matches!(v, IncomeLevel::Below25000 | IncomeLevel::Between25000And50000)
+    });
+    if is_low_income {
         raw += 10.0;
     }
 

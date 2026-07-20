@@ -4,8 +4,8 @@ import * as v from 'valibot';
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { CalculateMarksData, CalculateMarksErrors, CalculateMarksResponses, CreateApplicationData, CreateApplicationErrors, CreateApplicationResponses, CreateBatchData, CreateBatchErrors, CreateBatchResponses, DeleteApplicationData, DeleteApplicationErrors, DeleteApplicationResponses, DeleteBatchData, DeleteBatchErrors, DeleteBatchResponses, GenerateAdmissionListsData, GenerateAdmissionListsErrors, GenerateAdmissionListsResponses, GetApplicationData, GetApplicationErrors, GetApplicationResponses, GetBatchData, GetBatchErrors, GetBatchResponses, GetCounterData, GetCounterErrors, GetCounterResponses, GetSecureCounterData, GetSecureCounterErrors, GetSecureCounterResponses, IncrementCounterData, IncrementCounterErrors, IncrementCounterResponses, IncrementSecureCounterData, IncrementSecureCounterErrors, IncrementSecureCounterResponses, ListApplicationsData, ListApplicationsErrors, ListApplicationsResponses, ListBatchesData, ListBatchesErrors, ListBatchesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, RefreshData, RefreshErrors, RefreshResponses, RegisterData, RegisterErrors, RegisterResponses, SubmitApplicationData, SubmitApplicationErrors, SubmitApplicationResponses, UpdateApplicationData, UpdateApplicationErrors, UpdateApplicationResponses, UpdateBatchData, UpdateBatchErrors, UpdateBatchResponses, UploadFileData, UploadFileErrors, UploadFileResponses } from './types.gen';
-import { vCalculateMarksPath, vCalculateMarksResponse, vCreateApplicationBody, vCreateApplicationResponse, vCreateBatchBody2, vCreateBatchResponse, vDeleteApplicationPath, vDeleteApplicationResponse, vDeleteBatchPath, vDeleteBatchResponse, vGenerateAdmissionListsBody, vGenerateAdmissionListsResponse, vGetApplicationPath, vGetApplicationResponse, vGetBatchPath, vGetBatchResponse, vGetCounterPath, vGetCounterResponse, vGetSecureCounterPath, vGetSecureCounterResponse, vIncrementCounterPath, vIncrementCounterResponse, vIncrementSecureCounterPath, vIncrementSecureCounterResponse, vListApplicationsQuery, vListApplicationsResponse, vListBatchesResponse, vLoginBody, vLoginResponse, vLogoutAllResponse, vLogoutBody, vLogoutResponse, vMeResponse, vRefreshBody, vRefreshResponse, vRegisterBody, vRegisterResponse, vSubmitApplicationPath, vSubmitApplicationResponse, vUpdateApplicationBody, vUpdateApplicationPath, vUpdateApplicationResponse, vUpdateBatchBody2, vUpdateBatchPath, vUpdateBatchResponse, vUploadFileBody, vUploadFileResponse } from './valibot.gen';
+import type { CalculateMarksData, CalculateMarksErrors, CalculateMarksResponses, CreateApplicationData, CreateApplicationErrors, CreateApplicationResponses, CreateBatchData, CreateBatchErrors, CreateBatchResponses, CreateGuardianData, CreateGuardianErrors, CreateGuardianResponses, CreatePastPupilDetailData, CreatePastPupilDetailErrors, CreatePastPupilDetailResponses, CreateSiblingData, CreateSiblingErrors, CreateSiblingResponses, CreateStaffDetailData, CreateStaffDetailErrors, CreateStaffDetailResponses, CreateWorkspaceAddressData, CreateWorkspaceAddressErrors, CreateWorkspaceAddressResponses, DeleteApplicationData, DeleteApplicationErrors, DeleteApplicationResponses, DeleteBatchData, DeleteBatchErrors, DeleteBatchResponses, GenerateAdmissionListsData, GenerateAdmissionListsErrors, GenerateAdmissionListsResponses, GetApplicationData, GetApplicationDocumentsData, GetApplicationDocumentsErrors, GetApplicationDocumentsResponses, GetApplicationErrors, GetApplicationGuardiansData, GetApplicationGuardiansErrors, GetApplicationGuardiansResponses, GetApplicationResponses, GetApplicationSiblingsData, GetApplicationSiblingsErrors, GetApplicationSiblingsResponses, GetApplicationWorkspaceAddressesData, GetApplicationWorkspaceAddressesErrors, GetApplicationWorkspaceAddressesResponses, GetBatchData, GetBatchErrors, GetBatchResponses, GetCounterData, GetCounterErrors, GetCounterResponses, GetGuardianData, GetGuardianErrors, GetGuardianResponses, GetSecureCounterData, GetSecureCounterErrors, GetSecureCounterResponses, GetWorkspaceAddressData, GetWorkspaceAddressErrors, GetWorkspaceAddressResponses, IncrementCounterData, IncrementCounterErrors, IncrementCounterResponses, IncrementSecureCounterData, IncrementSecureCounterErrors, IncrementSecureCounterResponses, ListApplicationsData, ListApplicationsErrors, ListApplicationsResponses, ListBatchesData, ListBatchesErrors, ListBatchesResponses, ListGuardiansData, ListGuardiansErrors, ListGuardiansResponses, ListPastPupilDetailsData, ListPastPupilDetailsErrors, ListPastPupilDetailsResponses, ListSchoolsData, ListSchoolsErrors, ListSchoolsResponses, ListStaffDetailsData, ListStaffDetailsErrors, ListStaffDetailsResponses, ListStudentsData, ListStudentsErrors, ListStudentsResponses, ListWorkspaceAddressesData, ListWorkspaceAddressesErrors, ListWorkspaceAddressesResponses, LoginData, LoginErrors, LoginResponses, LogoutAllData, LogoutAllErrors, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, MeData, MeErrors, MeResponses, PresignedUploadUrlData, PresignedUploadUrlErrors, PresignedUploadUrlResponses, RefreshData, RefreshErrors, RefreshResponses, RegisterData, RegisterErrors, RegisterResponses, SaveApplicationDocumentsData, SaveApplicationDocumentsErrors, SaveApplicationDocumentsResponses, SaveGuardiansData, SaveGuardiansErrors, SaveGuardiansResponses, SaveSiblingsData, SaveSiblingsErrors, SaveSiblingsResponses, SaveWizardStepData, SaveWizardStepErrors, SaveWizardStepResponses, SaveWorkspaceAddressesData, SaveWorkspaceAddressesErrors, SaveWorkspaceAddressesResponses, SubmitApplicationData, SubmitApplicationErrors, SubmitApplicationResponses, UpdateApplicationData, UpdateApplicationErrors, UpdateApplicationResponses, UpdateBatchData, UpdateBatchErrors, UpdateBatchResponses, UpdateGuardianData, UpdateGuardianErrors, UpdateGuardianResponses, UpdateStudentData, UpdateStudentErrors, UpdateStudentResponses, UploadFileData, UploadFileErrors, UploadFileResponses } from './types.gen';
+import { vCalculateMarksPath, vCalculateMarksResponse, vCreateApplicationBody, vCreateApplicationResponse, vCreateBatchBody2, vCreateBatchResponse, vCreateGuardianBody2, vCreateGuardianResponse, vCreatePastPupilDetailBody2, vCreatePastPupilDetailResponse, vCreateSiblingBody, vCreateSiblingPath, vCreateSiblingResponse2, vCreateStaffDetailBody2, vCreateStaffDetailResponse, vCreateWorkspaceAddressBody2, vCreateWorkspaceAddressResponse, vDeleteApplicationPath, vDeleteApplicationResponse, vDeleteBatchPath, vDeleteBatchResponse, vGenerateAdmissionListsBody, vGenerateAdmissionListsResponse, vGetApplicationDocumentsPath, vGetApplicationDocumentsResponse, vGetApplicationGuardiansPath, vGetApplicationGuardiansResponse2, vGetApplicationPath, vGetApplicationResponse, vGetApplicationSiblingsPath, vGetApplicationSiblingsResponse2, vGetApplicationWorkspaceAddressesPath, vGetApplicationWorkspaceAddressesResponse2, vGetBatchPath, vGetBatchResponse, vGetCounterPath, vGetCounterResponse, vGetGuardianPath, vGetGuardianResponse, vGetSecureCounterPath, vGetSecureCounterResponse, vGetWorkspaceAddressPath, vGetWorkspaceAddressResponse, vIncrementCounterPath, vIncrementCounterResponse, vIncrementSecureCounterPath, vIncrementSecureCounterResponse, vListApplicationsQuery, vListApplicationsResponse, vListBatchesResponse, vListGuardiansResponse, vListPastPupilDetailsQuery, vListPastPupilDetailsResponse, vListSchoolsQuery, vListSchoolsResponse, vListStaffDetailsQuery, vListStaffDetailsResponse, vListStudentsQuery, vListStudentsResponse, vListWorkspaceAddressesQuery, vListWorkspaceAddressesResponse, vLoginBody, vLoginResponse, vLogoutAllResponse, vLogoutBody, vLogoutResponse, vMeResponse, vPresignedUploadUrlBody, vPresignedUploadUrlResponse, vRefreshBody, vRefreshResponse, vRegisterBody, vRegisterResponse, vSaveApplicationDocumentsBody, vSaveApplicationDocumentsPath, vSaveApplicationDocumentsResponse, vSaveGuardiansBody, vSaveGuardiansPath, vSaveGuardiansResponse2, vSaveSiblingsBody, vSaveSiblingsPath, vSaveSiblingsResponse2, vSaveWizardStepBody, vSaveWizardStepPath, vSaveWizardStepResponse, vSaveWorkspaceAddressesBody, vSaveWorkspaceAddressesPath, vSaveWorkspaceAddressesResponse2, vSubmitApplicationPath, vSubmitApplicationResponse, vUpdateApplicationBody, vUpdateApplicationPath, vUpdateApplicationResponse, vUpdateBatchBody2, vUpdateBatchPath, vUpdateBatchResponse, vUpdateGuardianBody2, vUpdateGuardianPath, vUpdateGuardianResponse, vUpdateStudentBody, vUpdateStudentPath, vUpdateStudentResponse, vUploadFileBody, vUploadFileResponse } from './valibot.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -177,6 +177,150 @@ export const generateAdmissionLists = <ThrowOnError extends boolean = false>(opt
     }
 });
 
+export const saveWizardStep = <ThrowOnError extends boolean = false>(options: Options<SaveWizardStepData, ThrowOnError>): RequestResult<SaveWizardStepResponses, SaveWizardStepErrors, ThrowOnError> => (options.client ?? client).patch<SaveWizardStepResponses, SaveWizardStepErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vSaveWizardStepBody,
+        path: vSaveWizardStepPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vSaveWizardStepResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/wizard-step',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getApplicationGuardians = <ThrowOnError extends boolean = false>(options: Options<GetApplicationGuardiansData, ThrowOnError>): RequestResult<GetApplicationGuardiansResponses, GetApplicationGuardiansErrors, ThrowOnError> => (options.client ?? client).get<GetApplicationGuardiansResponses, GetApplicationGuardiansErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vGetApplicationGuardiansPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetApplicationGuardiansResponse2, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/guardians',
+    ...options
+});
+
+export const saveGuardians = <ThrowOnError extends boolean = false>(options: Options<SaveGuardiansData, ThrowOnError>): RequestResult<SaveGuardiansResponses, SaveGuardiansErrors, ThrowOnError> => (options.client ?? client).put<SaveGuardiansResponses, SaveGuardiansErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vSaveGuardiansBody,
+        path: vSaveGuardiansPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vSaveGuardiansResponse2, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/guardians',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getApplicationWorkspaceAddresses = <ThrowOnError extends boolean = false>(options: Options<GetApplicationWorkspaceAddressesData, ThrowOnError>): RequestResult<GetApplicationWorkspaceAddressesResponses, GetApplicationWorkspaceAddressesErrors, ThrowOnError> => (options.client ?? client).get<GetApplicationWorkspaceAddressesResponses, GetApplicationWorkspaceAddressesErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vGetApplicationWorkspaceAddressesPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetApplicationWorkspaceAddressesResponse2, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/workspace-addresses',
+    ...options
+});
+
+export const saveWorkspaceAddresses = <ThrowOnError extends boolean = false>(options: Options<SaveWorkspaceAddressesData, ThrowOnError>): RequestResult<SaveWorkspaceAddressesResponses, SaveWorkspaceAddressesErrors, ThrowOnError> => (options.client ?? client).put<SaveWorkspaceAddressesResponses, SaveWorkspaceAddressesErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vSaveWorkspaceAddressesBody,
+        path: vSaveWorkspaceAddressesPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vSaveWorkspaceAddressesResponse2, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/workspace-addresses',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getApplicationSiblings = <ThrowOnError extends boolean = false>(options: Options<GetApplicationSiblingsData, ThrowOnError>): RequestResult<GetApplicationSiblingsResponses, GetApplicationSiblingsErrors, ThrowOnError> => (options.client ?? client).get<GetApplicationSiblingsResponses, GetApplicationSiblingsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vGetApplicationSiblingsPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetApplicationSiblingsResponse2, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/siblings',
+    ...options
+});
+
+export const saveSiblings = <ThrowOnError extends boolean = false>(options: Options<SaveSiblingsData, ThrowOnError>): RequestResult<SaveSiblingsResponses, SaveSiblingsErrors, ThrowOnError> => (options.client ?? client).put<SaveSiblingsResponses, SaveSiblingsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vSaveSiblingsBody,
+        path: vSaveSiblingsPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vSaveSiblingsResponse2, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/siblings',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const createSibling = <ThrowOnError extends boolean = false>(options: Options<CreateSiblingData, ThrowOnError>): RequestResult<CreateSiblingResponses, CreateSiblingErrors, ThrowOnError> => (options.client ?? client).post<CreateSiblingResponses, CreateSiblingErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vCreateSiblingBody,
+        path: vCreateSiblingPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vCreateSiblingResponse2, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/create-sibling',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getApplicationDocuments = <ThrowOnError extends boolean = false>(options: Options<GetApplicationDocumentsData, ThrowOnError>): RequestResult<GetApplicationDocumentsResponses, GetApplicationDocumentsErrors, ThrowOnError> => (options.client ?? client).get<GetApplicationDocumentsResponses, GetApplicationDocumentsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vGetApplicationDocumentsPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetApplicationDocumentsResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/documents',
+    ...options
+});
+
+export const saveApplicationDocuments = <ThrowOnError extends boolean = false>(options: Options<SaveApplicationDocumentsData, ThrowOnError>): RequestResult<SaveApplicationDocumentsResponses, SaveApplicationDocumentsErrors, ThrowOnError> => (options.client ?? client).put<SaveApplicationDocumentsResponses, SaveApplicationDocumentsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vSaveApplicationDocumentsBody,
+        path: vSaveApplicationDocumentsPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vSaveApplicationDocumentsResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/g1-applications/{id}/documents',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
 export const listBatches = <ThrowOnError extends boolean = false>(options?: Options<ListBatchesData, ThrowOnError>): RequestResult<ListBatchesResponses, ListBatchesErrors, ThrowOnError> => (options?.client ?? client).get<ListBatchesResponses, ListBatchesErrors, ThrowOnError>({
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
@@ -238,6 +382,213 @@ export const updateBatch = <ThrowOnError extends boolean = false>(options: Optio
     responseValidator: async (data) => await v.parseAsync(vUpdateBatchResponse, data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/enrollment-batches/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listGuardians = <ThrowOnError extends boolean = false>(options?: Options<ListGuardiansData, ThrowOnError>): RequestResult<ListGuardiansResponses, ListGuardiansErrors, ThrowOnError> => (options?.client ?? client).get<ListGuardiansResponses, ListGuardiansErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: v.optional(v.never()),
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vListGuardiansResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/guardians',
+    ...options
+});
+
+export const createGuardian = <ThrowOnError extends boolean = false>(options: Options<CreateGuardianData, ThrowOnError>): RequestResult<CreateGuardianResponses, CreateGuardianErrors, ThrowOnError> => (options.client ?? client).post<CreateGuardianResponses, CreateGuardianErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vCreateGuardianBody2,
+        path: v.optional(v.never()),
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vCreateGuardianResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/guardians',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getGuardian = <ThrowOnError extends boolean = false>(options: Options<GetGuardianData, ThrowOnError>): RequestResult<GetGuardianResponses, GetGuardianErrors, ThrowOnError> => (options.client ?? client).get<GetGuardianResponses, GetGuardianErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vGetGuardianPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetGuardianResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/guardians/{id}',
+    ...options
+});
+
+export const updateGuardian = <ThrowOnError extends boolean = false>(options: Options<UpdateGuardianData, ThrowOnError>): RequestResult<UpdateGuardianResponses, UpdateGuardianErrors, ThrowOnError> => (options.client ?? client).put<UpdateGuardianResponses, UpdateGuardianErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vUpdateGuardianBody2,
+        path: vUpdateGuardianPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vUpdateGuardianResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/guardians/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listPastPupilDetails = <ThrowOnError extends boolean = false>(options?: Options<ListPastPupilDetailsData, ThrowOnError>): RequestResult<ListPastPupilDetailsResponses, ListPastPupilDetailsErrors, ThrowOnError> => (options?.client ?? client).get<ListPastPupilDetailsResponses, ListPastPupilDetailsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: v.optional(v.never()),
+        query: v.optional(vListPastPupilDetailsQuery)
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vListPastPupilDetailsResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/past-pupil-details',
+    ...options
+});
+
+export const createPastPupilDetail = <ThrowOnError extends boolean = false>(options: Options<CreatePastPupilDetailData, ThrowOnError>): RequestResult<CreatePastPupilDetailResponses, CreatePastPupilDetailErrors, ThrowOnError> => (options.client ?? client).post<CreatePastPupilDetailResponses, CreatePastPupilDetailErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vCreatePastPupilDetailBody2,
+        path: v.optional(v.never()),
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vCreatePastPupilDetailResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/past-pupil-details',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listSchools = <ThrowOnError extends boolean = false>(options?: Options<ListSchoolsData, ThrowOnError>): RequestResult<ListSchoolsResponses, ListSchoolsErrors, ThrowOnError> => (options?.client ?? client).get<ListSchoolsResponses, ListSchoolsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: v.optional(v.never()),
+        query: v.optional(vListSchoolsQuery)
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vListSchoolsResponse, data),
+    url: '/api/schools',
+    ...options
+});
+
+export const listStaffDetails = <ThrowOnError extends boolean = false>(options?: Options<ListStaffDetailsData, ThrowOnError>): RequestResult<ListStaffDetailsResponses, ListStaffDetailsErrors, ThrowOnError> => (options?.client ?? client).get<ListStaffDetailsResponses, ListStaffDetailsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: v.optional(v.never()),
+        query: v.optional(vListStaffDetailsQuery)
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vListStaffDetailsResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/staff-details',
+    ...options
+});
+
+export const createStaffDetail = <ThrowOnError extends boolean = false>(options: Options<CreateStaffDetailData, ThrowOnError>): RequestResult<CreateStaffDetailResponses, CreateStaffDetailErrors, ThrowOnError> => (options.client ?? client).post<CreateStaffDetailResponses, CreateStaffDetailErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vCreateStaffDetailBody2,
+        path: v.optional(v.never()),
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vCreateStaffDetailResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/staff-details',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listStudents = <ThrowOnError extends boolean = false>(options?: Options<ListStudentsData, ThrowOnError>): RequestResult<ListStudentsResponses, ListStudentsErrors, ThrowOnError> => (options?.client ?? client).get<ListStudentsResponses, ListStudentsErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: v.optional(v.never()),
+        query: v.optional(vListStudentsQuery)
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vListStudentsResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/students',
+    ...options
+});
+
+export const updateStudent = <ThrowOnError extends boolean = false>(options: Options<UpdateStudentData, ThrowOnError>): RequestResult<UpdateStudentResponses, UpdateStudentErrors, ThrowOnError> => (options.client ?? client).put<UpdateStudentResponses, UpdateStudentErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vUpdateStudentBody,
+        path: vUpdateStudentPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vUpdateStudentResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/students/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const listWorkspaceAddresses = <ThrowOnError extends boolean = false>(options?: Options<ListWorkspaceAddressesData, ThrowOnError>): RequestResult<ListWorkspaceAddressesResponses, ListWorkspaceAddressesErrors, ThrowOnError> => (options?.client ?? client).get<ListWorkspaceAddressesResponses, ListWorkspaceAddressesErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: v.optional(v.never()),
+        query: v.optional(vListWorkspaceAddressesQuery)
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vListWorkspaceAddressesResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workspace-addresses',
+    ...options
+});
+
+export const createWorkspaceAddress = <ThrowOnError extends boolean = false>(options: Options<CreateWorkspaceAddressData, ThrowOnError>): RequestResult<CreateWorkspaceAddressResponses, CreateWorkspaceAddressErrors, ThrowOnError> => (options.client ?? client).post<CreateWorkspaceAddressResponses, CreateWorkspaceAddressErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vCreateWorkspaceAddressBody2,
+        path: v.optional(v.never()),
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vCreateWorkspaceAddressResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workspace-addresses',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getWorkspaceAddress = <ThrowOnError extends boolean = false>(options: Options<GetWorkspaceAddressData, ThrowOnError>): RequestResult<GetWorkspaceAddressResponses, GetWorkspaceAddressErrors, ThrowOnError> => (options.client ?? client).get<GetWorkspaceAddressResponses, GetWorkspaceAddressErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: v.optional(v.never()),
+        path: vGetWorkspaceAddressPath,
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vGetWorkspaceAddressResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/workspace-addresses/{id}',
+    ...options
+});
+
+export const presignedUploadUrl = <ThrowOnError extends boolean = false>(options: Options<PresignedUploadUrlData, ThrowOnError>): RequestResult<PresignedUploadUrlResponses, PresignedUploadUrlErrors, ThrowOnError> => (options.client ?? client).post<PresignedUploadUrlResponses, PresignedUploadUrlErrors, ThrowOnError>({
+    requestValidator: async (data) => await v.parseAsync(v.object({
+        body: vPresignedUploadUrlBody,
+        path: v.optional(v.never()),
+        query: v.optional(v.never())
+    }), data),
+    responseValidator: async (data) => await v.parseAsync(vPresignedUploadUrlResponse, data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/uploads/presigned',
     ...options,
     headers: {
         'Content-Type': 'application/json',

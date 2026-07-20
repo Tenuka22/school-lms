@@ -4,6 +4,20 @@ export type ClientOptions = {
     baseUrl: string;
 };
 
+export type AddressEntry = {
+    address_type: string;
+    is_primary: boolean;
+    residence_type: string;
+    workspace_address_id: string;
+};
+
+export type AddressEntryResponse = {
+    address_type: string;
+    is_primary: boolean;
+    residence_type: string;
+    workspace_address_id: string;
+};
+
 export type ApplicationStatus = 'Draft' | 'Submitted' | 'DocsPending' | 'UnderVerification' | 'Verified' | 'Marked' | 'Shortlisted' | 'Appealed' | 'Finalized' | 'Admitted' | 'Rejected' | 'Withdrawn';
 
 /**
@@ -38,6 +52,109 @@ export type CreateBatchBody = {
     staff_weight?: number | null;
     student_allocation?: number | null;
     year: number;
+};
+
+/**
+ * CreateGuardianBody
+ */
+export type CreateGuardianBody = {
+    contact_email?: string | null;
+    contact_phone: string;
+    employee_id?: string | null;
+    full_name: string;
+    govt_service_years?: number | null;
+    income_level?: IncomeLevel | null;
+    is_govt_employee: boolean;
+    is_past_pupil: boolean;
+    is_school_staff: boolean;
+    nic_number: string;
+    occupation?: string | null;
+    past_pupil_highest_grade?: string | null;
+    past_pupil_left_reason?: string | null;
+    past_pupil_school_id?: string | null;
+    past_pupil_student_id?: string | null;
+    past_pupil_year_left?: number | null;
+    relationship_type: string;
+    staff_school_id?: string | null;
+    staff_type?: StaffType | null;
+    workplace_address?: string | null;
+    workplace_name?: string | null;
+};
+
+/**
+ * CreatePastPupilDetailBody
+ */
+export type CreatePastPupilDetailBody = {
+    guardian_id: string;
+    highest_grade?: string | null;
+    left_reason?: string | null;
+    school_id: string;
+    student_id?: string | null;
+    verification_method?: string | null;
+    year_left?: number | null;
+};
+
+/**
+ * CreateSiblingRequest
+ */
+export type CreateSiblingRequest = {
+    birth_certificate_number?: string | null;
+    current_grade?: number | null;
+    date_of_birth: string;
+    email?: string | null;
+    full_name: string;
+    gender: Gender;
+    medium_of_instruction: MediumOfInstruction;
+    name_with_initials: string;
+    nationality: Nationality;
+    nic?: string | null;
+    passport_number?: string | null;
+    phone?: string | null;
+    religion?: Religion | null;
+    school_id?: string | null;
+};
+
+/**
+ * CreateSiblingResponse
+ */
+export type CreateSiblingResponse = {
+    created: boolean;
+    duplicates: Array<StudentDuplicate>;
+    student_id?: string | null;
+};
+
+/**
+ * CreateStaffDetailBody
+ */
+export type CreateStaffDetailBody = {
+    designation?: string | null;
+    employee_id?: string | null;
+    guardian_id: string;
+    school_id: string;
+    staff_type?: StaffType | null;
+};
+
+/**
+ * CreateWorkspaceAddressBody
+ */
+export type CreateWorkspaceAddressBody = {
+    building?: string | null;
+    city: string;
+    country: string;
+    name: string;
+    postal_code?: string | null;
+    state?: string | null;
+    street_1: string;
+    street_2?: string | null;
+};
+
+export type DocumentEntry = {
+    content_type?: string | null;
+    doc_type: string;
+    file_key: string;
+    file_name?: string | null;
+    file_size?: bigint | null;
+    file_url: string;
 };
 
 /**
@@ -78,13 +195,12 @@ export type G1Application = {
     age_eligibility_verified?: boolean;
     alternative_age_certificate?: boolean;
     alternative_age_certificate_ref?: string | null;
-    applied_year: number;
+    applied_year?: number;
     batch_id: string;
     birth_certificate_number?: string | null;
     birth_certificate_verified?: boolean;
-    category: G1Category;
+    category?: G1Category | null;
     category_verified?: boolean;
-    child_id: string;
     created_at?: string;
     created_by?: string | null;
     date_of_birth: string;
@@ -92,7 +208,7 @@ export type G1Application = {
     finalized_at?: string | null;
     full_name: string;
     gender: Gender;
-    guardian_id: string;
+    guardian_id?: string | null;
     id?: string;
     interview_completed?: boolean;
     interview_date?: string | null;
@@ -103,11 +219,11 @@ export type G1Application = {
     nationality: Nationality;
     overseas_arrival_date?: string | null;
     rank_number?: number | null;
-    reference_no: string;
+    reference_no?: string;
     rejection_reason?: string | null;
     religion?: Religion | null;
     residence_verified?: boolean;
-    school_id: string;
+    school_id?: string | null;
     status?: ApplicationStatus;
     student_id?: string | null;
     submission_method?: string | null;
@@ -118,6 +234,7 @@ export type G1Application = {
     user_agent?: string | null;
     verified_at?: string | null;
     verified_by?: string | null;
+    wizard_step?: number | null;
 };
 
 export type G1Category = 'CloseResident' | 'PastPupilChild' | 'Sibling' | 'MOEOrUGCStaffChild' | 'GovernmentTransferOfficerChild' | 'OverseasArrival' | 'ArmedForcesReserved';
@@ -141,6 +258,59 @@ export type GenerateListsResponse = {
 };
 
 /**
+ * GetApplicationGuardiansResponse
+ */
+export type GetApplicationGuardiansResponse = {
+    guardian_ids: Array<string>;
+};
+
+/**
+ * GetApplicationSiblingsResponse
+ */
+export type GetApplicationSiblingsResponse = {
+    sibling_ids: Array<string>;
+};
+
+/**
+ * GetApplicationWorkspaceAddressesResponse
+ */
+export type GetApplicationWorkspaceAddressesResponse = {
+    addresses: Array<AddressEntryResponse>;
+};
+
+/**
+ * GetDocumentsResponse
+ */
+export type GetDocumentsResponse = {
+    documents: Array<DocumentEntry>;
+};
+
+/**
+ * Guardian
+ */
+export type Guardian = {
+    address_id?: string | null;
+    contact_email?: string | null;
+    contact_phone?: string;
+    created_at?: string;
+    full_name: string;
+    govt_service_years?: number | null;
+    id: string;
+    income_level?: IncomeLevel | null;
+    is_govt_employee: boolean;
+    is_past_pupil: boolean;
+    is_school_staff: boolean;
+    nic_number: string;
+    occupation?: string | null;
+    past_pupil_verified: boolean;
+    relationship_type: string;
+    workplace_address?: string | null;
+    workplace_name?: string | null;
+};
+
+export type IncomeLevel = 'below_25000' | '25000_50000' | '50000_100000' | '100000_200000' | '200000_500000' | 'above_500000';
+
+/**
  * LoginRequest
  */
 export type LoginRequest = {
@@ -157,6 +327,22 @@ export type MessageResponse = {
     message: string;
 };
 
+/**
+ * Model
+ */
+export type Model = {
+    created_at?: string;
+    guardian_id: string;
+    highest_grade?: string | null;
+    id: string;
+    left_reason?: string | null;
+    school_id: string;
+    student_id?: string | null;
+    verification_method?: string | null;
+    verified: boolean;
+    year_left?: number | null;
+};
+
 export type Nationality = 'SriLankan' | 'DualCitizen' | 'Other';
 
 /**
@@ -165,6 +351,27 @@ export type Nationality = 'SriLankan' | 'DualCitizen' | 'Other';
 export type PaginatedApplicationsResponse = {
     items: Array<G1Application>;
     total: number;
+};
+
+/**
+ * PresignedUploadRequest
+ */
+export type PresignedUploadRequest = {
+    content_type: string;
+    file_name: string;
+    file_size: bigint;
+};
+
+/**
+ * PresignedUploadResponse
+ */
+export type PresignedUploadResponse = {
+    content_type: string;
+    file_name: string;
+    file_size: bigint;
+    key: string;
+    public_url: string;
+    url: string;
 };
 
 /**
@@ -184,12 +391,173 @@ export type RegisterRequest = {
 
 export type Religion = 'Buddhism' | 'Hinduism' | 'Islam' | 'Christianity' | 'Catholicism' | 'Other';
 
+export type SaveDocumentEntry = {
+    content_type?: string | null;
+    doc_type: string;
+    file_key: string;
+    file_size?: bigint | null;
+    file_url: string;
+};
+
+/**
+ * SaveDocumentsRequest
+ */
+export type SaveDocumentsRequest = {
+    documents: Array<SaveDocumentEntry>;
+};
+
+/**
+ * SaveDocumentsResponse
+ */
+export type SaveDocumentsResponse = {
+    count: number;
+};
+
+/**
+ * SaveGuardiansRequest
+ */
+export type SaveGuardiansRequest = {
+    guardian_ids: Array<string>;
+};
+
+/**
+ * SaveGuardiansResponse
+ */
+export type SaveGuardiansResponse = {
+    count: number;
+};
+
+/**
+ * SaveSiblingsRequest
+ */
+export type SaveSiblingsRequest = {
+    student_ids: Array<string>;
+};
+
+/**
+ * SaveSiblingsResponse
+ */
+export type SaveSiblingsResponse = {
+    count: number;
+};
+
+/**
+ * SaveStepRequest
+ */
+export type SaveStepRequest = {
+    wizard_step: number;
+};
+
+/**
+ * SaveStepResponse
+ */
+export type SaveStepResponse = {
+    wizard_step: number;
+};
+
+/**
+ * SaveWorkspaceAddressesRequest
+ */
+export type SaveWorkspaceAddressesRequest = {
+    addresses: Array<AddressEntry>;
+};
+
+/**
+ * SaveWorkspaceAddressesResponse
+ */
+export type SaveWorkspaceAddressesResponse = {
+    count: number;
+};
+
 export type SchoolListSummary = {
     main_list_count: number;
     school_id: string;
     school_name: string;
     waiting_list_count: number;
 };
+
+/**
+ * SchoolSummary
+ */
+export type SchoolSummary = {
+    id: string;
+    name_en?: string | null;
+    name_si: string;
+};
+
+/**
+ * StaffDetail
+ */
+export type StaffDetail = {
+    created_at?: string;
+    designation?: string | null;
+    distance_from_residence_km?: string | null;
+    employee_id?: string | null;
+    employment_type?: StaffEmploymentType | null;
+    guardian_id: string;
+    id: string;
+    is_current: boolean;
+    school_id: string;
+    service_end_date?: string | null;
+    service_start_date?: string | null;
+    staff_type?: StaffType | null;
+    verification_doc?: string | null;
+};
+
+export type StaffEmploymentType = 'Permanent' | 'Temporary' | 'Contract';
+
+export type StaffType = 'Teacher' | 'Admin' | 'Worker';
+
+/**
+ * Student
+ */
+export type Student = {
+    admission_date?: string | null;
+    admission_number?: string | null;
+    birth_certificate_number?: string | null;
+    created_at: string;
+    created_by?: string | null;
+    /**
+     * Integer representing the grade (e.g., 1 for Grade 1)
+     */
+    current_grade?: number | null;
+    /**
+     * Format: YYYY-MM-DD
+     */
+    date_of_birth: string;
+    email?: string | null;
+    full_name: string;
+    gender: Gender;
+    id: string;
+    medium_of_instruction: MediumOfInstruction;
+    name_with_initials: string;
+    nationality: Nationality;
+    nic?: string | null;
+    passport_number?: string | null;
+    /**
+     * E.164 format recommended
+     */
+    phone?: string | null;
+    religion?: Religion | null;
+    status: StudentStatus;
+    updated_at: string;
+    updated_by?: string | null;
+};
+
+export type StudentDuplicate = {
+    birth_certificate_number?: string | null;
+    current_grade?: number | null;
+    date_of_birth: string;
+    full_name: string;
+    gender: Gender;
+    id: string;
+    medium_of_instruction: MediumOfInstruction;
+    name_with_initials: string;
+    nationality: Nationality;
+    nic?: string | null;
+};
+
+export type StudentStatus = 'Active' | 'Graduated' | 'Removed';
 
 /**
  * UpdateBatchBody
@@ -203,6 +571,53 @@ export type UpdateBatchBody = {
     staff_weight?: number | null;
     status?: BatchStatus | null;
     student_allocation?: number | null;
+};
+
+/**
+ * UpdateGuardianBody
+ */
+export type UpdateGuardianBody = {
+    address_id?: string | null;
+    contact_email?: string | null;
+    contact_phone: string;
+    employee_id?: string | null;
+    full_name: string;
+    govt_service_years?: number | null;
+    income_level?: IncomeLevel | null;
+    is_govt_employee: boolean;
+    is_past_pupil: boolean;
+    is_school_staff: boolean;
+    nic_number: string;
+    occupation?: string | null;
+    past_pupil_highest_grade?: string | null;
+    past_pupil_left_reason?: string | null;
+    past_pupil_school_id?: string | null;
+    past_pupil_student_id?: string | null;
+    past_pupil_year_left?: number | null;
+    relationship_type: string;
+    staff_school_id?: string | null;
+    staff_type?: StaffType | null;
+    workplace_address?: string | null;
+    workplace_name?: string | null;
+};
+
+/**
+ * UpdateStudentRequest
+ */
+export type UpdateStudentRequest = {
+    birth_certificate_number?: string | null;
+    current_grade?: number | null;
+    date_of_birth: string;
+    email?: string | null;
+    full_name: string;
+    gender: Gender;
+    medium_of_instruction: MediumOfInstruction;
+    name_with_initials: string;
+    nationality: Nationality;
+    nic?: string | null;
+    passport_number?: string | null;
+    phone?: string | null;
+    religion?: Religion | null;
 };
 
 /**
@@ -228,6 +643,23 @@ export type UploadResponse = {
 export type UserResponse = {
     email: string;
     id: string;
+};
+
+/**
+ * WorkspaceAddress
+ */
+export type WorkspaceAddress = {
+    building?: string | null;
+    city: string;
+    country: string;
+    created_at?: string;
+    full_address: string;
+    id: string;
+    name: string;
+    postal_code?: string | null;
+    state?: string | null;
+    street_1: string;
+    street_2?: string | null;
 };
 
 export type GetCounterData = {
@@ -414,6 +846,7 @@ export type ListApplicationsData = {
     body?: never;
     path?: never;
     query?: {
+        batch_id?: string | null;
         category?: string | null;
         enrollment_status?: string | null;
         full_name?: string | null;
@@ -504,13 +937,12 @@ export type CreateApplicationResponses = {
         age_eligibility_verified?: boolean;
         alternative_age_certificate?: boolean;
         alternative_age_certificate_ref?: string | null;
-        applied_year: number;
+        applied_year?: number;
         batch_id: string;
         birth_certificate_number?: string | null;
         birth_certificate_verified?: boolean;
-        category: G1Category;
+        category?: G1Category | null;
         category_verified?: boolean;
-        child_id: string;
         created_at?: string;
         created_by?: string | null;
         date_of_birth: string;
@@ -518,7 +950,7 @@ export type CreateApplicationResponses = {
         finalized_at?: string | null;
         full_name: string;
         gender: Gender;
-        guardian_id: string;
+        guardian_id?: string | null;
         id?: string;
         interview_completed?: boolean;
         interview_date?: string | null;
@@ -529,11 +961,11 @@ export type CreateApplicationResponses = {
         nationality: Nationality;
         overseas_arrival_date?: string | null;
         rank_number?: number | null;
-        reference_no: string;
+        reference_no?: string;
         rejection_reason?: string | null;
         religion?: Religion | null;
         residence_verified?: boolean;
-        school_id: string;
+        school_id?: string | null;
         status?: ApplicationStatus;
         student_id?: string | null;
         submission_method?: string | null;
@@ -544,6 +976,7 @@ export type CreateApplicationResponses = {
         user_agent?: string | null;
         verified_at?: string | null;
         verified_by?: string | null;
+        wizard_step?: number | null;
     };
 };
 
@@ -814,6 +1247,456 @@ export type GenerateAdmissionListsResponses = {
 
 export type GenerateAdmissionListsResponse = GenerateAdmissionListsResponses[keyof GenerateAdmissionListsResponses];
 
+export type SaveWizardStepData = {
+    body: SaveStepRequest;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/wizard-step';
+};
+
+export type SaveWizardStepErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type SaveWizardStepResponses = {
+    200: SaveStepResponse;
+};
+
+export type SaveWizardStepResponse = SaveWizardStepResponses[keyof SaveWizardStepResponses];
+
+export type GetApplicationGuardiansData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/guardians';
+};
+
+export type GetApplicationGuardiansErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GetApplicationGuardiansResponses = {
+    200: GetApplicationGuardiansResponse;
+};
+
+export type GetApplicationGuardiansResponse2 = GetApplicationGuardiansResponses[keyof GetApplicationGuardiansResponses];
+
+export type SaveGuardiansData = {
+    body: SaveGuardiansRequest;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/guardians';
+};
+
+export type SaveGuardiansErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type SaveGuardiansResponses = {
+    200: SaveGuardiansResponse;
+};
+
+export type SaveGuardiansResponse2 = SaveGuardiansResponses[keyof SaveGuardiansResponses];
+
+export type GetApplicationWorkspaceAddressesData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/workspace-addresses';
+};
+
+export type GetApplicationWorkspaceAddressesErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GetApplicationWorkspaceAddressesResponses = {
+    200: GetApplicationWorkspaceAddressesResponse;
+};
+
+export type GetApplicationWorkspaceAddressesResponse2 = GetApplicationWorkspaceAddressesResponses[keyof GetApplicationWorkspaceAddressesResponses];
+
+export type SaveWorkspaceAddressesData = {
+    body: SaveWorkspaceAddressesRequest;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/workspace-addresses';
+};
+
+export type SaveWorkspaceAddressesErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type SaveWorkspaceAddressesResponses = {
+    200: SaveWorkspaceAddressesResponse;
+};
+
+export type SaveWorkspaceAddressesResponse2 = SaveWorkspaceAddressesResponses[keyof SaveWorkspaceAddressesResponses];
+
+export type GetApplicationSiblingsData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/siblings';
+};
+
+export type GetApplicationSiblingsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GetApplicationSiblingsResponses = {
+    200: GetApplicationSiblingsResponse;
+};
+
+export type GetApplicationSiblingsResponse2 = GetApplicationSiblingsResponses[keyof GetApplicationSiblingsResponses];
+
+export type SaveSiblingsData = {
+    body: SaveSiblingsRequest;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/siblings';
+};
+
+export type SaveSiblingsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type SaveSiblingsResponses = {
+    200: SaveSiblingsResponse;
+};
+
+export type SaveSiblingsResponse2 = SaveSiblingsResponses[keyof SaveSiblingsResponses];
+
+export type CreateSiblingData = {
+    body: CreateSiblingRequest;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/create-sibling';
+};
+
+export type CreateSiblingErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type CreateSiblingResponses = {
+    200: CreateSiblingResponse;
+};
+
+export type CreateSiblingResponse2 = CreateSiblingResponses[keyof CreateSiblingResponses];
+
+export type GetApplicationDocumentsData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/documents';
+};
+
+export type GetApplicationDocumentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GetApplicationDocumentsResponses = {
+    200: GetDocumentsResponse;
+};
+
+export type GetApplicationDocumentsResponse = GetApplicationDocumentsResponses[keyof GetApplicationDocumentsResponses];
+
+export type SaveApplicationDocumentsData = {
+    body: SaveDocumentsRequest;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/g1-applications/{id}/documents';
+};
+
+export type SaveApplicationDocumentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type SaveApplicationDocumentsResponses = {
+    200: SaveDocumentsResponse;
+};
+
+export type SaveApplicationDocumentsResponse = SaveApplicationDocumentsResponses[keyof SaveApplicationDocumentsResponses];
+
 export type ListBatchesData = {
     body?: never;
     path?: never;
@@ -1053,6 +1936,703 @@ export type UpdateBatchResponses = {
 };
 
 export type UpdateBatchResponse = UpdateBatchResponses[keyof UpdateBatchResponses];
+
+export type ListGuardiansData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/guardians';
+};
+
+export type ListGuardiansErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type ListGuardiansResponses = {
+    200: Array<Guardian>;
+};
+
+export type ListGuardiansResponse = ListGuardiansResponses[keyof ListGuardiansResponses];
+
+export type CreateGuardianData = {
+    body: CreateGuardianBody;
+    path?: never;
+    query?: never;
+    url: '/api/guardians';
+};
+
+export type CreateGuardianErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type CreateGuardianResponses = {
+    /**
+     * Guardian
+     */
+    201: {
+        address_id?: string | null;
+        contact_email?: string | null;
+        contact_phone?: string;
+        created_at?: string;
+        full_name: string;
+        govt_service_years?: number | null;
+        id: string;
+        income_level?: IncomeLevel | null;
+        is_govt_employee: boolean;
+        is_past_pupil: boolean;
+        is_school_staff: boolean;
+        nic_number: string;
+        occupation?: string | null;
+        past_pupil_verified: boolean;
+        relationship_type: string;
+        workplace_address?: string | null;
+        workplace_name?: string | null;
+    };
+};
+
+export type CreateGuardianResponse = CreateGuardianResponses[keyof CreateGuardianResponses];
+
+export type GetGuardianData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/guardians/{id}';
+};
+
+export type GetGuardianErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GetGuardianResponses = {
+    200: Guardian;
+};
+
+export type GetGuardianResponse = GetGuardianResponses[keyof GetGuardianResponses];
+
+export type UpdateGuardianData = {
+    body: UpdateGuardianBody;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/guardians/{id}';
+};
+
+export type UpdateGuardianErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type UpdateGuardianResponses = {
+    200: Guardian;
+};
+
+export type UpdateGuardianResponse = UpdateGuardianResponses[keyof UpdateGuardianResponses];
+
+export type ListPastPupilDetailsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        guardian_id?: string | null;
+    };
+    url: '/api/past-pupil-details';
+};
+
+export type ListPastPupilDetailsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type ListPastPupilDetailsResponses = {
+    200: Array<Model>;
+};
+
+export type ListPastPupilDetailsResponse = ListPastPupilDetailsResponses[keyof ListPastPupilDetailsResponses];
+
+export type CreatePastPupilDetailData = {
+    body: CreatePastPupilDetailBody;
+    path?: never;
+    query?: never;
+    url: '/api/past-pupil-details';
+};
+
+export type CreatePastPupilDetailErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type CreatePastPupilDetailResponses = {
+    /**
+     * Model
+     */
+    201: {
+        created_at?: string;
+        guardian_id: string;
+        highest_grade?: string | null;
+        id: string;
+        left_reason?: string | null;
+        school_id: string;
+        student_id?: string | null;
+        verification_method?: string | null;
+        verified: boolean;
+        year_left?: number | null;
+    };
+};
+
+export type CreatePastPupilDetailResponse = CreatePastPupilDetailResponses[keyof CreatePastPupilDetailResponses];
+
+export type ListSchoolsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        search?: string | null;
+    };
+    url: '/api/schools';
+};
+
+export type ListSchoolsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type ListSchoolsResponses = {
+    200: Array<SchoolSummary>;
+};
+
+export type ListSchoolsResponse = ListSchoolsResponses[keyof ListSchoolsResponses];
+
+export type ListStaffDetailsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        guardian_id?: string | null;
+    };
+    url: '/api/staff-details';
+};
+
+export type ListStaffDetailsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type ListStaffDetailsResponses = {
+    200: Array<StaffDetail>;
+};
+
+export type ListStaffDetailsResponse = ListStaffDetailsResponses[keyof ListStaffDetailsResponses];
+
+export type CreateStaffDetailData = {
+    body: CreateStaffDetailBody;
+    path?: never;
+    query?: never;
+    url: '/api/staff-details';
+};
+
+export type CreateStaffDetailErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type CreateStaffDetailResponses = {
+    /**
+     * StaffDetail
+     */
+    201: {
+        created_at?: string;
+        designation?: string | null;
+        distance_from_residence_km?: string | null;
+        employee_id?: string | null;
+        employment_type?: StaffEmploymentType | null;
+        guardian_id: string;
+        id: string;
+        is_current: boolean;
+        school_id: string;
+        service_end_date?: string | null;
+        service_start_date?: string | null;
+        staff_type?: StaffType | null;
+        verification_doc?: string | null;
+    };
+};
+
+export type CreateStaffDetailResponse = CreateStaffDetailResponses[keyof CreateStaffDetailResponses];
+
+export type ListStudentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        search?: string | null;
+    };
+    url: '/api/students';
+};
+
+export type ListStudentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type ListStudentsResponses = {
+    200: Array<Student>;
+};
+
+export type ListStudentsResponse = ListStudentsResponses[keyof ListStudentsResponses];
+
+export type UpdateStudentData = {
+    body: UpdateStudentRequest;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/students/{id}';
+};
+
+export type UpdateStudentErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type UpdateStudentResponses = {
+    200: Student;
+};
+
+export type UpdateStudentResponse = UpdateStudentResponses[keyof UpdateStudentResponses];
+
+export type ListWorkspaceAddressesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        search?: string | null;
+    };
+    url: '/api/workspace-addresses';
+};
+
+export type ListWorkspaceAddressesErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type ListWorkspaceAddressesResponses = {
+    200: Array<WorkspaceAddress>;
+};
+
+export type ListWorkspaceAddressesResponse = ListWorkspaceAddressesResponses[keyof ListWorkspaceAddressesResponses];
+
+export type CreateWorkspaceAddressData = {
+    body: CreateWorkspaceAddressBody;
+    path?: never;
+    query?: never;
+    url: '/api/workspace-addresses';
+};
+
+export type CreateWorkspaceAddressErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type CreateWorkspaceAddressResponses = {
+    /**
+     * WorkspaceAddress
+     */
+    201: {
+        building?: string | null;
+        city: string;
+        country: string;
+        created_at?: string;
+        full_address: string;
+        id: string;
+        name: string;
+        postal_code?: string | null;
+        state?: string | null;
+        street_1: string;
+        street_2?: string | null;
+    };
+};
+
+export type CreateWorkspaceAddressResponse = CreateWorkspaceAddressResponses[keyof CreateWorkspaceAddressResponses];
+
+export type GetWorkspaceAddressData = {
+    body?: never;
+    path: {
+        /**
+         * Uuid
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/workspace-addresses/{id}';
+};
+
+export type GetWorkspaceAddressErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type GetWorkspaceAddressResponses = {
+    200: WorkspaceAddress;
+};
+
+export type GetWorkspaceAddressResponse = GetWorkspaceAddressResponses[keyof GetWorkspaceAddressResponses];
+
+export type PresignedUploadUrlData = {
+    body: PresignedUploadRequest;
+    path?: never;
+    query?: never;
+    url: '/api/uploads/presigned';
+};
+
+export type PresignedUploadUrlErrors = {
+    /**
+     * Bad Request
+     */
+    400: unknown;
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+    /**
+     * Not Found
+     */
+    404: unknown;
+    /**
+     * Conflict
+     */
+    409: unknown;
+    /**
+     * Internal Server Error
+     */
+    500: unknown;
+};
+
+export type PresignedUploadUrlResponses = {
+    200: PresignedUploadResponse;
+};
+
+export type PresignedUploadUrlResponse = PresignedUploadUrlResponses[keyof PresignedUploadUrlResponses];
 
 export type UploadFileData = {
     body: UploadForm;

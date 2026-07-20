@@ -14,7 +14,7 @@ pub async fn get_batch(
     auth: AuthenticatedUser,
     id: web::Path<Uuid>,
 ) -> Result<Json<enrollment_batches::Model>, ApiError> {
-    auth.require_permission(Permission::All)
+    auth.require_permission(Permission::EnrollmentBatchRead)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let batch = enrollment_batches::Entity::find_by_id(id.into_inner())

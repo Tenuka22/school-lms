@@ -1,7 +1,7 @@
 "use client"
 
 import type { Table } from "@tanstack/react-table"
-import { Check, Settings2 } from "lucide-react"
+import { IconCheck, IconSettings } from "@tabler/icons-react"
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -54,7 +54,7 @@ export function DataTableViewOptions<TData>({
           />
         }
       >
-        <Settings2 className="text-muted-foreground" />
+        <IconSettings className="text-muted-foreground" />
         View
       </PopoverTrigger>
       <PopoverContent className="w-44 p-0" {...props}>
@@ -73,7 +73,7 @@ export function DataTableViewOptions<TData>({
                   <span className="truncate">
                     {(column.columnDef.meta as Record<string, unknown> | undefined)?.label as string ?? column.id}
                   </span>
-                  <Check
+                  <IconCheck
                     className={cn(
                       "ml-auto size-4 shrink-0",
                       column.getIsVisible() ? "opacity-100" : "opacity-0",

@@ -1,7 +1,7 @@
 "use client"
 
 import type { Column } from "@tanstack/react-table"
-import { ChevronDown, ChevronsUpDown, ChevronUp, EyeOff, X } from "lucide-react"
+import { IconChevronDown, IconArrowsSort, IconChevronUp, IconEyeOff, IconX } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -38,11 +38,11 @@ export function DataTableColumnHeader<TData, TValue>({
         {label}
         {column.getCanSort() &&
           (column.getIsSorted() === "desc" ? (
-            <ChevronDown />
+            <IconChevronDown />
           ) : column.getIsSorted() === "asc" ? (
-            <ChevronUp />
+            <IconChevronUp />
           ) : (
-            <ChevronsUpDown />
+            <IconArrowsSort />
           ))}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-28">
@@ -52,14 +52,14 @@ export function DataTableColumnHeader<TData, TValue>({
               className="gap-2 pl-2 [&_svg]:text-muted-foreground"
               onSelect={() => column.toggleSorting(false)}
             >
-              <ChevronUp className={cn("size-4", column.getIsSorted() === "asc" ? "opacity-100" : "opacity-40")} />
+              <IconChevronUp className={cn("size-4", column.getIsSorted() === "asc" ? "opacity-100" : "opacity-40")} />
               Asc
             </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-2 pl-2 [&_svg]:text-muted-foreground"
               onSelect={() => column.toggleSorting(true)}
             >
-              <ChevronDown className={cn("size-4", column.getIsSorted() === "desc" ? "opacity-100" : "opacity-40")} />
+              <IconChevronDown className={cn("size-4", column.getIsSorted() === "desc" ? "opacity-100" : "opacity-40")} />
               Desc
             </DropdownMenuItem>
             {column.getIsSorted() && (
@@ -67,7 +67,7 @@ export function DataTableColumnHeader<TData, TValue>({
                 className="gap-2 pl-2 [&_svg]:text-muted-foreground"
                 onSelect={() => column.clearSorting()}
               >
-                <X className="size-4" />
+                <IconX className="size-4" />
                 Reset
               </DropdownMenuItem>
             )}
@@ -78,7 +78,7 @@ export function DataTableColumnHeader<TData, TValue>({
             className="gap-2 pl-2 [&_svg]:text-muted-foreground"
             onSelect={() => column.toggleVisibility(false)}
           >
-            <EyeOff className="size-4" />
+            <IconEyeOff className="size-4" />
             Hide
           </DropdownMenuItem>
         )}

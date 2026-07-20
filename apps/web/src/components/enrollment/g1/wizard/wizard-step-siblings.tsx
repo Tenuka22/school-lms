@@ -1,96 +1,117 @@
 "use client"
 
+import { useState, useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Plus, Trash2 } from "lucide-react"
-import type { SiblingData } from "./wizard-shell"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { apiClient } from "@/lib/api-client"
+import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+import type { Student } from "@/lib/api-client/types.gen"
+import { IconLoader2, IconCheck, IconSchool, IconX, IconGripVertical } from "@tabler/icons-react"
 
 interface Props {
-  siblings: SiblingData[]
-  onChange: (siblings: SiblingData[]) => void
+  selectedStudentIds: string[]
+  onDeselect: (id: string) => void
+  onSave: (studentIds: string[]) => Promise<void>
   onBack: () => void
   onNext: () => void
 }
 
-export function WizardStepSiblings({ siblings, onChange, onBack, onNext }: Props) {
-  const update = (index: number, data: SiblingData) => {
-    const next = [...siblings]
-    next[index] = data
-    onChange(next)
-  }
+export function WizardStepSiblings({ selectedStudentIds, onDeselect, onSave, onBack, onNext }: Props) {
+  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
 
-  const add = () => {
-    onChange([
-      ...siblings,
-      {
-        tempId: crypto.randomUUID(),
-        sibling_name: "",
-        current_grade: 1,
-        admission_year: "",
-      },
-    ])
-  }
+  const { data: students = [] } = useQuery(listStudentsOptions({ client: apiClient }))
+  const studentMap = useMemo(() => {
+    const m = new Map<string, Student>()
+    for (const s of students) m.set(s.id, s)
+    return m
+  }, [students])
 
-  const remove = (index: number) => {
-    onChange(siblings.filter((_, i) => i !== index))
+  const selectedStudents = useMemo(() => {
+    return selectedStudentIds.map((id) => studentMap.get(id)).filter(Boolean) as Student[]
+  }, [selectedStudentIds, studentMap])
+
+  const handleNext = async () => {
+    setStatus("saving")
+    try {
+      await onSave(selectedStudentIds)
+      setStatus("done")
+      setTimeout(() => onNext(), 400)
+    } catch (e) {
+      console.error("onSave failed:", e)
+      setStatus("idle")
+      toast.error("Failed to save. Please try again.")
+    }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Step 5: Sibling Details</CardTitle>
-        <CardDescription>Add siblings currently studying at the selected school.</CardDescription>
+        <CardTitle>Selected Siblings ({selectedStudentIds.length})</CardTitle>
+        <CardDescription>Review siblings currently enrolled at this school.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {siblings.length === 0 && (
-          <p className="text-sm text-muted-foreground">No siblings added yet.</p>
-        )}
-        {siblings.map((s, i) => (
-          <div key={s.tempId} className="border rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Sibling {i + 1}</h4>
-              <Button variant="ghost" size="sm" onClick={() => remove(i)}>
-                <Trash2 className="size-4" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <Input
-                value={s.sibling_name}
-                onChange={(e) => update(i, { ...s, sibling_name: e.target.value })}
-                placeholder="Sibling's full name"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Current Grade</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={13}
-                  value={s.current_grade}
-                  onChange={(e) => update(i, { ...s, current_grade: parseInt(e.target.value) || 1 })}
-                />
+        <ScrollArea className="h-[400px]">
+          <div className="grid grid-cols-2 gap-3">
+            {selectedStudents.map((s) => (
+              <div
+                key={s.id}
+                className="relative rounded-lg border p-3 space-y-2"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => onDeselect(s.id)}
+                  aria-label={`Remove ${s.full_name}`}
+                  className="absolute top-1.5 right-1.5 size-6"
+                >
+                  <IconX className="size-3.5" />
+                </Button>
+                <div className="flex items-center gap-2.5">
+                  <div className="size-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <IconSchool className="size-5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{s.full_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{s.name_with_initials}</p>
+                  </div>
+                </div>
+                <div className="space-y-1 text-xs">
+                  <p className="flex items-center gap-1.5 text-muted-foreground">
+                    <IconGripVertical className="size-3 shrink-0" />
+                    <span>Enrollment Grade: {s.current_grade ?? "N/A"}</span>
+                  </p>
+                  {s.admission_number && (
+                    <p className="text-muted-foreground pl-5">{s.admission_number}</p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <Badge variant="secondary" className="text-[10px]">
+                    {s.medium_of_instruction}
+                  </Badge>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Admission Year</Label>
-                <Input
-                  value={s.admission_year}
-                  onChange={(e) => update(i, { ...s, admission_year: e.target.value })}
-                  placeholder="YYYY"
-                />
+            ))}
+            {selectedStudents.length === 0 && (
+              <div className="col-span-2">
+                <p className="text-sm text-muted-foreground text-center py-12">
+                  No siblings selected yet. Browse the directory on the left.
+                </p>
               </div>
-            </div>
+            )}
           </div>
-        ))}
-        <Button variant="outline" onClick={add}>
-          <Plus className="size-4 mr-2" /> Add Sibling
-        </Button>
-        <div className="flex justify-between pt-4">
+        </ScrollArea>
+
+        <div className="flex justify-between pt-4 border-t">
           <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={onNext}>Next</Button>
+          <Button onClick={handleNext} disabled={status !== "idle" || selectedStudentIds.length === 0}>
+            {status === "saving" && <IconLoader2 className="size-4 mr-1.5 animate-spin" />}
+            {status === "done" && <IconCheck className="size-4 mr-1.5 text-green-600" />}
+            {status === "idle" ? "Next" : status === "saving" ? "Saving\u2026" : "Saved"}
+          </Button>
         </div>
       </CardContent>
     </Card>

@@ -21,6 +21,10 @@ fn default_reference_no() -> String {
     format!("TMP-{}", uuid::Uuid::new_v4())
 }
 
+fn default_applied_year() -> i16 {
+    0
+}
+
 fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
@@ -37,11 +41,10 @@ pub struct Model {
     #[serde(default = "default_reference_no")]
     pub reference_no: String,
 
+    #[serde(default = "default_applied_year")]
     pub applied_year: i16,
     #[serde(default)]
     pub school_id: Option<Uuid>,
-    #[serde(default)]
-    pub child_id: Option<Uuid>,
     #[serde(default)]
     pub guardian_id: Option<Uuid>,
 
@@ -114,7 +117,8 @@ pub struct Model {
     #[serde(default)]
     pub alternative_age_certificate_ref: Option<String>,
 
-    pub category: G1Category,
+    #[serde(default)]
+    pub category: Option<G1Category>,
 
     #[serde(default)]
     pub overseas_arrival_date: Option<NaiveDate>,
@@ -127,6 +131,9 @@ pub struct Model {
 
     #[serde(default)]
     pub updated_by: Option<Uuid>,
+
+    #[serde(default)]
+    pub wizard_step: Option<i16>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -138,15 +145,15 @@ pub enum Relation {
     )]
     Guardian,
     #[sea_orm(
-        belongs_to = "super::children::Entity",
-        from = "Column::ChildId",
-        to = "super::children::Column::Id"
+        belongs_to = "super::super::student::student::Entity",
+        from = "Column::StudentId",
+        to = "super::super::student::student::Column::Id"
     )]
-    Child,
+    Student,
     #[sea_orm(
-        belongs_to = "super::schools::Entity",
+        belongs_to = "super::super::common::schools::Entity",
         from = "Column::SchoolId",
-        to = "super::schools::Column::Id"
+        to = "super::super::common::schools::Column::Id"
     )]
     School,
     #[sea_orm(
@@ -181,13 +188,7 @@ impl Related<super::super::common::guardians::Entity> for Entity {
     }
 }
 
-impl Related<super::children::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Child.def()
-    }
-}
-
-impl Related<super::schools::Entity> for Entity {
+impl Related<super::super::common::schools::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::School.def()
     }

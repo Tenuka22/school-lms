@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::super::common::enums::{SchoolType, SchoolCategory};
+use super::enums::{SchoolType, SchoolCategory};
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()
@@ -28,43 +28,43 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::applications::Entity")]
+    #[sea_orm(has_many = "super::super::g1::applications::Entity")]
     Applications,
-    #[sea_orm(has_many = "super::super::common::siblings::Entity")]
+    #[sea_orm(has_many = "super::siblings::Entity")]
     Siblings,
-    #[sea_orm(has_many = "super::super::common::staff_details::Entity")]
+    #[sea_orm(has_many = "super::staff_details::Entity")]
     StaffDetails,
-    #[sea_orm(has_many = "super::super::common::past_pupil_details::Entity")]
+    #[sea_orm(has_many = "super::past_pupil_details::Entity")]
     PastPupilDetails,
-    #[sea_orm(has_many = "super::admission_lists::Entity")]
+    #[sea_orm(has_many = "super::super::g1::admission_lists::Entity")]
     AdmissionLists,
 }
 
-impl Related<super::applications::Entity> for Entity {
+impl Related<super::super::g1::applications::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Applications.def()
     }
 }
 
-impl Related<super::super::common::siblings::Entity> for Entity {
+impl Related<super::siblings::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Siblings.def()
     }
 }
 
-impl Related<super::super::common::staff_details::Entity> for Entity {
+impl Related<super::staff_details::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::StaffDetails.def()
     }
 }
 
-impl Related<super::super::common::past_pupil_details::Entity> for Entity {
+impl Related<super::past_pupil_details::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::PastPupilDetails.def()
     }
 }
 
-impl Related<super::admission_lists::Entity> for Entity {
+impl Related<super::super::g1::admission_lists::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::AdmissionLists.def()
     }

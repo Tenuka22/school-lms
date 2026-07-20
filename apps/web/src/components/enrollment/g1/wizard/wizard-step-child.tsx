@@ -1,94 +1,286 @@
 "use client"
 
+import { useState } from "react"
+import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  Field, FieldError, FieldGroup, FieldLabel
+} from "@/components/ui/field"
+import { IconLoader2, IconCheck } from "@tabler/icons-react"
+import type { Gender, Nationality, MediumOfInstruction, G1Category } from "@/lib/api-client/types.gen"
 
-interface ChildData {
+export type ChildFormData = {
   full_name: string
   name_with_initials: string
   date_of_birth: string
-  gender: string
+  gender: Gender
+  nationality: Nationality
   religion: string
-  nationality: string
   birth_certificate_number: string
+  medium_of_instruction: MediumOfInstruction
+  category: G1Category | ""
+  overseas_arrival_date: string
 }
 
 interface Props {
-  data: ChildData
-  onChange: (data: ChildData) => void
+  defaultValues: ChildFormData
+  onSave: (data: ChildFormData) => Promise<void>
   onNext: () => void
 }
 
-export function WizardStepChild({ data, onChange, onNext }: Props) {
-  const update = (partial: Partial<ChildData>) => onChange({ ...data, ...partial })
+export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
+  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+
+  const form = useForm({
+    defaultValues,
+    onSubmit: async (values) => {
+      setStatus("saving")
+      await onSave(values.value)
+      setStatus("done")
+      setTimeout(() => onNext(), 400)
+    },
+  })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Step 1: Child Profile</CardTitle>
-        <CardDescription>Enter the child's personal details.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="full_name">Full Name</Label>
-          <Input id="full_name" value={data.full_name} onChange={(e) => update({ full_name: e.target.value })} placeholder="Nimal Perera" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="name_with_initials">Name with Initials</Label>
-          <Input id="name_with_initials" value={data.name_with_initials} onChange={(e) => update({ name_with_initials: e.target.value })} placeholder="N. Perera" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="date_of_birth">Date of Birth</Label>
-          <Input id="date_of_birth" type="date" value={data.date_of_birth} onChange={(e) => update({ date_of_birth: e.target.value })} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="gender">Gender</Label>
-          <Select value={data.gender} onValueChange={(val) => val && update({ gender: val })}>
-            <SelectTrigger id="gender"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Male">Male</SelectItem>
-              <SelectItem value="Female">Female</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="nationality">Nationality</Label>
-          <Select value={data.nationality} onValueChange={(val) => val && update({ nationality: val })}>
-            <SelectTrigger id="nationality"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SriLankan">Sri Lankan</SelectItem>
-              <SelectItem value="DualCitizen">Dual Citizen</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="religion">Religion</Label>
-          <Select value={data.religion} onValueChange={(val) => update({ religion: val ?? "" })}>
-            <SelectTrigger id="religion"><SelectValue placeholder="Select (optional)" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Buddhism">Buddhism</SelectItem>
-              <SelectItem value="Hinduism">Hinduism</SelectItem>
-              <SelectItem value="Islam">Islam</SelectItem>
-              <SelectItem value="Christianity">Christianity</SelectItem>
-              <SelectItem value="Catholicism">Catholicism</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="birth_certificate_number">Birth Certificate Number</Label>
-          <Input id="birth_certificate_number" value={data.birth_certificate_number} onChange={(e) => update({ birth_certificate_number: e.target.value })} placeholder="Optional" />
-        </div>
-        <div className="flex justify-end pt-4">
-          <Button onClick={onNext} disabled={!data.full_name || !data.name_with_initials || !data.date_of_birth}>
-            Next
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        form.handleSubmit()
+      }}
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle>Step 1: Child Profile</CardTitle>
+          <CardDescription>Enter the child's personal details.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <form.Field
+              name="full_name"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="Nimal Perera"
+                    />
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            <form.Field
+              name="name_with_initials"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Name with Initials</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="N. Perera"
+                    />
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            <form.Field
+              name="date_of_birth"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Date of Birth</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="date"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                    />
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            <form.Field
+              name="gender"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.state.value}
+                      onValueChange={(val) => val && field.handleChange(val as Gender)}
+                    >
+                      <SelectTrigger id={field.name} aria-invalid={isInvalid}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            <form.Field
+              name="nationality"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Nationality</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.state.value}
+                      onValueChange={(val) => val && field.handleChange(val as Nationality)}
+                    >
+                      <SelectTrigger id={field.name} aria-invalid={isInvalid}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="SriLankan">Sri Lankan</SelectItem>
+                        <SelectItem value="DualCitizen">Dual Citizen</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            <form.Field
+              name="religion"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Religion</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.state.value}
+                      onValueChange={(val) => field.handleChange(val ?? "")}
+                    >
+                      <SelectTrigger id={field.name} aria-invalid={isInvalid}>
+                        <SelectValue placeholder="Select (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Buddhism">Buddhism</SelectItem>
+                        <SelectItem value="Hinduism">Hinduism</SelectItem>
+                        <SelectItem value="Islam">Islam</SelectItem>
+                        <SelectItem value="Christianity">Christianity</SelectItem>
+                        <SelectItem value="Catholicism">Catholicism</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            <form.Field
+              name="birth_certificate_number"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Birth Certificate Number</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="Optional"
+                    />
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            <form.Field
+              name="medium_of_instruction"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Medium of Instruction</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.state.value}
+                      onValueChange={(val) => val && field.handleChange(val as MediumOfInstruction)}
+                    >
+                      <SelectTrigger id={field.name} aria-invalid={isInvalid}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Sinhala">Sinhala</SelectItem>
+                        <SelectItem value="Tamil">Tamil</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                )
+              }}
+            />
+            {defaultValues.category === "OverseasArrival" && (
+              <form.Field
+                name="overseas_arrival_date"
+                children={(field) => {
+                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Overseas Arrival Date</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="date"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                      />
+                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    </Field>
+                  )
+                }}
+              />
+            )}
+          </FieldGroup>
+          <div className="flex justify-end pt-4">
+            <Button type="submit" disabled={status !== "idle"}>
+              {status === "saving" && <IconLoader2 className="size-4 mr-1.5 animate-spin" />}
+              {status === "done" && <IconCheck className="size-4 mr-1.5 text-green-600" />}
+              {status === "idle" ? "Next" : status === "saving" ? "Saving…" : "Saved"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </form>
   )
 }

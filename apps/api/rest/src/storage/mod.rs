@@ -1,7 +1,9 @@
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_s3::config::{BehaviorVersion, Credentials, Region};
+use aws_sdk_s3::presigning::PresigningConfig;
 use aws_sdk_s3::Client;
 use std::env;
+use std::time::Duration;
 
 #[derive(Clone)]
 pub struct Storage {
@@ -79,8 +81,37 @@ impl Storage {
         Ok(())
     }
 
+    pub async fn delete_object(&self, key: &str) -> Result<(), aws_sdk_s3::Error> {
+        self.client
+            .delete_object()
+            .bucket(&self.bucket)
+            .key(key)
+            .send()
+            .await?;
+        Ok(())
+    }
+
     pub fn public_url(&self, key: &str) -> String {
         let endpoint = env::var("MINIO_ENDPOINT").unwrap_or_else(|_| "http://localhost:9000".into());
         format!("{}/{}/{}", endpoint.trim_end_matches('/'), self.bucket, key)
+    }
+
+    pub async fn presigned_put_url(
+        &self,
+        key: &str,
+        content_type: &str,
+        expires_in_secs: u64,
+    ) -> Result<String, aws_sdk_s3::Error> {
+        let config = PresigningConfig::expires_in(Duration::from_secs(expires_in_secs))
+            .expect("valid presigning config");
+        let presigned = self
+            .client
+            .put_object()
+            .bucket(&self.bucket)
+            .key(key)
+            .content_type(content_type)
+            .presigned(config)
+            .await?;
+        Ok(presigned.uri().to_string())
     }
 }

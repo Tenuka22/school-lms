@@ -31,9 +31,9 @@ pub enum Relation {
     )]
     Student,
     #[sea_orm(
-        belongs_to = "super::super::g1::schools::Entity",
+        belongs_to = "super::schools::Entity",
         from = "Column::SchoolId",
-        to = "super::super::g1::schools::Column::Id"
+        to = "super::schools::Column::Id"
     )]
     School,
     #[sea_orm(has_many = "super::super::g1::join_siblings::Entity")]
@@ -46,7 +46,7 @@ impl Related<super::super::student::student::Entity> for Entity {
     }
 }
 
-impl Related<super::super::g1::schools::Entity> for Entity {
+impl Related<super::schools::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::School.def()
     }

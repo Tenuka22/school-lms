@@ -1,152 +1,275 @@
 "use client"
 
-import { useCallback, useRef } from "react"
+import { useCallback, useRef, useState, useEffect } from "react"
 import { useMutation } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { uploadFileMutation } from "@/lib/api-client/@tanstack/react-query.gen"
+import { presignedUploadUrlMutation } from "@/lib/api-client/@tanstack/react-query.gen"
 import { apiClient } from "@/lib/api-client"
-import { Upload } from "lucide-react"
-import type { GuardianData, DocumentData } from "./wizard-shell"
+import { IconFileText, IconX, IconCloudUpload } from "@tabler/icons-react"
+import type { Guardian } from "@/lib/api-client/types.gen"
 
-interface Props {
-  documents: DocumentData[]
-  guardians: GuardianData[]
-  onChange: (docs: DocumentData[]) => void
-  onBack: () => void
-  onNext: () => void
+export type DocumentFormData = {
+  tempId: string
+  doc_type: string
+  file: File | null
+  file_url: string
+  file_key?: string
+  content_type?: string
+  file_size?: number
+  file_name?: string
+  file_type?: string
+  status: "pending" | "uploaded"
 }
 
-const REQUIRED_DOCS: { key: string; label: string; condition?: (gs: GuardianData[]) => boolean }[] = [
+interface Props {
+  defaultValues: DocumentFormData[]
+  guardians: Guardian[]
+  onSave: (data: DocumentFormData[]) => void
+  onBack: () => void
+  onNext: () => void
+  onDocumentsChange?: (docs: DocumentFormData[]) => void
+}
+
+const DOC_TYPES: { key: string; label: string; condition?: (gs: Guardian[]) => boolean }[] = [
   { key: "BirthCertificate", label: "Birth Certificate" },
   { key: "GuardianNIC", label: "Guardian NIC" },
   { key: "ResidenceProof", label: "Residence Proof" },
   {
     key: "StaffAppointmentLetter",
     label: "Staff Appointment Letter",
-    condition: (gs) => gs.some((g) => g.is_staff),
+    condition: (gs) => gs.some((g) => g.is_school_staff),
   },
   {
     key: "StaffServiceCertificate",
     label: "Staff Service Certificate",
-    condition: (gs) => gs.some((g) => g.is_staff),
+    condition: (gs) => gs.some((g) => g.is_school_staff),
   },
   {
-    key: "PastPupilCertificate",
-    label: "Past Pupil Certificate",
-    condition: (gs) => gs.some((g) => g.is_alumni),
+    key: "AlumniCertificate",
+    label: "Alumni Certificate",
+    condition: (gs) => gs.some((g) => g.is_past_pupil),
   },
   {
-    key: "GovtServiceCertificate",
-    label: "Govt Service Certificate",
+    key: "GovtEmployeeCertificate",
+    label: "Govt Employee Certificate",
     condition: (gs) => gs.some((g) => g.is_govt_employee),
   },
   {
-    key: "DisabilityCertificate",
-    label: "Disability Certificate",
-    condition: (gs) => gs.some((g) => g.disability),
+    key: "IncomeCertificate",
+    label: "Income Certificate",
+    condition: (gs) => gs.some((g) => {
+      const income = g.income_level ? parseFloat(g.income_level) : 0
+      return income > 0 && income < 100000
+    }),
   },
 ]
 
-export function WizardStepDocuments({ documents, guardians, onChange, onBack, onNext }: Props) {
+export function WizardStepDocuments({ defaultValues, guardians, onSave, onBack, onNext, onDocumentsChange }: Props) {
+  const [documents, setDocuments] = useState<DocumentFormData[]>(defaultValues)
+  const docsRef = useRef(documents)
+  docsRef.current = documents
+
+  useEffect(() => {
+    setDocuments(defaultValues)
+  }, [defaultValues])
+
+  const presignedUrl = useMutation(presignedUploadUrlMutation({ client: apiClient }))
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const uploadMutation = useMutation(uploadFileMutation({ client: apiClient }))
+  const pendingDocType = useRef<string | null>(null)
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null)
+  const [uploadingKey, setUploadingKey] = useState<string | null>(null)
 
-  const requiredTypes = REQUIRED_DOCS.filter((d) => !d.condition || d.condition(guardians))
+  const getDoc = useCallback((key: string) => {
+    return documents.find((d) => d.doc_type === key)
+  }, [documents])
 
-  const handleUpload = useCallback(
-    async (docType: string, file: File) => {
-      const existing = documents.find((d) => d.doc_type === docType && d.status === "uploaded")
-      if (existing) return
+  const updateDocs = useCallback((updated: DocumentFormData[]) => {
+    setDocuments(updated)
+    docsRef.current = updated
+    onDocumentsChange?.(updated)
+  }, [onDocumentsChange])
 
-      const tempId = crypto.randomUUID()
-      const pending: DocumentData = { tempId, doc_type: docType, file, file_url: "", status: "pending" }
-      onChange([...documents, pending])
+  const uploadAndSave = useCallback(async (docType: string, file: File) => {
+    setUploadingKey(docType)
+    try {
+      const { key, url: presignedUrlStr, public_url, content_type, file_size } = await presignedUrl.mutateAsync({
+        body: {
+          file_name: file.name,
+          content_type: file.type,
+          file_size: file.size as unknown as bigint,
+        },
+        client: apiClient,
+      })
+      await fetch(presignedUrlStr, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      })
+      const existing = docsRef.current.filter((d) => d.doc_type !== docType)
+      const uploaded = [
+        ...existing,
+        {
+          tempId: crypto.randomUUID(),
+          doc_type: docType,
+          file: null,
+          file_url: public_url,
+          file_key: key,
+          content_type,
+          file_size: Number(file_size),
+          file_name: file.name,
+          file_type: file.type,
+          status: "uploaded" as const,
+        },
+      ]
+      updateDocs(uploaded)
+      await onSave(uploaded)
+    } catch {
+      const existing = docsRef.current.filter((d) => d.doc_type !== docType)
+      const fallback = [
+        ...existing,
+        {
+          tempId: crypto.randomUUID(),
+          doc_type: docType,
+          file,
+          file_url: URL.createObjectURL(file),
+          file_name: file.name,
+          file_type: file.type,
+          status: "uploaded" as const,
+        },
+      ]
+      updateDocs(fallback)
+      await onSave(fallback)
+    }
+    setUploadingKey(null)
+  }, [presignedUrl, updateDocs, onSave])
 
+  const onFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    const docType = pendingDocType.current
+    if (!file || !docType) return
+    if (fileInputRef.current) fileInputRef.current.value = ""
+    uploadAndSave(docType, file)
+  }, [uploadAndSave])
+
+  const triggerUpload = useCallback((docKey: string) => {
+    pendingDocType.current = docKey
+    fileInputRef.current?.click()
+  }, [])
+
+  const removeDoc = useCallback(async (docKey: string) => {
+    const doc = docsRef.current.find((d) => d.doc_type === docKey)
+    if (doc?.file_key) {
       try {
-        const formData = new FormData()
-        formData.append("file", file)
-        formData.append("document_type", docType)
-        const result = await uploadMutation.mutateAsync({
-          body: formData as any,
-          client: apiClient,
-        })
-        onChange(
-          documents.map((d) =>
-            d.tempId === tempId ? { ...d, file_url: result.url ?? "", status: "uploaded" as const } : d,
-          ).concat(pending.tempId === tempId ? [] : []),
-        )
+        await apiClient.delete({ url: `/api/uploads/${encodeURIComponent(doc.file_key)}` })
       } catch {
-        onChange(documents.filter((d) => d.tempId !== tempId))
+        // ignore S3 delete failure
       }
-    },
-    [documents, onChange, uploadMutation],
-  )
+    }
+    if (doc?.file_url?.startsWith("blob:")) URL.revokeObjectURL(doc.file_url)
+    const remaining = docsRef.current.filter((d) => d.doc_type !== docKey)
+    updateDocs(remaining)
+    await onSave(remaining)
+  }, [updateDocs, onSave])
 
-  const allRequiredUploaded = requiredTypes.every((rt) =>
-    documents.some((d) => d.doc_type === rt.key && d.status === "uploaded"),
-  )
+  const handleDrop = useCallback((docKey: string, e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOverKey(null)
+    const file = e.dataTransfer.files?.[0]
+    if (file) uploadAndSave(docKey, file)
+  }, [uploadAndSave])
+
+  const handleDragOver = useCallback((docKey: string, e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOverKey(docKey)
+  }, [])
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverKey(null)
+  }, [])
+
+  const activeDocs = DOC_TYPES.filter((d) => !d.condition || d.condition(guardians))
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Step 6: Document Upload</CardTitle>
-        <CardDescription>Upload all required documents.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 text-sm">
-          <span>Required: {documents.filter((d) => d.status === "uploaded").length}/{requiredTypes.length}</span>
-          {!allRequiredUploaded && (
-            <Badge variant="secondary">Missing documents</Badge>
-          )}
-        </div>
-        {requiredTypes.map((rt) => {
-          const doc = documents.find((d) => d.doc_type === rt.key)
-          const uploaded = doc?.status === "uploaded"
-          return (
-            <div key={rt.key} className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>{rt.label}</Label>
-                {uploaded ? (
-                  <Badge variant="default">Uploaded</Badge>
-                ) : (
-                  <Badge variant="secondary">Missing</Badge>
-                )}
-              </div>
-              {!uploaded && (
-                <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleUpload(rt.key, file)
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Upload className="size-4 mr-2" /> Upload
-                  </Button>
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={onFileChange}
+        accept="image/*,.pdf"
+      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Documents</CardTitle>
+          <CardDescription>Upload required documents for verification.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3">
+            {activeDocs.map((doc) => {
+              const currentDoc = getDoc(doc.key)
+              const isUploaded = currentDoc?.status === "uploaded"
+              const isUploading = uploadingKey === doc.key
+              const isDragOver = dragOverKey === doc.key
+              return (
+                <div
+                  key={doc.key}
+                  onDrop={(e) => handleDrop(doc.key, e)}
+                  onDragOver={(e) => handleDragOver(doc.key, e)}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => !isUploaded && !isUploading && triggerUpload(doc.key)}
+                  className={`cursor-pointer rounded-xl border-2 border-dashed p-4 transition-all ${
+                    isUploaded
+                      ? "border-green-500/50 bg-green-50/50 dark:bg-green-950/10"
+                      : isDragOver
+                        ? "border-primary bg-primary/5 scale-[1.02]"
+                        : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30"
+                  }`}
+                >
+                  {isUploaded && currentDoc?.file_url ? (
+                    <div className="flex flex-col items-center justify-center gap-2 py-3">
+                      <div className="size-14 shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                        {currentDoc.file_type?.startsWith("image/") ? (
+                          <img src={currentDoc.file_url} alt={currentDoc.file_name ?? doc.label} className="size-full object-cover" />
+                        ) : (
+                          <IconFileText className="size-5 text-foreground" />
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-center truncate max-w-full">{doc.label}</p>
+                      <p className="text-xs text-muted-foreground text-center truncate max-w-full">{currentDoc.file_name ?? "Uploaded"}</p>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeDoc(doc.key) }}
+                        className="cursor-pointer size-7 rounded-full flex items-center justify-center hover:bg-destructive/10 hover:text-destructive shrink-0"
+                      >
+                        <IconX className="size-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 py-3">
+                      {isUploading ? (
+                        <div className="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                      ) : (
+                        <IconCloudUpload className={`size-8 ${isDragOver ? "text-primary" : "text-muted-foreground/60"}`} />
+                      )}
+                      <p className="text-sm font-medium">{doc.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isUploading ? "Uploading..." : "Click or drag to upload"}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-              {doc?.file && doc.status === "pending" && (
-                <p className="text-xs text-muted-foreground">Uploading...</p>
-              )}
-            </div>
-          )
-        })}
-        <div className="flex justify-between pt-4">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={onNext} disabled={!allRequiredUploaded}>Next</Button>
-        </div>
-      </CardContent>
-    </Card>
+              )
+            })}
+          </div>
+          <div className="flex justify-between pt-6">
+            <Button variant="outline" onClick={onBack}>Back</Button>
+            <Button onClick={onNext}>Next</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </>
   )
 }

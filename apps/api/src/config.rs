@@ -31,13 +31,13 @@ impl Config {
                 .map_err(|_| "POSTGRES_PASSWORD must be set")?,
             postgres_database: env::var("POSTGRES_DB").map_err(|_| "POSTGRES_DB must be set")?,
             server_port: env::var("SERVER_PORT")
-                .unwrap_or_else(|_| "3001".into())
+                .unwrap_or_else(|_| "8001".into())
                 .parse()
                 .map_err(|e| format!("SERVER_PORT is not a valid port: {e}"))?,
             jwt_secret: env::var("JWT_SECRET")
                 .map_err(|_| "JWT_SECRET must be set (add to .env file)")?,
             frontend_url: env::var("FRONTEND_URL")
-                .unwrap_or_else(|_| "http://localhost:3000".into()),
+                .unwrap_or_else(|_| "http://localhost:8000".into()),
             minio_endpoint: env::var("MINIO_ENDPOINT")
                 .unwrap_or_else(|_| "http://localhost:9000".into()),
             minio_access_key: env::var("MINIO_ACCESS_KEY")

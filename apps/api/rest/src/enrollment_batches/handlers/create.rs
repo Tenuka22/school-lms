@@ -49,7 +49,7 @@ pub async fn create_batch(
     auth: AuthenticatedUser,
     body: Json<CreateBatchBody>,
 ) -> Result<CreatedJson<enrollment_batches::Model>, ApiError> {
-    auth.require_permission(Permission::All)
+    auth.require_permission(Permission::EnrollmentBatchCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let input = body.into_inner();

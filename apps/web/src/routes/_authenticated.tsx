@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router"
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
 
 import { AppSidebar } from "@/components/nav/app-sidebar"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
@@ -7,8 +7,11 @@ import { getMeAction } from "@/lib/server/auth"
 import type { UserInfo } from "@/lib/server/auth"
 
 export const Route = createFileRoute("/_authenticated")({
-  beforeLoad: async (): Promise<{ user: UserInfo | null }> => {
+  beforeLoad: async ({ location }): Promise<{ user: UserInfo }> => {
     const result = await getMeAction()
+    if (!result.user) {
+      throw redirect({ to: "/auth/sign-in", search: { redirect: location.pathname } })
+    }
     return { user: result.user }
   },
   component: AuthenticatedLayout,

@@ -1,12 +1,21 @@
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
+
+use super::enums::IncomeLevel;
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+fn default_phone() -> String {
+    "0".to_string()
+}
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[schemars(rename = "Guardian")]
 #[sea_orm(table_name = "guardians")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -15,6 +24,7 @@ pub struct Model {
     pub full_name: String,
     #[sea_orm(unique)]
     pub nic_number: String,
+    #[serde(default = "default_phone")]
     pub contact_phone: String,
     pub contact_email: Option<String>,
     pub occupation: Option<String>,
@@ -25,7 +35,7 @@ pub struct Model {
     pub is_school_staff: bool,
     pub is_past_pupil: bool,
     pub past_pupil_verified: bool,
-    pub income_level: Option<Decimal>,
+    pub income_level: Option<IncomeLevel>,
     #[serde(default)]
     pub address_id: Option<Uuid>,
     #[serde(default = "default_now")]

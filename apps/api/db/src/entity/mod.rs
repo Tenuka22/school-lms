@@ -15,9 +15,9 @@ pub use common::guardians_audit;
 pub use common::past_pupil_details;
 pub use common::siblings;
 pub use common::staff_details;
+pub use common::workspace_addresses;
 pub use common::secure_counter;
-
-// User domain (accessible via pub mod user)
+pub use common::schools;
 // Backward-compatible re-exports for auth
 pub use user::Model as UserModel;
 pub use user::Entity as UserEntity;
@@ -36,8 +36,8 @@ pub use g1::documents;
 pub use g1::documents_audit;
 pub use g1::join_addresses;
 pub use g1::join_guardians;
+pub use g1::join_workspace_addresses;
 pub use g1::join_past_pupil_details;
 pub use g1::join_siblings;
 pub use g1::join_staff_details;
 pub use g1::marks_breakdown;
-pub use g1::schools;

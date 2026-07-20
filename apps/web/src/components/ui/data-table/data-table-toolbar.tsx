@@ -1,7 +1,7 @@
 "use client"
 
 import type { Column, Table } from "@tanstack/react-table"
-import { X } from "lucide-react"
+import { IconX } from "@tabler/icons-react"
 import * as React from "react"
 
 import { DataTableDateFilter } from "@/components/ui/data-table/data-table-date-filter"
@@ -56,7 +56,7 @@ export function DataTableToolbar<TData>({
             className="border-dashed"
             onClick={onReset}
           >
-            <X />
+            <IconX />
             Reset
           </Button>
         )}

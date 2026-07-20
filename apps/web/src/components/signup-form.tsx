@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-export function SignupForm({ className }: { className?: string }) {
+export function SignupForm({ className, redirect: redirectTo }: { className?: string; redirect?: string }) {
   const navigate = useNavigate()
   const mutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {
@@ -34,7 +34,7 @@ export function SignupForm({ className }: { className?: string }) {
     },
     onSuccess: () => {
       toast.success("Account created successfully!")
-      navigate({ to: "/" })
+      navigate({ to: redirectTo ?? "/" })
     },
     onError: (error: Error) => {
       toast.error(error.message)
@@ -139,10 +139,6 @@ export function SignupForm({ className }: { className?: string }) {
               form="signup-form"
               className="w-full"
               disabled={mutation.isPending}
-              onClick={(e) => {
-                e.preventDefault()
-                form.handleSubmit()
-              }}
             >
               {mutation.isPending ? "Creating account..." : "Create Account"}
             </Button>

@@ -14,7 +14,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   DropdownMenu,
@@ -105,34 +104,35 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />*/}
-            <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-              <AlertDialogTrigger render={<DropdownMenuItem onSelect={(e) => e.preventDefault()} />}>
-                <IconLogout />
-                Log out
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    You will be logged out of your account.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={async () => {
-                      setDropdownOpen(false)
-                      await logoutAction()
-                      window.location.href = "/auth/sign-in"
-                    }}
-                  >
-                    Log out
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => setAlertOpen(true)}>
+              <IconLogout />
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                You will be logged out of your account.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  setDropdownOpen(false)
+                  await logoutAction()
+                  window.location.href = "/auth/sign-in"
+                }}
+              >
+                Log out
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SidebarMenuItem>
     </SidebarMenu>
   )

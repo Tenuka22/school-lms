@@ -3,23 +3,33 @@
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import * as v from "valibot"
-import { Calendar as CalendarIcon, Plus } from "lucide-react"
+import { IconCalendar, IconPlus } from "@tabler/icons-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import { createApplication, } from "@/lib/api-client/sdk.gen"
 import { getApplicationQueryKey, listBatchesOptions, listBatchesQueryKey, listApplicationsQueryKey, updateApplicationMutation } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
+
 import {
-  vG1Application,
-  vUpdateApplicationBody,
   vGender,
   vNationality,
-  vG1Category,
   vMediumOfInstruction,
   vEnrollmentStatus,
   vReligion,
 } from "@/lib/api-client/valibot.gen"
+
+const vDialogApplication = v.object({
+  full_name: v.string(),
+  name_with_initials: v.string(),
+  date_of_birth: v.pipe(v.string(), v.isoDate()),
+  gender: vGender,
+  nationality: vNationality,
+  medium_of_instruction: vMediumOfInstruction,
+  enrollment_status: vEnrollmentStatus,
+  religion: v.nullish(vReligion),
+  batch_id: v.pipe(v.string(), v.uuid()),
+})
 import { formatDate } from "@/lib/format"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -132,8 +142,6 @@ export function G1EnrollmentDialog({
 
   const needsBatch = !!(selectedBatchYear && !selectedBatch)
 
-  const uid = () => crypto.randomUUID()
-
   const form = useForm({
     defaultValues: {
       full_name: enrollment?.full_name ?? "",
@@ -141,19 +149,13 @@ export function G1EnrollmentDialog({
       date_of_birth: enrollment?.date_of_birth ?? "",
       gender: enrollment?.gender ?? "Male",
       nationality: enrollment?.nationality ?? "SriLankan",
-      category: enrollment?.category ?? "CloseResident",
       medium_of_instruction: enrollment?.medium_of_instruction ?? "Sinhala",
       enrollment_status: enrollment?.enrollment_status ?? "Draft",
       religion: enrollment?.religion ?? null,
       batch_id: enrollment?.batch_id ?? "",
-      applied_year: new Date().getFullYear(),
-      child_id: uid(),
-      guardian_id: uid(),
-      reference_no: `REF-${Date.now()}`,
-      school_id: "00000000-0000-0000-0000-000000000000",
-    } as v.InferInput<typeof vG1Application>,
+    } as v.InferInput<typeof vDialogApplication>,
     validators: {
-      onSubmit: isEdit ? vUpdateApplicationBody : vG1Application,
+      onSubmit: vDialogApplication,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -168,7 +170,7 @@ export function G1EnrollmentDialog({
           toast.success("Enrollment updated")
         } else {
           await createApplication({
-            body: { ...value, id: uid() },
+            body: value,
             client: apiClient,
           })
           toast.success("Enrollment created")
@@ -267,7 +269,7 @@ export function G1EnrollmentDialog({
                           variant="outline"
                           className="w-full justify-start text-left font-normal"
                         >
-                          <CalendarIcon className="mr-2 size-4 shrink-0" />
+                          <IconCalendar className="mr-2 size-4 shrink-0" />
                           {dateValue ? formatDate(dateValue) : <span className="text-muted-foreground">Pick a date</span>}
                         </Button>}
                       />
@@ -340,34 +342,6 @@ export function G1EnrollmentDialog({
                         {vNationality.options.map((opt) => (
                           <SelectItem key={opt} value={opt}>
                             {LABELS[opt]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                )
-              }}
-            />
-            <form.Field
-              name="category"
-              children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Category</FieldLabel>
-                    <Select
-                      name={field.name}
-                      value={field.state.value}
-                      onValueChange={(val) => val && field.handleChange(val as "CloseResident" | "PastPupilChild" | "Sibling" | "MOEOrUGCStaffChild" | "GovernmentTransferOfficerChild" | "OverseasArrival" | "ArmedForcesReserved")}
-                    >
-                      <SelectTrigger id={field.name} aria-invalid={isInvalid}>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vG1Category.options.map((opt) => (
-                          <SelectItem key={opt} value={opt}>
-                            {LABELS[opt] ?? opt}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -518,7 +492,7 @@ export function G1EnrollmentDialog({
                           setCreateBatchOpen(true)
                         }}
                       >
-                        <Plus className="mr-2 size-4" />
+                        <IconPlus className="mr-2 size-4" />
                         Create Batch
                       </Button>
                     )}

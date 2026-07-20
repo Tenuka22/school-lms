@@ -38,9 +38,9 @@ pub enum Relation {
     )]
     Application,
     #[sea_orm(
-        belongs_to = "super::schools::Entity",
+        belongs_to = "super::super::common::schools::Entity",
         from = "Column::SchoolId",
-        to = "super::schools::Column::Id"
+        to = "super::super::common::schools::Column::Id"
     )]
     School,
 }
@@ -51,7 +51,7 @@ impl Related<super::applications::Entity> for Entity {
     }
 }
 
-impl Related<super::schools::Entity> for Entity {
+impl Related<super::super::common::schools::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::School.def()
     }
