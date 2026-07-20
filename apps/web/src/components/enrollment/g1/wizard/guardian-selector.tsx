@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react"
+import { useState, useCallback, useMemo, useRef } from "react"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { useForm } from "@tanstack/react-form"
-import { z } from "zod"
+import { vCreateWorkspaceAddressBody, vCreateGuardianBody } from "@/lib/api-client/valibot.gen"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +23,7 @@ import { createGuardianMutation, listGuardiansOptions, listGuardiansQueryKey, li
 import { queryClient } from "@/router"
 import { cn } from "@/lib/utils"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
+import { useDebounce } from "@/hooks/use-debounce"
 import { IconChevronLeft, IconChevronRight, IconChevronDown, IconPlus, IconSearch, IconCheck, IconUser, IconPencil } from "@tabler/icons-react"
 import type { Guardian, CreateGuardianBody } from "@/lib/api-client/types.gen"
 import professions from "professions"
@@ -68,15 +69,6 @@ const CATEGORY_INFO = [
   { key: "is_govt_employee", label: "Govt Employee", weight: "4%", desc: "Parent is a permanent government employee (non-staff)" },
 ] as const
 
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay)
-    return () => clearTimeout(timer)
-  }, [value, delay])
-  return debounced
-}
-
 const defaultValues: CreateGuardianBody & {
   past_pupil_highest_grade: string | null
   past_pupil_year_left: number | null
@@ -106,28 +98,6 @@ const defaultValues: CreateGuardianBody & {
   past_pupil_left_reason: null,
   past_pupil_school_id: null,
 }
-
-const createGuardianSchema = z.object({
-  full_name: z.string().min(1, "Full name is required"),
-  nic_number: z.string().min(1, "NIC number is required"),
-  contact_phone: z.string().min(1, "Phone number is required"),
-  contact_email: z.string().nullable(),
-  occupation: z.string().nullable(),
-  workplace_name: z.string().nullable(),
-  workplace_address: z.string().nullable(),
-  relationship_type: z.string().min(1),
-  is_school_staff: z.boolean(),
-  staff_type: z.string().nullable(),
-  employee_id: z.string().nullable(),
-  is_past_pupil: z.boolean(),
-  is_govt_employee: z.boolean(),
-  income_level: z.string().nullable(),
-  govt_service_years: z.number().nullable(),
-  past_pupil_student_id: z.string().nullable(),
-  past_pupil_highest_grade: z.string().nullable(),
-  past_pupil_year_left: z.number().nullable(),
-  past_pupil_left_reason: z.string().nullable(),
-})
 
 function WorkspaceAddressSelect({
   onChange,
@@ -243,17 +213,6 @@ const addressFormDefaults = {
   country: "Sri Lanka",
 }
 
-const addressSchema = z.object({
-  name: z.string().min(1, "Label is required"),
-  building: z.string().optional(),
-  street_1: z.string().min(1, "Street address is required"),
-  street_2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  state: z.string().optional(),
-  postal_code: z.string().optional(),
-  country: z.string().min(1, "Country is required"),
-})
-
 function CreateWorkspaceAddressForm({
   onSubmit,
   onCancel,
@@ -274,7 +233,7 @@ function CreateWorkspaceAddressForm({
 }) {
   const form = useForm({
     defaultValues: addressFormDefaults,
-    validators: { onSubmit: addressSchema as any },
+    validators: { onSubmit: vCreateWorkspaceAddressBody as any },
     onSubmit: async ({ value }) => {
       const data = value as typeof addressFormDefaults
       onSubmit({
@@ -494,7 +453,7 @@ function CreateGuardianDialog({ onCreated }: { onCreated: () => void }) {
 
   const form = useForm({
     defaultValues,
-    validators: { onSubmit: createGuardianSchema as any },
+    validators: { onSubmit: vCreateGuardianBody as any },
     onSubmit: async ({ value }) => {
       if (stepRef.current === 1) {
         setStep(2)
@@ -979,7 +938,7 @@ function EditGuardianDialog({ guardian, open, onOpenChange, onSaved }: { guardia
       past_pupil_left_reason: null,
       past_pupil_school_id: null,
     },
-    validators: { onSubmit: createGuardianSchema as any },
+    validators: { onSubmit: vCreateGuardianBody as any },
     onSubmit: async ({ value }) => {
       try {
         setEditing(true)

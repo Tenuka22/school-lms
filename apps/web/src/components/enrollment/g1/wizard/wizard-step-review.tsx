@@ -20,17 +20,8 @@ import type { WorkspaceAddress, Student } from "@/lib/api-client/types.gen"
 import type { DocumentFormData } from "./wizard-step-documents"
 import type { Guardian } from "@/lib/api-client/types.gen"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
+import { getInitials } from "@/lib/utils"
 import { IconSchool, IconFileText, IconCheck, IconMapPin, IconUsers, IconPhone, IconCalendar, IconFlag, IconHome, IconGenderBigender, IconGlobe, IconBook, IconId, IconCategory, IconMail, IconBriefcase, IconBuilding, IconCoin } from "@tabler/icons-react"
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
-}
 
 function ReviewBadge({ column, value }: { column: string; value: string | null | undefined }) {
   if (!value) return null

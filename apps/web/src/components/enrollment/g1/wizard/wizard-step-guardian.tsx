@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -35,6 +35,13 @@ const FILTERS: { key: FilterCategory; label: string }[] = [
 export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, onNext }: Props) {
   const [filter, setFilter] = useState<FilterCategory>("all")
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (navigateTimer.current) clearTimeout(navigateTimer.current)
+    }
+  }, [])
 
   const { data: guardians = [] } = useQuery(listGuardiansOptions({ client: apiClient }))
   const guardianMap = useMemo(() => {
@@ -61,7 +68,7 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
     try {
       await onSave(selectedIds)
       setStatus("done")
-      setTimeout(() => onNext(), 400)
+      navigateTimer.current = setTimeout(() => onNext(), 400)
     } catch (e) {
       console.error("onSave failed:", e)
       setStatus("idle")

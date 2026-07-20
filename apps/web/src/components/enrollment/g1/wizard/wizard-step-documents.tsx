@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState, useEffect } from "react"
 import { useMutation } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { presignedUploadUrlMutation } from "@/lib/api-client/@tanstack/react-query.gen"
@@ -101,11 +102,12 @@ export function WizardStepDocuments({ defaultValues, guardians, onSave, onBack, 
         },
         client: apiClient,
       })
-      await fetch(presignedUrlStr, {
+      const response = await fetch(presignedUrlStr, {
         method: "PUT",
         body: file,
         headers: { "Content-Type": file.type },
       })
+      if (!response.ok) throw new Error("Upload failed")
       const existing = docsRef.current.filter((d) => d.doc_type !== docType)
       const uploaded = [
         ...existing,
@@ -124,7 +126,8 @@ export function WizardStepDocuments({ defaultValues, guardians, onSave, onBack, 
       ]
       updateDocs(uploaded)
       await onSave(uploaded)
-    } catch {
+    } catch (error) {
+      const blobUrl = URL.createObjectURL(file)
       const existing = docsRef.current.filter((d) => d.doc_type !== docType)
       const fallback = [
         ...existing,
@@ -132,14 +135,14 @@ export function WizardStepDocuments({ defaultValues, guardians, onSave, onBack, 
           tempId: crypto.randomUUID(),
           doc_type: docType,
           file,
-          file_url: URL.createObjectURL(file),
+          file_url: blobUrl,
           file_name: file.name,
           file_type: file.type,
-          status: "uploaded" as const,
+          status: "pending" as const,
         },
       ]
       updateDocs(fallback)
-      await onSave(fallback)
+      toast.error("Upload failed. The file has been saved locally but will need to be re-uploaded.")
     }
     setUploadingKey(null)
   }, [presignedUrl, updateDocs, onSave])

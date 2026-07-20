@@ -50,14 +50,14 @@ export function DataTableColumnHeader<TData, TValue>({
           <>
             <DropdownMenuItem
               className="gap-2 pl-2 [&_svg]:text-muted-foreground"
-              onSelect={() => column.toggleSorting(false)}
+              onClick={() => column.toggleSorting(false)}
             >
               <IconChevronUp className={cn("size-4", column.getIsSorted() === "asc" ? "opacity-100" : "opacity-40")} />
               Asc
             </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-2 pl-2 [&_svg]:text-muted-foreground"
-              onSelect={() => column.toggleSorting(true)}
+              onClick={() => column.toggleSorting(true)}
             >
               <IconChevronDown className={cn("size-4", column.getIsSorted() === "desc" ? "opacity-100" : "opacity-40")} />
               Desc
@@ -65,7 +65,7 @@ export function DataTableColumnHeader<TData, TValue>({
             {column.getIsSorted() && (
               <DropdownMenuItem
                 className="gap-2 pl-2 [&_svg]:text-muted-foreground"
-                onSelect={() => column.clearSorting()}
+                onClick={() => column.clearSorting()}
               >
                 <IconX className="size-4" />
                 Reset
@@ -76,7 +76,7 @@ export function DataTableColumnHeader<TData, TValue>({
         {column.getCanHide() && (
           <DropdownMenuItem
             className="gap-2 pl-2 [&_svg]:text-muted-foreground"
-            onSelect={() => column.toggleVisibility(false)}
+            onClick={() => column.toggleVisibility(false)}
           >
             <IconEyeOff className="size-4" />
             Hide

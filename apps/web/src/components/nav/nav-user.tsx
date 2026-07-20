@@ -104,7 +104,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />*/}
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={() => setAlertOpen(true)}>
+            <DropdownMenuItem closeOnClick={false} onClick={() => setAlertOpen(true)}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

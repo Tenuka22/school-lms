@@ -8,16 +8,7 @@ import type { DocumentFormData } from "./wizard-step-documents"
 import { GuardianSelector } from "./guardian-selector"
 import { AddressSelector } from "./address-selector"
 import { SiblingSelector } from "./sibling-selector"
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
-}
+import { getInitials } from "@/lib/utils"
 
 interface ChildSummaryProps {
   data: ChildFormData

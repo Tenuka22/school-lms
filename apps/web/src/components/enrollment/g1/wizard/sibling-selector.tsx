@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { useForm } from "@tanstack/react-form"
 import { Input } from "@/components/ui/input"
@@ -19,17 +19,9 @@ import { queryClient } from "@/router"
 import { cn } from "@/lib/utils"
 import { IconChevronLeft, IconChevronRight, IconPlus, IconSearch, IconCheck, IconSchool, IconGripVertical, IconCalendar, IconPencil } from "@tabler/icons-react"
 import type { CreateSiblingRequest, CreateSiblingResponse, StudentDuplicate, Gender, Nationality, Religion, MediumOfInstruction, Student } from "@/lib/api-client/types.gen"
+import { useDebounce } from "@/hooks/use-debounce"
 
 const PAGE_SIZE = 8
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay)
-    return () => clearTimeout(timer)
-  }, [value, delay])
-  return debounced
-}
 
 interface CreateSiblingDialogProps {
   enrollmentId: string
@@ -167,7 +159,7 @@ function CreateSiblingForm({
         passport_number: value.passport_number || null,
         phone: value.phone || null,
         email: value.email || null,
-        current_grade: value.current_grade || null,
+        current_grade: value.current_grade ?? null,
         school_id: null,
       })
     },
@@ -636,7 +628,7 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                 }}
                 children={(field) => {
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                  const dateVal = field.state.value ? new Date(field.state.value + "T00:00:00") : undefined
+              const dateVal = field.state.value ? new Date(field.state.value + "T12:00:00") : undefined
                   return (
                     <Field data-invalid={isInvalid}>
                       <FieldLabel htmlFor={field.name}>Date of Birth <span className="text-destructive">*</span></FieldLabel>

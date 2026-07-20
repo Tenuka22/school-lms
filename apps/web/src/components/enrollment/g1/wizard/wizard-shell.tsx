@@ -38,6 +38,7 @@ export function WizardShell() {
   const enrollmentId = params.enrollment_id
   const [step, setStep] = useState(1)
   const [savedSteps, setSavedSteps] = useState<number>(0)
+  const [completed, setCompleted] = useState(false)
   const initialStepSet = useRef(false)
 
   const { data: application } = useQuery(
@@ -74,6 +75,9 @@ export function WizardShell() {
     if (dbStep >= 0) {
       setSavedSteps((prev) => Math.max(prev, dbStep))
     }
+    if (dbStep === 6) {
+      setCompleted(true)
+    }
     if (!initialStepSet.current && dbStep >= 1) {
       setStep(dbStep + 1)
       initialStepSet.current = true
@@ -95,52 +99,60 @@ export function WizardShell() {
 
   const [guardianIds, setGuardianIds] = useState<GuardianFormData>([])
   const initialGuardianLoad = useRef(false)
-  if (applicationGuardianIds && !initialGuardianLoad.current) {
-    initialGuardianLoad.current = true
-    setGuardianIds(applicationGuardianIds.guardian_ids)
-  }
-
   const [selectedAddressEntries, setSelectedAddressEntries] = useState<AddressEntryValue[]>([])
   const initialAddressLoad = useRef(false)
-
-  if (applicationAddressEntries && !initialAddressLoad.current) {
-    initialAddressLoad.current = true
-    setSelectedAddressEntries(
-      applicationAddressEntries.addresses.map((a) => ({
-        workspace_address_id: a.workspace_address_id,
-        address_type: a.address_type,
-        residence_type: a.residence_type,
-        is_primary: a.is_primary,
-      }))
-    )
-  }
-
   const [selectedSiblingIds, setSelectedSiblingIds] = useState<string[]>([])
   const initialSiblingLoad = useRef(false)
-  if (applicationSiblingIds && !initialSiblingLoad.current) {
-    initialSiblingLoad.current = true
-    setSelectedSiblingIds(applicationSiblingIds.sibling_ids)
-  }
-
   const [documentData, setDocumentData] = useState<DocumentFormData[]>([])
   const initialDocLoad = useRef(false)
-  if (serverDocuments && !initialDocLoad.current) {
-    initialDocLoad.current = true
-    setDocumentData(
-      serverDocuments.documents.map((d) => ({
-        tempId: crypto.randomUUID(),
-        doc_type: d.doc_type,
-        file: null,
-        file_url: d.file_url,
-        file_key: d.file_key,
-        content_type: d.content_type ?? undefined,
-        file_size: d.file_size != null ? Number(d.file_size) : undefined,
-        file_name: d.file_name ?? undefined,
-        file_type: d.content_type ?? undefined,
-        status: "uploaded" as const,
-      })),
-    )
-  }
+
+  useEffect(() => {
+    if (applicationGuardianIds && !initialGuardianLoad.current) {
+      initialGuardianLoad.current = true
+      setGuardianIds(applicationGuardianIds.guardian_ids)
+    }
+  }, [applicationGuardianIds])
+
+  useEffect(() => {
+    if (applicationAddressEntries && !initialAddressLoad.current) {
+      initialAddressLoad.current = true
+      setSelectedAddressEntries(
+        applicationAddressEntries.addresses.map((a) => ({
+          workspace_address_id: a.workspace_address_id,
+          address_type: a.address_type,
+          residence_type: a.residence_type,
+          is_primary: a.is_primary,
+        }))
+      )
+    }
+  }, [applicationAddressEntries])
+
+  useEffect(() => {
+    if (applicationSiblingIds && !initialSiblingLoad.current) {
+      initialSiblingLoad.current = true
+      setSelectedSiblingIds(applicationSiblingIds.sibling_ids)
+    }
+  }, [applicationSiblingIds])
+
+  useEffect(() => {
+    if (serverDocuments && !initialDocLoad.current) {
+      initialDocLoad.current = true
+      setDocumentData(
+        serverDocuments.documents.map((d) => ({
+          tempId: crypto.randomUUID(),
+          doc_type: d.doc_type,
+          file: null,
+          file_url: d.file_url,
+          file_key: d.file_key,
+          content_type: d.content_type ?? undefined,
+          file_size: d.file_size != null ? Number(d.file_size) : undefined,
+          file_name: d.file_name ?? undefined,
+          file_type: d.content_type ?? undefined,
+          status: "uploaded" as const,
+        }))
+      )
+    }
+  }, [serverDocuments])
 
   const updateApplication = useMutation(
     updateApplicationMutation({ client: apiClient }),
@@ -182,7 +194,7 @@ export function WizardShell() {
         body: {
           full_name: data.full_name,
           name_with_initials: data.name_with_initials,
-          date_of_birth: data.date_of_birth || "2000-01-01",
+          date_of_birth: data.date_of_birth,
           gender: data.gender,
           nationality: data.nationality,
           religion: (data.religion || null) as Religion | null,
@@ -209,7 +221,7 @@ export function WizardShell() {
         body: {
           full_name: childData.full_name,
           name_with_initials: childData.name_with_initials,
-          date_of_birth: childData.date_of_birth || "2000-01-01",
+          date_of_birth: childData.date_of_birth,
           gender: childData.gender,
           nationality: childData.nationality,
           religion: (childData.religion || null) as Religion | null,
@@ -218,14 +230,15 @@ export function WizardShell() {
           medium_of_instruction: childData.medium_of_instruction,
           category: childData.category || undefined,
           overseas_arrival_date: childData.overseas_arrival_date || null,
-          enrollment_status: "ProvisionallyApproved" as never,
+          enrollment_status: "ProvisionallyApproved" as const,
           batch_id: application?.batch_id ?? "",
           wizard_step: 6,
         },
       })
       queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
-      toast.success("Enrollment completed. Awaiting processing.")
-      navigate({ to: "/student-management/enrollment/g1" })
+      setSavedSteps(6)
+      setCompleted(true)
+      toast.success("Enrollment locked. Awaiting processing.")
     } catch {
       toast.error("Failed to complete enrollment")
     }
@@ -240,7 +253,7 @@ export function WizardShell() {
   return (
     <div className="size-full flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => window.history.back()}>
+        <Button variant="ghost" onClick={() => navigate({ to: "/student-management/enrollment/g1" })}>
           &larr; Back
         </Button>
         <h1 className="text-xl font-bold">Enrollment Wizard</h1>
@@ -296,98 +309,81 @@ export function WizardShell() {
       </div>
 
       <div className="flex gap-6">
-        <WizardSidebar
-          currentStep={step}
-          childData={childData}
-          enrollmentId={enrollmentId}
-          schoolId={SEEDED_SCHOOL_ID}
-          selectedGuardianIds={guardianIds}
-          onGuardianSelect={(id) => setGuardianIds((prev) => [...prev, id])}
-          onGuardianDeselect={(id) => setGuardianIds((prev) => prev.filter((s) => s !== id))}
-          selectedAddressIds={selectedAddressEntries.map((a) => a.workspace_address_id)}
-          onAddressSelect={(id) => {
-            if (!selectedAddressEntries.some((a) => a.workspace_address_id === id)) {
-              setSelectedAddressEntries((prev) => [
-                ...prev,
-                {
-                  workspace_address_id: id,
-                  address_type: "Permanent",
-                  residence_type: "Owned",
-                  is_primary: prev.length === 0,
-                },
-              ])
-            }
-          }}
-          onAddressDeselect={(id) => {
-            setSelectedAddressEntries((prev) => {
-              const next = prev.filter((a) => a.workspace_address_id !== id)
-              if (next.length > 0 && !next.some((a) => a.is_primary)) {
-                return next.map((a, i) => i === 0 ? { ...a, is_primary: true } : a)
-              }
-              return next
-            })
-          }}
-          selectedSiblingIds={selectedSiblingIds}
-          onSiblingSelect={(id) => setSelectedSiblingIds((prev) => (prev.includes(id) ? prev : [...prev, id]))}
-          onSiblingDeselect={(id) => setSelectedSiblingIds((prev) => prev.filter((s) => s !== id))}
-          documents={documentData}
-        />
+        {completed ? (
+          <div className="flex-1 space-y-6">
+            <div className="rounded-xl border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/30 p-6 text-center space-y-3">
+              <div className="size-14 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto text-2xl font-bold">
+                ✓
+              </div>
+              <h2 className="text-xl font-bold text-green-700 dark:text-green-400">Enrollment Locked</h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                This enrollment has been completed and locked. No further changes can be made. The application is now awaiting processing.
+              </p>
+              <div className="flex items-center justify-center gap-6 pt-2 text-sm">
+                <div className="text-center">
+                  <div className="font-medium text-foreground">{application?.full_name || childData.full_name}</div>
+                  <div className="text-muted-foreground">{application?.reference_no}</div>
+                </div>
+                <div className="h-8 w-px bg-border" />
+                <div className="text-center">
+                  <div className="font-medium text-foreground">{application?.enrollment_status === "ProvisionallyApproved" ? "Provisionally Approved" : "Completed"}</div>
+                  <div className="text-muted-foreground">Status</div>
+                </div>
+                <div className="h-8 w-px bg-border" />
+                <div className="text-center">
+                  <div className="font-medium text-foreground tabular-nums">{application?.applied_year}</div>
+                  <div className="text-muted-foreground">Year</div>
+                </div>
+              </div>
+            </div>
 
-        <div className="flex-1">
-          {step === 1 && (
-            <WizardStepChild
-              defaultValues={application ? {
-                full_name: application.full_name ?? "",
-                name_with_initials: application.name_with_initials ?? "",
-                date_of_birth: application.date_of_birth ?? "",
-                gender: application.gender ?? "Male",
-                nationality: application.nationality ?? "SriLankan",
-                religion: application.religion ?? "",
-                birth_certificate_number: application.birth_certificate_number ?? "",
-                medium_of_instruction: application.medium_of_instruction ?? "Sinhala",
-                category: application.category ?? ("" as G1Category | ""),
-                overseas_arrival_date: application.overseas_arrival_date ?? "",
-              } : childData}
-              onSave={async (data) => {
-                setChildData(data)
-                await autoSaveChild(data)
-              }}
-              onNext={() => setStep(2)}
-            />
-          )}
-          {step === 2 && (
-            <WizardStepGuardian
-              selectedIds={guardianIds}
-              onDeselect={(id) => setGuardianIds((prev) => prev.filter((s) => s !== id))}
-              onSave={async (ids) => {
-                setGuardianIds(ids)
-                console.log("[onSave] autoSaveStep(2) starting")
-                await autoSaveStep(2)
-                console.log("[onSave] autoSaveStep(2) done")
-                if (ids.length > 0) {
-                  console.log("[onSave] saving guardians ids=", ids)
-                  await saveGuardians.mutateAsync({
-                    path: { id: enrollmentId },
-                    body: { guardian_ids: ids },
-                  })
-                  console.log("[onSave] guardians saved")
+            <div className="rounded-xl border bg-card p-6 space-y-4">
+              <h3 className="font-semibold text-lg">Submission Summary</h3>
+              <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Full Name</span><span className="font-medium">{childData.full_name}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Name with Initials</span><span className="font-medium">{childData.name_with_initials}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Date of Birth</span><span className="font-medium">{childData.date_of_birth}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Gender</span><span className="font-medium">{childData.gender}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Nationality</span><span className="font-medium">{childData.nationality}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Medium</span><span className="font-medium">{childData.medium_of_instruction}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Category</span><span className="font-medium">{childData.category || "—"}</span></div>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => navigate({ to: "/student-management/enrollment/g1" })}
+              >
+                &larr; Back to Pipeline
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <WizardSidebar
+              currentStep={step}
+              childData={childData}
+              enrollmentId={enrollmentId}
+              schoolId={SEEDED_SCHOOL_ID}
+              selectedGuardianIds={guardianIds}
+              onGuardianSelect={(id) => setGuardianIds((prev) => [...prev, id])}
+              onGuardianDeselect={(id) => setGuardianIds((prev) => prev.filter((s) => s !== id))}
+              selectedAddressIds={selectedAddressEntries.map((a) => a.workspace_address_id)}
+              onAddressSelect={(id) => {
+                if (!selectedAddressEntries.some((a) => a.workspace_address_id === id)) {
+                  setSelectedAddressEntries((prev) => [
+                    ...prev,
+                    {
+                      workspace_address_id: id,
+                      address_type: "Permanent",
+                      residence_type: "Owned",
+                      is_primary: prev.length === 0,
+                    },
+                  ])
                 }
               }}
-              onBack={() => setStep(1)}
-              onNext={() => setStep(3)}
-            />
-          )}
-          {step === 3 && (
-            <WizardStepAddress
-              selectedAddresses={selectedAddressEntries}
-              onUpdate={(id, field, value) => {
-                setSelectedAddressEntries((prev) =>
-                  prev.map((a) =>
-                    a.workspace_address_id === id ? { ...a, [field]: value } : a
-                  )
-                )
-              }}
-              onDeselect={(id) => {
+              onAddressDeselect={(id) => {
                 setSelectedAddressEntries((prev) => {
                   const next = prev.filter((a) => a.workspace_address_id !== id)
                   if (next.length > 0 && !next.some((a) => a.is_primary)) {
@@ -396,89 +392,152 @@ export function WizardShell() {
                   return next
                 })
               }}
-              onSave={async (addresses) => {
-                setSelectedAddressEntries(addresses)
-                console.log("[onSave] autoSaveStep(3) starting")
-                await autoSaveStep(3)
-                console.log("[onSave] autoSaveStep(3) done")
-                if (addresses.length > 0) {
-                  console.log("[onSave] saving workspace addresses", addresses)
-                  await saveAddresses.mutateAsync({
-                    path: { id: enrollmentId },
-                    body: { addresses },
-                  })
-                  console.log("[onSave] workspace addresses saved")
-                }
-              }}
-              onBack={() => setStep(2)}
-              onNext={() => setStep(4)}
-            />
-          )}
-          {step === 4 && (
-            <WizardStepSiblings
-              selectedStudentIds={selectedSiblingIds}
-              onDeselect={(id) => setSelectedSiblingIds((prev) => prev.filter((s) => s !== id))}
-              onSave={async (ids) => {
-                setSelectedSiblingIds(ids)
-                await autoSaveStep(4)
-                if (ids.length > 0) {
-                  await saveSiblings.mutateAsync({
-                    path: { id: enrollmentId },
-                    body: { student_ids: ids },
-                  })
-                }
-              }}
-              onBack={() => setStep(3)}
-              onNext={() => setStep(5)}
-            />
-          )}
-          {step === 5 && (
-            <WizardStepDocuments
-              defaultValues={documentData}
-              guardians={selectedGuardians}
-              onSave={async (data) => {
-                setDocumentData(data)
-                const uploadedDocs = data.filter((d) => d.status === "uploaded" && d.file_key)
-                try {
-                  await saveAppDocuments.mutateAsync({
-                    path: { id: enrollmentId },
-                    body: {
-                      documents: uploadedDocs.map((d) => ({
-                        doc_type: d.doc_type,
-                        file_url: d.file_url,
-                        file_key: d.file_key!,
-                        content_type: d.content_type || null,
-                        file_size: (d.file_size ?? null) as unknown as bigint | null,
-                      })),
-                    },
-                  })
-                  queryClient.invalidateQueries({
-                    queryKey: getApplicationDocumentsOptions({ path: { id: enrollmentId }, client: apiClient }).queryKey,
-                  })
-                } catch {
-                  toast.error("Failed to save documents. Please try again.")
-                }
-                await autoSaveStep(5)
-              }}
-              onBack={() => setStep(4)}
-              onNext={() => setStep(6)}
-              onDocumentsChange={setDocumentData}
-            />
-          )}
-          {step === 6 && (
-            <WizardStepReview
-              child={childData}
-              guardians={selectedGuardians}
-              school={{ school_id: SEEDED_SCHOOL_ID, school_name_si: "St. Aloysius College, Galle", school_type: "1AB", category: "Urban", quota: 100 }}
-              selectedAddresses={selectedAddressEntries}
-              workspaceAddresses={allWorkspaceAddresses}
-              siblingIds={selectedSiblingIds}
+              selectedSiblingIds={selectedSiblingIds}
+              onSiblingSelect={(id) => setSelectedSiblingIds((prev) => (prev.includes(id) ? prev : [...prev, id]))}
+              onSiblingDeselect={(id) => setSelectedSiblingIds((prev) => prev.filter((s) => s !== id))}
               documents={documentData}
-              onBack={() => setStep(5)}
-              onComplete={handleComplete}
             />
-          )}
-        </div>
+
+            <div className="flex-1">
+              {step === 1 && (
+                <WizardStepChild
+                  defaultValues={application ? {
+                    full_name: application.full_name ?? "",
+                    name_with_initials: application.name_with_initials ?? "",
+                    date_of_birth: application.date_of_birth ?? "",
+                    gender: application.gender ?? "Male",
+                    nationality: application.nationality ?? "SriLankan",
+                    religion: application.religion ?? "",
+                    birth_certificate_number: application.birth_certificate_number ?? "",
+                    medium_of_instruction: application.medium_of_instruction ?? "Sinhala",
+                    category: application.category ?? ("" as G1Category | ""),
+                    overseas_arrival_date: application.overseas_arrival_date ?? "",
+                  } : childData}
+                  onSave={async (data) => {
+                    setChildData(data)
+                    await autoSaveChild(data)
+                  }}
+                  onNext={() => setStep(2)}
+                />
+              )}
+              {step === 2 && (
+                <WizardStepGuardian
+                  selectedIds={guardianIds}
+                  onDeselect={(id) => setGuardianIds((prev) => prev.filter((s) => s !== id))}
+                  onSave={async (ids) => {
+                    setGuardianIds(ids)
+                    await autoSaveStep(2)
+                    if (ids.length > 0) {
+                      await saveGuardians.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { guardian_ids: ids },
+                      })
+                    }
+                  }}
+                  onBack={() => setStep(1)}
+                  onNext={() => setStep(3)}
+                />
+              )}
+              {step === 3 && (
+                <WizardStepAddress
+                  selectedAddresses={selectedAddressEntries}
+                  onUpdate={(id, field, value) => {
+                    setSelectedAddressEntries((prev) =>
+                      prev.map((a) =>
+                        a.workspace_address_id === id ? { ...a, [field]: value } : a
+                      )
+                    )
+                  }}
+                  onDeselect={(id) => {
+                    setSelectedAddressEntries((prev) => {
+                      const next = prev.filter((a) => a.workspace_address_id !== id)
+                      if (next.length > 0 && !next.some((a) => a.is_primary)) {
+                        return next.map((a, i) => i === 0 ? { ...a, is_primary: true } : a)
+                      }
+                      return next
+                    })
+                  }}
+                  onSave={async (addresses) => {
+                    setSelectedAddressEntries(addresses)
+                    await autoSaveStep(3)
+                    if (addresses.length > 0) {
+                      await saveAddresses.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { addresses },
+                      })
+                    }
+                  }}
+                  onBack={() => setStep(2)}
+                  onNext={() => setStep(4)}
+                />
+              )}
+              {step === 4 && (
+                <WizardStepSiblings
+                  selectedStudentIds={selectedSiblingIds}
+                  onDeselect={(id) => setSelectedSiblingIds((prev) => prev.filter((s) => s !== id))}
+                  onSave={async (ids) => {
+                    setSelectedSiblingIds(ids)
+                    await autoSaveStep(4)
+                    if (ids.length > 0) {
+                      await saveSiblings.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { student_ids: ids },
+                      })
+                    }
+                  }}
+                  onBack={() => setStep(3)}
+                  onNext={() => setStep(5)}
+                />
+              )}
+              {step === 5 && (
+                <WizardStepDocuments
+                  defaultValues={documentData}
+                  guardians={selectedGuardians}
+                  onSave={async (data) => {
+                    setDocumentData(data)
+                    const uploadedDocs = data.filter((d) => d.status === "uploaded" && d.file_key)
+                    try {
+                      await saveAppDocuments.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: {
+                          documents: uploadedDocs.map((d) => ({
+                            doc_type: d.doc_type,
+                            file_url: d.file_url,
+                            file_key: d.file_key!,
+                            content_type: d.content_type || null,
+                            file_size: (d.file_size ?? null) as unknown as bigint | null,
+                          })),
+                        },
+                      })
+                      queryClient.invalidateQueries({
+                        queryKey: getApplicationDocumentsOptions({ path: { id: enrollmentId }, client: apiClient }).queryKey,
+                      })
+                    } catch {
+                      toast.error("Failed to save documents. Please try again.")
+                    }
+                    await autoSaveStep(5)
+                  }}
+                  onBack={() => setStep(4)}
+                  onNext={() => setStep(6)}
+                  onDocumentsChange={setDocumentData}
+                />
+              )}
+              {step === 6 && (
+                <WizardStepReview
+                  child={childData}
+                  guardians={selectedGuardians}
+                  school={{ school_id: SEEDED_SCHOOL_ID, school_name_si: "St. Aloysius College, Galle", school_type: "1AB", category: "Urban", quota: 100 }}
+                  selectedAddresses={selectedAddressEntries}
+                  workspaceAddresses={allWorkspaceAddresses}
+                  siblingIds={selectedSiblingIds}
+                  documents={documentData}
+                  onBack={() => setStep(5)}
+                  onComplete={handleComplete}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

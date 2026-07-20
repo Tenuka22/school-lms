@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -42,6 +42,13 @@ const FILTERS = [
 export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onSave, onBack, onNext }: Props) {
   const [filter, setFilter] = useState<string>("all")
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (navigateTimer.current) clearTimeout(navigateTimer.current)
+    }
+  }, [])
 
   const { data: addresses = [] } = useQuery(listWorkspaceAddressesOptions({ client: apiClient }))
   const addressMap = useMemo(() => {
@@ -69,7 +76,7 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
     try {
       await onSave(selectedAddresses)
       setStatus("done")
-      setTimeout(() => onNext(), 400)
+      navigateTimer.current = setTimeout(() => onNext(), 400)
     } catch (e) {
       console.error("onSave failed:", e)
       setStatus("idle")

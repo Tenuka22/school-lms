@@ -36,7 +36,9 @@ export function DataTable<TData>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers
+                  .filter((header) => header.column.getIsVisible())
+                  .map((header) => (
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}

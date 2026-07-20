@@ -92,8 +92,12 @@ interface G1DatagridProps {
 }
 
 const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
-  const toNum = (v: string | number | null | undefined): number | null | undefined =>
-    v == null ? undefined : typeof v === "number" ? v : parseInt(v, 10) || undefined
+  const toNum = (v: string | number | null | undefined): number | undefined => {
+    if (v == null) return undefined
+    if (typeof v === "number") return v
+    const n = parseInt(v, 10)
+    return Number.isNaN(n) ? undefined : n
+  }
 
   const queryOptions = React.useMemo(() => ({
     client: apiClient,

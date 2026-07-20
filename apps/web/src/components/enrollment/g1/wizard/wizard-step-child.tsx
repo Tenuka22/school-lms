@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +33,7 @@ interface Props {
 
 export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const form = useForm({
     defaultValues,
@@ -40,9 +41,15 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
       setStatus("saving")
       await onSave(values.value)
       setStatus("done")
-      setTimeout(() => onNext(), 400)
+      navigateTimer.current = setTimeout(() => onNext(), 400)
     },
   })
+
+  useEffect(() => {
+    return () => {
+      if (navigateTimer.current) clearTimeout(navigateTimer.current)
+    }
+  }, [])
 
   return (
     <form

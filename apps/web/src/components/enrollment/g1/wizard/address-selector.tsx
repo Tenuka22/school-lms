@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect, useMemo } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { useForm } from "@tanstack/react-form"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,7 @@ import { queryClient } from "@/router"
 import { cn } from "@/lib/utils"
 import { IconChevronLeft, IconChevronRight, IconPlus, IconSearch, IconCheck, IconBuilding, IconMapPin } from "@tabler/icons-react"
 import type { CreateWorkspaceAddressBody } from "@/lib/api-client/types.gen"
+import { useDebounce } from "@/hooks/use-debounce"
 
 const PAGE_SIZE = 8
 
@@ -24,15 +25,6 @@ export type AddressEntryValue = {
   address_type: string
   residence_type: string
   is_primary: boolean
-}
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay)
-    return () => clearTimeout(timer)
-  }, [value, delay])
-  return debounced
 }
 
 const addressFormDefaults: CreateWorkspaceAddressBody = {

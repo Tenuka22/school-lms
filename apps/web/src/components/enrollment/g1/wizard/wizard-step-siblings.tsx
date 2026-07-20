@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,13 @@ interface Props {
 
 export function WizardStepSiblings({ selectedStudentIds, onDeselect, onSave, onBack, onNext }: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (navigateTimer.current) clearTimeout(navigateTimer.current)
+    }
+  }, [])
 
   const { data: students = [] } = useQuery(listStudentsOptions({ client: apiClient }))
   const studentMap = useMemo(() => {
@@ -39,7 +46,7 @@ export function WizardStepSiblings({ selectedStudentIds, onDeselect, onSave, onB
     try {
       await onSave(selectedStudentIds)
       setStatus("done")
-      setTimeout(() => onNext(), 400)
+      navigateTimer.current = setTimeout(() => onNext(), 400)
     } catch (e) {
       console.error("onSave failed:", e)
       setStatus("idle")

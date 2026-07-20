@@ -51,12 +51,16 @@ export function ThemeProvider({
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const stored = localStorage.getItem(storageKey)
-    setThemeState(
-      stored === "light" || stored === "dark" || stored === "system"
-        ? stored
-        : defaultTheme
-    )
+    try {
+      const stored = localStorage.getItem(storageKey)
+      setThemeState(
+        stored === "light" || stored === "dark" || stored === "system"
+          ? stored
+          : defaultTheme
+      )
+    } catch {
+      setThemeState(defaultTheme)
+    }
     setMounted(true)
   }, [defaultTheme, storageKey])
 
@@ -75,7 +79,11 @@ export function ThemeProvider({
   }, [theme, mounted])
 
   const setTheme = (next: Theme) => {
-    localStorage.setItem(storageKey, next)
+    try {
+      localStorage.setItem(storageKey, next)
+    } catch {
+      // Storage may be unavailable in private browsing or if quota exceeded
+    }
     setThemeState(next)
   }
 

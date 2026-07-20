@@ -48,7 +48,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import type { SortingState, ColumnFiltersState, PaginationState, VisibilityState } from "@tanstack/react-table"
+import type { SortingState, ColumnFiltersState, PaginationState, VisibilityState, ColumnDef } from "@tanstack/react-table"
 import {
   getCoreRowModel, getSortedRowModel, useReactTable,
 } from "@tanstack/react-table"
@@ -57,6 +57,18 @@ import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
 
 import { Route } from "@/routes/_authenticated/student-management/enrollment/g1"
+import type { DashboardSearch } from "@/routes/_authenticated/student-management/enrollment/g1"
+import type { G1Application } from "@/lib/api-client/types.gen"
+
+const vDialogApplication = v.object({
+  full_name: v.string(),
+  name_with_initials: v.string(),
+  date_of_birth: v.pipe(v.string(), v.isoDate()),
+  gender: vGender,
+  nationality: vNationality,
+  medium_of_instruction: vMediumOfInstruction,
+  religion: vReligion,
+})
 
 const WEIGHT_INFO: Record<string, { label: string; desc: string }> = {
   proximity: { label: "Proximity", desc: "Priority for children living closest to the school" },
@@ -88,7 +100,7 @@ function EnumBadge({ column, value }: { column: string; value: string | null | u
 
 export function PipeDashboard() {
   const navigate = useNavigate({ from: Route.fullPath })
-  const search = Route.useSearch()
+  const search: DashboardSearch = Route.useSearch()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [batchId, setBatchId] = useState("")
   const [newDialogOpen, setNewDialogOpen] = useState(false)
@@ -128,16 +140,6 @@ export function PipeDashboard() {
     return acc
   }, {})
 
-  const vDialogApplication = v.object({
-    full_name: v.string(),
-    name_with_initials: v.string(),
-    date_of_birth: v.pipe(v.string(), v.isoDate()),
-    gender: vGender,
-    nationality: vNationality,
-    medium_of_instruction: vMediumOfInstruction,
-    religion: vReligion,
-  })
-
   const enrollmentForm = useForm({
     defaultValues: {
       full_name: "",
@@ -152,11 +154,11 @@ export function PipeDashboard() {
     onSubmit: async ({ value }) => {
       if (!batchId) return
       const { data, error } = await createApplication({
-        body: { ...value, batch_id: batchId },
+        body: { ...value, batch_id: batchId } as G1Application,
         client: apiClient,
       })
       if (error || !data) {
-        toast.error((error as any)?.message ?? "Failed to create enrollment")
+        toast.error((error as { message?: string })?.message ?? "Failed to create enrollment")
         return
       }
       toast.success("Enrollment created. Complete all details.")
@@ -185,7 +187,7 @@ export function PipeDashboard() {
     onSubmit: async ({ value }) => {
       try {
         const r = await createBatch({ body: value, client: apiClient })
-        const newBatchId = (r as any).id ?? (r as any).data?.id
+        const newBatchId = r.data?.id ?? (r.data as any)?.id
         toast.success("Batch created")
         setBatchDialogOpen(false)
         batchForm.reset()
@@ -297,15 +299,16 @@ export function PipeDashboard() {
     [pagination, navigate],
   )
 
-  const columns = useMemo(
+  const columns = useMemo<ColumnDef<G1Application>[]>(
     () => [
       {
         accessorKey: "full_name",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Full Name" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Full Name" />,
         enableColumnFilter: true,
         meta: { label: "Full Name", variant: "text" },
-        cell: ({ getValue, row }: { getValue: any; row: any }) => (
-          <div className="flex flex-col">
+        cell: ({ getValue, row }) => {
+          const name = getValue() as string | null | undefined
+          return (
             <button
               type="button"
               className="font-medium text-left hover:underline hover:text-primary transition-colors"
@@ -317,52 +320,55 @@ export function PipeDashboard() {
                 })
               }}
             >
-              {getValue() as string}
+              {name || <span className="text-muted-foreground italic text-sm">Unnamed</span>}
             </button>
-            <span className="text-[11px] text-muted-foreground font-mono">{row.original.reference_no}</span>
-          </div>
-        ),
+          )
+        },
       },
       {
         accessorKey: "name_with_initials",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Initials" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Initials" />,
         enableColumnFilter: true,
         meta: { label: "Name with Initials", variant: "text" },
+        cell: ({ getValue }) => {
+          const val = getValue() as string | null | undefined
+          return val ? <span>{val}</span> : <span className="text-muted-foreground text-sm">—</span>
+        },
       },
       {
         accessorKey: "date_of_birth",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="DOB" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="DOB" />,
         enableColumnFilter: false,
         meta: { label: "Date of Birth" },
-        cell: ({ getValue }: { getValue: any }) => {
-          const val = getValue() as string
+        cell: ({ getValue }) => {
+          const val = getValue() as string | null
           return val ? formatDate(new Date(val + "T12:00:00")) : ""
         },
       },
       {
         accessorKey: "gender",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Gender" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Gender" />,
         enableColumnFilter: true,
         meta: { label: "Gender", variant: "select", options: [
           { label: "Male", value: "Male" },
           { label: "Female", value: "Female" },
         ] },
-        cell: ({ getValue }: { getValue: any }) => <EnumBadge column="gender" value={getValue() as string} />,
+        cell: ({ getValue }) => <EnumBadge column="gender" value={getValue() as string} />,
       },
       {
         accessorKey: "nationality",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Nationality" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Nationality" />,
         enableColumnFilter: true,
         meta: { label: "Nationality", variant: "select", options: [
           { label: "Sri Lankan", value: "SriLankan" },
           { label: "Dual Citizen", value: "DualCitizen" },
           { label: "Other", value: "Other" },
         ] },
-        cell: ({ getValue }: { getValue: any }) => <EnumBadge column="nationality" value={getValue() as string} />,
+        cell: ({ getValue }) => <EnumBadge column="nationality" value={getValue() as string} />,
       },
       {
         accessorKey: "category",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Category" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Category" />,
         enableColumnFilter: true,
         meta: { label: "Category", variant: "select", options: [
           { label: "Close Resident", value: "CloseResident" },
@@ -373,21 +379,21 @@ export function PipeDashboard() {
           { label: "Overseas Arrival", value: "OverseasArrival" },
           { label: "Armed Forces Reserved", value: "ArmedForcesReserved" },
         ] },
-        cell: ({ getValue }: { getValue: any }) => <EnumBadge column="category" value={getValue() as string} />,
+        cell: ({ getValue }) => <EnumBadge column="category" value={getValue() as string} />,
       },
       {
         accessorKey: "medium_of_instruction",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Medium" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Medium" />,
         enableColumnFilter: true,
         meta: { label: "Medium", variant: "select", options: [
           { label: "Sinhala", value: "Sinhala" },
           { label: "Tamil", value: "Tamil" },
         ] },
-        cell: ({ getValue }: { getValue: any }) => <EnumBadge column="medium_of_instruction" value={getValue() as string} />,
+        cell: ({ getValue }) => <EnumBadge column="medium_of_instruction" value={getValue() as string} />,
       },
       {
         accessorKey: "enrollment_status",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Status" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Status" />,
         enableColumnFilter: true,
         meta: { label: "Status", variant: "select", options: [
           { label: "Draft", value: "Draft" },
@@ -398,14 +404,14 @@ export function PipeDashboard() {
           { label: "Withdrawn", value: "Withdrawn" },
           { label: "Removed", value: "Removed" },
         ] },
-        cell: ({ getValue }: { getValue: any }) => <EnumBadge column="enrollment_status" value={getValue() as string} />,
+        cell: ({ getValue }) => <EnumBadge column="enrollment_status" value={getValue() as string} />,
       },
       {
         accessorKey: "total_marks",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Marks" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Marks" />,
         enableColumnFilter: false,
         meta: { label: "Marks" },
-        cell: ({ getValue }: { getValue: any }) => {
+        cell: ({ getValue }) => {
           const val = getValue() as string | null | undefined
           if (!val) return <span className="text-muted-foreground">—</span>
           const num = parseFloat(val)
@@ -418,10 +424,10 @@ export function PipeDashboard() {
       },
       {
         accessorKey: "created_at",
-        header: ({ column }: { column: any }) => <DataTableColumnHeader column={column} label="Created" />,
+        header: ({ column }) => <DataTableColumnHeader column={column} label="Created" />,
         enableColumnFilter: false,
         meta: { label: "Created" },
-        cell: ({ getValue }: { getValue: any }) => {
+        cell: ({ getValue }) => {
           const val = getValue() as string | undefined
           return val ? (
             <span className="text-muted-foreground text-sm tabular-nums">{formatDate(new Date(val))}</span>
@@ -431,7 +437,7 @@ export function PipeDashboard() {
       {
         id: "actions",
         header: "",
-        cell: ({ row }: { row: any }) => (
+        cell: ({ row }) => (
           <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -444,7 +450,7 @@ export function PipeDashboard() {
               <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuItem
                   className="gap-3 pl-3 [&_svg]:size-4"
-                  onSelect={() => navigate({
+                  onClick={() => navigate({
                     to: "/student-management/enrollment/g1/$enrollment_id",
                     params: { enrollment_id: row.original.id! },
                   })}
@@ -467,7 +473,7 @@ export function PipeDashboard() {
                 />
                 <DropdownMenuItem
                   className="gap-3 pl-3 text-destructive focus:text-destructive [&_svg]:size-4"
-                  onSelect={() => setDeleteTarget(row.original.id!)}
+                  onClick={() => setDeleteTarget(row.original.id!)}
                 >
                   <IconTrash className="size-4" />
                   Delete

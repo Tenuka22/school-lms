@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start"
 import { setCookie, deleteCookie, getCookie } from "@tanstack/react-start/server"
 import { login as apiLogin, register as apiRegister, logout as apiLogout, me } from "@/lib/api-client/sdk.gen"
 import { apiClient } from "@/lib/api-client"
+import { safeParse } from "valibot"
+import { vLoginBody, vRegisterBody } from "@/lib/api-client/valibot.gen"
 
 export interface UserInfo {
   email: string
@@ -11,7 +13,11 @@ export interface UserInfo {
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
 export const loginAction = createServerFn({ method: "POST" })
-  .validator((d: { email: string; password: string }) => d)
+  .validator((d: unknown) => {
+    const result = safeParse(vLoginBody, d)
+    if (!result.success) throw new Error("Invalid email or password")
+    return result.output
+  })
   .handler(async (ctx) => {
     const { data } = await apiLogin({
       client: apiClient,
@@ -37,7 +43,11 @@ export const loginAction = createServerFn({ method: "POST" })
   })
 
 export const registerAction = createServerFn({ method: "POST" })
-  .validator((d: { email: string; password: string })=>d)
+  .validator((d: unknown) => {
+    const result = safeParse(vRegisterBody, d)
+    if (!result.success) throw new Error("Invalid email or password")
+    return result.output
+  })
   .handler(async (ctx) => {
     const { data } = await apiRegister({
       client: apiClient,

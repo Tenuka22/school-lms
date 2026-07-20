@@ -4,7 +4,7 @@ import { useForm } from "@tanstack/react-form"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import * as v from "valibot"
 import { IconCalendar, IconPlus } from "@tabler/icons-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import { createApplication, } from "@/lib/api-client/sdk.gen"
@@ -129,12 +129,14 @@ export function G1EnrollmentDialog({
     enabled: open,
   })
 
-  const computedYear = enrollment?.batch_id && batches
-    ? batches.find((b) => b.id === enrollment.batch_id)?.year
-    : undefined
-  if (computedYear && selectedBatchYear == null) {
-    setSelectedBatchYear(computedYear)
-  }
+  useEffect(() => {
+    if (enrollment?.batch_id && batches) {
+      const year = batches.find((b) => b.id === enrollment.batch_id)?.year
+      if (year && selectedBatchYear == null) {
+        setSelectedBatchYear(year)
+      }
+    }
+  }, [enrollment?.batch_id, batches, selectedBatchYear])
 
   const selectedBatch = selectedBatchYear && batches
     ? batches.find((b) => b.year === selectedBatchYear)
