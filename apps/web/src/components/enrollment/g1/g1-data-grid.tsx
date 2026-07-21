@@ -3,11 +3,13 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
-  type ColumnDef,
-  type SortingState,
-  type ColumnFiltersState,
-  type PaginationState,
-  type VisibilityState,
+} from "@tanstack/react-table"
+import type {
+  ColumnDef,
+  SortingState,
+  ColumnFiltersState,
+  PaginationState,
+  VisibilityState,
 } from "@tanstack/react-table"
 import * as React from "react"
 import {
@@ -39,10 +41,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import * as v from "valibot"
+import type * as v from "valibot"
 import { G1EnrollmentDialog } from "@/components/enrollment/g1/g1-enrollment-dialog"
 import { queryClient } from "@/router"
-import { vListApplicationsQuery } from "@/lib/api-client/valibot.gen"
+import type { vListApplicationsQuery } from "@/lib/api-client/valibot.gen"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 
 type G1SearchParams = v.InferOutput<typeof vListApplicationsQuery>
@@ -246,7 +248,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
           ;(next as Record<string, unknown>)[key] = undefined
         }
       }
-      navigate({ search: next as unknown as G1SearchParams })
+      navigate({ search: next })
     },
     [columnFilters, navigate, search]
   )

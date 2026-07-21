@@ -1,10 +1,7 @@
 import { createEnv } from "@t3-oss/env-core"
 import { string } from "valibot"
 
-const runtimeEnv =
-  typeof process !== "undefined" && process.env
-    ? { ...process.env, ...import.meta.env }
-    : { ...import.meta.env }
+const runtimeEnv = { ...process.env, ...import.meta.env }
 
 export const env = createEnv({
   server: {

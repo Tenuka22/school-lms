@@ -20,6 +20,7 @@ import {
   saveSiblingsMutation,
   saveApplicationDocumentsMutation,
   listWorkspaceAddressesOptions,
+  listGuardiansOptions,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import type {
@@ -34,7 +35,6 @@ import { WizardStepChild } from "./wizard-step-child"
 import type { ChildFormData } from "./wizard-step-child"
 import { WizardStepGuardian } from "./wizard-step-guardian"
 import type { GuardianFormData } from "./wizard-step-guardian"
-export const SEEDED_SCHOOL_ID = "00000000-0000-0000-0000-000000000001"
 import { WizardStepAddress } from "./wizard-step-address"
 import type { AddressEntryValue } from "./wizard-step-address"
 import { WizardStepSiblings } from "./wizard-step-siblings"
@@ -42,7 +42,8 @@ import { WizardStepDocuments } from "./wizard-step-documents"
 import type { DocumentFormData } from "./wizard-step-documents"
 import { WizardStepReview } from "./wizard-step-review"
 import { WizardSidebar } from "./wizard-sidebar"
-import { listGuardiansOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+
+export const SEEDED_SCHOOL_ID = "00000000-0000-0000-0000-000000000001"
 
 const STEPS = [
   "Child",
@@ -522,21 +523,19 @@ export function WizardShell() {
                   defaultValues={
                     application
                       ? {
-                          full_name: application.full_name ?? "",
-                          name_with_initials:
-                            application.name_with_initials ?? "",
-                          date_of_birth: application.date_of_birth ?? "",
-                          gender: application.gender ?? "Male",
-                          nationality: application.nationality ?? "SriLankan",
-                          religion: application.religion ?? "",
+                          full_name: application.full_name,
+                          name_with_initials: application.name_with_initials,
+                          date_of_birth: application.date_of_birth,
+                          gender: application.gender,
+                          nationality: application.nationality,
+                          religion: application.religion,
                           birth_certificate_number:
-                            application.birth_certificate_number ?? "",
+                            application.birth_certificate_number,
                           medium_of_instruction:
-                            application.medium_of_instruction ?? "Sinhala",
-                          category:
-                            application.category ?? ("" as G1Category | ""),
+                            application.medium_of_instruction,
+                          category: application.category,
                           overseas_arrival_date:
-                            application.overseas_arrival_date ?? "",
+                            application.overseas_arrival_date,
                         }
                       : childData
                   }

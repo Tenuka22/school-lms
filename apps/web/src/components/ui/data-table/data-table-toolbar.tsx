@@ -75,7 +75,7 @@ interface DataTableToolbarFilterProps<TData> {
 function DataTableToolbarFilter<TData>({
   column,
 }: DataTableToolbarFilterProps<TData>) {
-  const columnMeta = column.columnDef.meta as DataTableColumnMeta | undefined
+  const columnMeta = column.columnDef.meta
 
   if (!columnMeta?.variant) return null
 
@@ -84,7 +84,7 @@ function DataTableToolbarFilter<TData>({
       return (
         <Input
           placeholder={columnMeta.placeholder ?? columnMeta.label}
-          value={(column.getFilterValue() as string) ?? ""}
+          value={column.getFilterValue() as string}
           onChange={(event) => column.setFilterValue(event.target.value)}
           className="h-8 w-40 lg:w-56"
         />
@@ -97,7 +97,7 @@ function DataTableToolbarFilter<TData>({
             type="number"
             inputMode="numeric"
             placeholder={columnMeta.placeholder ?? columnMeta.label}
-            value={(column.getFilterValue() as string) ?? ""}
+            value={column.getFilterValue() as string}
             onChange={(event) => column.setFilterValue(event.target.value)}
             className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
           />

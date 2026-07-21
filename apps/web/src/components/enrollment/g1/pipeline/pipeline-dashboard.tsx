@@ -20,8 +20,6 @@ import { apiClient } from "@/lib/api-client"
 import {
   listBatchesOptions,
   listBatchesQueryKey,
-} from "@/lib/api-client/@tanstack/react-query.gen"
-import {
   listApplicationsOptions,
   listApplicationsQueryKey,
 } from "@/lib/api-client/@tanstack/react-query.gen"
@@ -293,7 +291,7 @@ export function PipeDashboard() {
       })
       if (error || !data) {
         toast.error(
-          (error as { message?: string })?.message ??
+          (error as { message?: string }).message ??
             "Failed to create enrollment"
         )
         return
@@ -824,7 +822,7 @@ export function PipeDashboard() {
                   key={b.id}
                   type="button"
                   onClick={() => {
-                    setBatchId(b.id!)
+                    setBatchId(b.id)
                     b.id &&
                       scrollRef.current
                         ?.querySelector(`[data-batch-id="${b.id}"]`)

@@ -212,7 +212,7 @@ export function WizardStepDocuments({
           // ignore S3 delete failure
         }
       }
-      if (doc?.file_url?.startsWith("blob:")) URL.revokeObjectURL(doc.file_url)
+      if (doc.file_url.startsWith("blob:")) URL.revokeObjectURL(doc.file_url)
       const remaining = docsRef.current.filter((d) => d.doc_type !== docKey)
       updateDocs(remaining)
       await onSave(remaining)
@@ -225,8 +225,8 @@ export function WizardStepDocuments({
       e.preventDefault()
       e.stopPropagation()
       setDragOverKey(null)
-      const file = e.dataTransfer.files?.[0]
-      if (file) uploadAndSave(docKey, file)
+      const file = e.dataTransfer.files[0]
+      uploadAndSave(docKey, file)
     },
     [uploadAndSave]
   )
@@ -285,7 +285,7 @@ export function WizardStepDocuments({
                         : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30"
                   }`}
                 >
-                  {isUploaded && currentDoc?.file_url ? (
+                  {isUploaded && currentDoc.file_url ? (
                     <div className="flex flex-col items-center justify-center gap-2 py-3">
                       <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
                         {currentDoc.file_type?.startsWith("image/") ? (

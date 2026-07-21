@@ -35,8 +35,7 @@ export function SignupForm({
   const navigate = useNavigate()
   const mutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {
-      const result = await registerAction({ data: values })
-      if (!result.ok) throw new Error("Registration failed")
+      await registerAction({ data: values })
     },
     onSuccess: () => {
       toast.success("Account created successfully!")

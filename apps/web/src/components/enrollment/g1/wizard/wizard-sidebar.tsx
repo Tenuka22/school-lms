@@ -56,26 +56,18 @@ function ChildSummary({ data }: ChildSummaryProps) {
             <span className="text-foreground">{data.date_of_birth}</span>
           </div>
         )}
-        {data.gender && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Gender</span>
-            <span className="text-foreground">{data.gender}</span>
-          </div>
-        )}
-        {data.nationality && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Nationality</span>
-            <span className="text-foreground">{data.nationality}</span>
-          </div>
-        )}
-        {data.medium_of_instruction && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Medium</span>
-            <span className="text-foreground">
-              {data.medium_of_instruction}
-            </span>
-          </div>
-        )}
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Gender</span>
+          <span className="text-foreground">{data.gender}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Nationality</span>
+          <span className="text-foreground">{data.nationality}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Medium</span>
+          <span className="text-foreground">{data.medium_of_instruction}</span>
+        </div>
         {data.category && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">Category</span>

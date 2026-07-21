@@ -1,4 +1,5 @@
-import { flexRender, type Table as TanstackTable } from "@tanstack/react-table"
+import { flexRender } from "@tanstack/react-table"
+import type { Table as TanstackTable } from "@tanstack/react-table"
 import type * as React from "react"
 
 import { DataTablePagination } from "@/components/ui/data-table/data-table-pagination"
@@ -58,7 +59,7 @@ export function DataTable<TData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}

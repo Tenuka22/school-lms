@@ -171,9 +171,7 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) =>
-                        val && field.handleChange(val as Gender)
-                      }
+                      onValueChange={(val) => val && field.handleChange(val)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue />
@@ -201,9 +199,7 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) =>
-                        val && field.handleChange(val as Nationality)
-                      }
+                      onValueChange={(val) => val && field.handleChange(val)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue />
@@ -296,9 +292,7 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) =>
-                        val && field.handleChange(val as MediumOfInstruction)
-                      }
+                      onValueChange={(val) => val && field.handleChange(val)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue />

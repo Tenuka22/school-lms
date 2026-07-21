@@ -385,7 +385,7 @@ function CreateWorkspaceAddressForm({
     defaultValues: addressFormDefaults,
     validators: { onSubmit: vCreateWorkspaceAddressBody as any },
     onSubmit: async ({ value }) => {
-      const data = value as typeof addressFormDefaults
+      const data = value
       onSubmit({
         name: data.name,
         building: data.building || null,
@@ -1300,18 +1300,18 @@ function EditGuardianDialog({
             workplace_address: value.workplace_address ?? null,
             relationship_type: value.relationship_type,
             is_school_staff: value.is_school_staff,
-            staff_type: value.staff_type ?? null,
-            employee_id: value.employee_id ?? null,
-            staff_school_id: value.staff_school_id ?? null,
+            staff_type: value.staff_type,
+            employee_id: value.employee_id,
+            staff_school_id: value.staff_school_id,
             is_past_pupil: value.is_past_pupil,
             is_govt_employee: value.is_govt_employee,
-            income_level: value.income_level ?? null,
-            govt_service_years: value.govt_service_years ?? null,
-            past_pupil_student_id: value.past_pupil_student_id ?? null,
-            past_pupil_highest_grade: value.past_pupil_highest_grade ?? null,
-            past_pupil_year_left: value.past_pupil_year_left ?? null,
-            past_pupil_left_reason: value.past_pupil_left_reason ?? null,
-            past_pupil_school_id: value.past_pupil_school_id ?? null,
+            income_level: value.income_level,
+            govt_service_years: value.govt_service_years,
+            past_pupil_student_id: value.past_pupil_student_id,
+            past_pupil_highest_grade: value.past_pupil_highest_grade,
+            past_pupil_year_left: value.past_pupil_year_left,
+            past_pupil_left_reason: value.past_pupil_left_reason,
+            past_pupil_school_id: value.past_pupil_school_id,
           },
         })
         queryClient.invalidateQueries({

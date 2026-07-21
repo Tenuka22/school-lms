@@ -195,25 +195,15 @@ export function ScoringDashboard({ enrollmentId }: Props) {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {CATEGORIES.map((cat) => {
-          const raw = 0
-          const weighted = 0
-          const hasValue = raw > 0
-
           return (
-            <Card
-              key={cat.code}
-              className={hasValue ? "ring-1 ring-primary/20" : "opacity-60"}
-            >
+            <Card key={cat.code} className="opacity-60">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className={`size-3 rounded-full ${cat.color}`} />
                     <CardTitle className="text-sm">{cat.label}</CardTitle>
                   </div>
-                  <Badge
-                    variant={hasValue ? "default" : "secondary"}
-                    className="text-[10px]"
-                  >
+                  <Badge variant="secondary" className="text-[10px]">
                     {cat.weight}%
                   </Badge>
                 </div>

@@ -35,8 +35,7 @@ export function LoginForm({
   const navigate = useNavigate()
   const mutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {
-      const result = await loginAction({ data: values })
-      if (!result.ok) throw new Error("Login failed")
+      await loginAction({ data: values })
     },
     onSuccess: () => {
       toast.success("Welcome back! Logging you in...")

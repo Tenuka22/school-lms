@@ -23,9 +23,12 @@ import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { ChildFormData } from "./wizard-step-child"
 import type { SchoolFormData } from "./wizard-step-school"
 import type { AddressEntryValue } from "./wizard-step-address"
-import type { WorkspaceAddress, Student } from "@/lib/api-client/types.gen"
+import type {
+  WorkspaceAddress,
+  Student,
+  Guardian,
+} from "@/lib/api-client/types.gen"
 import type { DocumentFormData } from "./wizard-step-documents"
-import type { Guardian } from "@/lib/api-client/types.gen"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { getInitials } from "@/lib/utils"
 import {

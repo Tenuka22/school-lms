@@ -24,18 +24,6 @@ import {
   vEnrollmentStatus,
   vReligion,
 } from "@/lib/api-client/valibot.gen"
-
-const vDialogApplication = v.object({
-  full_name: v.string(),
-  name_with_initials: v.string(),
-  date_of_birth: v.pipe(v.string(), v.isoDate()),
-  gender: vGender,
-  nationality: vNationality,
-  medium_of_instruction: vMediumOfInstruction,
-  enrollment_status: vEnrollmentStatus,
-  religion: v.nullish(vReligion),
-  batch_id: v.pipe(v.string(), v.uuid()),
-})
 import { formatDate } from "@/lib/format"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -68,6 +56,18 @@ import {
 } from "@/components/ui/field"
 import type { G1Application } from "@/lib/api-client/types.gen"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
+
+const vDialogApplication = v.object({
+  full_name: v.string(),
+  name_with_initials: v.string(),
+  date_of_birth: v.pipe(v.string(), v.isoDate()),
+  gender: vGender,
+  nationality: vNationality,
+  medium_of_instruction: vMediumOfInstruction,
+  enrollment_status: vEnrollmentStatus,
+  religion: v.nullish(vReligion),
+  batch_id: v.pipe(v.string(), v.uuid()),
+})
 
 const LABELS: Record<string, string> = {
   CloseResident: "Close Resident",
@@ -165,13 +165,13 @@ export function G1EnrollmentDialog({
       enrollment_status: enrollment?.enrollment_status ?? "Pending",
       religion: enrollment?.religion ?? null,
       batch_id: enrollment?.batch_id ?? "",
-    } as v.InferInput<typeof vDialogApplication>,
+    },
     validators: {
       onSubmit: vDialogApplication,
     },
     onSubmit: async ({ value }) => {
       try {
-        if (isEdit && enrollment?.id) {
+        if (isEdit && enrollment.id) {
           await updateApplication.mutateAsync({
             body: value,
             path: { id: enrollment.id },
@@ -348,9 +348,7 @@ export function G1EnrollmentDialog({
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) =>
-                        val && field.handleChange(val as "Male" | "Female")
-                      }
+                      onValueChange={(val) => val && field.handleChange(val)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select gender" />
@@ -381,12 +379,7 @@ export function G1EnrollmentDialog({
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) =>
-                        val &&
-                        field.handleChange(
-                          val as "SriLankan" | "DualCitizen" | "Other"
-                        )
-                      }
+                      onValueChange={(val) => val && field.handleChange(val)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select nationality" />
@@ -419,9 +412,7 @@ export function G1EnrollmentDialog({
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) =>
-                        val && field.handleChange(val as "Sinhala" | "Tamil")
-                      }
+                      onValueChange={(val) => val && field.handleChange(val)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select medium" />
@@ -452,9 +443,7 @@ export function G1EnrollmentDialog({
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) =>
-                        val && field.handleChange(val as any)
-                      }
+                      onValueChange={(val) => val && field.handleChange(val)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select status" />

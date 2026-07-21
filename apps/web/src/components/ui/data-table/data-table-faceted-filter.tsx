@@ -83,7 +83,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           />
         }
       >
-        {selectedValues?.size > 0 ? (
+        {selectedValues.size > 0 ? (
           <div
             role="button"
             aria-label={`Clear ${title} filter`}
@@ -97,7 +97,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           <IconCirclePlus />
         )}
         {title}
-        {selectedValues?.size > 0 && (
+        {selectedValues.size > 0 && (
           <>
             <Separator
               orientation="vertical"

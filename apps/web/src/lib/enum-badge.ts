@@ -223,12 +223,12 @@ const ENUM_LABELS: Record<string, Record<string, string>> = {
 }
 
 export function getEnumLabel(column: string, value: string): string {
-  return ENUM_LABELS[column]?.[value] ?? value
+  return ENUM_LABELS[column][value]
 }
 
 export function getEnumStyle(
   column: string,
   value: string
 ): string | undefined {
-  return ENUM_STYLES[column]?.[value]
+  return ENUM_STYLES[column][value]
 }
