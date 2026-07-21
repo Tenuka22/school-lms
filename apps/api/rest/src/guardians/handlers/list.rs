@@ -1,10 +1,10 @@
+use crate::auth::middleware::AuthenticatedUser;
+use crate::error::ApiError;
 use actix_web::{web, web::Json};
 use apistos::api_operation;
 use db::entity::guardians;
-use sea_orm::{DatabaseConnection, EntityTrait};
-use crate::auth::middleware::AuthenticatedUser;
-use crate::error::ApiError;
 use db::rbac::Permission;
+use sea_orm::{DatabaseConnection, EntityTrait};
 
 #[api_operation(tag = "guardians", operation_id = "list-guardians")]
 pub async fn list_guardians(

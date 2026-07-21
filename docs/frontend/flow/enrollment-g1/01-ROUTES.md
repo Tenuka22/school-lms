@@ -24,8 +24,9 @@ apps/web/src/routes/_authenticated/student-management/enrollment/g1/
 | `/student-management/enrollment/g1/applications/$id`               | Officer, Admin      | Application detail + Approve/Reject actions   |
 | `/student-management/enrollment/g1/applications/$id/documents`     | Officer             | Document review (read-only docs from wizard)  |
 | `/student-management/enrollment/g1/applications/$id/marks`         | Officer, Admin      | Marks breakdown (radar + category scores)     |
-| `/student-management/enrollment/g1/applications/$id/audit`         | Admin               | Full audit trail per application              |
+| `/student-management/enrollment/g1/applications/$id/audit`        | Admin               | Full audit trail per application              |
 | `/student-management/enrollment/g1/applications/$id/appeal`        | Officer, Admin      | Appeal history + file new appeal              |
+| `/student-management/enrollment/g1/scoring/$enrollment_id`         | Admin               | Category scoring & marks breakdown dashboard  |
 | `/student-management/enrollment/g1/lists`                          | All roles           | Final admission lists (Main/Waiting/Rejected) |
 | `/student-management/enrollment/g1/settings`                       | Admin               | Quotas, weights, distance bands               |
 

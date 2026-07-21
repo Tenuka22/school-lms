@@ -9,32 +9,32 @@ This system uses an **imperative, flow-based pipeline** — not a free-form decl
 ## The Pipeline (State Machine)
 
 ```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────────┐    ┌──────────┐
-│ PENDING  │ →  │COMPLETED │ →  │ PENDING  │ →  │   APPROVED   │ →  │ ADMITTED │
-│          │    │ (info    │    │ APPROVAL │    │ (→ creates   │    │          │
-│ (data    │    │  filled) │    │          │    │  student)    │    │          │
-│  entry)  │    └──────────┘    └──────────┘    └──────────────┘    └──────────┘
-└──────────┘                                                              ↑
-     │                                                                     │
-     └──────────► REJECTED (end state)                                     │
-                                                                           │
-     ┌──────────┐                                                          │
-     │ WITHDRAWN│ ← (manual withdrawal, end state)                         │
-     └──────────┘                                                          │
+┌──────────┐    ┌──────────┐    ┌──────────────┐    ┌──────────┐    ┌──────────┐
+│ PENDING  │ →  │COMPLETED │ →  │ PENDING      │ →  │ APPROVED │ →  │ ADMITTED │
+│          │    │ (data    │    │ APPROVAL     │    │ (student │    │          │
+│ (wizard) │    │  entry)  │    │ (marks calc) │    │  record) │    │          │
+└──────────┘    └──────────┘    └──────────────┘    └──────────┘    └──────────┘
+     │               │               │                    │
+     └───────┬───────┴───────┬───────┴────────┬───────────┘
+             ▼               ▼                ▼
+        ┌──────────┐   ┌──────────┐    ┌──────────┐
+        │ REJECTED │   │WITHDRAWN │    │ REMOVED  │
+        └──────────┘   └──────────┘    └──────────┘
 ```
 
 ### Enforced State Transitions
 
 | From            | To              | Trigger                                    | Guard Conditions                                   |
 |-----------------|-----------------|--------------------------------------------|----------------------------------------------------|
-| **PENDING**     | **COMPLETED**   | All required data entered via wizard        | Child+Guardian+School+Address+Siblings+Documents   |
-| **PENDING**     | **REJECTED**    | Officer rejects                             | Officer role, reason required                      |
-| **PENDING**     | **WITHDRAWN**   | Parent/System withdraws                     | —                                                  |
-| **COMPLETED**   | **PENDING_APPROVAL** | Marks calculated, ranked in descending order | All marks computed, ranked within school          |
-| **COMPLETED**   | **WITHDRAWN**   | Parent withdraws                            | —                                                  |
-| **PENDING_APPROVAL** | **APPROVED** | Officer approves → creates student record   | Student table has capacity, duplicate check passed |
+| **PENDING**     | **COMPLETED**   | Wizard complete                             | All required data entered                          |
+| **PENDING**     | **REJECTED**    | Officer rejects                             | Reason required                                    |
+| **PENDING**     | **WITHDRAWN**   | Manual withdrawal                           | —                                                  |
+| **COMPLETED**   | **PENDING_APPROVAL** | Marks calculated via API                | All data entered, at least one category scored     |
+| **COMPLETED**   | **WITHDRAWN**   | Manual withdrawal                           | —                                                  |
+| **PENDING_APPROVAL** | **APPROVED** | Officer approves → creates student record   | Student capacity available                         |
 | **PENDING_APPROVAL** | **REJECTED** | Officer rejects                             | Reason required                                    |
-| **APPROVED**    | **ADMITTED**    | Student formally admitted                   | Admission lists finalized                          |
+| **APPROVED**    | **ADMITTED**    | Formal admission                            | Admission lists finalized                          |
+| **Any**         | **REMOVED**     | System cleanup                              | Admin only                                         |
 
 **Illegal transitions** (prevented by backend + frontend guards):
 - Draft → Submitted (no free-form editing)
@@ -77,13 +77,14 @@ Only these statuses exist in the UI for the enrollment pipeline:
 |--------------------|---------------------------------------------------|
 | **PENDING**        | Created, wizard begun but not complete             |
 | **COMPLETED**      | All info entered, ready for marks calculation      |
-| **PENDING_APPROVAL** | Marks ranked, awaiting officer approval            |
+| **PENDING_APPROVAL** | Marks calculated, awaiting officer approval        |
 | **APPROVED**       | Student record created, enrollment finalized       |
 | **ADMITTED**       | Student formally admitted to school                |
 | **REJECTED**       | Terminal: application rejected                     |
 | **WITHDRAWN**      | Terminal: parent/system withdrew                   |
+| **REMOVED**        | Terminal: system cleanup/deletion                  |
 
-No `Draft`, no `Under_Verification`, no `Shortlisted` — these are sub-states handled within the pipeline internally, not exposed as user-facing statuses.
+No `Draft`, no `ApplicationStatus` — the simplified `EnrollmentStatus` is the single source of truth.
 
 ---
 

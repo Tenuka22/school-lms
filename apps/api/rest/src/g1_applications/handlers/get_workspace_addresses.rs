@@ -1,6 +1,6 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use db::entity::g1::{applications, join_workspace_addresses};
 use schemars::JsonSchema;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
@@ -24,7 +24,10 @@ pub struct GetApplicationWorkspaceAddressesResponse {
     pub addresses: Vec<AddressEntryResponse>,
 }
 
-#[api_operation(tag = "g1-applications", operation_id = "get-application-workspace-addresses")]
+#[api_operation(
+    tag = "g1-applications",
+    operation_id = "get-application-workspace-addresses"
+)]
 pub async fn get_application_workspace_addresses(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,

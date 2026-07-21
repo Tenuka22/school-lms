@@ -1,7 +1,7 @@
 use aws_config::meta::region::RegionProviderChain;
+use aws_sdk_s3::Client;
 use aws_sdk_s3::config::{BehaviorVersion, Credentials, Region};
 use aws_sdk_s3::presigning::PresigningConfig;
-use aws_sdk_s3::Client;
 use std::env;
 use std::time::Duration;
 
@@ -13,14 +13,18 @@ pub struct Storage {
 
 impl Storage {
     pub async fn from_env() -> Self {
-        let endpoint = env::var("MINIO_ENDPOINT").unwrap_or_else(|_| "http://localhost:9000".into());
+        let endpoint =
+            env::var("MINIO_ENDPOINT").unwrap_or_else(|_| "http://localhost:9000".into());
         let access_key = env::var("MINIO_ACCESS_KEY").unwrap_or_else(|_| "minioadmin".into());
         let secret_key = env::var("MINIO_SECRET_KEY").unwrap_or_else(|_| "minioadmin".into());
         let region = env::var("MINIO_REGION").unwrap_or_else(|_| "us-east-1".into());
         let bucket = env::var("MINIO_BUCKET").unwrap_or_else(|_| "school-lms".into());
 
         let region_provider = RegionProviderChain::first_try(Region::new(region));
-        let region = region_provider.region().await.unwrap_or_else(|| Region::new("us-east-1"));
+        let region = region_provider
+            .region()
+            .await
+            .unwrap_or_else(|| Region::new("us-east-1"));
 
         let creds = Credentials::new(access_key, secret_key, None, None, "minio");
 
@@ -92,7 +96,8 @@ impl Storage {
     }
 
     pub fn public_url(&self, key: &str) -> String {
-        let endpoint = env::var("MINIO_ENDPOINT").unwrap_or_else(|_| "http://localhost:9000".into());
+        let endpoint =
+            env::var("MINIO_ENDPOINT").unwrap_or_else(|_| "http://localhost:9000".into());
         format!("{}/{}/{}", endpoint.trim_end_matches('/'), self.bucket, key)
     }
 

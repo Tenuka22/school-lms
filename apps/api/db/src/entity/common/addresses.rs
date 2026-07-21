@@ -1,7 +1,7 @@
+use super::enums::ResidenceType;
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::enums::{ResidenceType};
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()
@@ -12,8 +12,6 @@ fn default_now() -> DateTime<Utc> {
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    #[serde(default)]
-    pub application_id: Option<Uuid>,
     pub address_line_1: String,
     pub address_line_2: Option<String>,
     pub city: String,

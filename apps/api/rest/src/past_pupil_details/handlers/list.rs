@@ -1,6 +1,6 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use db::entity::common::past_pupil_details;
 use schemars::JsonSchema;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};

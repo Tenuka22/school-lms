@@ -1,5 +1,5 @@
-use actix_multipart::form::tempfile::TempFile;
 use actix_multipart::form::MultipartForm;
+use actix_multipart::form::tempfile::TempFile;
 use actix_web::web::Json;
 use apistos::api_operation;
 use apistos::web;
@@ -120,11 +120,7 @@ pub async fn upload_file(
         .map(|m| m.to_string())
         .unwrap_or_else(|| "application/octet-stream".to_string());
 
-    let key = format!(
-        "{}-{}",
-        uuid::Uuid::new_v4(),
-        sanitize_filename(&file_name)
-    );
+    let key = format!("{}-{}", uuid::Uuid::new_v4(), sanitize_filename(&file_name));
 
     storage
         .put_object(&key, data, &content_type)
@@ -157,12 +153,20 @@ pub async fn delete_upload(
         log::error!("minio delete_object failed: {e}");
         ApiError::Internal("failed to delete file".into())
     })?;
-    Ok(Json(MessageResponse { message: "file deleted".into() }))
+    Ok(Json(MessageResponse {
+        message: "file deleted".into(),
+    }))
 }
 
 fn sanitize_filename(name: &str) -> String {
     name.chars()
-        .map(|c| if c.is_alphanumeric() || c == '.' || c == '-' || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_alphanumeric() || c == '.' || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect()
 }
 

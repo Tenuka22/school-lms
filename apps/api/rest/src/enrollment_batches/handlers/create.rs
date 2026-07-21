@@ -1,22 +1,18 @@
 use actix_web::{web, web::Json};
+use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use apistos::ApiComponent;
 use chrono::Utc;
 use db::entity::enrollment_batches;
 use db::entity::enums::{BatchStatus, EnrollmentType};
 use schemars::JsonSchema;
-use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter,
-};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
-
-
 
 fn generate_batch_code(enrollment_type: &EnrollmentType, year: i16) -> String {
     match enrollment_type {

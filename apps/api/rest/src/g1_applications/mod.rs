@@ -2,14 +2,27 @@ pub mod handlers;
 
 use apistos::web;
 
-use handlers::{create, create_sibling, delete, get, get_documents, get_guardians, get_siblings, get_workspace_addresses, list, save_documents, save_guardians, save_siblings, save_step, save_workspace_addresses, update};
+use handlers::{
+    create, create_sibling, delete, get, get_documents, get_guardians, get_siblings,
+    get_workspace_addresses, list, save_documents, save_guardians, save_siblings, save_step,
+    save_workspace_addresses, update,
+};
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.route("/g1-applications", web::get().to(list::list_applications))
         .route("/g1-applications/{id}", web::get().to(get::get_application))
-        .route("/g1-applications", web::post().to(create::create_application))
-        .route("/g1-applications/{id}", web::put().to(update::update_application))
-        .route("/g1-applications/{id}", web::delete().to(delete::delete_application))
+        .route(
+            "/g1-applications",
+            web::post().to(create::create_application),
+        )
+        .route(
+            "/g1-applications/{id}",
+            web::put().to(update::update_application),
+        )
+        .route(
+            "/g1-applications/{id}",
+            web::delete().to(delete::delete_application),
+        )
         .route(
             "/g1-applications/{id}/submit",
             web::post().to(create::submit_application),

@@ -1,11 +1,15 @@
+use super::super::common::enums::{
+    Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
+};
 use apistos::ApiComponent;
-use chrono::{DateTime, Utc, NaiveDate};
+use chrono::{DateTime, NaiveDate, Utc};
 use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::super::common::enums::{Gender, Nationality, Religion, MediumOfInstruction, StudentStatus};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
+)]
 #[schemars(rename = "Student")]
 #[sea_orm(table_name = "students")]
 pub struct Model {

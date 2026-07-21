@@ -19,7 +19,7 @@ export function PipelineCard({ enrollment, laneStatus, onClick }: PipelineCardPr
       <div className="font-medium text-sm mt-0.5 truncate">
         {enrollment.full_name || "—"}
       </div>
-      {laneStatus === "ProvisionallyApproved" && enrollment.total_marks != null && (
+      {(laneStatus === "Completed" || laneStatus === "PendingApproval") && enrollment.total_marks != null && (
         <div className="flex items-center gap-1 mt-2 text-xs font-mono">
           <span className="text-muted-foreground">Marks:</span>
           <span className="font-bold">{enrollment.total_marks}</span>

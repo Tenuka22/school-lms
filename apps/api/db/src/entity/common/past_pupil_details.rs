@@ -8,7 +8,9 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
+)]
 #[sea_orm(table_name = "past_pupil_details")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]

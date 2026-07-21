@@ -1,7 +1,7 @@
 use actix_web::{web, web::Json};
 use apistos::api_operation;
 use db::entity::workspace_addresses;
-use sea_orm::{DatabaseConnection, EntityTrait, ColumnTrait, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;

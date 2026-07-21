@@ -1,6 +1,6 @@
 use actix_web::web;
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enums::{DocumentVerificationStatus, G1DocumentType};
 use db::entity::g1::{applications, documents};
@@ -42,7 +42,9 @@ fn parse_doc_type(s: &str) -> Option<G1DocumentType> {
         "StaffServiceCertificate" => Some(G1DocumentType::StaffServiceCertificate),
         "PastPupilCertificate" | "AlumniCertificate" => Some(G1DocumentType::PastPupilCertificate),
         "PastPupilExamCert" => Some(G1DocumentType::PastPupilExamCert),
-        "GovtServiceCertificate" | "GovtEmployeeCertificate" => Some(G1DocumentType::GovtServiceCertificate),
+        "GovtServiceCertificate" | "GovtEmployeeCertificate" => {
+            Some(G1DocumentType::GovtServiceCertificate)
+        }
         "DisabilityCertificate" => Some(G1DocumentType::DisabilityCertificate),
         "IncomeCertificate" => Some(G1DocumentType::IncomeCertificate),
         "BaptismCertificate" => Some(G1DocumentType::BaptismCertificate),

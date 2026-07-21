@@ -1,6 +1,6 @@
 use actix_web::web;
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::g1::applications;
 use log::info;
@@ -36,7 +36,10 @@ pub async fn save_wizard_step(
     let app_id = id.into_inner();
     let step = body.wizard_step;
 
-    info!("[save_wizard_step] user={:?} app={app_id} step={step}", auth.user_id);
+    info!(
+        "[save_wizard_step] user={:?} app={app_id} step={step}",
+        auth.user_id
+    );
 
     let existing = applications::Entity::find_by_id(app_id)
         .one(db.as_ref())
@@ -46,7 +49,10 @@ pub async fn save_wizard_step(
             ApiError::NotFound("Application not found".into())
         })?;
 
-    info!("[save_wizard_step] current wizard_step={:?} -> setting to {step}", existing.wizard_step);
+    info!(
+        "[save_wizard_step] current wizard_step={:?} -> setting to {step}",
+        existing.wizard_step
+    );
 
     let mut active: applications::ActiveModel = existing.into();
     active.wizard_step = Set(Some(step));

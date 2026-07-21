@@ -1,7 +1,7 @@
 use actix_web::{web, web::Json};
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::{AuditOperation, ApplicationStatus};
+use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
 use db::entity::g1::applications;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use uuid::Uuid;
@@ -27,11 +27,11 @@ pub async fn delete_application(
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
 
-    if existing.status != ApplicationStatus::Draft
-        && existing.status != ApplicationStatus::Rejected
+    if existing.enrollment_status != EnrollmentStatus::Pending
+        && existing.enrollment_status != EnrollmentStatus::Rejected
     {
         return Err(ApiError::BadRequest(
-            "only draft or rejected applications can be deleted".into(),
+            "only pending or rejected applications can be deleted".into(),
         ));
     }
 

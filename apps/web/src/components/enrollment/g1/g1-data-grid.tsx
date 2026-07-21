@@ -73,10 +73,11 @@ const ENUM_OPTIONS = {
     { label: "Tamil", value: "Tamil" },
   ],
   enrollment_status: [
-    { label: "Draft", value: "Draft" },
     { label: "Pending", value: "Pending" },
-    { label: "Provisionally Approved", value: "ProvisionallyApproved" },
+    { label: "Completed", value: "Completed" },
+    { label: "Pending Approval", value: "PendingApproval" },
     { label: "Approved", value: "Approved" },
+    { label: "Admitted", value: "Admitted" },
     { label: "Rejected", value: "Rejected" },
     { label: "Withdrawn", value: "Withdrawn" },
     { label: "Removed", value: "Removed" },

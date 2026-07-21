@@ -1,17 +1,17 @@
 mod auth;
 mod counter;
+pub mod docs;
 mod enrollment_batches;
+pub mod error;
 mod g1_applications;
 mod guardians;
 mod past_pupil_details;
 mod schools;
 mod staff_details;
-mod students;
 pub mod storage;
+mod students;
 mod uploads;
 mod workspace_addresses;
-pub mod docs;
-pub mod error;
 
 use apistos::web;
 

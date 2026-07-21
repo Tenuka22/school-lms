@@ -31,22 +31,24 @@ pub async fn update_application(
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
 
-    info!("[update_application] found existing app status={:?} wizard_step={:?} guardian_count={}",
-        existing.status, existing.wizard_step, existing.guardian_id.map(|_| 1).unwrap_or(0));
+    info!(
+        "[update_application] found existing app status={:?} wizard_step={:?}",
+        existing.enrollment_status, existing.wizard_step
+    );
 
     let old_json = serde_json::to_value(&existing).ok();
 
     let m = body.into_inner();
 
-    info!("[update_application] incoming full_name={:?} gender={:?} school_id={:?} wizard_step={:?} guardian_id={:?}",
-        m.full_name, m.gender, m.school_id, m.wizard_step, m.guardian_id);
+    info!(
+        "[update_application] incoming full_name={:?} gender={:?} school_id={:?} wizard_step={:?}",
+        m.full_name, m.gender, m.school_id, m.wizard_step
+    );
     let active = applications::ActiveModel {
         id: Set(id),
         reference_no: Set(m.reference_no),
         applied_year: Set(m.applied_year),
         school_id: Set(m.school_id),
-        guardian_id: Set(m.guardian_id),
-        status: Set(m.status),
         total_marks: Set(m.total_marks),
         rank_number: Set(m.rank_number),
         list_category: Set(m.list_category),
@@ -87,7 +89,10 @@ pub async fn update_application(
     };
 
     let saved = active.update(db.as_ref()).await?;
-    info!("[update_application] updated successfully wizard_step={:?}", saved.wizard_step);
+    info!(
+        "[update_application] updated successfully wizard_step={:?}",
+        saved.wizard_step
+    );
     let new_json = serde_json::to_value(&saved).ok();
 
     db::entity::g1::audit::ActiveModel {

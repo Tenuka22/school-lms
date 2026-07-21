@@ -1,7 +1,5 @@
 use chrono::Utc;
-use sea_orm::{
-    ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait, Set,
-};
+use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, PaginatorTrait, Set};
 use uuid::Uuid;
 
 use crate::entity::common::enums::{SchoolCategory, SchoolType};

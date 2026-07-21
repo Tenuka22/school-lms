@@ -1,14 +1,18 @@
 use actix_web::web;
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
-use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, StudentStatus};
+use db::entity::common::enums::{
+    Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
+};
 use db::entity::common::siblings;
 use db::entity::g1::{applications, join_siblings};
 use db::entity::student::student;
 use log::info;
 use schemars::JsonSchema;
-use sea_orm::{ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use sea_orm::{
+    ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, EntityTrait, QueryFilter, Set,
+};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -68,32 +72,30 @@ pub async fn create_sibling(
     let app_id = id.into_inner();
     let user_id = auth.user_id;
 
-    info!("[create_sibling] user={user_id:?} app={app_id} name={}", body.full_name);
+    info!(
+        "[create_sibling] user={user_id:?} app={app_id} name={}",
+        body.full_name
+    );
 
     let app = applications::Entity::find_by_id(app_id)
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("Application not found".into()))?;
 
-    let school_id = body.school_id
-        .or(app.school_id)
-        .ok_or_else(|| ApiError::BadRequest("Application has no school assigned and no school_id provided".into()))?;
+    let school_id = body.school_id.or(app.school_id).ok_or_else(|| {
+        ApiError::BadRequest("Application has no school assigned and no school_id provided".into())
+    })?;
 
     let now = Utc::now();
 
     // Search for potential duplicate students by name, birth cert, or NIC
     let mut dup_conditions = Condition::any()
-        .add(
-            student::Column::FullName
-                .ilike(format!("%{}%", &body.full_name))
-        )
-        .add(
-            student::Column::NameWithInitials
-                .ilike(format!("%{}%", &body.name_with_initials))
-        );
+        .add(student::Column::FullName.ilike(format!("%{}%", &body.full_name)))
+        .add(student::Column::NameWithInitials.ilike(format!("%{}%", &body.name_with_initials)));
 
     if let Some(ref bc) = body.birth_certificate_number {
-        dup_conditions = dup_conditions.add(student::Column::BirthCertificateNumber.eq(bc.as_str()));
+        dup_conditions =
+            dup_conditions.add(student::Column::BirthCertificateNumber.eq(bc.as_str()));
     }
     if let Some(ref nic) = body.nic {
         dup_conditions = dup_conditions.add(student::Column::Nic.eq(nic.as_str()));
@@ -120,7 +122,10 @@ pub async fn create_sibling(
 
     // If duplicates exist, return them without creating
     if !duplicates.is_empty() {
-        info!("[create_sibling] found {} potential duplicates, returning without creating", duplicates.len());
+        info!(
+            "[create_sibling] found {} potential duplicates, returning without creating",
+            duplicates.len()
+        );
         return Ok(web::Json(CreateSiblingResponse {
             student_id: None,
             created: false,

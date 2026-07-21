@@ -44,7 +44,11 @@ pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
         ("g1:application:submit", "g1_application", "submit"),
         ("g1:application:verify", "g1_application", "verify"),
         ("g1:application:mark", "g1_application", "mark"),
-        ("g1:application:generate-lists", "g1_application", "generate-lists"),
+        (
+            "g1:application:generate-lists",
+            "g1_application",
+            "generate-lists",
+        ),
         ("g1:document:upload", "g1_document", "upload"),
         ("g1:document:verify", "g1_document", "verify"),
         ("g1:appeal:create", "g1_appeal", "create"),

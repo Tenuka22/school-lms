@@ -1,7 +1,7 @@
+use super::super::common::enums::{AdmissionListType, QuotaCategory};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::super::common::enums::{AdmissionListType, QuotaCategory};
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()

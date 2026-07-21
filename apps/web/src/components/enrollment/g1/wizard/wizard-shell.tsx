@@ -230,7 +230,7 @@ export function WizardShell() {
           medium_of_instruction: childData.medium_of_instruction,
           category: childData.category || undefined,
           overseas_arrival_date: childData.overseas_arrival_date || null,
-          enrollment_status: "ProvisionallyApproved" as const,
+            enrollment_status: "Completed" as any,
           batch_id: application?.batch_id ?? "",
           wizard_step: 6,
         },
@@ -326,7 +326,7 @@ export function WizardShell() {
                 </div>
                 <div className="h-8 w-px bg-border" />
                 <div className="text-center">
-                  <div className="font-medium text-foreground">{application?.enrollment_status === "ProvisionallyApproved" ? "Provisionally Approved" : "Completed"}</div>
+                  <div className="font-medium text-foreground">Completed</div>
                   <div className="text-muted-foreground">Status</div>
                 </div>
                 <div className="h-8 w-px bg-border" />

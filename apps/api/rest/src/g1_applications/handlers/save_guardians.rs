@@ -1,6 +1,6 @@
 use actix_web::web;
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enums::GuardianRelationship;
 use db::entity::common::guardians;
@@ -72,12 +72,20 @@ pub async fn save_guardians(
         .all(db.as_ref())
         .await?;
 
-    info!("[save_guardians] found {} guardians out of {} requested", guardians.len(), requested_ids.len());
+    info!(
+        "[save_guardians] found {} guardians out of {} requested",
+        guardians.len(),
+        requested_ids.len()
+    );
 
     let mut count = 0;
     for g in &guardians {
         let relationship = parse_relationship(&g.relationship_type);
-        info!("[save_guardians] inserting join guardian_id={} relationship={relationship:?} is_primary={}", g.id, count == 0);
+        info!(
+            "[save_guardians] inserting join guardian_id={} relationship={relationship:?} is_primary={}",
+            g.id,
+            count == 0
+        );
         join_guardians::ActiveModel {
             id: Set(Uuid::new_v4()),
             application_id: Set(app_id),

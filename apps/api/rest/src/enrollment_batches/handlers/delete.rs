@@ -32,5 +32,7 @@ pub async fn delete_batch(
         .exec(db.as_ref())
         .await?;
 
-    Ok(Json(MessageResponse { message: "batch deleted".into() }))
+    Ok(Json(MessageResponse {
+        message: "batch deleted".into(),
+    }))
 }

@@ -1,6 +1,6 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use db::entity::common::siblings;
 use db::entity::g1::{applications, join_siblings};
 use schemars::JsonSchema;
@@ -53,5 +53,7 @@ pub async fn get_application_siblings(
             .collect()
     };
 
-    Ok(Json(GetApplicationSiblingsResponse { sibling_ids: student_ids }))
+    Ok(Json(GetApplicationSiblingsResponse {
+        sibling_ids: student_ids,
+    }))
 }

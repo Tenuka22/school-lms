@@ -1,6 +1,6 @@
 use actix_web::web;
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::siblings;
 use db::entity::g1::{applications, join_siblings};
@@ -49,7 +49,8 @@ pub async fn save_siblings(
             ApiError::NotFound("Application not found".into())
         })?;
 
-    let school_id = app.school_id
+    let school_id = app
+        .school_id
         .ok_or_else(|| ApiError::BadRequest("Application has no school assigned".into()))?;
 
     // Delete existing joins
@@ -66,7 +67,11 @@ pub async fn save_siblings(
         .all(db.as_ref())
         .await?;
 
-    info!("[save_siblings] found {} students out of {} requested", students.len(), student_ids.len());
+    info!(
+        "[save_siblings] found {} students out of {} requested",
+        students.len(),
+        student_ids.len()
+    );
 
     let mut count = 0;
     for s in &students {
@@ -78,7 +83,10 @@ pub async fn save_siblings(
             .await?;
 
         let sibling_id = if let Some(existing_sibling) = existing {
-            info!("[save_siblings] reusing existing sibling_id={} for student_id={}", existing_sibling.id, s.id);
+            info!(
+                "[save_siblings] reusing existing sibling_id={} for student_id={}",
+                existing_sibling.id, s.id
+            );
             existing_sibling.id
         } else {
             let new_sibling = siblings::ActiveModel {
@@ -94,7 +102,10 @@ pub async fn save_siblings(
             }
             .insert(db.as_ref())
             .await?;
-            info!("[save_siblings] created new sibling_id={} for student_id={}", new_sibling.id, s.id);
+            info!(
+                "[save_siblings] created new sibling_id={} for student_id={}",
+                new_sibling.id, s.id
+            );
             new_sibling.id
         };
 

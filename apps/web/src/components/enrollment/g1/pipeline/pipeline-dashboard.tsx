@@ -80,9 +80,11 @@ const WEIGHT_INFO: Record<string, { label: string; desc: string }> = {
 }
 
 const LANE_CONFIG = [
-  { status: "Pending", label: "Pending", badgeVariant: "secondary" as const, note: "Awaiting review" },
-  { status: "ProvisionallyApproved", label: "Completed", badgeVariant: "default" as const, note: "Marks calculated" },
-  { status: "Approved", label: "Approved", badgeVariant: "default" as const, note: "Admitted" },
+  { status: "Pending", label: "Pending", badgeVariant: "secondary" as const, note: "Data entry in progress" },
+  { status: "Completed", label: "Completed", badgeVariant: "default" as const, note: "Data entered, ready for marks" },
+  { status: "PendingApproval", label: "Pending Approval", badgeVariant: "default" as const, note: "Awaiting officer approval" },
+  { status: "Approved", label: "Approved", badgeVariant: "default" as const, note: "Approved" },
+  { status: "Admitted", label: "Admitted", badgeVariant: "default" as const, note: "Formally admitted" },
   { status: "Rejected", label: "Rejected", badgeVariant: "destructive" as const, note: "Not selected" },
 ]
 
@@ -396,10 +398,11 @@ export function PipeDashboard() {
         header: ({ column }) => <DataTableColumnHeader column={column} label="Status" />,
         enableColumnFilter: true,
         meta: { label: "Status", variant: "select", options: [
-          { label: "Draft", value: "Draft" },
           { label: "Pending", value: "Pending" },
-          { label: "Provisionally Approved", value: "ProvisionallyApproved" },
+          { label: "Completed", value: "Completed" },
+          { label: "Pending Approval", value: "PendingApproval" },
           { label: "Approved", value: "Approved" },
+          { label: "Admitted", value: "Admitted" },
           { label: "Rejected", value: "Rejected" },
           { label: "Withdrawn", value: "Withdrawn" },
           { label: "Removed", value: "Removed" },
@@ -599,7 +602,7 @@ export function PipeDashboard() {
 
       {batchId ? (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
             {LANE_CONFIG.map((lane) => {
               const count = grouped[lane.status] ?? 0
               return (

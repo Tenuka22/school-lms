@@ -1,12 +1,10 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use db::entity::enrollment_batches;
 use db::entity::enums::BatchStatus;
 use schemars::JsonSchema;
-use sea_orm::{
-    ActiveModelTrait, DatabaseConnection, EntityTrait, Set,
-};
+use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -53,7 +51,9 @@ pub async fn update_batch(
         status: Set(patch.status.unwrap_or(existing.status)),
         created_at: Set(existing.created_at),
         created_by: Set(existing.created_by),
-        student_allocation: Set(patch.student_allocation.unwrap_or(existing.student_allocation)),
+        student_allocation: Set(patch
+            .student_allocation
+            .unwrap_or(existing.student_allocation)),
         proximity_weight: Set(patch.proximity_weight.unwrap_or(existing.proximity_weight)),
         staff_weight: Set(patch.staff_weight.unwrap_or(existing.staff_weight)),
         sibling_weight: Set(patch.sibling_weight.unwrap_or(existing.sibling_weight)),

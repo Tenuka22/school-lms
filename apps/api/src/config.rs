@@ -40,10 +40,8 @@ impl Config {
                 .unwrap_or_else(|_| "http://localhost:8000".into()),
             minio_endpoint: env::var("MINIO_ENDPOINT")
                 .unwrap_or_else(|_| "http://localhost:9000".into()),
-            minio_access_key: env::var("MINIO_ACCESS_KEY")
-                .unwrap_or_else(|_| "minioadmin".into()),
-            minio_secret_key: env::var("MINIO_SECRET_KEY")
-                .unwrap_or_else(|_| "minioadmin".into()),
+            minio_access_key: env::var("MINIO_ACCESS_KEY").unwrap_or_else(|_| "minioadmin".into()),
+            minio_secret_key: env::var("MINIO_SECRET_KEY").unwrap_or_else(|_| "minioadmin".into()),
             minio_bucket: env::var("MINIO_BUCKET").unwrap_or_else(|_| "school-lms".into()),
             minio_region: env::var("MINIO_REGION").unwrap_or_else(|_| "us-east-1".into()),
         })

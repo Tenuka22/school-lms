@@ -1,6 +1,6 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
 use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
 use db::entity::student::student;
@@ -45,7 +45,10 @@ pub async fn update_student(
     let user_id = auth.user_id;
     let b = body.into_inner();
 
-    info!("[update_student] user={user_id:?} student={student_id} name={}", b.full_name);
+    info!(
+        "[update_student] user={user_id:?} student={student_id} name={}",
+        b.full_name
+    );
 
     let existing = student::Entity::find_by_id(student_id)
         .one(db.as_ref())

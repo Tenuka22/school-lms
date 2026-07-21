@@ -1,7 +1,7 @@
+use super::enums::{SchoolCategory, SchoolType};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::enums::{SchoolType, SchoolCategory};
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()

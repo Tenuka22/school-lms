@@ -1,10 +1,10 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use db::entity::workspace_addresses;
 use schemars::JsonSchema;
-use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, QueryOrder};
 use sea_orm::sea_query::{Expr, SimpleExpr, extension::postgres::PgExpr};
+use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, QueryOrder};
 use serde::Deserialize;
 
 use crate::auth::middleware::AuthenticatedUser;

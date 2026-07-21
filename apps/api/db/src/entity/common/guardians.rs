@@ -14,7 +14,9 @@ fn default_phone() -> String {
     "0".to_string()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
+)]
 #[schemars(rename = "Guardian")]
 #[sea_orm(table_name = "guardians")]
 pub struct Model {

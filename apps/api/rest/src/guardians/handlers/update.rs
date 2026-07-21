@@ -1,9 +1,9 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::StaffType;
 use db::entity::common::enums::IncomeLevel;
+use db::entity::common::enums::StaffType;
 use db::entity::common::guardians;
 use db::entity::common::past_pupil_details;
 use db::entity::common::staff_details;

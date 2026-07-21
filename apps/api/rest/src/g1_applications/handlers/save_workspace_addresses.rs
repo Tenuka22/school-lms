@@ -1,6 +1,6 @@
 use actix_web::web;
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::g1::{applications, join_workspace_addresses};
 use log::{info, warn};
@@ -44,7 +44,10 @@ pub async fn save_workspace_addresses(
     let app_id = id.into_inner();
     let user_id = auth.user_id;
 
-    info!("[save_workspace_addresses] user={user_id:?} app={app_id} addr_count={}", body.addresses.len());
+    info!(
+        "[save_workspace_addresses] user={user_id:?} app={app_id} addr_count={}",
+        body.addresses.len()
+    );
 
     applications::Entity::find_by_id(app_id)
         .one(db.as_ref())

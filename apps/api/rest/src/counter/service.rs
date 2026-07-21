@@ -1,9 +1,9 @@
+use apistos::ApiComponent;
 use db::entity::{counter, secure_counter};
+use schemars::JsonSchema;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, Set,
 };
-use apistos::ApiComponent;
-use schemars::JsonSchema;
 use serde::Serialize;
 
 pub enum CounterTarget {

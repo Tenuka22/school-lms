@@ -1,7 +1,7 @@
+use super::super::common::enums::AppealStatus;
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::super::common::enums::AppealStatus;
 
 fn default_appeal_status() -> AppealStatus {
     AppealStatus::Filed

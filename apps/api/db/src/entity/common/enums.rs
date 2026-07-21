@@ -3,7 +3,19 @@ use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum Gender {
     #[sea_orm(string_value = "Male")]
@@ -12,7 +24,19 @@ pub enum Gender {
     Female,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum Religion {
     #[sea_orm(string_value = "Buddhism")]
@@ -29,7 +53,19 @@ pub enum Religion {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum Nationality {
     #[sea_orm(string_value = "SriLankan")]
@@ -40,7 +76,19 @@ pub enum Nationality {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum MediumOfInstruction {
     #[sea_orm(string_value = "Sinhala")]
@@ -49,7 +97,19 @@ pub enum MediumOfInstruction {
     Tamil,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum StudentStatus {
     #[sea_orm(string_value = "Active")]
@@ -60,17 +120,31 @@ pub enum StudentStatus {
     Removed,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum EnrollmentStatus {
-    #[sea_orm(string_value = "Draft")]
-    Draft,
     #[sea_orm(string_value = "Pending")]
     Pending,
-    #[sea_orm(string_value = "ProvisionallyApproved")]
-    ProvisionallyApproved,
+    #[sea_orm(string_value = "Completed")]
+    Completed,
+    #[sea_orm(string_value = "PendingApproval")]
+    PendingApproval,
     #[sea_orm(string_value = "Approved")]
     Approved,
+    #[sea_orm(string_value = "Admitted")]
+    Admitted,
     #[sea_orm(string_value = "Rejected")]
     Rejected,
     #[sea_orm(string_value = "Withdrawn")]
@@ -79,7 +153,19 @@ pub enum EnrollmentStatus {
     Removed,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum BatchStatus {
     #[sea_orm(string_value = "Open")]
@@ -90,14 +176,38 @@ pub enum BatchStatus {
     Archived,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum EnrollmentType {
     #[sea_orm(string_value = "G1")]
     G1,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum G1Category {
     #[sea_orm(string_value = "CloseResident")]
@@ -116,7 +226,19 @@ pub enum G1Category {
     ArmedForcesReserved,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum DocumentType {
     #[sea_orm(string_value = "BirthCertificate")]
@@ -131,7 +253,19 @@ pub enum DocumentType {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum VerificationStatus {
     #[sea_orm(string_value = "Pending")]
@@ -142,7 +276,19 @@ pub enum VerificationStatus {
     Rejected,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum GuardianRelationship {
     #[sea_orm(string_value = "Father")]
@@ -153,7 +299,19 @@ pub enum GuardianRelationship {
     Guardian,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AuditOperation {
     #[sea_orm(string_value = "Insert")]
@@ -170,7 +328,19 @@ pub enum AuditOperation {
     AppealDecide,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum ApplicationStatus {
     #[sea_orm(string_value = "Draft")]
@@ -199,7 +369,19 @@ pub enum ApplicationStatus {
     Withdrawn,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum ApplicationListCategory {
     #[sea_orm(string_value = "Main")]
@@ -210,7 +392,19 @@ pub enum ApplicationListCategory {
     NotSelected,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum DocumentVerificationStatus {
     #[sea_orm(string_value = "Pending")]
@@ -223,7 +417,19 @@ pub enum DocumentVerificationStatus {
     Flagged,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum G1DocumentType {
     #[sea_orm(string_value = "BirthCertificate")]
@@ -254,7 +460,19 @@ pub enum G1DocumentType {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum SchoolType {
     #[sea_orm(string_value = "1AB")]
@@ -267,7 +485,19 @@ pub enum SchoolType {
     Type3,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum SchoolCategory {
     #[sea_orm(string_value = "Urban")]
@@ -280,7 +510,19 @@ pub enum SchoolCategory {
     Estate,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum SchoolStatus {
     #[sea_orm(string_value = "Active")]
@@ -289,7 +531,19 @@ pub enum SchoolStatus {
     Inactive,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum ResidenceType {
     #[sea_orm(string_value = "Owned")]
@@ -302,7 +556,19 @@ pub enum ResidenceType {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum DistanceBand {
     #[sea_orm(string_value = "Under05")]
@@ -319,7 +585,19 @@ pub enum DistanceBand {
     Over5,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum StaffEmploymentType {
     #[sea_orm(string_value = "Permanent")]
@@ -330,7 +608,19 @@ pub enum StaffEmploymentType {
     Contract,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum StaffType {
     #[sea_orm(string_value = "Teacher")]
@@ -341,7 +631,19 @@ pub enum StaffType {
     Worker,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AppealType {
     #[sea_orm(string_value = "DistanceCalculation")]
@@ -358,7 +660,19 @@ pub enum AppealType {
     Other,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AppealStatus {
     #[sea_orm(string_value = "Filed")]
@@ -373,7 +687,19 @@ pub enum AppealStatus {
     Rejected,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AdmissionListType {
     #[sea_orm(string_value = "MainList")]
@@ -384,7 +710,19 @@ pub enum AdmissionListType {
     RejectedList,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum QuotaCategory {
     #[sea_orm(string_value = "General")]
@@ -397,7 +735,19 @@ pub enum QuotaCategory {
     SpecialNeeds,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AuditAction {
     #[sea_orm(string_value = "INSERT")]
@@ -414,7 +764,19 @@ pub enum AuditAction {
     AppealDecide,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum IncomeLevel {
     #[serde(rename = "below_25000")]

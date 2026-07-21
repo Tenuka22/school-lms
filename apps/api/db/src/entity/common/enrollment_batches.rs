@@ -45,7 +45,9 @@ fn default_special_weight() -> i16 {
     1
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
+)]
 #[schemars(rename = "EnrollmentBatch")]
 #[sea_orm(table_name = "enrollment_batches")]
 pub struct Model {

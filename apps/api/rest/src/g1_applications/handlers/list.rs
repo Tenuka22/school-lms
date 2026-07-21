@@ -1,9 +1,11 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use db::entity::g1::applications;
 use schemars::JsonSchema;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder, PaginatorTrait};
+use sea_orm::{
+    ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::auth::middleware::AuthenticatedUser;
@@ -80,11 +82,17 @@ pub async fn list_applications(
     }
     if let Some(ref batch_id) = params.batch_id {
         if !batch_id.is_empty() {
-            query = query.filter(applications::Column::BatchId.eq(uuid::Uuid::parse_str(batch_id).unwrap_or_default()));
+            query = query.filter(
+                applications::Column::BatchId
+                    .eq(uuid::Uuid::parse_str(batch_id).unwrap_or_default()),
+            );
         }
     }
 
-    let sort_order = params.sort_order.clone().unwrap_or_else(|| "asc".to_string());
+    let sort_order = params
+        .sort_order
+        .clone()
+        .unwrap_or_else(|| "asc".to_string());
     let order = if sort_order.to_lowercase() == "desc" {
         sea_orm::Order::Desc
     } else {
@@ -93,16 +101,36 @@ pub async fn list_applications(
 
     if let Some(ref sort_by) = params.sort_by {
         match sort_by.as_str() {
-            "full_name" => { query = query.order_by(applications::Column::FullName, order); }
-            "name_with_initials" => { query = query.order_by(applications::Column::NameWithInitials, order); }
-            "date_of_birth" => { query = query.order_by(applications::Column::DateOfBirth, order); }
-            "gender" => { query = query.order_by(applications::Column::Gender, order); }
-            "nationality" => { query = query.order_by(applications::Column::Nationality, order); }
-            "category" => { query = query.order_by(applications::Column::Category, order); }
-            "medium_of_instruction" => { query = query.order_by(applications::Column::MediumOfInstruction, order); }
-            "enrollment_status" => { query = query.order_by(applications::Column::EnrollmentStatus, order); }
-            "created_at" => { query = query.order_by(applications::Column::CreatedAt, order); }
-            _ => { query = query.order_by(applications::Column::CreatedAt, sea_orm::Order::Desc); }
+            "full_name" => {
+                query = query.order_by(applications::Column::FullName, order);
+            }
+            "name_with_initials" => {
+                query = query.order_by(applications::Column::NameWithInitials, order);
+            }
+            "date_of_birth" => {
+                query = query.order_by(applications::Column::DateOfBirth, order);
+            }
+            "gender" => {
+                query = query.order_by(applications::Column::Gender, order);
+            }
+            "nationality" => {
+                query = query.order_by(applications::Column::Nationality, order);
+            }
+            "category" => {
+                query = query.order_by(applications::Column::Category, order);
+            }
+            "medium_of_instruction" => {
+                query = query.order_by(applications::Column::MediumOfInstruction, order);
+            }
+            "enrollment_status" => {
+                query = query.order_by(applications::Column::EnrollmentStatus, order);
+            }
+            "created_at" => {
+                query = query.order_by(applications::Column::CreatedAt, order);
+            }
+            _ => {
+                query = query.order_by(applications::Column::CreatedAt, sea_orm::Order::Desc);
+            }
         }
     } else {
         query = query.order_by(applications::Column::CreatedAt, sea_orm::Order::Desc);

@@ -9,10 +9,10 @@ Entities are organized into domain folders under `apps/api/db/src/entity/`:
 
 | Domain | Purpose | Entities |
 |--------|---------|----------|
-| `common` | Shared identity and lookup tables | addresses, guardians, schools, children, staff_details, past_pupil_details, siblings, audit_logs, enrollment_batches, counters |
+| `common` | Shared identity and lookup tables | addresses, workspace_addresses, guardians, schools, staff_details, past_pupil_details, siblings, audit_logs, enrollment_batches, counters |
 | `user` | Authentication and RBAC | user, role, permission, role_permission, user_role, session |
 | `student` | Student lifecycle | student, student_join_addresses, student_join_guardians, students_audit |
-| `g1` | Grade 1 admissions | applications, documents, join_addresses, join_guardians, join_staff_details, join_past_pupil_details, join_siblings, marks_breakdown, appeal_history, admission_lists, audit |
+| `g1` | Grade 1 admissions | applications, documents, join_addresses, join_workspace_addresses, join_guardians, join_staff_details, join_past_pupil_details, join_siblings, marks_breakdown, appeal_history, admission_lists, audit |
 
 All entities are re-exported at the top level via `db::entity::*` for backward compatibility.
 
@@ -21,7 +21,7 @@ All entities are re-exported at the top level via `db::entity::*` for backward c
 1. **Tech Stack**: The system uses **PostgreSQL** as the primary relational database, interfaced via **SeaORM** for type-safe data access in Rust.
 2. **Primary Keys**: All primary keys are `UUID`s. This ensures secure, universally unique identifiers that prevent enumeration attacks and support distributed systems.
 3. **Domain-Driven Structure**:
-   - **Common Domain**: Master identity tables (`guardians`, `addresses`, `schools`, `children`) with strict uniqueness constraints.
+   - **Common Domain**: Master identity tables (`guardians`, `addresses`, `workspace_addresses`, `schools`) with strict uniqueness constraints.
    - **User Domain**: Authentication and authorization entities.
    - **Student Domain**: Student profiles and relationships.
    - **G1 Admission Domain**: Application-specific tables with join patterns to common masters.

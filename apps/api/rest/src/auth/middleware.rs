@@ -45,7 +45,9 @@ impl AuthenticatedUser {
         } else {
             log::error!(
                 "Permission denied: user={:?} required={} permissions={:?}",
-                self.user_id, perm_str, self.permissions
+                self.user_id,
+                perm_str,
+                self.permissions
             );
             Err(ErrorForbidden("insufficient permissions"))
         }

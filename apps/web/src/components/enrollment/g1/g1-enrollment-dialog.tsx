@@ -83,10 +83,11 @@ const LABELS: Record<string, string> = {
   Islam: "Islam",
   Christianity: "Christianity",
   Catholicism: "Catholicism",
-  Draft: "Draft",
   Pending: "Pending",
-  ProvisionallyApproved: "Provisionally Approved",
+  Completed: "Completed",
+  PendingApproval: "Pending Approval",
   Approved: "Approved",
+  Admitted: "Admitted",
   Rejected: "Rejected",
   Withdrawn: "Withdrawn",
   Removed: "Removed",
@@ -152,7 +153,7 @@ export function G1EnrollmentDialog({
       gender: enrollment?.gender ?? "Male",
       nationality: enrollment?.nationality ?? "SriLankan",
       medium_of_instruction: enrollment?.medium_of_instruction ?? "Sinhala",
-      enrollment_status: enrollment?.enrollment_status ?? "Draft",
+      enrollment_status: enrollment?.enrollment_status ?? "Pending",
       religion: enrollment?.religion ?? null,
       batch_id: enrollment?.batch_id ?? "",
     } as v.InferInput<typeof vDialogApplication>,
@@ -391,7 +392,7 @@ export function G1EnrollmentDialog({
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) => val && field.handleChange(val as "Draft" | "Pending" | "ProvisionallyApproved" | "Approved" | "Rejected" | "Withdrawn" | "Removed")}
+                       onValueChange={(val) => val && field.handleChange(val as any)}
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select status" />

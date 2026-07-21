@@ -1,7 +1,7 @@
+use super::super::common::enums::{DocumentVerificationStatus, G1DocumentType};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::super::common::enums::{DocumentVerificationStatus, G1DocumentType};
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()

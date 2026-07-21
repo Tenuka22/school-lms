@@ -1,20 +1,18 @@
+use super::super::common::enums::{
+    EnrollmentStatus, G1Category, Gender, MediumOfInstruction, Nationality, Religion,
+};
 use apistos::ApiComponent;
-use chrono::{DateTime, Utc, NaiveDate};
+use chrono::{DateTime, NaiveDate, Utc};
 use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-use super::super::common::enums::{ApplicationStatus, EnrollmentStatus, Gender, Nationality, Religion, MediumOfInstruction, G1Category};
 
 fn default_id() -> Uuid {
     uuid::Uuid::new_v4()
 }
 
-fn default_application_status() -> ApplicationStatus {
-    ApplicationStatus::Draft
-}
-
 fn default_enrollment_status() -> EnrollmentStatus {
-    EnrollmentStatus::Draft
+    EnrollmentStatus::Pending
 }
 
 fn default_reference_no() -> String {
@@ -29,7 +27,9 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
+)]
 #[schemars(rename = "G1Application")]
 #[sea_orm(table_name = "g1_applications")]
 pub struct Model {
@@ -45,11 +45,6 @@ pub struct Model {
     pub applied_year: i16,
     #[serde(default)]
     pub school_id: Option<Uuid>,
-    #[serde(default)]
-    pub guardian_id: Option<Uuid>,
-
-    #[serde(default = "default_application_status")]
-    pub status: ApplicationStatus,
 
     pub total_marks: Option<Decimal>,
     pub rank_number: Option<i32>,
@@ -139,12 +134,6 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::super::common::guardians::Entity",
-        from = "Column::GuardianId",
-        to = "super::super::common::guardians::Column::Id"
-    )]
-    Guardian,
-    #[sea_orm(
         belongs_to = "super::super::student::student::Entity",
         from = "Column::StudentId",
         to = "super::super::student::student::Column::Id"
@@ -180,12 +169,6 @@ pub enum Relation {
     JoinPastPupilDetails,
     #[sea_orm(has_many = "super::join_siblings::Entity")]
     JoinSiblings,
-}
-
-impl Related<super::super::common::guardians::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Guardian.def()
-    }
 }
 
 impl Related<super::super::common::schools::Entity> for Entity {

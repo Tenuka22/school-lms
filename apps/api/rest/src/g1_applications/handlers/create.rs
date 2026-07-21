@@ -4,8 +4,8 @@ use actix_web::{web, web::Json};
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::{ApplicationStatus, AuditOperation, BatchStatus, EnrollmentStatus, IncomeLevel};
-use db::entity::{enrollment_batches, g1::applications, guardians, schools};
+use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus, IncomeLevel};
+use db::entity::{enrollment_batches, g1::applications, schools};
 use num_traits::ToPrimitive;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
@@ -44,7 +44,6 @@ pub async fn create_application(
     active.id = Set(Uuid::new_v4());
     active.applied_year = Set(batch.year);
     active.enrollment_status = Set(EnrollmentStatus::Pending);
-    active.status = Set(ApplicationStatus::Draft);
     active.created_at = Set(now);
     active.updated_at = Set(now);
     active.created_by = Set(None);
@@ -88,16 +87,16 @@ pub async fn submit_application(
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
 
-    if existing.status != ApplicationStatus::Draft {
+    if existing.enrollment_status != EnrollmentStatus::Pending {
         return Err(ApiError::BadRequest(
-            "only draft applications can be submitted".into(),
+            "only pending applications can be submitted".into(),
         ));
     }
 
     let txn = db.begin().await?;
 
     let mut active: applications::ActiveModel = existing.clone().into();
-    active.status = Set(ApplicationStatus::Submitted);
+    active.enrollment_status = Set(EnrollmentStatus::Completed);
     active.submitted_at = Set(Some(Utc::now()));
     active.ip_address = Set(None);
     active.user_agent = Set(None);
@@ -137,9 +136,9 @@ pub async fn calculate_marks(
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
 
-    if existing.status != ApplicationStatus::Verified {
+    if existing.enrollment_status != EnrollmentStatus::Completed {
         return Err(ApiError::BadRequest(
-            "only verified applications can be marked".into(),
+            "only completed applications can be marked".into(),
         ));
     }
 
@@ -169,11 +168,11 @@ pub async fn calculate_marks(
         .await?
         .unwrap_or(0.0);
 
-    let final_total = (total_marks + staff_marks + sibling_marks + alumni_marks + govt_marks
-        + special_marks)
-        .round()
-        .max(0.0)
-        .min(100.0);
+    let final_total =
+        (total_marks + staff_marks + sibling_marks + alumni_marks + govt_marks + special_marks)
+            .round()
+            .max(0.0)
+            .min(100.0);
 
     let categories = vec![
         ("PROX", total_marks, 50.0),
@@ -191,22 +190,18 @@ pub async fn calculate_marks(
                 id: Set(Uuid::new_v4()),
                 application_id: Set(id),
                 category_code: Set(code.to_string()),
-                raw_marks: Set(Some(sea_orm::prelude::Decimal::from_str(&format!(
-                    "{:.2}",
-                    raw
-                ))
-                .unwrap_or_default())),
+                raw_marks: Set(Some(
+                    sea_orm::prelude::Decimal::from_str(&format!("{:.2}", raw)).unwrap_or_default(),
+                )),
                 max_raw_marks: Set(Some(sea_orm::prelude::Decimal::from(100))),
-                weight_percentage: Set(Some(sea_orm::prelude::Decimal::from_str(&format!(
-                    "{:.2}",
-                    weight
-                ))
-                .unwrap_or_default())),
-                weighted_score: Set(Some(sea_orm::prelude::Decimal::from_str(&format!(
-                    "{:.2}",
-                    weighted
-                ))
-                .unwrap_or_default())),
+                weight_percentage: Set(Some(
+                    sea_orm::prelude::Decimal::from_str(&format!("{:.2}", weight))
+                        .unwrap_or_default(),
+                )),
+                weighted_score: Set(Some(
+                    sea_orm::prelude::Decimal::from_str(&format!("{:.2}", weighted))
+                        .unwrap_or_default(),
+                )),
                 distance_km: Set(None),
                 distance_band: Set(None),
                 calculated_at: Set(Utc::now()),
@@ -218,12 +213,10 @@ pub async fn calculate_marks(
     }
 
     let mut active: applications::ActiveModel = existing.clone().into();
-    active.total_marks = Set(Some(sea_orm::prelude::Decimal::from_str(&format!(
-        "{:.2}",
-        final_total
-    ))
-    .unwrap_or_default()));
-    active.status = Set(ApplicationStatus::Marked);
+    active.total_marks = Set(Some(
+        sea_orm::prelude::Decimal::from_str(&format!("{:.2}", final_total)).unwrap_or_default(),
+    ));
+    active.enrollment_status = Set(EnrollmentStatus::PendingApproval);
     active.updated_at = Set(Utc::now());
 
     let saved = active.update(&txn).await?;
@@ -273,7 +266,7 @@ pub async fn generate_admission_lists(
     for school in school_list {
         let marked_apps = applications::Entity::find()
             .filter(applications::Column::SchoolId.eq(Some(school.id)))
-            .filter(applications::Column::Status.eq(ApplicationStatus::Marked))
+            .filter(applications::Column::EnrollmentStatus.eq(EnrollmentStatus::PendingApproval))
             .filter(applications::Column::AppliedYear.eq(batch.year))
             .all(db.as_ref())
             .await?;
@@ -322,7 +315,11 @@ pub async fn generate_admission_lists(
                 admitted: Set(false),
                 admitted_at: Set(None),
                 admitted_by: Set(None),
-                waiting_position: Set(if idx >= main_list_count { position } else { None }),
+                waiting_position: Set(if idx >= main_list_count {
+                    position
+                } else {
+                    None
+                }),
                 promoted_at: Set(None),
                 promoted_from: Set(None),
                 created_at: Set(Utc::now()),
@@ -414,9 +411,7 @@ async fn calculate_staff_marks(
     application: &applications::Model,
 ) -> Result<Option<f64>, ApiError> {
     let staff_joins = db::entity::g1::join_staff_details::Entity::find()
-        .filter(
-            db::entity::g1::join_staff_details::Column::ApplicationId.eq(application.id),
-        )
+        .filter(db::entity::g1::join_staff_details::Column::ApplicationId.eq(application.id))
         .all(db)
         .await?;
 
@@ -481,11 +476,10 @@ async fn calculate_sibling_marks(
     let mut total_weighted: f64 = 0.0;
 
     for join in sibling_joins {
-        let sibling =
-            db::entity::common::siblings::Entity::find_by_id(join.sibling_id)
-                .one(db)
-                .await?
-                .ok_or_else(|| ApiError::NotFound("sibling not found".into()))?;
+        let sibling = db::entity::common::siblings::Entity::find_by_id(join.sibling_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("sibling not found".into()))?;
 
         if !sibling.verified {
             continue;
@@ -508,9 +502,7 @@ async fn calculate_alumni_marks(
     application: &applications::Model,
 ) -> Result<Option<f64>, ApiError> {
     let alumni_joins = db::entity::g1::join_past_pupil_details::Entity::find()
-        .filter(
-            db::entity::g1::join_past_pupil_details::Column::ApplicationId.eq(application.id),
-        )
+        .filter(db::entity::g1::join_past_pupil_details::Column::ApplicationId.eq(application.id))
         .all(db)
         .await?;
 
@@ -553,14 +545,19 @@ async fn calculate_govt_marks(
     db: &DatabaseConnection,
     application: &applications::Model,
 ) -> Result<Option<f64>, ApiError> {
-    let guardian_id = match application.guardian_id {
-        Some(id) => id,
+    let guardian_joins = db::entity::g1::join_guardians::Entity::find()
+        .filter(db::entity::g1::join_guardians::Column::ApplicationId.eq(application.id))
+        .filter(db::entity::g1::join_guardians::Column::IsPrimary.eq(true))
+        .one(db)
+        .await?;
+
+    let guardian = match guardian_joins {
+        Some(gj) => db::entity::common::guardians::Entity::find_by_id(gj.guardian_id)
+            .one(db)
+            .await?
+            .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?,
         None => return Ok(None),
     };
-    let guardian = guardians::Entity::find_by_id(guardian_id)
-        .one(db)
-        .await?
-        .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?;
 
     if !guardian.is_govt_employee {
         return Ok(None);
@@ -591,17 +588,28 @@ async fn calculate_special_marks(
 ) -> Result<Option<f64>, ApiError> {
     let mut raw: f64 = 0.0;
 
-    let guardian_id = match application.guardian_id {
-        Some(id) => id,
-        None => return Ok(Some(raw.min(100.0) / 100.0 * 1.0)),
-    };
-    let guardian = match guardians::Entity::find_by_id(guardian_id).one(db).await {
-        Ok(Some(g)) => g,
-        _ => return Ok(Some(raw.min(100.0) / 100.0 * 1.0)),
+    let guardian_joins = db::entity::g1::join_guardians::Entity::find()
+        .filter(db::entity::g1::join_guardians::Column::ApplicationId.eq(application.id))
+        .filter(db::entity::g1::join_guardians::Column::IsPrimary.eq(true))
+        .one(db)
+        .await?;
+
+    let guardian = match guardian_joins {
+        Some(gj) => match db::entity::common::guardians::Entity::find_by_id(gj.guardian_id)
+            .one(db)
+            .await
+        {
+            Ok(Some(g)) => g,
+            _ => return Ok(Some((raw.min(100.0) / 100.0) * 1.0)),
+        },
+        None => return Ok(Some((raw.min(100.0) / 100.0) * 1.0)),
     };
 
     let is_low_income = guardian.income_level.map_or(false, |v| {
-        matches!(v, IncomeLevel::Below25000 | IncomeLevel::Between25000And50000)
+        matches!(
+            v,
+            IncomeLevel::Below25000 | IncomeLevel::Between25000And50000
+        )
     });
     if is_low_income {
         raw += 10.0;
@@ -648,35 +656,41 @@ fn haversine_distance(
     let lat1_rad = lat1.to_f64().unwrap_or(0.0).to_radians();
     let lat2_rad = lat2.to_f64().unwrap_or(0.0).to_radians();
 
-    let a = (d_lat / 2.0).sin().powi(2)
-        + lat1_rad.cos() * lat2_rad.cos() * (d_lon / 2.0).sin().powi(2);
+    let a =
+        (d_lat / 2.0).sin().powi(2) + lat1_rad.cos() * lat2_rad.cos() * (d_lon / 2.0).sin().powi(2);
     let c = 2.0 * a.sqrt().asin();
 
     r * c
 }
 
-fn old_json_for_status(
-    existing: &applications::Model,
-) -> Option<serde_json::Value> {
+fn old_json_for_status(existing: &applications::Model) -> Option<serde_json::Value> {
     let mut map = serde_json::Map::new();
-    map.insert("status".into(), serde_json::json!(existing.status));
+    map.insert(
+        "enrollment_status".into(),
+        serde_json::json!(existing.enrollment_status),
+    );
     Some(serde_json::Value::Object(map))
 }
 
-fn new_json_for_status(
-    saved: &applications::Model,
-) -> Option<serde_json::Value> {
+fn new_json_for_status(saved: &applications::Model) -> Option<serde_json::Value> {
     let mut map = serde_json::Map::new();
-    map.insert("status".into(), serde_json::json!(saved.status));
+    map.insert(
+        "enrollment_status".into(),
+        serde_json::json!(saved.enrollment_status),
+    );
     Some(serde_json::Value::Object(map))
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, schemars::JsonSchema, apistos::ApiComponent)]
+#[derive(
+    Debug, serde::Serialize, serde::Deserialize, schemars::JsonSchema, apistos::ApiComponent,
+)]
 pub struct GenerateListsRequest {
     pub batch_id: Uuid,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize, schemars::JsonSchema, apistos::ApiComponent)]
+#[derive(
+    Debug, serde::Serialize, serde::Deserialize, schemars::JsonSchema, apistos::ApiComponent,
+)]
 pub struct SchoolListSummary {
     pub school_id: Uuid,
     pub school_name: String,

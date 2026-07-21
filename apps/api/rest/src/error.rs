@@ -17,7 +17,7 @@ pub struct ErrorResponse {
     status(code = 403),
     status(code = 404),
     status(code = 409),
-    status(code = 500),
+    status(code = 500)
 )]
 pub enum ApiError {
     BadRequest(String),

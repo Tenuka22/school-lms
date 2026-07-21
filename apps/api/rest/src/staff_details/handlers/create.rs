@@ -1,7 +1,7 @@
 use actix_web::{web, web::Json};
+use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use apistos::ApiComponent;
 use chrono::Utc;
 use db::entity::common::enums::StaffType;
 use db::entity::common::staff_details;
