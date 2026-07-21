@@ -4,9 +4,18 @@ import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import {
-  Field, FieldError, FieldGroup, FieldLabel
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
 } from "@/components/ui/field"
 
 export type SchoolFormData = {
@@ -24,7 +33,12 @@ interface Props {
   onNext: () => void
 }
 
-export function WizardStepSchool({ defaultValues, onSave, onBack, onNext }: Props) {
+export function WizardStepSchool({
+  defaultValues,
+  onSave,
+  onBack,
+  onNext,
+}: Props) {
   const form = useForm({
     defaultValues,
     onSubmit: async (values) => {
@@ -56,7 +70,8 @@ export function WizardStepSchool({ defaultValues, onSave, onBack, onNext }: Prop
             <form.Field
               name="school_name_si"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>School Name</FieldLabel>
@@ -72,14 +87,16 @@ export function WizardStepSchool({ defaultValues, onSave, onBack, onNext }: Prop
                       aria-invalid={isInvalid}
                       placeholder="Enter school name"
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
             />
           </FieldGroup>
           {schoolName && (
-            <div className="border rounded-lg p-4 space-y-2 mt-4">
+            <div className="mt-4 space-y-2 rounded-lg border p-4">
               <h4 className="font-semibold">{schoolName}</h4>
               <div className="flex gap-2">
                 <Badge variant="outline">{schoolType || "N/A"}</Badge>
@@ -89,8 +106,12 @@ export function WizardStepSchool({ defaultValues, onSave, onBack, onNext }: Prop
             </div>
           )}
           <div className="flex justify-between pt-4">
-            <Button variant="outline" type="button" onClick={onBack}>Back</Button>
-            <Button type="submit" disabled={!schoolName}>Next</Button>
+            <Button variant="outline" type="button" onClick={onBack}>
+              Back
+            </Button>
+            <Button type="submit" disabled={!schoolName}>
+              Next
+            </Button>
           </div>
         </CardContent>
       </Card>

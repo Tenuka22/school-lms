@@ -15,7 +15,9 @@ export interface DashboardSearch {
   enrollment_status?: string
 }
 
-export const Route = createFileRoute("/_authenticated/student-management/enrollment/g1/")({
+export const Route = createFileRoute(
+  "/_authenticated/student-management/enrollment/g1/"
+)({
   validateSearch: (search: Record<string, unknown>): DashboardSearch => ({
     page: search.page ? Number(search.page) : undefined,
     page_size: search.page_size ? Number(search.page_size) : undefined,
@@ -26,7 +28,8 @@ export const Route = createFileRoute("/_authenticated/student-management/enrollm
     gender: (search.gender as string) || undefined,
     nationality: (search.nationality as string) || undefined,
     category: (search.category as string) || undefined,
-    medium_of_instruction: (search.medium_of_instruction as string) || undefined,
+    medium_of_instruction:
+      (search.medium_of_instruction as string) || undefined,
     enrollment_status: (search.enrollment_status as string) || undefined,
   }),
   component: RouteComponent,

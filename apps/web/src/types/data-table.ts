@@ -8,7 +8,14 @@ export interface Option {
 }
 
 export interface DataTableColumnMeta {
-  variant?: "text" | "number" | "range" | "date" | "dateRange" | "select" | "multiSelect"
+  variant?:
+    | "text"
+    | "number"
+    | "range"
+    | "date"
+    | "dateRange"
+    | "select"
+    | "multiSelect"
   label?: string
   placeholder?: string
   options?: Option[]

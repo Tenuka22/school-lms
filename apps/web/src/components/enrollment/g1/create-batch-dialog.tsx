@@ -55,7 +55,8 @@ export function CreateBatchDialog({
         onOpenChange(false)
         if (data) onSuccess(data)
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to create batch"
+        const message =
+          err instanceof Error ? err.message : "Failed to create batch"
         toast.error(message)
       }
     },
@@ -82,7 +83,8 @@ export function CreateBatchDialog({
             <form.Field
               name="year"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Year</FieldLabel>
@@ -92,11 +94,15 @@ export function CreateBatchDialog({
                       type="number"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(Number(e.target.value))}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
                       aria-invalid={isInvalid}
                       placeholder="2026"
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -105,7 +111,11 @@ export function CreateBatchDialog({
           </FieldGroup>
         </form>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button type="submit" form="create-batch-form">

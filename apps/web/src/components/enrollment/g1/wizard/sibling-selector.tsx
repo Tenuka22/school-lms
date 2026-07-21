@@ -6,19 +6,61 @@ import { useForm } from "@tanstack/react-form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { apiClient } from "@/lib/api-client"
-import { listStudentsOptions, listStudentsQueryKey, createSiblingMutation, updateStudentMutation } from "@/lib/api-client/@tanstack/react-query.gen"
+import {
+  listStudentsOptions,
+  listStudentsQueryKey,
+  createSiblingMutation,
+  updateStudentMutation,
+} from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import { cn } from "@/lib/utils"
-import { IconChevronLeft, IconChevronRight, IconPlus, IconSearch, IconCheck, IconSchool, IconGripVertical, IconCalendar, IconPencil } from "@tabler/icons-react"
-import type { CreateSiblingRequest, CreateSiblingResponse, StudentDuplicate, Gender, Nationality, Religion, MediumOfInstruction, Student } from "@/lib/api-client/types.gen"
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+  IconSearch,
+  IconCheck,
+  IconSchool,
+  IconGripVertical,
+  IconCalendar,
+  IconPencil,
+} from "@tabler/icons-react"
+import type {
+  CreateSiblingRequest,
+  CreateSiblingResponse,
+  StudentDuplicate,
+  Gender,
+  Nationality,
+  Religion,
+  MediumOfInstruction,
+  Student,
+} from "@/lib/api-client/types.gen"
 import { useDebounce } from "@/hooks/use-debounce"
 
 const PAGE_SIZE = 8
@@ -29,14 +71,20 @@ interface CreateSiblingDialogProps {
   onCreated: (studentId: string) => void
 }
 
-function CreateSiblingDialog({ enrollmentId, schoolId, onCreated }: CreateSiblingDialogProps) {
+function CreateSiblingDialog({
+  enrollmentId,
+  schoolId,
+  onCreated,
+}: CreateSiblingDialogProps) {
   const [open, setOpen] = useState(false)
   const [duplicates, setDuplicates] = useState<StudentDuplicate[]>([])
 
   const createMutation = useMutation({
     ...createSiblingMutation({ client: apiClient }),
     onSuccess: (data: CreateSiblingResponse) => {
-      queryClient.invalidateQueries({ queryKey: listStudentsQueryKey({ client: apiClient }) })
+      queryClient.invalidateQueries({
+        queryKey: listStudentsQueryKey({ client: apiClient }),
+      })
       if (data.created && data.student_id) {
         onCreated(data.student_id)
         setDuplicates([])
@@ -49,21 +97,29 @@ function CreateSiblingDialog({ enrollmentId, schoolId, onCreated }: CreateSiblin
 
   return (
     <>
-      <Button variant="outline" size="sm" className="w-full" onClick={() => setOpen(true)}>
-        <IconPlus className="size-4 mr-1.5" />
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={() => setOpen(true)}
+      >
+        <IconPlus className="mr-1.5 size-4" />
         Create Sibling
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{duplicates.length > 0 ? "Similar Students Found" : "New Sibling"}</DialogTitle>
+            <DialogTitle>
+              {duplicates.length > 0 ? "Similar Students Found" : "New Sibling"}
+            </DialogTitle>
           </DialogHeader>
           {duplicates.length > 0 ? (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                The following students match the details you entered. Select one to add as a sibling, or go back to enter different info.
+                The following students match the details you entered. Select one
+                to add as a sibling, or go back to enter different info.
               </p>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              <div className="max-h-[300px] space-y-2 overflow-y-auto">
                 {duplicates.map((s) => (
                   <div
                     key={s.id}
@@ -81,23 +137,32 @@ function CreateSiblingDialog({ enrollmentId, schoolId, onCreated }: CreateSiblin
                         setOpen(false)
                       }
                     }}
-                    className="flex items-start gap-2.5 rounded-lg border p-3 text-left text-sm transition-colors hover:bg-accent cursor-pointer"
+                    className="flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 text-left text-sm transition-colors hover:bg-accent"
                   >
-                    <div className="size-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
                       <IconSchool className="size-5 text-muted-foreground" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{s.full_name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{s.name_with_initials}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{s.full_name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {s.name_with_initials}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        DOB: {s.date_of_birth} &middot; Gender: {s.gender} &middot; Grade: {s.current_grade ?? "N/A"}
+                        DOB: {s.date_of_birth} &middot; Gender: {s.gender}{" "}
+                        &middot; Grade: {s.current_grade ?? "N/A"}
                       </p>
                     </div>
-                    <Button variant="ghost" size="sm" className="shrink-0">Select</Button>
+                    <Button variant="ghost" size="sm" className="shrink-0">
+                      Select
+                    </Button>
                   </div>
                 ))}
               </div>
-              <Button variant="outline" className="w-full" onClick={() => setDuplicates([])}>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setDuplicates([])}
+              >
                 Go back to form
               </Button>
             </div>
@@ -105,9 +170,16 @@ function CreateSiblingDialog({ enrollmentId, schoolId, onCreated }: CreateSiblin
             <CreateSiblingForm
               onSubmit={(data) => {
                 setDuplicates([])
-                createMutation.mutate({ path: { id: enrollmentId }, body: { ...data, school_id: schoolId }, client: apiClient })
+                createMutation.mutate({
+                  path: { id: enrollmentId },
+                  body: { ...data, school_id: schoolId },
+                  client: apiClient,
+                })
               }}
-              onCancel={() => { setDuplicates([]); setOpen(false) }}
+              onCancel={() => {
+                setDuplicates([])
+                setOpen(false)
+              }}
               isPending={createMutation.isPending}
             />
           )}
@@ -178,13 +250,17 @@ function CreateSiblingForm({
           <form.Field
             name="full_name"
             validators={{
-              onChange: ({ value }) => (!value ? "Name is required" : undefined),
+              onChange: ({ value }) =>
+                !value ? "Name is required" : undefined,
             }}
             children={(field) => {
-              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid
               return (
                 <Field data-invalid={isInvalid} className="col-span-2">
-                  <FieldLabel htmlFor={field.name}>Full Name <span className="text-destructive">*</span></FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    Full Name <span className="text-destructive">*</span>
+                  </FieldLabel>
                   <Input
                     id={field.name}
                     name={field.name}
@@ -202,13 +278,18 @@ function CreateSiblingForm({
           <form.Field
             name="name_with_initials"
             validators={{
-              onChange: ({ value }) => (!value ? "Name with initials is required" : undefined),
+              onChange: ({ value }) =>
+                !value ? "Name with initials is required" : undefined,
             }}
             children={(field) => {
-              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid
               return (
                 <Field data-invalid={isInvalid} className="col-span-2">
-                  <FieldLabel htmlFor={field.name}>Name with Initials <span className="text-destructive">*</span></FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    Name with Initials{" "}
+                    <span className="text-destructive">*</span>
+                  </FieldLabel>
                   <Input
                     id={field.name}
                     name={field.name}
@@ -226,14 +307,20 @@ function CreateSiblingForm({
           <form.Field
             name="date_of_birth"
             validators={{
-              onChange: ({ value }) => (!value ? "Date of birth is required" : undefined),
+              onChange: ({ value }) =>
+                !value ? "Date of birth is required" : undefined,
             }}
             children={(field) => {
-              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-              const dateVal = field.state.value ? new Date(field.state.value + "T00:00:00") : undefined
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid
+              const dateVal = field.state.value
+                ? new Date(field.state.value + "T00:00:00")
+                : undefined
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Date of Birth <span className="text-destructive">*</span></FieldLabel>
+                  <FieldLabel htmlFor={field.name}>
+                    Date of Birth <span className="text-destructive">*</span>
+                  </FieldLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -245,9 +332,11 @@ function CreateSiblingForm({
                         )}
                         aria-invalid={isInvalid}
                       >
-                        <IconCalendar className="size-4 mr-2 shrink-0" />
+                        <IconCalendar className="mr-2 size-4 shrink-0" />
                         {field.state.value
-                          ? new Date(field.state.value + "T00:00:00").toLocaleDateString("en-US", {
+                          ? new Date(
+                              field.state.value + "T00:00:00"
+                            ).toLocaleDateString("en-US", {
                               year: "numeric",
                               month: "short",
                               day: "numeric",
@@ -271,7 +360,9 @@ function CreateSiblingForm({
                         }}
                         startMonth={new Date(1990, 0)}
                         endMonth={new Date(2026, 11)}
-                        disabled={(d) => d > new Date() || d < new Date(1950, 0, 1)}
+                        disabled={(d) =>
+                          d > new Date() || d < new Date(1950, 0, 1)
+                        }
                       />
                     </PopoverContent>
                   </Popover>
@@ -284,7 +375,9 @@ function CreateSiblingForm({
             name="gender"
             children={(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Gender <span className="text-destructive">*</span></FieldLabel>
+                <FieldLabel htmlFor={field.name}>
+                  Gender <span className="text-destructive">*</span>
+                </FieldLabel>
                 <Select
                   value={field.state.value}
                   onValueChange={(v) => field.handleChange(v as Gender)}
@@ -304,7 +397,9 @@ function CreateSiblingForm({
             name="nationality"
             children={(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Nationality <span className="text-destructive">*</span></FieldLabel>
+                <FieldLabel htmlFor={field.name}>
+                  Nationality <span className="text-destructive">*</span>
+                </FieldLabel>
                 <Select
                   value={field.state.value}
                   onValueChange={(v) => field.handleChange(v as Nationality)}
@@ -330,7 +425,9 @@ function CreateSiblingForm({
                   <FieldLabel htmlFor={field.name}>Religion</FieldLabel>
                   <Select
                     value={val ?? ""}
-                    onValueChange={(v) => field.handleChange(v ? v as Religion : null)}
+                    onValueChange={(v) =>
+                      field.handleChange(v ? (v as Religion) : null)
+                    }
                   >
                     <SelectTrigger id={field.name}>
                       <SelectValue placeholder="Select (optional)" />
@@ -352,10 +449,14 @@ function CreateSiblingForm({
             name="medium_of_instruction"
             children={(field) => (
               <Field>
-                <FieldLabel htmlFor={field.name}>Medium <span className="text-destructive">*</span></FieldLabel>
+                <FieldLabel htmlFor={field.name}>
+                  Medium <span className="text-destructive">*</span>
+                </FieldLabel>
                 <Select
                   value={field.state.value}
-                  onValueChange={(v) => field.handleChange(v as MediumOfInstruction)}
+                  onValueChange={(v) =>
+                    field.handleChange(v as MediumOfInstruction)
+                  }
                 >
                   <SelectTrigger id={field.name}>
                     <SelectValue />
@@ -383,7 +484,11 @@ function CreateSiblingForm({
                     max={13}
                     value={val ?? ""}
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value ? Number(e.target.value) : null)}
+                    onChange={(e) =>
+                      field.handleChange(
+                        e.target.value ? Number(e.target.value) : null
+                      )
+                    }
                     placeholder="e.g. 1"
                   />
                 </Field>
@@ -392,8 +497,10 @@ function CreateSiblingForm({
           />
         </div>
 
-        <div className="border-t pt-3 mt-1">
-          <p className="text-xs font-medium text-muted-foreground mb-2">Optional Contact &amp; ID Fields</p>
+        <div className="mt-1 border-t pt-3">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
+            Optional Contact &amp; ID Fields
+          </p>
           <div className="grid grid-cols-2 gap-3">
             <form.Field
               name="birth_certificate_number"
@@ -401,13 +508,17 @@ function CreateSiblingForm({
                 const val = field.state.value
                 return (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Birth Certificate No</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Birth Certificate No
+                    </FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
                       value={val ?? ""}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value || null)}
+                      onChange={(e) =>
+                        field.handleChange(e.target.value || null)
+                      }
                       placeholder="e.g. BC123456"
                     />
                   </Field>
@@ -426,7 +537,9 @@ function CreateSiblingForm({
                       name={field.name}
                       value={val ?? ""}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value || null)}
+                      onChange={(e) =>
+                        field.handleChange(e.target.value || null)
+                      }
                       placeholder="e.g. 200012345678"
                     />
                   </Field>
@@ -445,7 +558,9 @@ function CreateSiblingForm({
                       name={field.name}
                       value={val ?? ""}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value || null)}
+                      onChange={(e) =>
+                        field.handleChange(e.target.value || null)
+                      }
                       placeholder="e.g. P1234567"
                     />
                   </Field>
@@ -464,7 +579,9 @@ function CreateSiblingForm({
                       name={field.name}
                       value={val ?? ""}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value || null)}
+                      onChange={(e) =>
+                        field.handleChange(e.target.value || null)
+                      }
                       placeholder="e.g. +94771234567"
                     />
                   </Field>
@@ -484,7 +601,9 @@ function CreateSiblingForm({
                       type="email"
                       value={val ?? ""}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value || null)}
+                      onChange={(e) =>
+                        field.handleChange(e.target.value || null)
+                      }
                       placeholder="e.g. john@example.com"
                     />
                   </Field>
@@ -494,8 +613,13 @@ function CreateSiblingForm({
           </div>
         </div>
       </FieldGroup>
-      <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+      <div className="mt-4 flex justify-end gap-2 border-t pt-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isPending}
+        >
           Cancel
         </Button>
         <Button type="submit" disabled={isPending}>
@@ -512,11 +636,17 @@ interface EditStudentDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogProps) {
+function EditStudentDialog({
+  student,
+  open,
+  onOpenChange,
+}: EditStudentDialogProps) {
   const updateMutation = useMutation({
     ...updateStudentMutation({ client: apiClient }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: listStudentsQueryKey({ client: apiClient }) })
+      queryClient.invalidateQueries({
+        queryKey: listStudentsQueryKey({ client: apiClient }),
+      })
       onOpenChange(false)
     },
   })
@@ -578,13 +708,17 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
               <form.Field
                 name="full_name"
                 validators={{
-                  onChange: ({ value }) => (!value ? "Name is required" : undefined),
+                  onChange: ({ value }) =>
+                    !value ? "Name is required" : undefined,
                 }}
                 children={(field) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid} className="col-span-2">
-                      <FieldLabel htmlFor={field.name}>Full Name <span className="text-destructive">*</span></FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Full Name <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
@@ -593,7 +727,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
                       />
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -601,13 +737,18 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
               <form.Field
                 name="name_with_initials"
                 validators={{
-                  onChange: ({ value }) => (!value ? "Name with initials is required" : undefined),
+                  onChange: ({ value }) =>
+                    !value ? "Name with initials is required" : undefined,
                 }}
                 children={(field) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid} className="col-span-2">
-                      <FieldLabel htmlFor={field.name}>Name with Initials <span className="text-destructive">*</span></FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Name with Initials{" "}
+                        <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
@@ -616,7 +757,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
                       />
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -624,14 +767,21 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
               <form.Field
                 name="date_of_birth"
                 validators={{
-                  onChange: ({ value }) => (!value ? "Date of birth is required" : undefined),
+                  onChange: ({ value }) =>
+                    !value ? "Date of birth is required" : undefined,
                 }}
                 children={(field) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-              const dateVal = field.state.value ? new Date(field.state.value + "T12:00:00") : undefined
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
+                  const dateVal = field.state.value
+                    ? new Date(field.state.value + "T12:00:00")
+                    : undefined
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Date of Birth <span className="text-destructive">*</span></FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Date of Birth{" "}
+                        <span className="text-destructive">*</span>
+                      </FieldLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
@@ -643,9 +793,11 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                             )}
                             aria-invalid={isInvalid}
                           >
-                            <IconCalendar className="size-4 mr-2 shrink-0" />
+                            <IconCalendar className="mr-2 size-4 shrink-0" />
                             {field.state.value
-                              ? new Date(field.state.value + "T00:00:00").toLocaleDateString("en-US", {
+                              ? new Date(
+                                  field.state.value + "T00:00:00"
+                                ).toLocaleDateString("en-US", {
                                   year: "numeric",
                                   month: "short",
                                   day: "numeric",
@@ -662,18 +814,25 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                             onSelect={(d) => {
                               if (d) {
                                 const y = d.getFullYear()
-                                const m = String(d.getMonth() + 1).padStart(2, "0")
+                                const m = String(d.getMonth() + 1).padStart(
+                                  2,
+                                  "0"
+                                )
                                 const day = String(d.getDate()).padStart(2, "0")
                                 field.handleChange(`${y}-${m}-${day}`)
                               }
                             }}
                             startMonth={new Date(1990, 0)}
                             endMonth={new Date(2026, 11)}
-                            disabled={(d) => d > new Date() || d < new Date(1950, 0, 1)}
+                            disabled={(d) =>
+                              d > new Date() || d < new Date(1950, 0, 1)
+                            }
                           />
                         </PopoverContent>
                       </Popover>
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -682,7 +841,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                 name="gender"
                 children={(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Gender <span className="text-destructive">*</span></FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Gender <span className="text-destructive">*</span>
+                    </FieldLabel>
                     <Select
                       value={field.state.value}
                       onValueChange={(v) => field.handleChange(v as Gender)}
@@ -702,17 +863,23 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                 name="nationality"
                 children={(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Nationality <span className="text-destructive">*</span></FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Nationality <span className="text-destructive">*</span>
+                    </FieldLabel>
                     <Select
                       value={field.state.value}
-                      onValueChange={(v) => field.handleChange(v as Nationality)}
+                      onValueChange={(v) =>
+                        field.handleChange(v as Nationality)
+                      }
                     >
                       <SelectTrigger id={field.name}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="SriLankan">Sri Lankan</SelectItem>
-                        <SelectItem value="DualCitizen">Dual Citizen</SelectItem>
+                        <SelectItem value="DualCitizen">
+                          Dual Citizen
+                        </SelectItem>
                         <SelectItem value="Other">Other</SelectItem>
                       </SelectContent>
                     </Select>
@@ -728,7 +895,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                       <FieldLabel htmlFor={field.name}>Religion</FieldLabel>
                       <Select
                         value={val ?? ""}
-                        onValueChange={(v) => field.handleChange(v ? v as Religion : null)}
+                        onValueChange={(v) =>
+                          field.handleChange(v ? (v as Religion) : null)
+                        }
                       >
                         <SelectTrigger id={field.name}>
                           <SelectValue placeholder="Select (optional)" />
@@ -737,8 +906,12 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                           <SelectItem value="Buddhism">Buddhism</SelectItem>
                           <SelectItem value="Hinduism">Hinduism</SelectItem>
                           <SelectItem value="Islam">Islam</SelectItem>
-                          <SelectItem value="Christianity">Christianity</SelectItem>
-                          <SelectItem value="Catholicism">Catholicism</SelectItem>
+                          <SelectItem value="Christianity">
+                            Christianity
+                          </SelectItem>
+                          <SelectItem value="Catholicism">
+                            Catholicism
+                          </SelectItem>
                           <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
@@ -750,10 +923,14 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                 name="medium_of_instruction"
                 children={(field) => (
                   <Field>
-                    <FieldLabel htmlFor={field.name}>Medium <span className="text-destructive">*</span></FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Medium <span className="text-destructive">*</span>
+                    </FieldLabel>
                     <Select
                       value={field.state.value}
-                      onValueChange={(v) => field.handleChange(v as MediumOfInstruction)}
+                      onValueChange={(v) =>
+                        field.handleChange(v as MediumOfInstruction)
+                      }
                     >
                       <SelectTrigger id={field.name}>
                         <SelectValue />
@@ -772,7 +949,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                   const val = field.state.value
                   return (
                     <Field>
-                      <FieldLabel htmlFor={field.name}>Enrollment Grade</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Enrollment Grade
+                      </FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
@@ -781,7 +960,11 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                         max={13}
                         value={val ?? ""}
                         onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value ? Number(e.target.value) : null)}
+                        onChange={(e) =>
+                          field.handleChange(
+                            e.target.value ? Number(e.target.value) : null
+                          )
+                        }
                         placeholder="e.g. 1"
                       />
                     </Field>
@@ -790,8 +973,10 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
               />
             </div>
 
-            <div className="border-t pt-3 mt-1">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Optional Contact &amp; ID Fields</p>
+            <div className="mt-1 border-t pt-3">
+              <p className="mb-2 text-xs font-medium text-muted-foreground">
+                Optional Contact &amp; ID Fields
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <form.Field
                   name="birth_certificate_number"
@@ -799,13 +984,17 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                     const val = field.state.value
                     return (
                       <Field>
-                        <FieldLabel htmlFor={field.name}>Birth Certificate No</FieldLabel>
+                        <FieldLabel htmlFor={field.name}>
+                          Birth Certificate No
+                        </FieldLabel>
                         <Input
                           id={field.name}
                           name={field.name}
                           value={val ?? ""}
                           onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value || null)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value || null)
+                          }
                           placeholder="e.g. BC123456"
                         />
                       </Field>
@@ -824,7 +1013,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                           name={field.name}
                           value={val ?? ""}
                           onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value || null)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value || null)
+                          }
                           placeholder="e.g. 200012345678"
                         />
                       </Field>
@@ -837,13 +1028,17 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                     const val = field.state.value
                     return (
                       <Field>
-                        <FieldLabel htmlFor={field.name}>Passport No</FieldLabel>
+                        <FieldLabel htmlFor={field.name}>
+                          Passport No
+                        </FieldLabel>
                         <Input
                           id={field.name}
                           name={field.name}
                           value={val ?? ""}
                           onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value || null)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value || null)
+                          }
                           placeholder="e.g. P1234567"
                         />
                       </Field>
@@ -862,7 +1057,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                           name={field.name}
                           value={val ?? ""}
                           onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value || null)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value || null)
+                          }
                           placeholder="e.g. +94771234567"
                         />
                       </Field>
@@ -882,7 +1079,9 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
                           type="email"
                           value={val ?? ""}
                           onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value || null)}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value || null)
+                          }
                           placeholder="e.g. john@example.com"
                         />
                       </Field>
@@ -892,8 +1091,13 @@ function EditStudentDialog({ student, open, onOpenChange }: EditStudentDialogPro
               </div>
             </div>
           </FieldGroup>
-          <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={updateMutation.isPending}>
+          <div className="mt-4 flex justify-end gap-2 border-t pt-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={updateMutation.isPending}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={updateMutation.isPending}>
@@ -914,14 +1118,23 @@ interface SiblingSelectorProps {
   onDeselect: (id: string) => void
 }
 
-export function SiblingSelector({ enrollmentId, schoolId, selectedStudentIds, onSelect, onDeselect }: SiblingSelectorProps) {
+export function SiblingSelector({
+  enrollmentId,
+  schoolId,
+  selectedStudentIds,
+  onSelect,
+  onDeselect,
+}: SiblingSelectorProps) {
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(0)
   const debouncedSearch = useDebounce(search, 300)
   const [editingStudent, setEditingStudent] = useState<Student | null>(null)
 
   const { data: students = [] } = useQuery(
-    listStudentsOptions({ client: apiClient, query: { search: debouncedSearch || undefined } }),
+    listStudentsOptions({
+      client: apiClient,
+      query: { search: debouncedSearch || undefined },
+    })
   )
 
   const filtered = useMemo(() => {
@@ -931,7 +1144,7 @@ export function SiblingSelector({ enrollmentId, schoolId, selectedStudentIds, on
       (s) =>
         s.full_name.toLowerCase().includes(q) ||
         (s.admission_number ?? "").toLowerCase().includes(q) ||
-        s.name_with_initials.toLowerCase().includes(q),
+        s.name_with_initials.toLowerCase().includes(q)
     )
   }, [students, search])
 
@@ -943,24 +1156,34 @@ export function SiblingSelector({ enrollmentId, schoolId, selectedStudentIds, on
     setPage(Math.max(0, Math.min(p, totalPages - 1)))
   }
 
-  const handleCreated = useCallback((studentId: string) => {
-    onSelect(studentId)
-    setPage(0)
-  }, [onSelect])
+  const handleCreated = useCallback(
+    (studentId: string) => {
+      onSelect(studentId)
+      setPage(0)
+    },
+    [onSelect]
+  )
 
   return (
     <div className="space-y-3">
       <div className="relative">
-        <IconSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <IconSearch className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search by name, admission no..."
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(0) }}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(0)
+          }}
           className="pl-9"
         />
       </div>
 
-      <CreateSiblingDialog enrollmentId={enrollmentId} schoolId={schoolId} onCreated={handleCreated} />
+      <CreateSiblingDialog
+        enrollmentId={enrollmentId}
+        schoolId={schoolId}
+        onCreated={handleCreated}
+      />
 
       <p className="text-xs text-muted-foreground">
         Select students currently enrolled at this school as siblings.
@@ -976,40 +1199,50 @@ export function SiblingSelector({ enrollmentId, schoolId, selectedStudentIds, on
                 key={s.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => isSelected ? onDeselect(s.id) : onSelect(s.id)}
-                onKeyDown={(e) => { if (e.key === "Enter") isSelected ? onDeselect(s.id) : onSelect(s.id) }}
+                onClick={() => (isSelected ? onDeselect(s.id) : onSelect(s.id))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter")
+                    isSelected ? onDeselect(s.id) : onSelect(s.id)
+                }}
                 className={cn(
-                  "w-full flex items-start gap-2.5 rounded-lg border p-3 text-left text-sm transition-colors hover:bg-accent cursor-pointer group",
+                  "group flex w-full cursor-pointer items-start gap-2.5 rounded-lg border p-3 text-left text-sm transition-colors hover:bg-accent",
                   isSelected ? "border-primary bg-primary/5" : "border-border"
                 )}
               >
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="font-medium truncate">{s.full_name}</p>
+                    <p className="truncate font-medium">{s.full_name}</p>
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={(e) => { e.stopPropagation(); setEditingStudent(s) }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditingStudent(s)
+                      }}
                       aria-label={`Edit ${s.full_name}`}
-                      className="size-6 shrink-0 -mr-1"
+                      className="-mr-1 size-6 shrink-0"
                     >
                       <IconPencil className="size-3" />
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{s.name_with_initials}</p>
-                  <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                  <p className="truncate text-xs text-muted-foreground">
+                    {s.name_with_initials}
+                  </p>
+                  <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                     <IconGripVertical className="size-3 shrink-0" />
                     <span>Enrollment Grade: {displayGrade}</span>
                     {s.admission_number && (
                       <>
-                        <span className="text-muted-foreground/40">&middot;</span>
+                        <span className="text-muted-foreground/40">
+                          &middot;
+                        </span>
                         <span>{s.admission_number}</span>
                       </>
                     )}
                   </div>
                 </div>
                 {isSelected && (
-                  <div className="size-5 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary">
                     <IconCheck className="size-3 text-primary-foreground" />
                   </div>
                 )}
@@ -1017,7 +1250,7 @@ export function SiblingSelector({ enrollmentId, schoolId, selectedStudentIds, on
             )
           })}
           {paged.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-8">
+            <p className="py-8 text-center text-sm text-muted-foreground">
               {search ? "No students found" : "No students available."}
             </p>
           )}
@@ -1028,19 +1261,31 @@ export function SiblingSelector({ enrollmentId, schoolId, selectedStudentIds, on
         <EditStudentDialog
           student={editingStudent}
           open={true}
-          onOpenChange={(o) => { if (!o) setEditingStudent(null) }}
+          onOpenChange={(o) => {
+            if (!o) setEditingStudent(null)
+          }}
         />
       )}
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-1">
-          <Button variant="ghost" size="sm" disabled={safePage === 0} onClick={() => handlePageChange(safePage - 1)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={safePage === 0}
+            onClick={() => handlePageChange(safePage - 1)}
+          >
             <IconChevronLeft className="size-4" />
           </Button>
           <span className="text-xs text-muted-foreground">
             {safePage + 1} / {totalPages}
           </span>
-          <Button variant="ghost" size="sm" disabled={safePage >= totalPages - 1} onClick={() => handlePageChange(safePage + 1)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={safePage >= totalPages - 1}
+            onClick={() => handlePageChange(safePage + 1)}
+          >
             <IconChevronRight className="size-4" />
           </Button>
         </div>

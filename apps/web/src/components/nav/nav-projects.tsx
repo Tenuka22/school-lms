@@ -16,7 +16,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { IconDots, IconFolder, IconShare2, IconTrash } from "@tabler/icons-react"
+import {
+  IconDots,
+  IconFolder,
+  IconShare2,
+  IconTrash,
+} from "@tabler/icons-react"
 
 export function NavProjects({
   projects,
@@ -47,8 +52,7 @@ export function NavProjects({
                   />
                 }
               >
-                <IconDots
-                />
+                <IconDots />
                 <span className="sr-only">More</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -75,8 +79,7 @@ export function NavProjects({
         ))}
         <SidebarMenuItem>
           <SidebarMenuButton>
-            <IconDots
-            />
+            <IconDots />
             <span>More</span>
           </SidebarMenuButton>
         </SidebarMenuItem>

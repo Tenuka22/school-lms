@@ -36,7 +36,7 @@ function parseValuesAsNumbers(value: unknown): RangeValue | undefined {
     value.length === 2 &&
     value.every(
       (v) =>
-        (typeof v === "string" || typeof v === "number") && !Number.isNaN(v),
+        (typeof v === "string" || typeof v === "number") && !Number.isNaN(v)
     )
   ) {
     return [Number(value[0]), Number(value[1])]
@@ -58,7 +58,8 @@ export function DataTableSliderFilter<TData>({
 
   const columnFilterValue = parseValuesAsNumbers(column.getFilterValue())
 
-  const columnMeta = column.columnDef.meta as Record<string, unknown> | undefined
+  const columnMeta = column.columnDef.meta as
+    Record<string, unknown> | undefined
   const defaultRange = columnMeta?.range as [number, number] | undefined
   const unit = columnMeta?.unit as string | undefined
 
@@ -108,7 +109,7 @@ export function DataTableSliderFilter<TData>({
         column.setFilterValue([numValue, range[1]])
       }
     },
-    [column, min, range],
+    [column, min, range]
   )
 
   const onToInputChange = React.useCallback(
@@ -118,7 +119,7 @@ export function DataTableSliderFilter<TData>({
         column.setFilterValue([range[0], numValue])
       }
     },
-    [column, max, range],
+    [column, max, range]
   )
 
   const onSliderValueChange = React.useCallback(
@@ -127,7 +128,7 @@ export function DataTableSliderFilter<TData>({
         column.setFilterValue(value as RangeValue)
       }
     },
-    [column],
+    [column]
   )
 
   const onReset = React.useCallback(
@@ -137,7 +138,7 @@ export function DataTableSliderFilter<TData>({
       }
       column.setFilterValue(undefined)
     },
-    [column],
+    [column]
   )
 
   return (
@@ -156,7 +157,7 @@ export function DataTableSliderFilter<TData>({
             role="button"
             aria-label={`Clear ${title} filter`}
             tabIndex={0}
-            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
             onClick={onReset}
           >
             <IconCircleX />
@@ -179,7 +180,7 @@ export function DataTableSliderFilter<TData>({
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
-          <p className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          <p className="leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {title}
           </p>
           <div className="flex items-center gap-4">
@@ -202,7 +203,7 @@ export function DataTableSliderFilter<TData>({
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
               {unit && (
-                <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
+                <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
                   {unit}
                 </span>
               )}
@@ -226,7 +227,7 @@ export function DataTableSliderFilter<TData>({
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
               {unit && (
-                <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
+                <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
                   {unit}
                 </span>
               )}
@@ -242,7 +243,9 @@ export function DataTableSliderFilter<TData>({
             max={max}
             step={step}
             value={range[0]}
-            onChange={(e) => onSliderValueChange([Number(e.target.value), range[1]])}
+            onChange={(e) =>
+              onSliderValueChange([Number(e.target.value), range[1]])
+            }
             className="h-2 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-primary"
           />
           <input
@@ -251,7 +254,9 @@ export function DataTableSliderFilter<TData>({
             max={max}
             step={step}
             value={range[1]}
-            onChange={(e) => onSliderValueChange([range[0], Number(e.target.value)])}
+            onChange={(e) =>
+              onSliderValueChange([range[0], Number(e.target.value)])
+            }
             className="h-2 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-primary"
           />
         </div>

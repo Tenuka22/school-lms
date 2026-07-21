@@ -27,17 +27,21 @@ function ChildSummary({ data }: ChildSummaryProps) {
           </AvatarFallback>
         </Avatar>
         <div>
-          <p className="text-sm font-medium leading-tight">
+          <p className="text-sm leading-tight font-medium">
             {data.full_name || "Child Profile"}
           </p>
-          <p className="text-xs text-muted-foreground">{filledCore}/3 required fields</p>
+          <p className="text-xs text-muted-foreground">
+            {filledCore}/3 required fields
+          </p>
         </div>
       </div>
       <div className="space-y-1.5 text-xs">
         {data.full_name && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">Name</span>
-            <span className="text-foreground font-medium">{data.full_name}</span>
+            <span className="font-medium text-foreground">
+              {data.full_name}
+            </span>
           </div>
         )}
         {data.name_with_initials && (
@@ -67,7 +71,9 @@ function ChildSummary({ data }: ChildSummaryProps) {
         {data.medium_of_instruction && (
           <div className="flex justify-between">
             <span className="text-muted-foreground">Medium</span>
-            <span className="text-foreground">{data.medium_of_instruction}</span>
+            <span className="text-foreground">
+              {data.medium_of_instruction}
+            </span>
           </div>
         )}
         {data.category && (
@@ -87,12 +93,20 @@ interface GuardianDirectoryProps {
   onDeselect: (id: string) => void
 }
 
-function GuardianDirectory({ selectedIds, onSelect, onDeselect }: GuardianDirectoryProps) {
+function GuardianDirectory({
+  selectedIds,
+  onSelect,
+  onDeselect,
+}: GuardianDirectoryProps) {
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <h4 className="text-sm font-medium text-muted-foreground">Guardian Directory</h4>
-        <p className="text-xs text-muted-foreground">Search, browse, and select guardians.</p>
+        <h4 className="text-sm font-medium text-muted-foreground">
+          Guardian Directory
+        </h4>
+        <p className="text-xs text-muted-foreground">
+          Search, browse, and select guardians.
+        </p>
       </div>
       <GuardianSelector
         selectedIds={selectedIds}
@@ -109,12 +123,20 @@ interface AddressDirectoryProps {
   onDeselect: (id: string) => void
 }
 
-function AddressDirectory({ selectedIds, onSelect, onDeselect }: AddressDirectoryProps) {
+function AddressDirectory({
+  selectedIds,
+  onSelect,
+  onDeselect,
+}: AddressDirectoryProps) {
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <h4 className="text-sm font-medium text-muted-foreground">Address Directory</h4>
-        <p className="text-xs text-muted-foreground">Search, browse, and select addresses.</p>
+        <h4 className="text-sm font-medium text-muted-foreground">
+          Address Directory
+        </h4>
+        <p className="text-xs text-muted-foreground">
+          Search, browse, and select addresses.
+        </p>
       </div>
       <AddressSelector
         selectedIds={selectedIds}
@@ -133,12 +155,22 @@ interface SiblingDirectoryProps {
   onDeselect: (id: string) => void
 }
 
-function SiblingDirectory({ enrollmentId, schoolId, selectedStudentIds, onSelect, onDeselect }: SiblingDirectoryProps) {
+function SiblingDirectory({
+  enrollmentId,
+  schoolId,
+  selectedStudentIds,
+  onSelect,
+  onDeselect,
+}: SiblingDirectoryProps) {
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <h4 className="text-sm font-medium text-muted-foreground">Student Directory</h4>
-        <p className="text-xs text-muted-foreground">Search and select siblings from enrolled students at this school.</p>
+        <h4 className="text-sm font-medium text-muted-foreground">
+          Student Directory
+        </h4>
+        <p className="text-xs text-muted-foreground">
+          Search and select siblings from enrolled students at this school.
+        </p>
       </div>
       <SiblingSelector
         enrollmentId={enrollmentId}
@@ -178,7 +210,7 @@ function DocumentsPreview({ documents }: DocumentsPreviewProps) {
       </div>
       {uploaded.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <IconPhoto className="size-8 text-muted-foreground/40 mb-2" />
+          <IconPhoto className="mb-2 size-8 text-muted-foreground/40" />
           <p className="text-xs text-muted-foreground">No files uploaded yet</p>
         </div>
       ) : (
@@ -191,7 +223,7 @@ function DocumentsPreview({ documents }: DocumentsPreviewProps) {
                 key={doc.tempId}
                 className="flex items-start gap-2.5 rounded-lg border p-2"
               >
-                <div className="size-10 shrink-0 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
                   {isImage ? (
                     <img
                       src={doc.file_url}
@@ -203,13 +235,16 @@ function DocumentsPreview({ documents }: DocumentsPreviewProps) {
                     <IconFileText className="size-5 text-muted-foreground" />
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{label}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-medium">{label}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">
                     {doc.file_name ?? "Unknown"}
                   </p>
                 </div>
-                <Badge className="mt-0.5 text-[10px] h-4 px-1.5" variant="outline">
+                <Badge
+                  className="mt-0.5 h-4 px-1.5 text-[10px]"
+                  variant="outline"
+                >
                   Uploaded
                 </Badge>
               </div>
@@ -257,31 +292,40 @@ export function WizardSidebar({
   if (currentStep === 6) return null
 
   return (
-    <div className="w-80 shrink-0 border-r pr-4 space-y-6">
+    <div className="w-80 shrink-0 space-y-6 border-r pr-4">
       {currentStep === 1 && <ChildSummary data={childData} />}
-      {currentStep === 2 && selectedGuardianIds && onGuardianSelect && onGuardianDeselect && (
-        <GuardianDirectory
-          selectedIds={selectedGuardianIds}
-          onSelect={onGuardianSelect}
-          onDeselect={onGuardianDeselect}
-        />
-      )}
-      {currentStep === 3 && selectedAddressIds && onAddressSelect && onAddressDeselect && (
-        <AddressDirectory
-          selectedIds={selectedAddressIds}
-          onSelect={onAddressSelect}
-          onDeselect={onAddressDeselect}
-        />
-      )}
-      {currentStep === 4 && selectedSiblingIds && onSiblingSelect && onSiblingDeselect && (
-        <SiblingDirectory
-          enrollmentId={enrollmentId}
-          schoolId={schoolId}
-          selectedStudentIds={selectedSiblingIds}
-          onSelect={onSiblingSelect}
-          onDeselect={onSiblingDeselect}
-        />
-      )}
+      {currentStep === 2 &&
+        selectedGuardianIds &&
+        onGuardianSelect &&
+        onGuardianDeselect && (
+          <GuardianDirectory
+            selectedIds={selectedGuardianIds}
+            onSelect={onGuardianSelect}
+            onDeselect={onGuardianDeselect}
+          />
+        )}
+      {currentStep === 3 &&
+        selectedAddressIds &&
+        onAddressSelect &&
+        onAddressDeselect && (
+          <AddressDirectory
+            selectedIds={selectedAddressIds}
+            onSelect={onAddressSelect}
+            onDeselect={onAddressDeselect}
+          />
+        )}
+      {currentStep === 4 &&
+        selectedSiblingIds &&
+        onSiblingSelect &&
+        onSiblingDeselect && (
+          <SiblingDirectory
+            enrollmentId={enrollmentId}
+            schoolId={schoolId}
+            selectedStudentIds={selectedSiblingIds}
+            onSelect={onSiblingSelect}
+            onDeselect={onSiblingDeselect}
+          />
+        )}
       {currentStep === 5 && documents && (
         <DocumentsPreview documents={documents} />
       )}

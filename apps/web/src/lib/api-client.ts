@@ -9,5 +9,5 @@ export const apiClient = createClient(
       const result = await resolveTokenAction()
       return result.token ?? undefined
     },
-  }),
+  })
 )

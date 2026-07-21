@@ -25,7 +25,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-export function LoginForm({ className, redirect: redirectTo }: { className?: string; redirect?: string }) {
+export function LoginForm({
+  className,
+  redirect: redirectTo,
+}: {
+  className?: string
+  redirect?: string
+}) {
   const navigate = useNavigate()
   const mutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {
@@ -152,7 +158,11 @@ export function LoginForm({ className, redirect: redirectTo }: { className?: str
             </Button>
             <FieldDescription className="w-full text-center">
               Don&apos;t have an account?{" "}
-              <Link to="/auth/sign-up" search={{ redirect: redirectTo }} className="underline underline-offset-4">
+              <Link
+                to="/auth/sign-up"
+                search={{ redirect: redirectTo }}
+                className="underline underline-offset-4"
+              >
                 Sign up
               </Link>
             </FieldDescription>

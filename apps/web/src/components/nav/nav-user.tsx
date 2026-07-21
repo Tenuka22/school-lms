@@ -1,10 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {
-  Avatar,
-  AvatarFallback,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +40,7 @@ export function NavUser({
   const [alertOpen, setAlertOpen] = React.useState(false)
 
   const userEmail = user?.email ?? ""
-  const userName = userEmail ? userEmail.split("@")[0] ?? "User" : "User"
+  const userName = userEmail ? (userEmail.split("@")[0] ?? "User") : "User"
 
   if (!user) return null
 
@@ -57,7 +54,9 @@ export function NavUser({
             }
           >
             <Avatar>
-              <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>
+                {userName.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-start text-sm leading-tight">
               <span className="truncate font-medium">{userName}</span>
@@ -77,7 +76,9 @@ export function NavUser({
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                   <Avatar>
-                    <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                      {userName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-start text-sm leading-tight">
                     <span className="truncate font-medium">{userName}</span>
@@ -104,7 +105,10 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />*/}
-            <DropdownMenuItem closeOnClick={false} onClick={() => setAlertOpen(true)}>
+            <DropdownMenuItem
+              closeOnClick={false}
+              onClick={() => setAlertOpen(true)}
+            >
               <IconLogout />
               Log out
             </DropdownMenuItem>

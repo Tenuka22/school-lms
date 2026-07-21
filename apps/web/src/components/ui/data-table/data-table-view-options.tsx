@@ -19,8 +19,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-interface DataTableViewOptionsProps<TData>
-  extends React.ComponentProps<typeof PopoverContent> {
+interface DataTableViewOptionsProps<TData> extends React.ComponentProps<
+  typeof PopoverContent
+> {
   table: Table<TData>
   disabled?: boolean
 }
@@ -36,9 +37,9 @@ export function DataTableViewOptions<TData>({
         .getAllColumns()
         .filter(
           (column) =>
-            typeof column.accessorFn !== "undefined" && column.getCanHide(),
+            typeof column.accessorFn !== "undefined" && column.getCanHide()
         ),
-    [table],
+    [table]
   )
 
   return (
@@ -71,12 +72,15 @@ export function DataTableViewOptions<TData>({
                   }
                 >
                   <span className="truncate">
-                    {(column.columnDef.meta as Record<string, unknown> | undefined)?.label as string ?? column.id}
+                    {((
+                      column.columnDef.meta as
+                        Record<string, unknown> | undefined
+                    )?.label as string) ?? column.id}
                   </span>
                   <IconCheck
                     className={cn(
                       "ml-auto size-4 shrink-0",
-                      column.getIsVisible() ? "opacity-100" : "opacity-0",
+                      column.getIsVisible() ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>

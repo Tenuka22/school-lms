@@ -60,7 +60,9 @@ function getActiveMode(pathname: string): NavMode {
 export function AppSidebar({
   user,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { user?: { email: string; sub: string } | null }) {
+}: React.ComponentProps<typeof Sidebar> & {
+  user?: { email: string; sub: string } | null
+}) {
   const { pathname } = useLocation()
   const activeMode = getActiveMode(pathname)
   const modeData = getModeData(activeMode.id)

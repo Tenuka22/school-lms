@@ -47,11 +47,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-        <ThemeProvider defaultTheme="system" storageKey="theme">
-          {children}
-        </ThemeProvider>
-        </TooltipProvider>
+          <TooltipProvider>
+            <ThemeProvider defaultTheme="system" storageKey="theme">
+              {children}
+            </ThemeProvider>
+          </TooltipProvider>
         </QueryClientProvider>
         <Toaster position="top-center" richColors />
         <TanStackDevtools

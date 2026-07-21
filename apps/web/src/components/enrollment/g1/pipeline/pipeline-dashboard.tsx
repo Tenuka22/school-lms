@@ -6,51 +6,104 @@ import { useNavigate, Link } from "@tanstack/react-router"
 import { useState, useRef, useMemo, useCallback } from "react"
 import * as v from "valibot"
 import {
-  IconPlus, IconFolderPlus,
-  IconCalendar, IconPencil, IconTrash, IconLoader2, IconDots, IconExternalLink,
+  IconPlus,
+  IconFolderPlus,
+  IconCalendar,
+  IconPencil,
+  IconTrash,
+  IconLoader2,
+  IconDots,
+  IconExternalLink,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
-import { listBatchesOptions, listBatchesQueryKey } from "@/lib/api-client/@tanstack/react-query.gen"
-import { listApplicationsOptions, listApplicationsQueryKey } from "@/lib/api-client/@tanstack/react-query.gen"
-import { createApplication, createBatch, deleteApplication } from "@/lib/api-client/sdk.gen"
+import {
+  listBatchesOptions,
+  listBatchesQueryKey,
+} from "@/lib/api-client/@tanstack/react-query.gen"
+import {
+  listApplicationsOptions,
+  listApplicationsQueryKey,
+} from "@/lib/api-client/@tanstack/react-query.gen"
+import {
+  createApplication,
+  createBatch,
+  deleteApplication,
+} from "@/lib/api-client/sdk.gen"
 import { queryClient } from "@/router"
 import {
-  vGender, vNationality, vMediumOfInstruction, vReligion,
+  vGender,
+  vNationality,
+  vMediumOfInstruction,
+  vReligion,
 } from "@/lib/api-client/valibot.gen"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  Field, FieldError, FieldGroup, FieldLabel,
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
 } from "@/components/ui/field"
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select"
 import {
-  Popover, PopoverContent, PopoverTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { formatDate } from "@/lib/format"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import type { SortingState, ColumnFiltersState, PaginationState, VisibilityState, ColumnDef } from "@tanstack/react-table"
+import type {
+  SortingState,
+  ColumnFiltersState,
+  PaginationState,
+  VisibilityState,
+  ColumnDef,
+} from "@tanstack/react-table"
 import {
-  getCoreRowModel, getSortedRowModel, useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
 } from "@tanstack/react-table"
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
@@ -71,33 +124,107 @@ const vDialogApplication = v.object({
 })
 
 const WEIGHT_INFO: Record<string, { label: string; desc: string }> = {
-  proximity: { label: "Proximity", desc: "Priority for children living closest to the school" },
-  staff: { label: "Staff", desc: "Children of staff members employed at the school" },
-  sibling: { label: "Sibling", desc: "Children with siblings already enrolled at the school" },
-  alumni: { label: "Alumni", desc: "Children of former graduates of the school" },
-  govt: { label: "Govt", desc: "Children of government employees transferred to the area" },
-  special: { label: "Special", desc: "Children with special needs or exceptional circumstances" },
+  proximity: {
+    label: "Proximity",
+    desc: "Priority for children living closest to the school",
+  },
+  staff: {
+    label: "Staff",
+    desc: "Children of staff members employed at the school",
+  },
+  sibling: {
+    label: "Sibling",
+    desc: "Children with siblings already enrolled at the school",
+  },
+  alumni: {
+    label: "Alumni",
+    desc: "Children of former graduates of the school",
+  },
+  govt: {
+    label: "Govt",
+    desc: "Children of government employees transferred to the area",
+  },
+  special: {
+    label: "Special",
+    desc: "Children with special needs or exceptional circumstances",
+  },
 }
 
 const LANE_CONFIG = [
-  { status: "Pending", label: "Pending", badgeVariant: "secondary" as const, note: "Data entry in progress" },
-  { status: "Completed", label: "Completed", badgeVariant: "default" as const, note: "Data entered, ready for marks" },
-  { status: "PendingApproval", label: "Pending Approval", badgeVariant: "default" as const, note: "Awaiting officer approval" },
-  { status: "Approved", label: "Approved", badgeVariant: "default" as const, note: "Approved" },
-  { status: "Admitted", label: "Admitted", badgeVariant: "default" as const, note: "Formally admitted" },
-  { status: "Rejected", label: "Rejected", badgeVariant: "destructive" as const, note: "Not selected" },
+  {
+    status: "Pending",
+    label: "Pending",
+    badgeVariant: "secondary" as const,
+    note: "Data entry in progress",
+  },
+  {
+    status: "Completed",
+    label: "Completed",
+    badgeVariant: "default" as const,
+    note: "Data entered, ready for marks",
+  },
+  {
+    status: "PendingApproval",
+    label: "Pending Approval",
+    badgeVariant: "default" as const,
+    note: "Awaiting officer approval",
+  },
+  {
+    status: "Approved",
+    label: "Approved",
+    badgeVariant: "default" as const,
+    note: "Approved",
+  },
+  {
+    status: "Admitted",
+    label: "Admitted",
+    badgeVariant: "default" as const,
+    note: "Formally admitted",
+  },
+  {
+    status: "Rejected",
+    label: "Rejected",
+    badgeVariant: "destructive" as const,
+    note: "Not selected",
+  },
 ]
 
 const CURRENT_YEAR = new Date().getFullYear()
 
-const FILTER_KEYS = ["full_name", "name_with_initials", "gender", "nationality", "category", "medium_of_instruction", "enrollment_status"] as const
-const ENUM_KEYS = new Set(["gender", "nationality", "category", "medium_of_instruction", "enrollment_status"])
+const FILTER_KEYS = [
+  "full_name",
+  "name_with_initials",
+  "gender",
+  "nationality",
+  "category",
+  "medium_of_instruction",
+  "enrollment_status",
+] as const
+const ENUM_KEYS = new Set([
+  "gender",
+  "nationality",
+  "category",
+  "medium_of_instruction",
+  "enrollment_status",
+])
 
-function EnumBadge({ column, value }: { column: string; value: string | null | undefined }) {
-  if (!value) return <span className="text-muted-foreground text-sm">—</span>
+function EnumBadge({
+  column,
+  value,
+}: {
+  column: string
+  value: string | null | undefined
+}) {
+  if (!value) return <span className="text-sm text-muted-foreground">—</span>
   const label = getEnumLabel(column, value)
   const style = getEnumStyle(column, value)
-  return <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${style ?? "bg-muted text-muted-foreground border-border"}`}>{label}</span>
+  return (
+    <span
+      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${style ?? "border-border bg-muted text-muted-foreground"}`}
+    >
+      {label}
+    </span>
+  )
 }
 
 export function PipeDashboard() {
@@ -112,23 +239,26 @@ export function PipeDashboard() {
 
   const { data: batches } = useQuery(listBatchesOptions({ client: apiClient }))
 
-  const queryOptions = useMemo(() => ({
-    client: apiClient,
-    query: {
-      page: search.page ?? undefined,
-      page_size: search.page_size ?? undefined,
-      sort_by: search.sort_by ?? undefined,
-      sort_order: search.sort_order ?? undefined,
-      full_name: search.full_name ?? undefined,
-      name_with_initials: search.name_with_initials ?? undefined,
-      gender: search.gender ?? undefined,
-      nationality: search.nationality ?? undefined,
-      category: search.category ?? undefined,
-      medium_of_instruction: search.medium_of_instruction ?? undefined,
-      enrollment_status: search.enrollment_status ?? undefined,
-      batch_id: batchId || null,
-    },
-  }), [search, batchId])
+  const queryOptions = useMemo(
+    () => ({
+      client: apiClient,
+      query: {
+        page: search.page ?? undefined,
+        page_size: search.page_size ?? undefined,
+        sort_by: search.sort_by ?? undefined,
+        sort_order: search.sort_order ?? undefined,
+        full_name: search.full_name ?? undefined,
+        name_with_initials: search.name_with_initials ?? undefined,
+        gender: search.gender ?? undefined,
+        nationality: search.nationality ?? undefined,
+        category: search.category ?? undefined,
+        medium_of_instruction: search.medium_of_instruction ?? undefined,
+        enrollment_status: search.enrollment_status ?? undefined,
+        batch_id: batchId || null,
+      },
+    }),
+    [search, batchId]
+  )
 
   const { data: enrollments } = useQuery({
     ...listApplicationsOptions(queryOptions),
@@ -138,7 +268,9 @@ export function PipeDashboard() {
   const total = enrollments?.total ?? 0
 
   const grouped = LANE_CONFIG.reduce<Record<string, number>>((acc, lane) => {
-    acc[lane.status] = items.filter((e) => e.enrollment_status === lane.status).length
+    acc[lane.status] = items.filter(
+      (e) => e.enrollment_status === lane.status
+    ).length
     return acc
   }, {})
 
@@ -160,13 +292,18 @@ export function PipeDashboard() {
         client: apiClient,
       })
       if (error || !data) {
-        toast.error((error as { message?: string })?.message ?? "Failed to create enrollment")
+        toast.error(
+          (error as { message?: string })?.message ??
+            "Failed to create enrollment"
+        )
         return
       }
       toast.success("Enrollment created. Complete all details.")
       setNewDialogOpen(false)
       enrollmentForm.reset()
-      queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
+      queryClient.invalidateQueries({
+        queryKey: listApplicationsQueryKey({ client: apiClient }),
+      })
       navigate({
         to: "/student-management/enrollment/g1/$enrollment_id",
         params: { enrollment_id: data.id! },
@@ -193,7 +330,9 @@ export function PipeDashboard() {
         toast.success("Batch created")
         setBatchDialogOpen(false)
         batchForm.reset()
-        await queryClient.invalidateQueries({ queryKey: listBatchesQueryKey({ client: apiClient }) })
+        await queryClient.invalidateQueries({
+          queryKey: listBatchesQueryKey({ client: apiClient }),
+        })
         if (newBatchId) setBatchId(newBatchId)
       } catch {
         toast.error("Failed to create batch")
@@ -206,7 +345,9 @@ export function PipeDashboard() {
     try {
       await deleteApplication({ path: { id: rowId }, client: apiClient })
       setDeleteTarget(null)
-      queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
+      queryClient.invalidateQueries({
+        queryKey: listApplicationsQueryKey({ client: apiClient }),
+      })
       toast.success("Enrollment deleted")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Delete failed")
@@ -241,19 +382,25 @@ export function PipeDashboard() {
       pageIndex: Math.max(0, (search.page ?? 1) - 1),
       pageSize: search.page_size ?? 10,
     }),
-    [search.page, search.page_size],
+    [search.page, search.page_size]
   )
 
   const handleColumnFiltersChange = useCallback(
-    (updater: ColumnFiltersState | ((prev: ColumnFiltersState) => ColumnFiltersState)) => {
-      const newFilters = typeof updater === "function" ? updater(columnFilters) : updater
+    (
+      updater:
+        ColumnFiltersState | ((prev: ColumnFiltersState) => ColumnFiltersState)
+    ) => {
+      const newFilters =
+        typeof updater === "function" ? updater(columnFilters) : updater
       navigate({
         search: (prev) => {
           const next = { ...prev, page: 1 }
           for (const key of FILTER_KEYS) {
             const filter = newFilters.find((f) => f.id === key)
             if (filter) {
-              const val = Array.isArray(filter.value) ? filter.value[0] : filter.value
+              const val = Array.isArray(filter.value)
+                ? filter.value[0]
+                : filter.value
               next[key] = val ? String(val) : undefined
             } else {
               next[key] = undefined
@@ -263,12 +410,13 @@ export function PipeDashboard() {
         },
       })
     },
-    [columnFilters, navigate],
+    [columnFilters, navigate]
   )
 
   const handleSortingChange = useCallback(
     (updater: SortingState | ((prev: SortingState) => SortingState)) => {
-      const newSorting = typeof updater === "function" ? updater(sorting) : updater
+      const newSorting =
+        typeof updater === "function" ? updater(sorting) : updater
       navigate({
         search: (prev) => {
           const next = { ...prev }
@@ -284,12 +432,15 @@ export function PipeDashboard() {
         },
       })
     },
-    [sorting, navigate],
+    [sorting, navigate]
   )
 
   const handlePaginationChange = useCallback(
-    (updater: PaginationState | ((prev: PaginationState) => PaginationState)) => {
-      const newPagination = typeof updater === "function" ? updater(pagination) : updater
+    (
+      updater: PaginationState | ((prev: PaginationState) => PaginationState)
+    ) => {
+      const newPagination =
+        typeof updater === "function" ? updater(pagination) : updater
       navigate({
         search: (prev) => ({
           ...prev,
@@ -298,14 +449,16 @@ export function PipeDashboard() {
         }),
       })
     },
-    [pagination, navigate],
+    [pagination, navigate]
   )
 
   const columns = useMemo<ColumnDef<G1Application>[]>(
     () => [
       {
         accessorKey: "full_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Full Name" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Full Name" />
+        ),
         enableColumnFilter: true,
         meta: { label: "Full Name", variant: "text" },
         cell: ({ getValue, row }) => {
@@ -313,7 +466,7 @@ export function PipeDashboard() {
           return (
             <button
               type="button"
-              className="font-medium text-left hover:underline hover:text-primary transition-colors"
+              className="text-left font-medium transition-colors hover:text-primary hover:underline"
               onClick={(e) => {
                 e.stopPropagation()
                 navigate({
@@ -322,24 +475,36 @@ export function PipeDashboard() {
                 })
               }}
             >
-              {name || <span className="text-muted-foreground italic text-sm">Unnamed</span>}
+              {name || (
+                <span className="text-sm text-muted-foreground italic">
+                  Unnamed
+                </span>
+              )}
             </button>
           )
         },
       },
       {
         accessorKey: "name_with_initials",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Initials" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Initials" />
+        ),
         enableColumnFilter: true,
         meta: { label: "Name with Initials", variant: "text" },
         cell: ({ getValue }) => {
           const val = getValue() as string | null | undefined
-          return val ? <span>{val}</span> : <span className="text-muted-foreground text-sm">—</span>
+          return val ? (
+            <span>{val}</span>
+          ) : (
+            <span className="text-sm text-muted-foreground">—</span>
+          )
         },
       },
       {
         accessorKey: "date_of_birth",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="DOB" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="DOB" />
+        ),
         enableColumnFilter: false,
         meta: { label: "Date of Birth" },
         cell: ({ getValue }) => {
@@ -349,69 +514,117 @@ export function PipeDashboard() {
       },
       {
         accessorKey: "gender",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Gender" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Gender" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Gender", variant: "select", options: [
-          { label: "Male", value: "Male" },
-          { label: "Female", value: "Female" },
-        ] },
-        cell: ({ getValue }) => <EnumBadge column="gender" value={getValue() as string} />,
+        meta: {
+          label: "Gender",
+          variant: "select",
+          options: [
+            { label: "Male", value: "Male" },
+            { label: "Female", value: "Female" },
+          ],
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="gender" value={getValue() as string} />
+        ),
       },
       {
         accessorKey: "nationality",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Nationality" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Nationality" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Nationality", variant: "select", options: [
-          { label: "Sri Lankan", value: "SriLankan" },
-          { label: "Dual Citizen", value: "DualCitizen" },
-          { label: "Other", value: "Other" },
-        ] },
-        cell: ({ getValue }) => <EnumBadge column="nationality" value={getValue() as string} />,
+        meta: {
+          label: "Nationality",
+          variant: "select",
+          options: [
+            { label: "Sri Lankan", value: "SriLankan" },
+            { label: "Dual Citizen", value: "DualCitizen" },
+            { label: "Other", value: "Other" },
+          ],
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="nationality" value={getValue() as string} />
+        ),
       },
       {
         accessorKey: "category",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Category" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Category" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Category", variant: "select", options: [
-          { label: "Close Resident", value: "CloseResident" },
-          { label: "Past Pupil Child", value: "PastPupilChild" },
-          { label: "Sibling", value: "Sibling" },
-          { label: "MOE or UGC Staff Child", value: "MOEOrUGCStaffChild" },
-          { label: "Government Transfer Officer Child", value: "GovernmentTransferOfficerChild" },
-          { label: "Overseas Arrival", value: "OverseasArrival" },
-          { label: "Armed Forces Reserved", value: "ArmedForcesReserved" },
-        ] },
-        cell: ({ getValue }) => <EnumBadge column="category" value={getValue() as string} />,
+        meta: {
+          label: "Category",
+          variant: "select",
+          options: [
+            { label: "Close Resident", value: "CloseResident" },
+            { label: "Past Pupil Child", value: "PastPupilChild" },
+            { label: "Sibling", value: "Sibling" },
+            { label: "MOE or UGC Staff Child", value: "MOEOrUGCStaffChild" },
+            {
+              label: "Government Transfer Officer Child",
+              value: "GovernmentTransferOfficerChild",
+            },
+            { label: "Overseas Arrival", value: "OverseasArrival" },
+            { label: "Armed Forces Reserved", value: "ArmedForcesReserved" },
+          ],
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="category" value={getValue() as string} />
+        ),
       },
       {
         accessorKey: "medium_of_instruction",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Medium" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Medium" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Medium", variant: "select", options: [
-          { label: "Sinhala", value: "Sinhala" },
-          { label: "Tamil", value: "Tamil" },
-        ] },
-        cell: ({ getValue }) => <EnumBadge column="medium_of_instruction" value={getValue() as string} />,
+        meta: {
+          label: "Medium",
+          variant: "select",
+          options: [
+            { label: "Sinhala", value: "Sinhala" },
+            { label: "Tamil", value: "Tamil" },
+          ],
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge
+            column="medium_of_instruction"
+            value={getValue() as string}
+          />
+        ),
       },
       {
         accessorKey: "enrollment_status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Status" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Status" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Status", variant: "select", options: [
-          { label: "Pending", value: "Pending" },
-          { label: "Completed", value: "Completed" },
-          { label: "Pending Approval", value: "PendingApproval" },
-          { label: "Approved", value: "Approved" },
-          { label: "Admitted", value: "Admitted" },
-          { label: "Rejected", value: "Rejected" },
-          { label: "Withdrawn", value: "Withdrawn" },
-          { label: "Removed", value: "Removed" },
-        ] },
-        cell: ({ getValue }) => <EnumBadge column="enrollment_status" value={getValue() as string} />,
+        meta: {
+          label: "Status",
+          variant: "select",
+          options: [
+            { label: "Pending", value: "Pending" },
+            { label: "Completed", value: "Completed" },
+            { label: "Pending Approval", value: "PendingApproval" },
+            { label: "Approved", value: "Approved" },
+            { label: "Admitted", value: "Admitted" },
+            { label: "Rejected", value: "Rejected" },
+            { label: "Withdrawn", value: "Withdrawn" },
+            { label: "Removed", value: "Removed" },
+          ],
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="enrollment_status" value={getValue() as string} />
+        ),
       },
       {
         accessorKey: "total_marks",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Marks" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Marks" />
+        ),
         enableColumnFilter: false,
         meta: { label: "Marks" },
         cell: ({ getValue }) => {
@@ -419,33 +632,55 @@ export function PipeDashboard() {
           if (!val) return <span className="text-muted-foreground">—</span>
           const num = parseFloat(val)
           if (num > 0) {
-            const color = num >= 75 ? "text-green-600" : num >= 50 ? "text-amber-600" : "text-red-600"
-            return <span className={`font-semibold tabular-nums ${color}`}>{num.toFixed(2)}</span>
+            const color =
+              num >= 75
+                ? "text-green-600"
+                : num >= 50
+                  ? "text-amber-600"
+                  : "text-red-600"
+            return (
+              <span className={`font-semibold tabular-nums ${color}`}>
+                {num.toFixed(2)}
+              </span>
+            )
           }
           return <span className="tabular-nums">{val}</span>
         },
       },
       {
         accessorKey: "created_at",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Created" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Created" />
+        ),
         enableColumnFilter: false,
         meta: { label: "Created" },
         cell: ({ getValue }) => {
           const val = getValue() as string | undefined
           return val ? (
-            <span className="text-muted-foreground text-sm tabular-nums">{formatDate(new Date(val))}</span>
-          ) : <span className="text-muted-foreground">—</span>
+            <span className="text-sm text-muted-foreground tabular-nums">
+              {formatDate(new Date(val))}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )
         },
       },
       {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Button variant="ghost" size="xs" className="size-8 data-[state=open]:bg-accent">
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="size-8 data-[state=open]:bg-accent"
+                  >
                     <IconDots className="size-4" />
                   </Button>
                 }
@@ -453,10 +688,12 @@ export function PipeDashboard() {
               <DropdownMenuContent align="end" className="w-44">
                 <DropdownMenuItem
                   className="gap-3 pl-3 [&_svg]:size-4"
-                  onClick={() => navigate({
-                    to: "/student-management/enrollment/g1/$enrollment_id",
-                    params: { enrollment_id: row.original.id! },
-                  })}
+                  onClick={() =>
+                    navigate({
+                      to: "/student-management/enrollment/g1/$enrollment_id",
+                      params: { enrollment_id: row.original.id! },
+                    })
+                  }
                 >
                   <IconExternalLink className="size-4" />
                   View Details
@@ -485,13 +722,17 @@ export function PipeDashboard() {
             </DropdownMenu>
             <AlertDialog
               open={deleteTarget === row.original.id}
-              onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+              onOpenChange={(open) => {
+                if (!open) setDeleteTarget(null)
+              }}
             >
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Enrollment</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete {row.original.full_name || "this enrollment"}? This action cannot be undone.
+                    Are you sure you want to delete{" "}
+                    {row.original.full_name || "this enrollment"}? This action
+                    cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -500,7 +741,9 @@ export function PipeDashboard() {
                     disabled={deleting}
                     onClick={() => handleDelete(row.original.id!)}
                   >
-                    {deleting ? <IconLoader2 className="size-4 animate-spin" /> : null}
+                    {deleting ? (
+                      <IconLoader2 className="size-4 animate-spin" />
+                    ) : null}
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -510,7 +753,7 @@ export function PipeDashboard() {
         ),
       },
     ],
-    [navigate, deleteTarget, deleting, handleDelete],
+    [navigate, deleteTarget, deleting, handleDelete]
   )
 
   const table = useReactTable({
@@ -532,48 +775,94 @@ export function PipeDashboard() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground px-0.5">Batch</Label>
+        <Label className="px-0.5 text-xs text-muted-foreground">Batch</Label>
         <ScrollArea className="w-full">
-          <div ref={scrollRef} className="flex gap-2 min-w-max pb-1">
+          <div ref={scrollRef} className="flex min-w-max gap-2 pb-1">
             {(batches ?? []).map((b: any) => {
               const isActive = b.id === batchId
               const miniWeights = [
-                { key: "proximity", value: String(b.proximity_weight ?? 50), color: "bg-blue-500" },
-                { key: "staff", value: String(b.staff_weight ?? 25), color: "bg-emerald-500" },
-                { key: "sibling", value: String(b.sibling_weight ?? 14), color: "bg-violet-500" },
-                { key: "alumni", value: String(b.alumni_weight ?? 6), color: "bg-amber-500" },
-                { key: "govt", value: String(b.govt_weight ?? 4), color: "bg-rose-500" },
-                { key: "special", value: String(b.special_weight ?? 1), color: "bg-cyan-500" },
+                {
+                  key: "proximity",
+                  value: String(b.proximity_weight ?? 50),
+                  color: "bg-blue-500",
+                },
+                {
+                  key: "staff",
+                  value: String(b.staff_weight ?? 25),
+                  color: "bg-emerald-500",
+                },
+                {
+                  key: "sibling",
+                  value: String(b.sibling_weight ?? 14),
+                  color: "bg-violet-500",
+                },
+                {
+                  key: "alumni",
+                  value: String(b.alumni_weight ?? 6),
+                  color: "bg-amber-500",
+                },
+                {
+                  key: "govt",
+                  value: String(b.govt_weight ?? 4),
+                  color: "bg-rose-500",
+                },
+                {
+                  key: "special",
+                  value: String(b.special_weight ?? 1),
+                  color: "bg-cyan-500",
+                },
               ]
-              const miniTotalW = miniWeights.reduce((s, w) => s + (parseInt(w.value) || 0), 0)
-              const miniSegments = miniWeights.filter((w) => (parseInt(w.value) || 0) > 0)
+              const miniTotalW = miniWeights.reduce(
+                (s, w) => s + (parseInt(w.value) || 0),
+                0
+              )
+              const miniSegments = miniWeights.filter(
+                (w) => (parseInt(w.value) || 0) > 0
+              )
               return (
                 <button
                   key={b.id}
                   type="button"
                   onClick={() => {
                     setBatchId(b.id!)
-                    b.id && scrollRef.current?.querySelector(`[data-batch-id="${b.id}"]`)?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" })
+                    b.id &&
+                      scrollRef.current
+                        ?.querySelector(`[data-batch-id="${b.id}"]`)
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                          inline: "start",
+                          block: "nearest",
+                        })
                   }}
-                  className={`flex items-start gap-3 rounded-xl border px-5 py-3 text-left transition-all min-w-52 shrink-0 ${
+                  className={`flex min-w-52 shrink-0 items-start gap-3 rounded-xl border px-5 py-3 text-left transition-all ${
                     isActive
                       ? "border-primary bg-primary/10 ring-2 ring-primary/30"
                       : "border-border hover:border-primary/40 hover:bg-accent/40"
                   }`}
                   data-batch-id={b.id}
                 >
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-base font-bold">{b.year}</span>
-                    <span className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${getEnumStyle("batch_status", b.status) ?? "bg-muted text-muted-foreground border-border"}`}>
-                      {getEnumLabel("batch_status", b.status)}
-                    </span>
-                  </div>
-                    <div className="text-[11px] text-muted-foreground">{b.student_allocation ?? 0} seats</div>
-                    <div className="flex h-3 w-full rounded-full overflow-hidden">
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-base font-bold">{b.year}</span>
+                      <span
+                        className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${getEnumStyle("batch_status", b.status) ?? "border-border bg-muted text-muted-foreground"}`}
+                      >
+                        {getEnumLabel("batch_status", b.status)}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {b.student_allocation ?? 0} seats
+                    </div>
+                    <div className="flex h-3 w-full overflow-hidden rounded-full">
                       {miniSegments.map((w: any) => {
                         const pct = (parseInt(w.value) || 0) / miniTotalW
-                        return <div key={w.key} className={`${w.color}`} style={{ width: `${pct * 100}%` }} />
+                        return (
+                          <div
+                            key={w.key}
+                            className={`${w.color}`}
+                            style={{ width: `${pct * 100}%` }}
+                          />
+                        )
                       })}
                     </div>
                   </div>
@@ -583,7 +872,7 @@ export function PipeDashboard() {
             <button
               type="button"
               onClick={() => setBatchDialogOpen(true)}
-              className="flex items-center gap-2 rounded-xl border border-dashed border-border px-5 py-3 text-sm text-muted-foreground hover:border-primary/50 hover:text-primary transition-all min-w-52 shrink-0 justify-center"
+              className="flex min-w-52 shrink-0 items-center justify-center gap-2 rounded-xl border border-dashed border-border px-5 py-3 text-sm text-muted-foreground transition-all hover:border-primary/50 hover:text-primary"
             >
               <IconFolderPlus className="size-5" />
               New Batch
@@ -594,24 +883,34 @@ export function PipeDashboard() {
       </div>
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Grade 1 Admissions Pipeline</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          Grade 1 Admissions Pipeline
+        </h1>
         <Button onClick={() => setNewDialogOpen(true)} disabled={!batchId}>
-          <IconPlus className="size-4 mr-2" /> {batchId ? "New Enrollment" : "Select Batch"}
+          <IconPlus className="mr-2 size-4" />{" "}
+          {batchId ? "New Enrollment" : "Select Batch"}
         </Button>
       </div>
 
       {batchId ? (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
             {LANE_CONFIG.map((lane) => {
               const count = grouped[lane.status] ?? 0
               return (
-                <div key={lane.status} className="rounded-xl border bg-card p-4">
-                  <div className="flex items-center justify-between mb-1">
+                <div
+                  key={lane.status}
+                  className="rounded-xl border bg-card p-4"
+                >
+                  <div className="mb-1 flex items-center justify-between">
                     <Badge variant={lane.badgeVariant}>{lane.label}</Badge>
-                    <span className="text-2xl font-bold tabular-nums">{count}</span>
+                    <span className="text-2xl font-bold tabular-nums">
+                      {count}
+                    </span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">{lane.note}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {lane.note}
+                  </p>
                 </div>
               )
             })}
@@ -623,9 +922,13 @@ export function PipeDashboard() {
         </>
       ) : (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <IconFolderPlus className="size-12 text-muted-foreground/30 mb-4" />
-          <h3 className="text-lg font-semibold text-muted-foreground">No Batch Selected</h3>
-          <p className="text-sm text-muted-foreground/60 mt-1">Select a batch above to view its enrollment pipeline.</p>
+          <IconFolderPlus className="mb-4 size-12 text-muted-foreground/30" />
+          <h3 className="text-lg font-semibold text-muted-foreground">
+            No Batch Selected
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground/60">
+            Select a batch above to view its enrollment pipeline.
+          </p>
         </div>
       )}
 
@@ -633,7 +936,10 @@ export function PipeDashboard() {
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Batch</DialogTitle>
-            <DialogDescription>Set up a new G1 admission batch with allocation and scoring weights.</DialogDescription>
+            <DialogDescription>
+              Set up a new G1 admission batch with allocation and scoring
+              weights.
+            </DialogDescription>
           </DialogHeader>
           <form
             id="create-batch-form"
@@ -647,7 +953,8 @@ export function PipeDashboard() {
               <batchForm.Field
                 name="year"
                 children={(field: any) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
                       <FieldLabel htmlFor={field.name}>Year</FieldLabel>
@@ -657,11 +964,15 @@ export function PipeDashboard() {
                         type="number"
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                        onChange={(e) =>
+                          field.handleChange(Number(e.target.value))
+                        }
                         aria-invalid={isInvalid}
                         placeholder="2026"
                       />
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -669,20 +980,27 @@ export function PipeDashboard() {
               <batchForm.Field
                 name="student_allocation"
                 children={(field: any) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Total Student Allocation</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Total Student Allocation
+                      </FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
                         type="number"
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                        onChange={(e) =>
+                          field.handleChange(Number(e.target.value))
+                        }
                         aria-invalid={isInvalid}
                       />
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -703,57 +1021,160 @@ export function PipeDashboard() {
                   })}
                   children={(vals: any) => {
                     const weights = [
-                      { key: "proximity", value: String(vals.proximity_weight), color: "bg-blue-500" },
-                      { key: "staff", value: String(vals.staff_weight), color: "bg-emerald-500" },
-                      { key: "sibling", value: String(vals.sibling_weight), color: "bg-violet-500" },
-                      { key: "alumni", value: String(vals.alumni_weight), color: "bg-amber-500" },
-                      { key: "govt", value: String(vals.govt_weight), color: "bg-rose-500" },
-                      { key: "special", value: String(vals.special_weight), color: "bg-cyan-500" },
+                      {
+                        key: "proximity",
+                        value: String(vals.proximity_weight),
+                        color: "bg-blue-500",
+                      },
+                      {
+                        key: "staff",
+                        value: String(vals.staff_weight),
+                        color: "bg-emerald-500",
+                      },
+                      {
+                        key: "sibling",
+                        value: String(vals.sibling_weight),
+                        color: "bg-violet-500",
+                      },
+                      {
+                        key: "alumni",
+                        value: String(vals.alumni_weight),
+                        color: "bg-amber-500",
+                      },
+                      {
+                        key: "govt",
+                        value: String(vals.govt_weight),
+                        color: "bg-rose-500",
+                      },
+                      {
+                        key: "special",
+                        value: String(vals.special_weight),
+                        color: "bg-cyan-500",
+                      },
                     ]
                     return (
                       <>
-                        <WeightBar weights={weights} totalAllocation={vals.student_allocation} />
+                        <WeightBar
+                          weights={weights}
+                          totalAllocation={vals.student_allocation}
+                        />
 
                         <div className="space-y-1.5">
-                          {([
-                            { key: "proximity", label: "proximity_weight", color: "bg-blue-500" },
-                            { key: "staff", label: "staff_weight", color: "bg-emerald-500" },
-                            { key: "sibling", label: "sibling_weight", color: "bg-violet-500" },
-                            { key: "alumni", label: "alumni_weight", color: "bg-amber-500" },
-                            { key: "govt", label: "govt_weight", color: "bg-rose-500" },
-                            { key: "special", label: "special_weight", color: "bg-cyan-500" },
-                          ] as const).map((w: any) => {
+                          {(
+                            [
+                              {
+                                key: "proximity",
+                                label: "proximity_weight",
+                                color: "bg-blue-500",
+                              },
+                              {
+                                key: "staff",
+                                label: "staff_weight",
+                                color: "bg-emerald-500",
+                              },
+                              {
+                                key: "sibling",
+                                label: "sibling_weight",
+                                color: "bg-violet-500",
+                              },
+                              {
+                                key: "alumni",
+                                label: "alumni_weight",
+                                color: "bg-amber-500",
+                              },
+                              {
+                                key: "govt",
+                                label: "govt_weight",
+                                color: "bg-rose-500",
+                              },
+                              {
+                                key: "special",
+                                label: "special_weight",
+                                color: "bg-cyan-500",
+                              },
+                            ] as const
+                          ).map((w: any) => {
                             const info = WEIGHT_INFO[w.key]
                             const weight = vals[w.label]
-                            const totalWeight = vals.proximity_weight + vals.staff_weight + vals.sibling_weight + vals.alumni_weight + vals.govt_weight + vals.special_weight
-                            const pct = totalWeight > 0 ? (weight / totalWeight * 100).toFixed(0) : "0"
-                            const seats = totalWeight > 0 ? Math.round((weight / totalWeight) * vals.student_allocation) : 0
+                            const totalWeight =
+                              vals.proximity_weight +
+                              vals.staff_weight +
+                              vals.sibling_weight +
+                              vals.alumni_weight +
+                              vals.govt_weight +
+                              vals.special_weight
+                            const pct =
+                              totalWeight > 0
+                                ? ((weight / totalWeight) * 100).toFixed(0)
+                                : "0"
+                            const seats =
+                              totalWeight > 0
+                                ? Math.round(
+                                    (weight / totalWeight) *
+                                      vals.student_allocation
+                                  )
+                                : 0
                             return (
                               <Tooltip key={w.key}>
-                                <TooltipTrigger render={<div className="flex items-center gap-2 cursor-help" />}>
-                                  <div className={`size-3 rounded-full shrink-0 ${w.color}`} />
-                                  <span className="text-xs w-14 text-muted-foreground">{info.label}</span>
+                                <TooltipTrigger
+                                  render={
+                                    <div className="flex cursor-help items-center gap-2" />
+                                  }
+                                >
+                                  <div
+                                    className={`size-3 shrink-0 rounded-full ${w.color}`}
+                                  />
+                                  <span className="w-14 text-xs text-muted-foreground">
+                                    {info.label}
+                                  </span>
                                   <div className="flex items-center gap-1">
                                     <button
                                       type="button"
-                                      className="size-6 rounded border border-input flex items-center justify-center text-xs hover:bg-accent disabled:opacity-30"
+                                      className="flex size-6 items-center justify-center rounded border border-input text-xs hover:bg-accent disabled:opacity-30"
                                       disabled={weight <= 0}
-                                      onClick={(e) => { e.stopPropagation(); batchForm.setFieldValue(w.label, Math.max(0, weight - 1)) }}
-                                    >−</button>
-                                    <span className="w-8 text-center text-sm font-mono tabular-nums">{weight}</span>
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        batchForm.setFieldValue(
+                                          w.label,
+                                          Math.max(0, weight - 1)
+                                        )
+                                      }}
+                                    >
+                                      −
+                                    </button>
+                                    <span className="w-8 text-center font-mono text-sm tabular-nums">
+                                      {weight}
+                                    </span>
                                     <button
                                       type="button"
-                                      className="size-6 rounded border border-input flex items-center justify-center text-xs hover:bg-accent"
-                                      onClick={(e) => { e.stopPropagation(); batchForm.setFieldValue(w.label, weight + 1) }}
-                                    >+</button>
+                                      className="flex size-6 items-center justify-center rounded border border-input text-xs hover:bg-accent"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        batchForm.setFieldValue(
+                                          w.label,
+                                          weight + 1
+                                        )
+                                      }}
+                                    >
+                                      +
+                                    </button>
                                   </div>
                                   <div className="flex-1" />
-                                  <span className="text-xs text-muted-foreground tabular-nums">{pct}%</span>
-                                  <span className="text-xs font-medium tabular-nums w-16 text-right">{seats} seats</span>
+                                  <span className="text-xs text-muted-foreground tabular-nums">
+                                    {pct}%
+                                  </span>
+                                  <span className="w-16 text-right text-xs font-medium tabular-nums">
+                                    {seats} seats
+                                  </span>
                                 </TooltipTrigger>
-                                <TooltipContent side="left" className="max-w-64">
+                                <TooltipContent
+                                  side="left"
+                                  className="max-w-64"
+                                >
                                   <p className="font-medium">{info.label}</p>
-                                  <p className="text-[11px] opacity-80">{info.desc}</p>
+                                  <p className="text-[11px] opacity-80">
+                                    {info.desc}
+                                  </p>
                                 </TooltipContent>
                               </Tooltip>
                             )
@@ -767,17 +1188,23 @@ export function PipeDashboard() {
             </FieldGroup>
           </form>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBatchDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" form="create-batch-form">Create Batch</Button>
+            <Button variant="outline" onClick={() => setBatchDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" form="create-batch-form">
+              Create Batch
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={newDialogOpen} onOpenChange={setNewDialogOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[75vh] overflow-y-auto">
+        <DialogContent className="max-h-[75vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>New Enrollment</DialogTitle>
-            <DialogDescription>Fill in the child's details to create a PENDING enrollment.</DialogDescription>
+            <DialogDescription>
+              Fill in the child's details to create a PENDING enrollment.
+            </DialogDescription>
           </DialogHeader>
           <form
             id="new-enrollment-form"
@@ -791,7 +1218,8 @@ export function PipeDashboard() {
               <enrollmentForm.Field
                 name="full_name"
                 children={(field: any) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
                       <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
@@ -804,7 +1232,9 @@ export function PipeDashboard() {
                         aria-invalid={isInvalid}
                         placeholder="John Doe"
                       />
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -812,10 +1242,13 @@ export function PipeDashboard() {
               <enrollmentForm.Field
                 name="name_with_initials"
                 children={(field: any) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Name with Initials</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Name with Initials
+                      </FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
@@ -825,7 +1258,9 @@ export function PipeDashboard() {
                         aria-invalid={isInvalid}
                         placeholder="J. Doe"
                       />
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -836,21 +1271,32 @@ export function PipeDashboard() {
                   const dateValue = field.state.value
                     ? new Date(field.state.value + "T12:00:00")
                     : undefined
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Date of Birth</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Date of Birth
+                      </FieldLabel>
                       <Popover>
                         <PopoverTrigger
                           id={field.name}
                           aria-invalid={isInvalid}
-                          render={<Button
-                            variant="outline"
-                            className="w-full justify-start text-left font-normal"
-                          >
-                            <IconCalendar className="mr-2 size-4 shrink-0" />
-                            {dateValue ? formatDate(dateValue) : <span className="text-muted-foreground">Pick a date</span>}
-                          </Button>}
+                          render={
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-left font-normal"
+                            >
+                              <IconCalendar className="mr-2 size-4 shrink-0" />
+                              {dateValue ? (
+                                formatDate(dateValue)
+                              ) : (
+                                <span className="text-muted-foreground">
+                                  Pick a date
+                                </span>
+                              )}
+                            </Button>
+                          }
                         />
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
@@ -858,9 +1304,15 @@ export function PipeDashboard() {
                             selected={dateValue}
                             defaultMonth={dateValue}
                             onSelect={(d) => {
-                              if (!d) { field.handleChange(""); return }
+                              if (!d) {
+                                field.handleChange("")
+                                return
+                              }
                               const y = d.getFullYear()
-                              const m = String(d.getMonth() + 1).padStart(2, "0")
+                              const m = String(d.getMonth() + 1).padStart(
+                                2,
+                                "0"
+                              )
                               const day = String(d.getDate()).padStart(2, "0")
                               field.handleChange(`${y}-${m}-${day}`)
                             }}
@@ -869,7 +1321,9 @@ export function PipeDashboard() {
                           />
                         </PopoverContent>
                       </Popover>
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -877,7 +1331,8 @@ export function PipeDashboard() {
               <enrollmentForm.Field
                 name="gender"
                 children={(field: any) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
                       <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
@@ -891,11 +1346,15 @@ export function PipeDashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           {["Male", "Female"].map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            <SelectItem key={opt} value={opt}>
+                              {opt}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -903,7 +1362,8 @@ export function PipeDashboard() {
               <enrollmentForm.Field
                 name="nationality"
                 children={(field: any) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
                       <FieldLabel htmlFor={field.name}>Nationality</FieldLabel>
@@ -917,11 +1377,15 @@ export function PipeDashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           {["SriLankan", "DualCitizen", "Other"].map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            <SelectItem key={opt} value={opt}>
+                              {opt}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -929,10 +1393,13 @@ export function PipeDashboard() {
               <enrollmentForm.Field
                 name="medium_of_instruction"
                 children={(field: any) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Medium of Instruction</FieldLabel>
+                      <FieldLabel htmlFor={field.name}>
+                        Medium of Instruction
+                      </FieldLabel>
                       <Select
                         name={field.name}
                         value={field.state.value}
@@ -943,11 +1410,15 @@ export function PipeDashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           {["Sinhala", "Tamil"].map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            <SelectItem key={opt} value={opt}>
+                              {opt}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
                     </Field>
                   )
                 }}
@@ -955,8 +1426,12 @@ export function PipeDashboard() {
             </FieldGroup>
           </form>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setNewDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" form="new-enrollment-form">Create</Button>
+            <Button variant="outline" onClick={() => setNewDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" form="new-enrollment-form">
+              Create
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -964,26 +1439,33 @@ export function PipeDashboard() {
   )
 }
 
-function WeightBar({ weights, totalAllocation }: { weights: { key: string; value: string; color: string }[]; totalAllocation: number }) {
+function WeightBar({
+  weights,
+  totalAllocation,
+}: {
+  weights: { key: string; value: string; color: string }[]
+  totalAllocation: number
+}) {
   const totalWeight = weights.reduce((s, w) => s + (parseInt(w.value) || 0), 0)
   const segments = weights.filter((w) => (parseInt(w.value) || 0) > 0)
 
   return (
     <div className="space-y-2">
-      <div className="flex h-8 w-full rounded-md overflow-hidden border">
+      <div className="flex h-8 w-full overflow-hidden rounded-md border">
         {segments.length === 0 ? (
-          <div className="flex-1 bg-muted flex items-center justify-center text-[10px] text-muted-foreground">
+          <div className="flex flex-1 items-center justify-center bg-muted text-[10px] text-muted-foreground">
             No weights set
           </div>
         ) : (
           segments.map((w) => {
             const info = WEIGHT_INFO[w.key]
             const pct = (parseInt(w.value) || 0) / totalWeight
-            const seats = totalWeight > 0 ? Math.round(pct * totalAllocation) : 0
+            const seats =
+              totalWeight > 0 ? Math.round(pct * totalAllocation) : 0
             return (
               <Tooltip key={w.key}>
                 <TooltipTrigger
-                  className={`${w.color} flex items-center justify-center text-[10px] text-white font-medium truncate px-0.5 transition-all cursor-help`}
+                  className={`${w.color} flex cursor-help items-center justify-center truncate px-0.5 text-[10px] font-medium text-white transition-all`}
                   style={{ width: `${pct * 100}%` }}
                 >
                   {pct > 0.08 ? `${(pct * 100).toFixed(0)}%` : ""}
@@ -991,7 +1473,9 @@ function WeightBar({ weights, totalAllocation }: { weights: { key: string; value
                 <TooltipContent side="top">
                   <p className="font-medium">{info.label}</p>
                   <p className="text-[11px] opacity-80">{info.desc}</p>
-                  <p className="text-[11px] mt-1 opacity-70">{w.value} pts — {seats} seats</p>
+                  <p className="mt-1 text-[11px] opacity-70">
+                    {w.value} pts — {seats} seats
+                  </p>
                 </TooltipContent>
               </Tooltip>
             )
@@ -1005,7 +1489,7 @@ function WeightBar({ weights, totalAllocation }: { weights: { key: string; value
           const seats = totalWeight > 0 ? Math.round(pct * totalAllocation) : 0
           return (
             <Tooltip key={w.key}>
-              <TooltipTrigger className="flex items-center gap-1 text-[10px] text-muted-foreground cursor-help">
+              <TooltipTrigger className="flex cursor-help items-center gap-1 text-[10px] text-muted-foreground">
                 <div className={`size-2 rounded-full ${w.color}`} />
                 <span>{info.label}</span>
                 <span className="font-medium tabular-nums">{seats}</span>

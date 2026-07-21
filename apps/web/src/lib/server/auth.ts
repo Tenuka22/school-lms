@@ -1,6 +1,15 @@
 import { createServerFn } from "@tanstack/react-start"
-import { setCookie, deleteCookie, getCookie } from "@tanstack/react-start/server"
-import { login as apiLogin, register as apiRegister, logout as apiLogout, me } from "@/lib/api-client/sdk.gen"
+import {
+  setCookie,
+  deleteCookie,
+  getCookie,
+} from "@tanstack/react-start/server"
+import {
+  login as apiLogin,
+  register as apiRegister,
+  logout as apiLogout,
+  me,
+} from "@/lib/api-client/sdk.gen"
 import { apiClient } from "@/lib/api-client"
 import { safeParse } from "valibot"
 import { vLoginBody, vRegisterBody } from "@/lib/api-client/valibot.gen"
@@ -72,8 +81,8 @@ export const registerAction = createServerFn({ method: "POST" })
     return { ok: true as const }
   })
 
-export const logoutAction = createServerFn({ method: "POST" })
-  .handler(async () => {
+export const logoutAction = createServerFn({ method: "POST" }).handler(
+  async () => {
     const refreshToken = getCookie("refresh_token")
     if (refreshToken) {
       try {
@@ -90,10 +99,11 @@ export const logoutAction = createServerFn({ method: "POST" })
     deleteCookie("refresh_token", { path: "/" })
 
     return { ok: true as const }
-  })
+  }
+)
 
-export const getMeAction = createServerFn({ method: "GET" })
-  .handler(async () => {
+export const getMeAction = createServerFn({ method: "GET" }).handler(
+  async () => {
     const { data } = await me({ client: apiClient })
     if (!data) return { user: null }
 
@@ -103,4 +113,5 @@ export const getMeAction = createServerFn({ method: "GET" })
         sub: String(data.id),
       } satisfies UserInfo,
     }
-  })
+  }
+)

@@ -25,7 +25,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-export function SignupForm({ className, redirect: redirectTo }: { className?: string; redirect?: string }) {
+export function SignupForm({
+  className,
+  redirect: redirectTo,
+}: {
+  className?: string
+  redirect?: string
+}) {
   const navigate = useNavigate()
   const mutation = useMutation({
     mutationFn: async (values: { email: string; password: string }) => {

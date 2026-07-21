@@ -5,13 +5,31 @@ import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { apiClient } from "@/lib/api-client"
 import { listWorkspaceAddressesOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { WorkspaceAddress } from "@/lib/api-client/types.gen"
-import { IconLoader2, IconCheck, IconBuilding, IconMapPin, IconX } from "@tabler/icons-react"
+import {
+  IconLoader2,
+  IconCheck,
+  IconBuilding,
+  IconMapPin,
+  IconX,
+} from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
 export type AddressEntryValue = {
@@ -23,7 +41,11 @@ export type AddressEntryValue = {
 
 interface Props {
   selectedAddresses: AddressEntryValue[]
-  onUpdate: (id: string, field: keyof AddressEntryValue, value: string | boolean) => void
+  onUpdate: (
+    id: string,
+    field: keyof AddressEntryValue,
+    value: string | boolean
+  ) => void
   onDeselect: (id: string) => void
   onSave: (addresses: AddressEntryValue[]) => Promise<void>
   onBack: () => void
@@ -39,7 +61,14 @@ const FILTERS = [
   { key: "Temporary", label: "Temporary" },
 ] as const
 
-export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onSave, onBack, onNext }: Props) {
+export function WizardStepAddress({
+  selectedAddresses,
+  onUpdate,
+  onDeselect,
+  onSave,
+  onBack,
+  onNext,
+}: Props) {
   const [filter, setFilter] = useState<string>("all")
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -50,7 +79,9 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
     }
   }, [])
 
-  const { data: addresses = [] } = useQuery(listWorkspaceAddressesOptions({ client: apiClient }))
+  const { data: addresses = [] } = useQuery(
+    listWorkspaceAddressesOptions({ client: apiClient })
+  )
   const addressMap = useMemo(() => {
     const m = new Map<string, WorkspaceAddress>()
     for (const a of addresses) m.set(a.id, a)
@@ -67,7 +98,11 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
 
   const updatePrimary = (id: string) => {
     for (const a of selectedAddresses) {
-      onUpdate(a.workspace_address_id, "is_primary", a.workspace_address_id === id)
+      onUpdate(
+        a.workspace_address_id,
+        "is_primary",
+        a.workspace_address_id === id
+      )
     }
   }
 
@@ -88,7 +123,9 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
     <Card>
       <CardHeader>
         <CardTitle>Selected Addresses ({selectedAddresses.length})</CardTitle>
-        <CardDescription>Review and manage addresses assigned to this child.</CardDescription>
+        <CardDescription>
+          Review and manage addresses assigned to this child.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-1.5">
@@ -113,7 +150,7 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
                 <div
                   key={entry.workspace_address_id}
                   className={cn(
-                    "relative rounded-lg border p-3 space-y-2",
+                    "relative space-y-2 rounded-lg border p-3",
                     entry.is_primary && "border-primary/50 bg-primary/5"
                   )}
                 >
@@ -128,46 +165,72 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
                   </Button>
 
                   <div className="flex items-center gap-2.5">
-                    <div className="size-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
                       <IconBuilding className="size-5 text-muted-foreground" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{addr.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{addr.full_address}</p>
+                      <p className="truncate text-sm font-medium">
+                        {addr.name}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {addr.full_address}
+                      </p>
                     </div>
                   </div>
 
                   <div className="space-y-1 text-xs">
                     <p className="flex items-center gap-1.5 text-muted-foreground">
                       <IconMapPin className="size-3 shrink-0" />
-                      <span>{addr.city}{addr.state ? `, ${addr.state}` : ""}{addr.postal_code ? ` - ${addr.postal_code}` : ""}</span>
+                      <span>
+                        {addr.city}
+                        {addr.state ? `, ${addr.state}` : ""}
+                        {addr.postal_code ? ` - ${addr.postal_code}` : ""}
+                      </span>
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 pt-1 border-t">
+                  <div className="grid grid-cols-2 gap-2 border-t pt-1">
                     <Select
                       value={entry.address_type}
-                      onValueChange={(val) => val && onUpdate(entry.workspace_address_id, "address_type", val)}
+                      onValueChange={(val) =>
+                        val &&
+                        onUpdate(
+                          entry.workspace_address_id,
+                          "address_type",
+                          val
+                        )
+                      }
                     >
-                      <SelectTrigger className="w-full h-7 text-xs">
+                      <SelectTrigger className="h-7 w-full text-xs">
                         <SelectValue placeholder="Type" />
                       </SelectTrigger>
                       <SelectContent>
                         {ADDRESS_TYPE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <Select
                       value={entry.residence_type}
-                      onValueChange={(val) => val && onUpdate(entry.workspace_address_id, "residence_type", val)}
+                      onValueChange={(val) =>
+                        val &&
+                        onUpdate(
+                          entry.workspace_address_id,
+                          "residence_type",
+                          val
+                        )
+                      }
                     >
-                      <SelectTrigger className="w-full h-7 text-xs">
+                      <SelectTrigger className="h-7 w-full text-xs">
                         <SelectValue placeholder="Residence" />
                       </SelectTrigger>
                       <SelectContent>
                         {RESIDENCE_TYPE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -177,12 +240,21 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
                         type="radio"
                         name="primary-address"
                         checked={entry.is_primary}
-                        onChange={() => updatePrimary(entry.workspace_address_id)}
+                        onChange={() =>
+                          updatePrimary(entry.workspace_address_id)
+                        }
                         className="size-3.5 accent-primary"
                       />
-                      <span className="text-xs text-muted-foreground">Primary address</span>
+                      <span className="text-xs text-muted-foreground">
+                        Primary address
+                      </span>
                       {entry.is_primary && (
-                        <Badge variant="default" className="text-[10px] px-1 py-0 h-4 ml-auto">Primary</Badge>
+                        <Badge
+                          variant="default"
+                          className="ml-auto h-4 px-1 py-0 text-[10px]"
+                        >
+                          Primary
+                        </Badge>
                       )}
                     </div>
                   </div>
@@ -191,7 +263,7 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
             })}
             {displayAddresses.length === 0 && (
               <div className="col-span-2">
-                <p className="text-sm text-muted-foreground text-center py-12">
+                <p className="py-12 text-center text-sm text-muted-foreground">
                   {selectedAddresses.length === 0
                     ? "No addresses selected yet. Browse the directory on the left."
                     : "No addresses match the current filter."}
@@ -201,12 +273,25 @@ export function WizardStepAddress({ selectedAddresses, onUpdate, onDeselect, onS
           </div>
         </ScrollArea>
 
-        <div className="flex justify-between pt-4 border-t">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={handleNext} disabled={status !== "idle" || selectedAddresses.length === 0}>
-            {status === "saving" && <IconLoader2 className="size-4 mr-1.5 animate-spin" />}
-            {status === "done" && <IconCheck className="size-4 mr-1.5 text-green-600" />}
-            {status === "idle" ? "Next" : status === "saving" ? "Saving\u2026" : "Saved"}
+        <div className="flex justify-between border-t pt-4">
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button
+            onClick={handleNext}
+            disabled={status !== "idle" || selectedAddresses.length === 0}
+          >
+            {status === "saving" && (
+              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
+            )}
+            {status === "done" && (
+              <IconCheck className="mr-1.5 size-4 text-green-600" />
+            )}
+            {status === "idle"
+              ? "Next"
+              : status === "saving"
+                ? "Saving\u2026"
+                : "Saved"}
           </Button>
         </div>
       </CardContent>

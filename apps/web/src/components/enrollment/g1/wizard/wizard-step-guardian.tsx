@@ -5,12 +5,26 @@ import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { apiClient } from "@/lib/api-client"
 import { listGuardiansOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { Guardian } from "@/lib/api-client/types.gen"
-import { IconLoader2, IconCheck, IconUser, IconX, IconPhone, IconId, IconBriefcase } from "@tabler/icons-react"
+import {
+  IconLoader2,
+  IconCheck,
+  IconUser,
+  IconX,
+  IconPhone,
+  IconId,
+  IconBriefcase,
+} from "@tabler/icons-react"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 
 export type GuardianFormData = string[]
@@ -32,7 +46,13 @@ const FILTERS: { key: FilterCategory; label: string }[] = [
   { key: "govt", label: "Govt" },
 ]
 
-export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, onNext }: Props) {
+export function WizardStepGuardian({
+  selectedIds,
+  onDeselect,
+  onSave,
+  onBack,
+  onNext,
+}: Props) {
   const [filter, setFilter] = useState<FilterCategory>("all")
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -43,7 +63,9 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
     }
   }, [])
 
-  const { data: guardians = [] } = useQuery(listGuardiansOptions({ client: apiClient }))
+  const { data: guardians = [] } = useQuery(
+    listGuardiansOptions({ client: apiClient })
+  )
   const guardianMap = useMemo(() => {
     const m = new Map<string, Guardian>()
     for (const g of guardians) m.set(g.id, g)
@@ -51,7 +73,9 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
   }, [guardians])
 
   const selectedGuardians = useMemo(() => {
-    return selectedIds.map((id) => guardianMap.get(id)).filter(Boolean) as Guardian[]
+    return selectedIds
+      .map((id) => guardianMap.get(id))
+      .filter(Boolean) as Guardian[]
   }, [selectedIds, guardianMap])
 
   const filteredGuardians = useMemo(() => {
@@ -80,7 +104,9 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
     <Card>
       <CardHeader>
         <CardTitle>Selected Guardians ({selectedIds.length})</CardTitle>
-        <CardDescription>Review and manage guardians assigned to this child.</CardDescription>
+        <CardDescription>
+          Review and manage guardians assigned to this child.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-1.5">
@@ -101,7 +127,7 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
             {filteredGuardians.map((g) => (
               <div
                 key={g.id}
-                className="relative rounded-lg border p-3 space-y-2"
+                className="relative space-y-2 rounded-lg border p-3"
               >
                 <Button
                   variant="ghost"
@@ -113,12 +139,16 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
                   <IconX className="size-3.5" />
                 </Button>
                 <div className="flex items-center gap-2.5">
-                  <div className="size-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
                     <IconUser className="size-5 text-muted-foreground" />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{g.full_name}</p>
-                    <p className="text-xs text-muted-foreground">{g.relationship_type}</p>
+                    <p className="truncate text-sm font-medium">
+                      {g.full_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {g.relationship_type}
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-1 text-xs">
@@ -137,27 +167,37 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
                     </p>
                   )}
                   {g.workplace_name && (
-                    <p className="text-muted-foreground pl-5 truncate">{g.workplace_name}</p>
+                    <p className="truncate pl-5 text-muted-foreground">
+                      {g.workplace_name}
+                    </p>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {g.is_school_staff && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "staff") ?? ""}`}>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "staff") ?? ""}`}
+                    >
                       Staff
                     </span>
                   )}
                   {g.is_past_pupil && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "past_pupil") ?? ""}`}>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "past_pupil") ?? ""}`}
+                    >
                       Alumni
                     </span>
                   )}
                   {g.is_govt_employee && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "govt") ?? ""}`}>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "govt") ?? ""}`}
+                    >
                       Govt
                     </span>
                   )}
                   {g.income_level && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("income_level", g.income_level) ?? ""}`}>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("income_level", g.income_level) ?? ""}`}
+                    >
                       {getEnumLabel("income_level", g.income_level)}
                     </span>
                   )}
@@ -166,7 +206,7 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
             ))}
             {filteredGuardians.length === 0 && (
               <div className="col-span-2">
-                <p className="text-sm text-muted-foreground text-center py-12">
+                <p className="py-12 text-center text-sm text-muted-foreground">
                   {selectedGuardians.length === 0
                     ? "No guardians selected yet. Browse the directory on the left."
                     : "No guardians match the current filter."}
@@ -176,12 +216,25 @@ export function WizardStepGuardian({ selectedIds, onDeselect, onSave, onBack, on
           </div>
         </ScrollArea>
 
-        <div className="flex justify-between pt-4 border-t">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={handleNext} disabled={status !== "idle" || selectedIds.length === 0}>
-            {status === "saving" && <IconLoader2 className="size-4 mr-1.5 animate-spin" />}
-            {status === "done" && <IconCheck className="size-4 mr-1.5 text-green-600" />}
-            {status === "idle" ? "Next" : status === "saving" ? "Saving\u2026" : "Saved"}
+        <div className="flex justify-between border-t pt-4">
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button
+            onClick={handleNext}
+            disabled={status !== "idle" || selectedIds.length === 0}
+          >
+            {status === "saving" && (
+              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
+            )}
+            {status === "done" && (
+              <IconCheck className="mr-1.5 size-4 text-green-600" />
+            )}
+            {status === "idle"
+              ? "Next"
+              : status === "saving"
+                ? "Saving\u2026"
+                : "Saved"}
           </Button>
         </div>
       </CardContent>

@@ -10,7 +10,12 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table"
 import * as React from "react"
-import { IconPlus, IconPencil, IconTrash, IconLoader2 } from "@tabler/icons-react"
+import {
+  IconPlus,
+  IconPencil,
+  IconTrash,
+  IconLoader2,
+} from "@tabler/icons-react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import {
@@ -42,11 +47,23 @@ import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 
 type G1SearchParams = v.InferOutput<typeof vListApplicationsQuery>
 
-function EnumBadge({ column, value }: { column: string; value: string | null | undefined }) {
-  if (!value) return <span className="text-muted-foreground text-sm">—</span>
+function EnumBadge({
+  column,
+  value,
+}: {
+  column: string
+  value: string | null | undefined
+}) {
+  if (!value) return <span className="text-sm text-muted-foreground">—</span>
   const label = getEnumLabel(column, value)
   const style = getEnumStyle(column, value)
-  return <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${style ?? "bg-muted text-muted-foreground border-border"}`}>{label}</span>
+  return (
+    <span
+      className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${style ?? "border-border bg-muted text-muted-foreground"}`}
+    >
+      {label}
+    </span>
+  )
 }
 
 const ENUM_OPTIONS = {
@@ -64,7 +81,10 @@ const ENUM_OPTIONS = {
     { label: "Past Pupil Child", value: "PastPupilChild" },
     { label: "Sibling", value: "Sibling" },
     { label: "MOE or UGC Staff Child", value: "MOEOrUGCStaffChild" },
-    { label: "Government Transfer Officer Child", value: "GovernmentTransferOfficerChild" },
+    {
+      label: "Government Transfer Officer Child",
+      value: "GovernmentTransferOfficerChild",
+    },
     { label: "Overseas Arrival", value: "OverseasArrival" },
     { label: "Armed Forces Reserved", value: "ArmedForcesReserved" },
   ],
@@ -84,8 +104,22 @@ const ENUM_OPTIONS = {
   ],
 }
 
-const FILTER_KEYS = ["full_name", "name_with_initials", "gender", "nationality", "category", "medium_of_instruction", "enrollment_status"] as const
-const ENUM_KEYS = new Set(["gender", "nationality", "category", "medium_of_instruction", "enrollment_status"])
+const FILTER_KEYS = [
+  "full_name",
+  "name_with_initials",
+  "gender",
+  "nationality",
+  "category",
+  "medium_of_instruction",
+  "enrollment_status",
+] as const
+const ENUM_KEYS = new Set([
+  "gender",
+  "nationality",
+  "category",
+  "medium_of_instruction",
+  "enrollment_status",
+])
 
 interface G1DatagridProps {
   search: G1SearchParams
@@ -100,54 +134,59 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
     return Number.isNaN(n) ? undefined : n
   }
 
-  const queryOptions = React.useMemo(() => ({
-    client: apiClient,
-    query: {
-      page: toNum(search.page),
-      page_size: toNum(search.page_size),
-      sort_by: search.sort_by,
-      sort_order: search.sort_order,
-      full_name: search.full_name,
-      name_with_initials: search.name_with_initials,
-      gender: search.gender,
-      nationality: search.nationality,
-      category: search.category,
-      medium_of_instruction: search.medium_of_instruction,
-      enrollment_status: search.enrollment_status,
-    },
-  }), [search])
+  const queryOptions = React.useMemo(
+    () => ({
+      client: apiClient,
+      query: {
+        page: toNum(search.page),
+        page_size: toNum(search.page_size),
+        sort_by: search.sort_by,
+        sort_order: search.sort_order,
+        full_name: search.full_name,
+        name_with_initials: search.name_with_initials,
+        gender: search.gender,
+        nationality: search.nationality,
+        category: search.category,
+        medium_of_instruction: search.medium_of_instruction,
+        enrollment_status: search.enrollment_status,
+      },
+    }),
+    [search]
+  )
 
   const { data } = useSuspenseQuery(listApplicationsOptions(queryOptions))
   const enrollments = data.items
   const total = data.total
 
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
   const [dialogOpen, setDialogOpen] = React.useState(false)
   const [editTarget, setEditTarget] = React.useState<G1Application | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<string | null>(null)
   const [deleting, setDeleting] = React.useState(false)
 
   const onSuccess = React.useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
+    queryClient.invalidateQueries({
+      queryKey: listApplicationsQueryKey({ client: apiClient }),
+    })
   }, [])
 
-  const handleDelete = React.useCallback(
-    async (rowId: string) => {
-      setDeleting(true)
-      try {
-        await deleteApplication({ path: { id: rowId }, client: apiClient })
-        setDeleteTarget(null)
-        queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
-        toast.success("Enrollment deleted")
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Delete failed"
-        toast.error(message)
-      } finally {
-        setDeleting(false)
-      }
-    },
-    [],
-  )
+  const handleDelete = React.useCallback(async (rowId: string) => {
+    setDeleting(true)
+    try {
+      await deleteApplication({ path: { id: rowId }, client: apiClient })
+      setDeleteTarget(null)
+      queryClient.invalidateQueries({
+        queryKey: listApplicationsQueryKey({ client: apiClient }),
+      })
+      toast.success("Enrollment deleted")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Delete failed"
+      toast.error(message)
+    } finally {
+      setDeleting(false)
+    }
+  }, [])
 
   const handleAdd = React.useCallback(() => {
     setEditTarget(null)
@@ -179,31 +218,43 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
   }, [search])
 
   const pagination: PaginationState = React.useMemo(
-    () => ({ pageIndex: Math.max(0, (toNum(search.page) ?? 1) - 1), pageSize: toNum(search.page_size) ?? 10 }),
-    [search.page, search.page_size],
+    () => ({
+      pageIndex: Math.max(0, (toNum(search.page) ?? 1) - 1),
+      pageSize: toNum(search.page_size) ?? 10,
+    }),
+    [search.page, search.page_size]
   )
 
   const handleColumnFiltersChange = React.useCallback(
-    (updater: ColumnFiltersState | ((prev: ColumnFiltersState) => ColumnFiltersState)) => {
-      const newFilters = typeof updater === "function" ? updater(columnFilters) : updater
+    (
+      updater:
+        ColumnFiltersState | ((prev: ColumnFiltersState) => ColumnFiltersState)
+    ) => {
+      const newFilters =
+        typeof updater === "function" ? updater(columnFilters) : updater
       const next = { ...search, page: 1, page_size: search.page_size }
       for (const key of FILTER_KEYS) {
-        const filter = newFilters.find(f => f.id === key)
+        const filter = newFilters.find((f) => f.id === key)
         if (filter) {
-          const val = Array.isArray(filter.value) ? filter.value[0] : filter.value
-          ;(next as Record<string, unknown>)[key] = val ? String(val) : undefined
+          const val = Array.isArray(filter.value)
+            ? filter.value[0]
+            : filter.value
+          ;(next as Record<string, unknown>)[key] = val
+            ? String(val)
+            : undefined
         } else {
           ;(next as Record<string, unknown>)[key] = undefined
         }
       }
       navigate({ search: next as unknown as G1SearchParams })
     },
-    [columnFilters, navigate, search],
+    [columnFilters, navigate, search]
   )
 
   const handleSortingChange = React.useCallback(
     (updater: SortingState | ((prev: SortingState) => SortingState)) => {
-      const newSorting = typeof updater === "function" ? updater(sorting) : updater
+      const newSorting =
+        typeof updater === "function" ? updater(sorting) : updater
       const next = { ...search }
       if (newSorting.length === 0) {
         next.sort_by = undefined
@@ -215,76 +266,132 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
       }
       navigate({ search: next })
     },
-    [sorting, navigate, search],
+    [sorting, navigate, search]
   )
 
   const handlePaginationChange = React.useCallback(
-    (updater: PaginationState | ((prev: PaginationState) => PaginationState)) => {
-      const newPagination = typeof updater === "function" ? updater(pagination) : updater
-      const next = { ...search, page: newPagination.pageIndex + 1, page_size: newPagination.pageSize }
+    (
+      updater: PaginationState | ((prev: PaginationState) => PaginationState)
+    ) => {
+      const newPagination =
+        typeof updater === "function" ? updater(pagination) : updater
+      const next = {
+        ...search,
+        page: newPagination.pageIndex + 1,
+        page_size: newPagination.pageSize,
+      }
       navigate({ search: next })
     },
-    [pagination, navigate, search],
+    [pagination, navigate, search]
   )
 
   const columns = React.useMemo<ColumnDef<G1Application>[]>(
     () => [
       {
         accessorKey: "full_name",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Full Name" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Full Name" />
+        ),
         enableColumnFilter: true,
         meta: { label: "Full Name", variant: "text" },
       },
       {
         accessorKey: "name_with_initials",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Name with Initials" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Name with Initials" />
+        ),
         enableColumnFilter: true,
         meta: { label: "Name with Initials", variant: "text" },
       },
       {
         accessorKey: "date_of_birth",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Date of Birth" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Date of Birth" />
+        ),
         enableColumnFilter: false,
         meta: { label: "Date of Birth", variant: "text" },
       },
       {
         accessorKey: "gender",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Gender" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Gender" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Gender", variant: "select", options: ENUM_OPTIONS.gender },
-        cell: ({ getValue }) => <EnumBadge column="gender" value={getValue() as string} />,
+        meta: {
+          label: "Gender",
+          variant: "select",
+          options: ENUM_OPTIONS.gender,
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="gender" value={getValue() as string} />
+        ),
         filterFn: "equals",
       },
       {
         accessorKey: "nationality",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Nationality" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Nationality" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Nationality", variant: "select", options: ENUM_OPTIONS.nationality },
-        cell: ({ getValue }) => <EnumBadge column="nationality" value={getValue() as string} />,
+        meta: {
+          label: "Nationality",
+          variant: "select",
+          options: ENUM_OPTIONS.nationality,
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="nationality" value={getValue() as string} />
+        ),
         filterFn: "equals",
       },
       {
         accessorKey: "category",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Category" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Category" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Category", variant: "select", options: ENUM_OPTIONS.category },
-        cell: ({ getValue }) => <EnumBadge column="category" value={getValue() as string} />,
+        meta: {
+          label: "Category",
+          variant: "select",
+          options: ENUM_OPTIONS.category,
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="category" value={getValue() as string} />
+        ),
         filterFn: "equals",
       },
       {
         accessorKey: "medium_of_instruction",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Medium" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Medium" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Medium", variant: "select", options: ENUM_OPTIONS.medium_of_instruction },
-        cell: ({ getValue }) => <EnumBadge column="medium_of_instruction" value={getValue() as string} />,
+        meta: {
+          label: "Medium",
+          variant: "select",
+          options: ENUM_OPTIONS.medium_of_instruction,
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge
+            column="medium_of_instruction"
+            value={getValue() as string}
+          />
+        ),
         filterFn: "equals",
       },
       {
         accessorKey: "enrollment_status",
-        header: ({ column }) => <DataTableColumnHeader column={column} label="Status" />,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Status" />
+        ),
         enableColumnFilter: true,
-        meta: { label: "Status", variant: "select", options: ENUM_OPTIONS.enrollment_status },
-        cell: ({ getValue }) => <EnumBadge column="enrollment_status" value={getValue() as string} />,
+        meta: {
+          label: "Status",
+          variant: "select",
+          options: ENUM_OPTIONS.enrollment_status,
+        },
+        cell: ({ getValue }) => (
+          <EnumBadge column="enrollment_status" value={getValue() as string} />
+        ),
         filterFn: "equals",
       },
       {
@@ -344,7 +451,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         ),
       },
     ],
-    [handleEdit, deleteTarget, deleting, handleDelete],
+    [handleEdit, deleteTarget, deleting, handleDelete]
   )
 
   const table = useReactTable({

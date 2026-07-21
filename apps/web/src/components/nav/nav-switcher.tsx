@@ -45,7 +45,7 @@ export function NavSwitcher({
       onModeChange?.(mode)
       navigate({ to: mode.url })
     },
-    [navigate, onModeChange],
+    [navigate, onModeChange]
   )
 
   return (
@@ -90,7 +90,9 @@ export function NavSwitcher({
                   </div>
                   <div className="grid flex-1 text-start">
                     <span className="font-medium">{mode.name}</span>
-                    <span className="text-xs text-muted-foreground">{mode.description}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {mode.description}
+                    </span>
                   </div>
                   <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                 </DropdownMenuItem>

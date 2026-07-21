@@ -7,8 +7,14 @@ import { IconCalendar, IconPlus } from "@tabler/icons-react"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
-import { createApplication, } from "@/lib/api-client/sdk.gen"
-import { getApplicationQueryKey, listBatchesOptions, listBatchesQueryKey, listApplicationsQueryKey, updateApplicationMutation } from "@/lib/api-client/@tanstack/react-query.gen"
+import { createApplication } from "@/lib/api-client/sdk.gen"
+import {
+  getApplicationQueryKey,
+  listBatchesOptions,
+  listBatchesQueryKey,
+  listApplicationsQueryKey,
+  updateApplicationMutation,
+} from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 
 import {
@@ -117,14 +123,16 @@ export function G1EnrollmentDialog({
   onSuccess,
 }: G1EnrollmentDialogProps) {
   const isEdit = !!enrollment
-  const updateApplication = useMutation(updateApplicationMutation({
-    client:apiClient
-  }))
+  const updateApplication = useMutation(
+    updateApplicationMutation({
+      client: apiClient,
+    })
+  )
   const [createBatchOpen, setCreateBatchOpen] = useState(false)
   const [createBatchYear, setCreateBatchYear] = useState<number | undefined>()
-  const [selectedBatchYear, setSelectedBatchYear] = useState<number | undefined>(
-    () => enrollment ? undefined : new Date().getFullYear(),
-  )
+  const [selectedBatchYear, setSelectedBatchYear] = useState<
+    number | undefined
+  >(() => (enrollment ? undefined : new Date().getFullYear()))
   const { data: batches } = useQuery({
     ...listBatchesOptions({ client: apiClient }),
     enabled: open,
@@ -139,9 +147,10 @@ export function G1EnrollmentDialog({
     }
   }, [enrollment?.batch_id, batches, selectedBatchYear])
 
-  const selectedBatch = selectedBatchYear && batches
-    ? batches.find((b) => b.year === selectedBatchYear)
-    : undefined
+  const selectedBatch =
+    selectedBatchYear && batches
+      ? batches.find((b) => b.year === selectedBatchYear)
+      : undefined
 
   const needsBatch = !!(selectedBatchYear && !selectedBatch)
 
@@ -163,13 +172,17 @@ export function G1EnrollmentDialog({
     onSubmit: async ({ value }) => {
       try {
         if (isEdit && enrollment?.id) {
-
           await updateApplication.mutateAsync({
             body: value,
             path: { id: enrollment.id },
             client: apiClient,
           })
-          queryClient.invalidateQueries({ queryKey: getApplicationQueryKey({ path: { id: enrollment.id }, client: apiClient }) })
+          queryClient.invalidateQueries({
+            queryKey: getApplicationQueryKey({
+              path: { id: enrollment.id },
+              client: apiClient,
+            }),
+          })
           toast.success("Enrollment updated")
         } else {
           await createApplication({
@@ -178,7 +191,9 @@ export function G1EnrollmentDialog({
           })
           toast.success("Enrollment created")
         }
-        queryClient.invalidateQueries({ queryKey: listApplicationsQueryKey({ client: apiClient }) })
+        queryClient.invalidateQueries({
+          queryKey: listApplicationsQueryKey({ client: apiClient }),
+        })
         onOpenChange(false)
         onSuccess()
       } catch (err) {
@@ -194,9 +209,11 @@ export function G1EnrollmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[75vh] overflow-y-auto">
+      <DialogContent className="max-h-[75vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Enrollment" : "Add Enrollment"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Enrollment" : "Add Enrollment"}
+          </DialogTitle>
           <DialogDescription>
             {isEdit
               ? "Update the enrollment details below."
@@ -215,7 +232,8 @@ export function G1EnrollmentDialog({
             <form.Field
               name="full_name"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
@@ -228,7 +246,9 @@ export function G1EnrollmentDialog({
                       aria-invalid={isInvalid}
                       placeholder="John Doe"
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -236,10 +256,13 @@ export function G1EnrollmentDialog({
             <form.Field
               name="name_with_initials"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Name with Initials</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Name with Initials
+                    </FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -249,7 +272,9 @@ export function G1EnrollmentDialog({
                       aria-invalid={isInvalid}
                       placeholder="J. Doe"
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -260,7 +285,8 @@ export function G1EnrollmentDialog({
                 const dateValue = field.state.value
                   ? new Date(field.state.value + "T12:00:00")
                   : undefined
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Date of Birth</FieldLabel>
@@ -268,13 +294,21 @@ export function G1EnrollmentDialog({
                       <PopoverTrigger
                         id={field.name}
                         aria-invalid={isInvalid}
-                        render={<Button
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal"
-                        >
-                          <IconCalendar className="mr-2 size-4 shrink-0" />
-                          {dateValue ? formatDate(dateValue) : <span className="text-muted-foreground">Pick a date</span>}
-                        </Button>}
+                        render={
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal"
+                          >
+                            <IconCalendar className="mr-2 size-4 shrink-0" />
+                            {dateValue ? (
+                              formatDate(dateValue)
+                            ) : (
+                              <span className="text-muted-foreground">
+                                Pick a date
+                              </span>
+                            )}
+                          </Button>
+                        }
                       />
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
@@ -282,7 +316,10 @@ export function G1EnrollmentDialog({
                           selected={dateValue}
                           defaultMonth={dateValue}
                           onSelect={(d) => {
-                            if (!d) { field.handleChange(""); return }
+                            if (!d) {
+                              field.handleChange("")
+                              return
+                            }
                             const y = d.getFullYear()
                             const m = String(d.getMonth() + 1).padStart(2, "0")
                             const day = String(d.getDate()).padStart(2, "0")
@@ -293,7 +330,9 @@ export function G1EnrollmentDialog({
                         />
                       </PopoverContent>
                     </Popover>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -301,14 +340,17 @@ export function G1EnrollmentDialog({
             <form.Field
               name="gender"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) => val && field.handleChange(val as "Male" | "Female")}
+                      onValueChange={(val) =>
+                        val && field.handleChange(val as "Male" | "Female")
+                      }
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select gender" />
@@ -321,7 +363,9 @@ export function G1EnrollmentDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -329,14 +373,20 @@ export function G1EnrollmentDialog({
             <form.Field
               name="nationality"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Nationality</FieldLabel>
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) => val && field.handleChange(val as "SriLankan" | "DualCitizen" | "Other")}
+                      onValueChange={(val) =>
+                        val &&
+                        field.handleChange(
+                          val as "SriLankan" | "DualCitizen" | "Other"
+                        )
+                      }
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select nationality" />
@@ -349,7 +399,9 @@ export function G1EnrollmentDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -357,14 +409,19 @@ export function G1EnrollmentDialog({
             <form.Field
               name="medium_of_instruction"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Medium of Instruction</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>
+                      Medium of Instruction
+                    </FieldLabel>
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={(val) => val && field.handleChange(val as "Sinhala" | "Tamil")}
+                      onValueChange={(val) =>
+                        val && field.handleChange(val as "Sinhala" | "Tamil")
+                      }
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select medium" />
@@ -377,7 +434,9 @@ export function G1EnrollmentDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -385,14 +444,17 @@ export function G1EnrollmentDialog({
             <form.Field
               name="enrollment_status"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Status</FieldLabel>
                     <Select
                       name={field.name}
                       value={field.state.value}
-                       onValueChange={(val) => val && field.handleChange(val as any)}
+                      onValueChange={(val) =>
+                        val && field.handleChange(val as any)
+                      }
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select status" />
@@ -405,7 +467,9 @@ export function G1EnrollmentDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -413,14 +477,26 @@ export function G1EnrollmentDialog({
             <form.Field
               name="religion"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 return (
                   <Field data-invalid={isInvalid}>
                     <FieldLabel htmlFor={field.name}>Religion</FieldLabel>
                     <Select
                       name={field.name}
                       value={field.state.value ?? ""}
-                      onValueChange={(val) => field.handleChange(val as "Buddhism" | "Hinduism" | "Islam" | "Christianity" | "Catholicism" | "Other" | null)}
+                      onValueChange={(val) =>
+                        field.handleChange(
+                          val as
+                            | "Buddhism"
+                            | "Hinduism"
+                            | "Islam"
+                            | "Christianity"
+                            | "Catholicism"
+                            | "Other"
+                            | null
+                        )
+                      }
                     >
                       <SelectTrigger id={field.name} aria-invalid={isInvalid}>
                         <SelectValue placeholder="Select religion (optional)" />
@@ -433,7 +509,9 @@ export function G1EnrollmentDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -441,7 +519,8 @@ export function G1EnrollmentDialog({
             <form.Field
               name="batch_id"
               children={(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
                 const batchYears = getBatchYears(batches)
                 return (
                   <Field data-invalid={isInvalid}>
@@ -467,7 +546,9 @@ export function G1EnrollmentDialog({
                             const year = parseInt(val, 10)
                             if (!isNaN(year)) {
                               setSelectedBatchYear(year)
-                              const batch = batches?.find((b) => b.year === year)
+                              const batch = batches?.find(
+                                (b) => b.year === year
+                              )
                               if (batch?.id) field.handleChange(batch.id)
                             }
                           }}
@@ -499,7 +580,9 @@ export function G1EnrollmentDialog({
                         Create Batch
                       </Button>
                     )}
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 )
               }}
@@ -511,7 +594,9 @@ export function G1EnrollmentDialog({
                 if (!v) setCreateBatchYear(undefined)
               }}
               onSuccess={async (batch) => {
-                await queryClient.refetchQueries({ queryKey: listBatchesQueryKey({ client: apiClient }) })
+                await queryClient.refetchQueries({
+                  queryKey: listBatchesQueryKey({ client: apiClient }),
+                })
 
                 if (batch.id) {
                   form.setFieldValue("batch_id", batch.id)
@@ -524,7 +609,11 @@ export function G1EnrollmentDialog({
           </FieldGroup>
         </form>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
           <Button type="submit" form="enrollment-form" disabled={needsBatch}>
