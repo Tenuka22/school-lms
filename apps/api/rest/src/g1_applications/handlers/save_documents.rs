@@ -64,7 +64,7 @@ pub async fn save_application_documents(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let app_id = id.into_inner();
-    let user_id = auth.user_id;
+    let _user_id = auth.user_id;
 
     applications::Entity::find_by_id(app_id)
         .one(db.as_ref())

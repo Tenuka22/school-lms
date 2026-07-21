@@ -13,6 +13,7 @@ pub struct Config {
     pub frontend_url: String,
     pub minio_endpoint: String,
     pub minio_access_key: String,
+    #[allow(dead_code)]
     minio_secret_key: String,
     pub minio_bucket: String,
     pub minio_region: String,
