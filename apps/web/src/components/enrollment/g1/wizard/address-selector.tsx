@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/field"
 import { apiClient } from "@/lib/api-client"
 import {
-  listWorkspaceAddressesOptions,
-  createWorkspaceAddressMutation,
-  listWorkspaceAddressesQueryKey,
+  listAddressesOptions,
+  createAddressMutation,
+  listAddressesQueryKey,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import { cn } from "@/lib/utils"
@@ -32,40 +32,44 @@ import {
   IconPlus,
   IconSearch,
   IconCheck,
-  IconBuilding,
   IconMapPin,
 } from "@tabler/icons-react"
-import type { CreateWorkspaceAddressBody } from "@/lib/api-client/types.gen"
+import type { CreateAddressBody } from "@/lib/api-client/types.gen"
 import { useDebounce } from "@/hooks/use-debounce"
 
 const PAGE_SIZE = 8
 
 export type AddressEntryValue = {
-  workspace_address_id: string
+  address_id: string
   address_type: string
   residence_type: string
   is_primary: boolean
 }
 
-const addressFormDefaults: CreateWorkspaceAddressBody = {
-  name: "",
-  building: null,
-  street_1: "",
-  street_2: null,
+const addressFormDefaults: CreateAddressBody = {
+  address_line_1: "",
+  address_line_2: null,
   city: "Galle",
-  state: null,
+  district: "Galle",
+  province: "Southern",
+  gs_division: "",
   postal_code: null,
-  country: "Sri Lanka",
+  latitude: null,
+  longitude: null,
+  distance_to_school_km: null,
+  verified_by_map: false,
+  residence_type: null,
+  ownership_proof: null,
 }
 
 function CreateAddressDialog({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false)
 
   const createMutation = useMutation({
-    ...createWorkspaceAddressMutation({ client: apiClient }),
+    ...createAddressMutation({ client: apiClient }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: listWorkspaceAddressesQueryKey({ client: apiClient }),
+        queryKey: listAddressesQueryKey({ client: apiClient }),
       })
       onCreated()
       setOpen(false)
@@ -106,7 +110,7 @@ function CreateAddressForm({
   onCancel,
   isPending,
 }: {
-  onSubmit: (data: CreateWorkspaceAddressBody) => void
+  onSubmit: (data: CreateAddressBody) => void
   onCancel: () => void
   isPending: boolean
 }) {
@@ -114,14 +118,19 @@ function CreateAddressForm({
     defaultValues: addressFormDefaults,
     onSubmit: async ({ value }) => {
       onSubmit({
-        name: value.name,
-        building: value.building || null,
-        street_1: value.street_1,
-        street_2: value.street_2 || null,
+        address_line_1: value.address_line_1,
+        address_line_2: value.address_line_2 || null,
         city: value.city,
-        state: value.state || null,
+        district: value.district,
+        province: value.province,
+        gs_division: value.gs_division,
         postal_code: value.postal_code || null,
-        country: value.country,
+        latitude: value.latitude ?? null,
+        longitude: value.longitude ?? null,
+        distance_to_school_km: value.distance_to_school_km ?? null,
+        verified_by_map: value.verified_by_map,
+        residence_type: value.residence_type || null,
+        ownership_proof: value.ownership_proof || null,
       })
     },
   })
@@ -136,38 +145,14 @@ function CreateAddressForm({
     >
       <FieldGroup>
         <form.Field
-          name="name"
+          name="address_line_1"
           children={(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>
-                  Label <span className="text-destructive">*</span>
-                </FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  placeholder="e.g. Home, Office, Rental"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            )
-          }}
-        />
-        <form.Field
-          name="street_1"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>
-                  Street Address <span className="text-destructive">*</span>
+                  Address Line 1 <span className="text-destructive">*</span>
                 </FieldLabel>
                 <Input
                   id={field.name}
@@ -183,49 +168,28 @@ function CreateAddressForm({
             )
           }}
         />
+        <form.Field
+          name="address_line_2"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Address Line 2</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value ?? ""}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value || null)}
+                  aria-invalid={isInvalid}
+                  placeholder="e.g. Apt 4B"
+                />
+              </Field>
+            )
+          }}
+        />
         <div className="grid grid-cols-2 gap-3">
-          <form.Field
-            name="building"
-            children={(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Building</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value ?? ""}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value || null)}
-                    aria-invalid={isInvalid}
-                    placeholder="e.g. Block A"
-                  />
-                </Field>
-              )
-            }}
-          />
-          <form.Field
-            name="street_2"
-            children={(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Street Line 2</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value ?? ""}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value || null)}
-                    aria-invalid={isInvalid}
-                    placeholder="e.g. Near park"
-                  />
-                </Field>
-              )
-            }}
-          />
           <form.Field
             name="city"
             children={(field) => {
@@ -235,6 +199,72 @@ function CreateAddressForm({
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>
                     City <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={isInvalid}
+                  />
+                </Field>
+              )
+            }}
+          />
+          <form.Field
+            name="district"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>
+                    District <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={isInvalid}
+                  />
+                </Field>
+              )
+            }}
+          />
+          <form.Field
+            name="province"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>
+                    Province <span className="text-destructive">*</span>
+                  </FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={isInvalid}
+                  />
+                </Field>
+              )
+            }}
+          />
+          <form.Field
+            name="gs_division"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>
+                    GS Division <span className="text-destructive">*</span>
                   </FieldLabel>
                   <Input
                     id={field.name}
@@ -303,7 +333,7 @@ export function AddressSelector({
   const debouncedSearch = useDebounce(search, 300)
 
   const { data: addresses = [] } = useQuery(
-    listWorkspaceAddressesOptions({
+    listAddressesOptions({
       client: apiClient,
       query: { search: debouncedSearch || undefined },
     })
@@ -314,10 +344,12 @@ export function AddressSelector({
     const q = search.toLowerCase()
     return addresses.filter(
       (a) =>
-        a.name.toLowerCase().includes(q) ||
-        a.full_address.toLowerCase().includes(q) ||
+        a.address_line_1.toLowerCase().includes(q) ||
+        (a.address_line_2 && a.address_line_2.toLowerCase().includes(q)) ||
         a.city.toLowerCase().includes(q) ||
-        (a.street_1 && a.street_1.toLowerCase().includes(q))
+        a.district.toLowerCase().includes(q) ||
+        a.province.toLowerCase().includes(q) ||
+        (a.postal_code && a.postal_code.toLowerCase().includes(q))
     )
   }, [addresses, search])
 
@@ -372,18 +404,18 @@ export function AddressSelector({
                 )}
               >
                 <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <IconBuilding className="size-5 text-muted-foreground" />
+                  <IconMapPin className="size-5 text-muted-foreground" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{addr.name}</p>
+                  <p className="truncate font-medium">{addr.address_line_1}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {addr.full_address}
+                    {addr.address_line_2 || `${addr.district}, ${addr.province}`}
                   </p>
                   <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                     <IconMapPin className="size-3 shrink-0" />
                     <span>
                       {addr.city}
-                      {addr.state ? `, ${addr.state}` : ""}
+                      {addr.postal_code ? `, ${addr.postal_code}` : ""}
                     </span>
                   </div>
                 </div>

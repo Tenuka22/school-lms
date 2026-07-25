@@ -1,5 +1,7 @@
 use super::enums::{SchoolCategory, SchoolType};
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -7,7 +9,8 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[schemars(rename = "School")]
 #[sea_orm(table_name = "schools")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
@@ -28,6 +31,12 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(
+        belongs_to = "super::districts::Entity",
+        from = "Column::DistrictId",
+        to = "super::districts::Column::Id"
+    )]
+    District,
     #[sea_orm(has_many = "super::super::g1::applications::Entity")]
     Applications,
     #[sea_orm(has_many = "super::siblings::Entity")]
@@ -38,6 +47,12 @@ pub enum Relation {
     PastPupilDetails,
     #[sea_orm(has_many = "super::super::g1::admission_lists::Entity")]
     AdmissionLists,
+}
+
+impl Related<super::districts::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::District.def()
+    }
 }
 
 impl Related<super::super::g1::applications::Entity> for Entity {

@@ -3,6 +3,7 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Role {
     Admin,
+    OfficeStaff,
     Unknown,
     Unauthenticated,
 }
@@ -11,6 +12,7 @@ impl fmt::Display for Role {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Role::Admin => write!(f, "admin"),
+            Role::OfficeStaff => write!(f, "office_staff"),
             Role::Unknown => write!(f, "unknown"),
             Role::Unauthenticated => write!(f, "unauthenticated"),
         }
@@ -21,6 +23,7 @@ impl From<&str> for Role {
     fn from(s: &str) -> Self {
         match s {
             "admin" => Role::Admin,
+            "office_staff" => Role::OfficeStaff,
             "unknown" => Role::Unknown,
             "unauthenticated" => Role::Unauthenticated,
             _ => Role::Unknown,

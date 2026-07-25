@@ -1,7 +1,8 @@
 use actix_web::{web, web::Json};
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
+use db::entity::common::enrollment_batches;
+use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
 use db::entity::g1::applications;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use uuid::Uuid;
@@ -35,11 +36,25 @@ pub async fn delete_application(
         ));
     }
 
+    let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
+        .one(db.as_ref())
+        .await?
+        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+
+    let now = Utc::now();
+    if batch.status != BatchStatus::Open || batch.closed_at <= now {
+        return Err(ApiError::BadRequest(
+            "cannot delete application after enrollment batch closed".into(),
+        ));
+    }
+
     let old_json = serde_json::to_value(&existing).ok();
 
-    applications::Entity::delete_by_id(id)
-        .exec(db.as_ref())
-        .await?;
+    let mut active: applications::ActiveModel = existing.into();
+    active.deleted_at = Set(Some(Utc::now()));
+    active.updated_at = Set(Utc::now());
+
+    active.update(db.as_ref()).await?;
 
     db::entity::g1::audit::ActiveModel {
         id: Set(Uuid::new_v4()),

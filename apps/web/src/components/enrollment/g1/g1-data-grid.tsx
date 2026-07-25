@@ -69,15 +69,6 @@ function EnumBadge({
 }
 
 const ENUM_OPTIONS = {
-  gender: [
-    { label: "Male", value: "Male" },
-    { label: "Female", value: "Female" },
-  ],
-  nationality: [
-    { label: "Sri Lankan", value: "SriLankan" },
-    { label: "Dual Citizen", value: "DualCitizen" },
-    { label: "Other", value: "Other" },
-  ],
   category: [
     { label: "Close Resident", value: "CloseResident" },
     { label: "Past Pupil Child", value: "PastPupilChild" },
@@ -89,10 +80,6 @@ const ENUM_OPTIONS = {
     },
     { label: "Overseas Arrival", value: "OverseasArrival" },
     { label: "Armed Forces Reserved", value: "ArmedForcesReserved" },
-  ],
-  medium_of_instruction: [
-    { label: "Sinhala", value: "Sinhala" },
-    { label: "Tamil", value: "Tamil" },
   ],
   enrollment_status: [
     { label: "Pending", value: "Pending" },
@@ -107,19 +94,11 @@ const ENUM_OPTIONS = {
 }
 
 const FILTER_KEYS = [
-  "full_name",
-  "name_with_initials",
-  "gender",
-  "nationality",
   "category",
-  "medium_of_instruction",
   "enrollment_status",
 ] as const
 const ENUM_KEYS = new Set([
-  "gender",
-  "nationality",
   "category",
-  "medium_of_instruction",
   "enrollment_status",
 ])
 
@@ -144,13 +123,9 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         page_size: toNum(search.page_size),
         sort_by: search.sort_by,
         sort_order: search.sort_order,
-        full_name: search.full_name,
-        name_with_initials: search.name_with_initials,
-        gender: search.gender,
-        nationality: search.nationality,
         category: search.category,
-        medium_of_instruction: search.medium_of_instruction,
         enrollment_status: search.enrollment_status,
+        batch_id: search.batch_id,
       },
     }),
     [search]
@@ -290,60 +265,12 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
   const columns = React.useMemo<ColumnDef<G1Application>[]>(
     () => [
       {
-        accessorKey: "full_name",
+        accessorKey: "reference_no",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Full Name" />
-        ),
-        enableColumnFilter: true,
-        meta: { label: "Full Name", variant: "text" },
-      },
-      {
-        accessorKey: "name_with_initials",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Name with Initials" />
-        ),
-        enableColumnFilter: true,
-        meta: { label: "Name with Initials", variant: "text" },
-      },
-      {
-        accessorKey: "date_of_birth",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Date of Birth" />
+          <DataTableColumnHeader column={column} label="Reference No" />
         ),
         enableColumnFilter: false,
-        meta: { label: "Date of Birth", variant: "text" },
-      },
-      {
-        accessorKey: "gender",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Gender" />
-        ),
-        enableColumnFilter: true,
-        meta: {
-          label: "Gender",
-          variant: "select",
-          options: ENUM_OPTIONS.gender,
-        },
-        cell: ({ getValue }) => (
-          <EnumBadge column="gender" value={getValue() as string} />
-        ),
-        filterFn: "equals",
-      },
-      {
-        accessorKey: "nationality",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Nationality" />
-        ),
-        enableColumnFilter: true,
-        meta: {
-          label: "Nationality",
-          variant: "select",
-          options: ENUM_OPTIONS.nationality,
-        },
-        cell: ({ getValue }) => (
-          <EnumBadge column="nationality" value={getValue() as string} />
-        ),
-        filterFn: "equals",
+        meta: { label: "Reference No", variant: "text" },
       },
       {
         accessorKey: "category",
@@ -358,25 +285,6 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
         },
         cell: ({ getValue }) => (
           <EnumBadge column="category" value={getValue() as string} />
-        ),
-        filterFn: "equals",
-      },
-      {
-        accessorKey: "medium_of_instruction",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Medium" />
-        ),
-        enableColumnFilter: true,
-        meta: {
-          label: "Medium",
-          variant: "select",
-          options: ENUM_OPTIONS.medium_of_instruction,
-        },
-        cell: ({ getValue }) => (
-          <EnumBadge
-            column="medium_of_instruction"
-            value={getValue() as string}
-          />
         ),
         filterFn: "equals",
       },
@@ -431,7 +339,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
                   <AlertDialogTitle>Delete Enrollment</AlertDialogTitle>
                   <AlertDialogDescription>
                     Are you sure you want to delete{" "}
-                    {row.original.full_name || "this enrollment"}? This action
+                    {row.original.reference_no || "this enrollment"}? This action
                     cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>

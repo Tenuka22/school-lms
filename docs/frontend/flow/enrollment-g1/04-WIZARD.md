@@ -1,66 +1,33 @@
 # Imperative Application Wizard
 
 ## Route
-`/student-management/enrollment/g1/$enrollment-id`
-> File: `apps/web/src/routes/_authenticated/student-management/enrollment/g1/$enrollment-id.tsx`
+`/_authenticated/student-management/enrollment/g1/$enrollment_id`
+> File: `apps/web/src/components/enrollment/g1/wizard/wizard-shell.tsx`
 
 ---
 
 ## Imperative Rules
 
 1. **Wizard is the only path** to fill enrollment data. No standalone edit dialogs.
-2. **Steps are sequential and locked.** Step N cannot be accessed until Steps 1..N-1 are validated.
-3. **Once COMPLETED, wizard is read-only.** Re-open shows review mode; no edits.
-4. **No manual status changes.** Status transitions happen only via pipeline actions.
-5. **Enrollment only exists in PENDING or COMPLETED** during wizard access. Beyond COMPLETED, the enrollment moves to `/applications/$id`.
+2. **Steps are sequential and locked.** Step N cannot be accessed until Steps 1..N-1 are saved.
+3. **Once COMPLETED, wizard is read-only.** Re-opening shows a locked confirmation screen.
+4. **No manual status changes.** Status transitions happen only via pipeline actions (wizard completion, mark calculation).
+5. **School is hardcoded.** `SEEDED_SCHOOL_ID = "00000000-0000-0000-0000-000000000001"` — multi-school support is not yet implemented.
 
 ---
 
-## Entity Data Flow (Pipeline Model)
+## 6-Step Wizard Flow
 
-```
-                        PENDING enrollment
-                              │
-                    ┌─────────┼─────────┐
-                    ▼         ▼         ▼
-                 CHILD    GUARDIAN    SCHOOL
-                 (children) (guardians) (schools)
-                    │         │          │
-                    │    ┌────┼────┐     │
-                    │    ▼    ▼    ▼     │
-                    │  STAFF ALUMNI GOVT │
-                    │    │    │    │     │
-                    └────┼────┼────┼─────┘
-                         │    │    │
-            ┌────────────┘    │    └────────────┐
-            ▼                 ▼                 ▼
-        ADDRESS           SIBLINGS          DOCUMENTS
-        (addresses)       (per-app table)   (g1_documents)
-            │
-            ▼
-    ┌──────────────┐
-    │  distance_km │ → proximity score (50%)
-    │  distance_band│
-    └──────────────┘
+| Step | Component | Purpose |
+|------|-----------|---------|
+| 1 — Child | `WizardStepChild` | Full name, initials, DOB, gender, nationality, religion, birth cert, medium, category, overseas arrival |
+| 2 — Guardian | `WizardStepGuardian` | Select guardians from existing guardian master records |
+| 3 — Address | `WizardStepAddress` | Select addresses from existing address records (Permanent type, Owned/Rented residence type, is_primary flag) |
+| 4 — Siblings | `WizardStepSiblings` | Select sibling students from existing student records |
+| 5 — Documents | `WizardStepDocuments` | Upload documents via drop zone (MinIO storage) |
+| 6 — Review & Lock | `WizardStepReview` | Final review; locks the enrollment |
 
-    After COMPLETED:
-
-    marks_breakdown calculated → total_marks
-        │
-        ▼
-    PENDING_APPROVAL status
-        │
-        ▼
-    APPROVED → creates student record:
-        │
-        ├── students table (new row)
-        ├── student_join_addresses (link addresses to student)
-        ├── student_join_guardians (link guardians to student)
-        └── enrollment status → APPROVED
-            │
-            ▼
-        ADMITTED (final)
-```
+> Note: The design docs describe a 7-step wizard with a School Selection step. The current implementation has 6 steps and does **not** include a school selection step.
 
 ---
 
@@ -68,19 +35,17 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  ① Child     ② Guardian    ③ School     ④ Address    ⑤ Siblings │
-│    ✓ ───────────  ✓ ────────────  ⬤ ────────────  ○             │
-│  ⑥ Documents  ⑦ Review & Lock                                    │
-│    ○                                                              │
+│  ① Child     ② Guardian    ③ Address    ④ Siblings  ⑤ Documents│
+│    ✓ ───────────  ✓ ────────────  ⬤ ────────────  ○ ──── ○    │
+│                   ⑥ Review & Lock                                 │
+│                    ○                                               │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-- No revisiting completed steps to edit — only forward progression.
 - Current step: active dot (blue ring).
 - Completed: green checkmark.
-- Future: gray dashed.
-- Step 5 (Siblings): only visible if Category=Sibling declared in Step 2.
-- Documents step: auto-calculates required types from Step 2 categories.
+- Future: gray dashed cross.
+- Users can only click on completed steps or the next available step (`savedSteps + 1`).
 
 ---
 
@@ -88,204 +53,156 @@
 
 ### Fields
 
-| Field | Component | Validation |
-|-------|-----------|------------|
-| Full Name | `Input` | Required, ≥3 chars |
+| Field | Component | Notes |
+|-------|-----------|-------|
+| Full Name | `Input` | Required |
 | Name with Initials | `Input` | Required |
-| Date of Birth | `Calendar` + `Popover` | Required; ≤5 years before Jan 31 of batch year |
-| Gender | `Select` | Required |
+| Date of Birth | `Calendar` + `Popover` | Required |
+| Gender | `Select` | Male / Female |
 | Religion | `Select` | Optional |
-| Nationality | `Select` | SriLankan/DualCitizen/Other |
+| Nationality | `Select` | SriLankan / DualCitizen / Other |
 | Birth Certificate No | `Input` | Optional |
-| Photo | File + preview | JPG/PNG ≤2MB |
+| Medium of Instruction | `Select` | Sinhala / Tamil |
+| Category | `Select` | 7 options |
+| Overseas Arrival Date | `Input` | Optional |
 
-### Age Validation
+### Default Values
+
 ```ts
-const batchYear = 2027
-const cutoff = new Date(batchYear, 0, 31) // Jan 31
-const minDOB = new Date(cutoff.getFullYear() - 5, cutoff.getMonth(), cutoff.getDate())
-// DOB must be ≤ minDOB
+gender: "Male"
+nationality: "SriLankan"
+medium_of_instruction: "Sinhala"
+category: ""
 ```
 
-### Completion → Creates `children` record or links existing via lookup.
+### Auto-Save
+
+On save, calls `updateApplication` mutation with all child fields plus `wizard_step: 1`.
 
 ---
 
-## Step 2: Guardian Profile + Scoring Categories
+## Step 2: Guardian
 
-### Primary Guardian Fields
+### Behavior
 
-| Field | Component | Required |
-|-------|-----------|----------|
-| Relationship | `Select` (Father/Mother/Guardian) | Yes |
-| Full Name | `Input` | Yes |
-| NIC Number | `Input` | Yes (NIC format check) |
-| Phone | `Input` | Yes |
-| Email | `Input` | No |
-| Occupation | `Input` | No |
-| Workplace | `Input` | No |
-| Workplace Address | `Textarea` | No |
-| Income Level | `Input` (number) | No |
+- Loads all existing guardians from `listGuardiansOptions`.
+- Shows a selector where users pick guardians from the master list.
+- Selected guardian IDs are saved via `saveGuardiansMutation`.
 
-### Category Declaration (Checkboxes, 1 per guardian)
+### Data Saved
 
-| Checkbox | Weight | Effect |
-|----------|--------|--------|
-| Close Resident | 50% | Always ON (automatic via address) |
-| School Staff | 25% | Shows staff sub-form; locks to selected school later |
-| Has Sibling in School | 14% | Unlocks Step 5 |
-| Past Pupil (Alumni) | 6% | Shows alumni sub-form; locks to selected school |
-| Govt Employee | 4% | Shows service years field |
-| Special Circumstances | 1% | Shows disability/conflict fields |
-
-### Conditional Sub-Forms
-
-**Staff** → inline: Designation, Employment Type (Permanent/Temporary/Contract), Service Start Date.
-**Alumni** → inline: Highest Grade (GCE_AL/GCE_OL/Grade_11/Grade_10/Below), Year Left, Left Reason.
-**Govt** → inline: Service Years (affects raw score: ≥5→40, ≥10→60, ≥15→80, ≥20→100).
-**Special** → inline: Disability checkbox (triggers DisabilityType field), Conflict Area checkbox, Single Parent checkbox.
-
-### Optional: Second Guardian
-Button "Add Guardian" below. Same fields + checkboxes. Max 2 guardians.
-
-### Completion → Creates `guardians` record(s) + `g1_join_guardians` linking.
+```ts
+body: { guardian_ids: string[] }
+```
 
 ---
 
-## Step 3: School Selection
+## Step 3: Address
 
-### School Search
-`Command` palette with filters: District, SchoolType, SchoolCategory.
+### Behavior
 
-### Selected School Card
-Shows school name (SI+EN), type Badge, category Badge, quota Badge, address, mini map.
+- Loads all existing addresses from `listAddressesOptions`.
+- Shows a selector where users pick addresses from the master list.
+- Each selected address gets: `address_type: "Permanent"`, `residence_type: "Owned"` (default), `is_primary` flag.
 
-### Cross-validation (runs on step completion)
-- Staff guardian → staff school must match selected school.
-- Alumni guardian → alumni school must match selected school.
-- Sibling → sibling school must match selected school (enforced in Step 5).
+### Data Saved
 
-### Completion → Sets `enrollment.school_id`.
-
----
-
-## Step 4: Address + Proximity
-
-### Address Fields
-
-| Field | Component | Required |
-|-------|-----------|----------|
-| Address Line 1 | `Input` | Required |
-| Address Line 2 | `Input` | No |
-| City | `Input` | Required |
-| District | `Select` | Required |
-| Province | `Select` | Required |
-| GS Division | `Input` | Required |
-| Postal Code | `Input` | No |
-| Residence Type | `Select` | Owned/Rented/Relative/Other |
-| Ownership Proof | `Select` | Deed/Lease/GN Certificate |
-
-### Map Pin (Interactive)
-Map centered on selected school. User taps to place residence pin → auto-fills lat/lon → Haversine distance calculated live.
-
-### Distance Card
-Shows real-time: distance (km), band (<0.5 / 0.5-1 / 1-2 / 2-3 / 3-5 / >5), raw proximity score, weighted (50%) score preview.
-
-### Completion → Creates `addresses` record + `g1_join_addresses`.
+```ts
+body: { addresses: Array<{ address_id, address_type, residence_type, is_primary }> }
+```
 
 ---
 
-## Step 5: Sibling Details
+## Step 4: Siblings
 
-**Only visible if Category=Sibling was checked in Step 2.**
+### Behavior
 
-Direct fields per sibling (no join to student table):
+- Shows a selector where users pick sibling students from existing students.
+- Selected sibling IDs are saved via `saveSiblingsMutation`.
 
-| Field | Component | Required |
-|-------|-----------|----------|
-| Full Name | `Input` | Required |
-| School | `Select` (disabled, = selected school) | Locked |
-| Current Grade | `Input` number (1–13) | Required |
-| Admission Year | `Input` (4-digit year) | No |
-| Photo | File upload | No |
-| Verification Doc | File upload | No |
+### Data Saved
 
-### Sibling Scoring Preview
-Live distance-based scoring using same bands as proximity.
-
-### Completion → Creates sibling records directly.
+```ts
+body: { student_ids: string[] }
+```
 
 ---
 
-## Step 6: Document Upload
+## Step 5: Documents
 
-### Auto-Calculated Required Types
+### Behavior
 
-| Category Declared | Required Documents |
-|-------------------|--------------------|
-| Always (base) | Birth Certificate, Guardian NIC |
-| Close Resident | Residence Proof |
-| Staff | Staff Appointment Letter, Staff Service Certificate |
-| Sibling | Sibling School Certificate |
-| Alumni | Past Pupil Certificate, Past Pupil Exam Certificate |
-| Govt Employee | Govt Service Certificate |
-| Special (Disability) | Disability Certificate |
-| Religion (Buddhism/Catholicism/etc.) | Baptism Certificate |
+- Shows document upload cards with drop zones.
+- Documents are uploaded to MinIO and tracked locally with `status: "uploaded"`.
+- On save, only documents with `status === "uploaded"` and `file_key` are sent to the server.
 
-### Document Card
-Each required type renders as a Card with drop zone, file preview, upload progress. Status: uploaded ✅ or missing ⚠️.
+### Data Saved
 
-### Upload Action
-Upload via drop zone → creates `g1_documents` record with file_hash, file_size, verification_status=Pending.
-
-### Completion Validation
-All required types must be uploaded.
-
----
-
-## Step 7: Review & Lock
-
-### Layout
-Full read-only summary — every section from Steps 1-6 displayed in cards. Estimated score preview with per-category weighted breakdown. Missing-docs banner if any.
-
-### Lock Action
-"Confirm & Complete" button → **AlertDialog**: "After completing, this enrollment cannot be edited. Are you sure?" → On confirm:
-- Status → `COMPLETED`
-- All data persisted
-- Navigates to pipeline dashboard
-- Toast: "Enrollment completed. Awaiting marks calculation."
-
-### Save Draft (PENDING)
-If user hasn't finished, a "Save Progress" button saves current step state. Enrollment remains `PENDING`. User can return to wizard at the last incomplete step.
-
-### Exit
-"Exit" → back to pipeline dashboard. Enrollment stays PENDING at current step. Card shows "Continue Wizard" action in pipeline dashboard.
-
----
-
-## Wizard State Store
-
-Local React context scoped to wizard route. Persists across step navigation. No server round-trips between steps — only on completion of each step or on Save Draft.
-
-```tsx
-interface WizardState {
-  step: number                                // 1-7
-  enrollmentId: string                        // from route param
-  child: { full_name, date_of_birth, gender, religion, nationality, birth_cert_no, photo_url }
-  guardians: Array<{
-    tempId, relationship, full_name, nic, phone, email,
-    occupation, workplace, workplace_address, income,
-    is_staff, staff_designation, staff_employment_type, staff_service_start,
-    is_alumni, alumni_highest_grade, alumni_year_left, alumni_left_reason,
-    is_govt_employee, govt_service_years,
-    is_special, disability, conflict_area, single_parent
+```ts
+body: {
+  documents: Array<{
+    doc_type: string
+    file_url: string
+    file_key: string
+    content_type: string | null
+    file_size: bigint | null
   }>
-  school: { school_id, school_name_si, school_type, category, quota }
-  address: { line1, line2, city, district, province, gs_division, postal_code, residence_type, ownership_proof, lat, lon, distance_km, distance_band }
-  siblings: Array<{ tempId, sibling_name, current_grade, admission_year, photo_url, verification_doc }>
-  documents: Array<{ tempId, doc_type, file, file_url, status }>
-  completed: boolean                          // READ_ONLY after true
 }
 ```
 
 ---
+
+## Step 6: Review & Lock
+
+### Layout
+
+Read-only summary of all entered data:
+- Child details
+- Selected guardians (with names)
+- Selected addresses (with types)
+- Selected siblings (with names)
+- Uploaded documents (with file names)
+- School info (hardcoded: "St. Aloysius College, Galle")
+
+### School Info (Hardcoded)
+
+```ts
+school: {
+  school_id: SEEDED_SCHOOL_ID,  // "00000000-0000-0000-0000-000000000001"
+  school_name_si: "St. Aloysius College, Galle",
+  school_type: "1AB",
+  category: "Urban",
+  quota: 100,
+}
+```
+
+### Lock Action
+
+"Complete Enrollment" button → sets:
+- `enrollment_status: "Completed"`
+- `wizard_step: 6`
+- Shows confirmation screen with enrollment details.
+
+### After Completion
+
+The wizard shows a locked screen with:
+- Green checkmark + "Enrollment Locked"
+- Submission summary (name, reference no, status, year)
+- "Back to Pipeline" button
+
+---
+
+## Wizard State Management
+
+All state is managed in `wizard-shell.tsx` via React `useState` hooks. No global store or context. Data is persisted to the server after each step via dedicated mutations.
+
+### Key Mutations
+
+| Mutation | Trigger | Purpose |
+|----------|---------|---------|
+| `updateApplication` | Child step auto-save, completion | Updates application fields |
+| `saveWizardStepMutation` | Any step completion | Updates `wizard_step` counter |
+| `saveGuardiansMutation` | Guardian step save | Links guardian IDs to application |
+| `saveAddressesMutation` | Address step save | Links address entries to application |
+| `saveSiblingsMutation` | Siblings step save | Links sibling student IDs to application |
+| `saveApplicationDocumentsMutation` | Documents step save | Links document records to application |

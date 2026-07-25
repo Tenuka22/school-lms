@@ -29,7 +29,6 @@ import type {
   Gender,
   Nationality,
   MediumOfInstruction,
-  G1Category,
 } from "@/lib/api-client/types.gen"
 
 export type ChildFormData = {
@@ -41,7 +40,7 @@ export type ChildFormData = {
   religion: string
   birth_certificate_number: string
   medium_of_instruction: MediumOfInstruction
-  category: G1Category | ""
+  category: string
   overseas_arrival_date: string
 }
 

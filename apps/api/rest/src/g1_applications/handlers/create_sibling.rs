@@ -78,6 +78,7 @@ pub async fn create_sibling(
     );
 
     let app = applications::Entity::find_by_id(app_id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("Application not found".into()))?;

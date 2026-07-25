@@ -49,6 +49,11 @@ pub async fn update_batch(
         batch_name: Set(existing.batch_name),
         enrollment_type: Set(existing.enrollment_type),
         status: Set(patch.status.unwrap_or(existing.status)),
+        opened_at: Set(existing.opened_at),
+        closed_at: Set(existing.closed_at),
+        list_published_at: Set(existing.list_published_at),
+        appeal_deadline_at: Set(existing.appeal_deadline_at),
+        finalized_at: Set(existing.finalized_at),
         created_at: Set(existing.created_at),
         created_by: Set(existing.created_by),
         student_allocation: Set(patch
@@ -60,6 +65,7 @@ pub async fn update_batch(
         alumni_weight: Set(patch.alumni_weight.unwrap_or(existing.alumni_weight)),
         govt_weight: Set(patch.govt_weight.unwrap_or(existing.govt_weight)),
         special_weight: Set(patch.special_weight.unwrap_or(existing.special_weight)),
+        waiting_list_size: Set(existing.waiting_list_size),
     };
 
     let saved = active.update(db.as_ref()).await?;

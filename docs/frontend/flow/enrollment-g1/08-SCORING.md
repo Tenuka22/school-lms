@@ -1,7 +1,7 @@
 # G1 Scoring & Marks Management
 
 ## Route
-`/student-management/enrollment/g1/scoring/$enrollment_id`
+`/_authenticated/student-management/enrollment/g1/scoring/$enrollment_id`
 > File: `apps/web/src/routes/_authenticated/student-management/enrollment/g1/scoring.$enrollment_id.tsx`
 > Component: `apps/web/src/components/enrollment/g1/scoring/scoring-dashboard.tsx`
 
@@ -9,7 +9,7 @@
 
 ## Purpose
 
-This page displays the **6 scoring categories** for a G1 application, their computed scores, and allows triggering mark calculation. It is the administrative interface for the scoring engine defined in the admission circular.
+This page displays the **6 scoring categories** for a G1 application, their computed scores, and allows triggering mark calculation.
 
 ---
 
@@ -24,15 +24,13 @@ This page displays the **6 scoring categories** for a G1 application, their comp
 | Government Employee | GOVT | 4% | Parent is a government employee |
 | Special Circumstances | SPECIAL | 1% | Disability, low income, or special needs |
 
-> **Note:** At least one category must have data. Categories with no data are shown with 0 marks and marked as "No data provided".
-
 ---
 
 ## Layout
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  Scoring & Marks                                                  │
+│  ← Scoring & Marks                                              │
 │  Nimal Perera · G1-2027-00042                    [Calculate Marks]│
 ├──────────────────────────────────────────────────────────────────┤
 │ ┌────────────────────────────────────────────────────────────┐   │
@@ -65,9 +63,9 @@ This page displays the **6 scoring categories** for a G1 application, their comp
 ## Category Cards
 
 Each category renders as a card showing:
-1. **Category label** with color indicator (matches batch weight visualization)
+1. **Category label** with color indicator
 2. **Weight percentage** badge
-3. **Raw score** (0-100) with progress bar
+3. **Raw score** (0-100) with progress bar — shown only when data is available
 4. **Weighted score** (raw_score × weight / 100)
 5. If no data: "No data provided for this category" with reduced opacity
 
@@ -81,7 +79,7 @@ When marks exist, the highest-contributing category is highlighted in a green ba
 
 ## Calculate Marks Action
 
-The "Calculate Marks" button calls the backend `POST /api/g1-applications/{id}/calculate-marks` endpoint, which:
+The "Calculate Marks" button calls the backend endpoint, which:
 1. Queries all join tables for the application
 2. Computes raw and weighted scores per category
 3. Stores results in `marks_breakdown` table
@@ -92,7 +90,7 @@ The "Calculate Marks" button calls the backend `POST /api/g1-applications/{id}/c
 
 ## Distance Bands Reference
 
-A consistent reference table at the bottom shows the 6 distance bands used for proximity scoring, matching the admission circular specification.
+A consistent reference table at the bottom shows the 6 distance bands used for proximity scoring.
 
 | Distance | Raw Marks |
 |----------|-----------|
@@ -102,3 +100,4 @@ A consistent reference table at the bottom shows the 6 distance bands used for p
 | 2 - 3 km | 40 |
 | 3 - 5 km | 20 |
 | > 5 km | 10 |
+

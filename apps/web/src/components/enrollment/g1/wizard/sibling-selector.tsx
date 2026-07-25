@@ -322,28 +322,30 @@ function CreateSiblingForm({
                     Date of Birth <span className="text-destructive">*</span>
                   </FieldLabel>
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        id={field.name}
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !field.state.value && "text-muted-foreground"
-                        )}
-                        aria-invalid={isInvalid}
-                      >
-                        <IconCalendar className="mr-2 size-4 shrink-0" />
-                        {field.state.value
-                          ? new Date(
-                              field.state.value + "T00:00:00"
-                            ).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })
-                          : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          id={field.name}
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !field.state.value && "text-muted-foreground"
+                          )}
+                          aria-invalid={isInvalid}
+                        >
+                          <IconCalendar className="mr-2 size-4 shrink-0" />
+                          {field.state.value
+                            ? new Date(
+                                field.state.value + "T00:00:00"
+                              ).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })
+                            : "Pick a date"}
+                        </Button>
+                      }
+                    />
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         captionLayout="dropdown"
@@ -783,28 +785,30 @@ function EditStudentDialog({
                         <span className="text-destructive">*</span>
                       </FieldLabel>
                       <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            id={field.name}
-                            variant="outline"
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !field.state.value && "text-muted-foreground"
-                            )}
-                            aria-invalid={isInvalid}
-                          >
-                            <IconCalendar className="mr-2 size-4 shrink-0" />
-                            {field.state.value
-                              ? new Date(
-                                  field.state.value + "T00:00:00"
-                                ).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                })
-                              : "Pick a date"}
-                          </Button>
-                        </PopoverTrigger>
+                        <PopoverTrigger
+                          render={
+                            <Button
+                              id={field.name}
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !field.state.value && "text-muted-foreground"
+                              )}
+                              aria-invalid={isInvalid}
+                            >
+                              <IconCalendar className="mr-2 size-4 shrink-0" />
+                              {field.state.value
+                                ? new Date(
+                                    field.state.value + "T00:00:00"
+                                  ).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })
+                                : "Pick a date"}
+                            </Button>
+                          }
+                        />
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             captionLayout="dropdown"

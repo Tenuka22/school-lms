@@ -1,8 +1,8 @@
-# G1 Admission — Imperative Pipeline Architecture
+# G1 Admission — Pipeline Architecture
 
 ## Architectural Principle
 
-This system uses an **imperative, flow-based pipeline** — not a free-form declarative CRUD model. Users cannot freely change enrollment status or delete records at will. Instead, the system enforces a **locked-step state machine** that guarantees data integrity and prevents impossible states.
+The system uses an **imperative, flow-based pipeline** for G1 admissions. Users cannot freely change enrollment status or delete records. The system enforces a **locked-step state machine** that guarantees data integrity.
 
 ---
 
@@ -22,80 +22,65 @@ This system uses an **imperative, flow-based pipeline** — not a free-form decl
         └──────────┘   └──────────┘    └──────────┘
 ```
 
-### Enforced State Transitions
+### Statuses
 
-| From            | To              | Trigger                                    | Guard Conditions                                   |
-|-----------------|-----------------|--------------------------------------------|----------------------------------------------------|
-| **PENDING**     | **COMPLETED**   | Wizard complete                             | All required data entered                          |
-| **PENDING**     | **REJECTED**    | Officer rejects                             | Reason required                                    |
-| **PENDING**     | **WITHDRAWN**   | Manual withdrawal                           | —                                                  |
-| **COMPLETED**   | **PENDING_APPROVAL** | Marks calculated via API                | All data entered, at least one category scored     |
-| **COMPLETED**   | **WITHDRAWN**   | Manual withdrawal                           | —                                                  |
-| **PENDING_APPROVAL** | **APPROVED** | Officer approves → creates student record   | Student capacity available                         |
-| **PENDING_APPROVAL** | **REJECTED** | Officer rejects                             | Reason required                                    |
-| **APPROVED**    | **ADMITTED**    | Formal admission                            | Admission lists finalized                          |
-| **Any**         | **REMOVED**     | System cleanup                              | Admin only                                         |
-
-**Illegal transitions** (prevented by backend + frontend guards):
-- Draft → Submitted (no free-form editing)
-- Verified → Pending (no going backwards)
-- Any status → Deleted (soft-delete only via WITHDRAWN)
-- APPROVED → REJECTED (student already created)
+| Status | Description |
+|--------|-------------|
+| **PENDING** | Created, wizard begun but not complete |
+| **COMPLETED** | All info entered, ready for marks calculation |
+| **PENDING_APPROVAL** | Marks calculated, awaiting officer approval |
+| **APPROVED** | Student record created, enrollment finalized |
+| **ADMITTED** | Student formally admitted to school |
+| **REJECTED** | Terminal: application rejected |
+| **WITHDRAWN** | Terminal: parent/system withdrew |
+| **REMOVED** | Terminal: system cleanup/deletion |
 
 ---
 
-## Imperative Enforcement in UI
+## Pipeline Dashboard
 
-| User Action                 | UI Behavior                                    |
-|-----------------------------|-------------------------------------------------|
-| Create enrollment           | `G1EnrollmentDialog` → auto-sets status=`PENDING`, redirects to wizard |
-| Edit after COMPLETED        | Wizard opens in **read-only review mode**, no editing allowed |
-| Change marks                | Only via **Marks Calculator** (admin-only, audit-logged) |
-| Delete enrollment           | Only available in PENDING state, sets to WITHDRAWN, not hard-delete |
-| Approve                     | Separate "Approval Queue" page, not a dialog on the data grid |
+**File:** `apps/web/src/components/enrollment/g1/pipeline/pipeline-dashboard.tsx`
 
----
+The dashboard shows a horizontal batch selector (scrollable cards with weight distribution bars) and a data table of enrollments filtered by the selected batch. Status lane summary cards show counts per status.
 
-## Why Imperative Over Declarative
+### Creating an Enrollment
 
-| Problem (Declarative)               | Solution (Imperative)                              |
-|-------------------------------------|-----------------------------------------------------|
-| User changes status mid-wizard      | Wizard locks after COMPLETED; no manual status dropdown |
-| User deletes after approval         | APPROVED records are locked; only WITHDRAWN allowed |
-| User forgets required fields        | Each pipeline step validates before allowing progression |
-| User changes school after marks     | School is locked after COMPLETED                    |
-| Out-of-order data entry             | Wizard enforces sequential steps                    |
-| Missing documents at approval       | COMPLETED state requires all required docs          |
+1. Select a batch (required before creating).
+2. Click "New Enrollment" → dialog with: full name, name with initials, date of birth, gender, nationality, medium of instruction, religion.
+3. On submit: enrollment created with `enrollment_status: Pending`, navigates to wizard at `/$enrollment_id`.
+
+### Data Table Actions
+
+Each row has a dropdown with: View Details → wizard, Configure → wizard, Delete (with confirmation).
+
+### Scoring Access
+
+From the pipeline, navigate to `/scoring/$enrollment_id` to view and calculate marks.
 
 ---
 
-## Statuses (Simplified)
+## Enrollment Wizard
 
-Only these statuses exist in the UI for the enrollment pipeline:
+**File:** `apps/web/src/components/enrollment/g1/wizard/wizard-shell.tsx`
 
-| Status             | Description                                       |
-|--------------------|---------------------------------------------------|
-| **PENDING**        | Created, wizard begun but not complete             |
-| **COMPLETED**      | All info entered, ready for marks calculation      |
-| **PENDING_APPROVAL** | Marks calculated, awaiting officer approval        |
-| **APPROVED**       | Student record created, enrollment finalized       |
-| **ADMITTED**       | Student formally admitted to school                |
-| **REJECTED**       | Terminal: application rejected                     |
-| **WITHDRAWN**      | Terminal: parent/system withdrew                   |
-| **REMOVED**        | Terminal: system cleanup/deletion                  |
+### 6-Step Wizard Flow
 
-No `Draft`, no `ApplicationStatus` — the simplified `EnrollmentStatus` is the single source of truth.
+| Step | Component | Purpose |
+|------|-----------|---------|
+| 1 — Child | `WizardStepChild` | Full name, initials, DOB, gender, nationality, religion, birth cert, medium, category, overseas arrival |
+| 2 — Guardian | `WizardStepGuardian` | Select guardians from existing guardian master records |
+| 3 — Address | `WizardStepAddress` | Select addresses from existing address records, with type (Permanent) and residence type |
+| 4 — Siblings | `WizardStepSiblings` | Select sibling students from existing student records |
+| 5 — Documents | `WizardStepDocuments` | Upload documents via drop zone (MinIO storage) |
+| 6 — Review & Lock | `WizardStepReview` | Final review; locks the enrollment |
 
----
+> Note: The design docs describe a 7-step wizard with a School Selection step. The current implementation has 6 steps and does **not** include a school selection step. `SEEDED_SCHOOL_ID = "00000000-0000-0000-0000-000000000001"` is hardcoded.
 
-## Application Management Route (New)
+### Wizard Mechanics
 
-`/student-management/enrollment/g1/applications` — where scored & ranked applications live, sorted **descending by total_marks** by default. This is the approval queue for officers.
-
-Only applications in `PENDING_APPROVAL` appear here. Officers can:
-- View full application detail (read-only)
-- **Approve** → creates `student` record + connects `student_join_addresses`, `student_join_guardians`
-- **Reject** → sets to REJECTED with reason
-- See rank order (marks descending, tied by proximity → timestamp → lottery)
+- **Step locking**: Users can only navigate to `savedSteps + 1`. Completed steps show a green checkmark; locked steps show a cross icon.
+- **Auto-save**: Each step auto-saves via dedicated mutations.
+- **Persistence**: The `wizard_step` field tracks progress. `wizard_step: 6` = completed.
+- **Completion**: Sets `wizard_step: 6`, `enrollment_status: Completed`, shows locked confirmation screen.
 
 ---

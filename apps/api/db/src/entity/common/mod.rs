@@ -1,7 +1,9 @@
 pub mod addresses;
 pub mod addresses_audit;
 pub mod audit_logs;
+pub mod blacklist;
 pub mod counter;
+pub mod districts;
 pub mod enrollment_batches;
 pub mod enums;
 pub mod guardians;

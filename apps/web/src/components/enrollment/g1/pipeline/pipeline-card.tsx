@@ -21,7 +21,7 @@ export function PipelineCard({
         {enrollment.id?.slice(0, 8) ?? "—"}
       </div>
       <div className="mt-0.5 truncate text-sm font-medium">
-        {enrollment.full_name || "—"}
+        {enrollment.reference_no || "—"}
       </div>
       {(laneStatus === "Completed" || laneStatus === "PendingApproval") &&
         enrollment.total_marks != null && (

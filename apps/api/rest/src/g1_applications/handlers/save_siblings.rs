@@ -42,6 +42,7 @@ pub async fn save_siblings(
     info!("[save_siblings] user={user_id:?} app={app_id} student_ids={student_ids:?}");
 
     let app = applications::Entity::find_by_id(app_id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| {

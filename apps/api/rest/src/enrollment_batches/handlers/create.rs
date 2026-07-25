@@ -2,7 +2,7 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use db::entity::enrollment_batches;
 use db::entity::enums::{BatchStatus, EnrollmentType};
 use schemars::JsonSchema;
@@ -64,6 +64,7 @@ pub async fn create_batch(
         )));
     }
 
+    let now = Utc::now();
     let data = enrollment_batches::Model {
         id: Uuid::new_v4(),
         year: input.year,
@@ -71,7 +72,12 @@ pub async fn create_batch(
         batch_name,
         enrollment_type: input.enrollment_type,
         status: BatchStatus::Open,
-        created_at: Utc::now(),
+        opened_at: now,
+        closed_at: DateTime::from(now + chrono::Duration::days(365)),
+        list_published_at: None,
+        appeal_deadline_at: None,
+        finalized_at: None,
+        created_at: now,
         created_by: None,
         student_allocation: input.student_allocation.unwrap_or(200),
         proximity_weight: input.proximity_weight.unwrap_or(50),
@@ -80,6 +86,7 @@ pub async fn create_batch(
         alumni_weight: input.alumni_weight.unwrap_or(6),
         govt_weight: input.govt_weight.unwrap_or(4),
         special_weight: input.special_weight.unwrap_or(1),
+        waiting_list_size: 20,
     };
 
     let active: enrollment_batches::ActiveModel = data.into();

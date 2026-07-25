@@ -10,6 +10,7 @@ pub struct Model {
     pub application_id: Uuid,
     pub address_id: Uuid,
     pub address_type: String,
+    pub residence_type: String,
     pub is_primary: bool,
     pub created_at: DateTime<Utc>,
 }

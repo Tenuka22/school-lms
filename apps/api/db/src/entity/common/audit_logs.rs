@@ -16,6 +16,7 @@ pub struct Model {
     pub performed_by: Option<Uuid>,
     pub performed_at: DateTime<Utc>,
     pub ip_address: Option<String>,
+    pub reason: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

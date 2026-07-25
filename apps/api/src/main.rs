@@ -58,6 +58,10 @@ async fn main() -> std::io::Result<()> {
         log::warn!("RBAC seeding failed: {e}");
     }
 
+    if let Err(e) = db::seed::seed_districts(&db).await {
+        log::warn!("District seeding failed (continuing): {e}");
+    }
+
     if let Err(e) = db::seed::seed_schools(&db).await {
         log::warn!("School seeding failed (continuing): {e}");
     }

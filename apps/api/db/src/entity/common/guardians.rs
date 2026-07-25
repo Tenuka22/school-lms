@@ -10,10 +10,6 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-fn default_phone() -> String {
-    "0".to_string()
-}
-
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
 )]
@@ -26,7 +22,6 @@ pub struct Model {
     pub full_name: String,
     #[sea_orm(unique)]
     pub nic_number: String,
-    #[serde(default = "default_phone")]
     pub contact_phone: String,
     pub contact_email: Option<String>,
     pub occupation: Option<String>,

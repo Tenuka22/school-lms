@@ -1,13 +1,16 @@
-use super::enums::ResidenceType;
+use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
+use super::enums::ResidenceType;
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[schemars(rename = "Address")]
 #[sea_orm(table_name = "addresses")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]

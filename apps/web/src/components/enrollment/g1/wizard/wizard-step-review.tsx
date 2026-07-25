@@ -24,7 +24,7 @@ import type { ChildFormData } from "./wizard-step-child"
 import type { SchoolFormData } from "./wizard-step-school"
 import type { AddressEntryValue } from "./wizard-step-address"
 import type {
-  WorkspaceAddress,
+  Address,
   Student,
   Guardian,
 } from "@/lib/api-client/types.gen"
@@ -100,7 +100,7 @@ interface Props {
   guardians: Guardian[]
   school: SchoolFormData
   selectedAddresses: AddressEntryValue[]
-  workspaceAddresses: WorkspaceAddress[]
+  addresses: Address[]
   siblingIds: string[]
   documents: DocumentFormData[]
   onBack: () => void
@@ -112,13 +112,13 @@ export function WizardStepReview({
   guardians,
   school: _school,
   selectedAddresses,
-  workspaceAddresses,
+  addresses,
   siblingIds,
   documents,
   onBack,
   onComplete,
 }: Props) {
-  const addressMap = new Map(workspaceAddresses.map((a) => [a.id, a]))
+  const addressMap = new Map(addresses.map((a) => [a.id, a]))
   const { data: students = [] } = useQuery(
     listStudentsOptions({ client: apiClient })
   )
@@ -359,18 +359,18 @@ export function WizardStepReview({
               </p>
             ) : (
               selectedAddresses.map((entry) => {
-                const addr = addressMap.get(entry.workspace_address_id)
+                const addr = addressMap.get(entry.address_id)
                 if (!addr) return null
                 return (
                   <div
-                    key={entry.workspace_address_id}
+                    key={entry.address_id}
                     className="group rounded-lg border p-3 transition-colors hover:bg-muted/30"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex min-w-0 items-center gap-2">
                         <IconHome className="size-4 shrink-0 text-muted-foreground" />
                         <p className="truncate text-sm font-medium">
-                          {addr.name}
+                          {addr.address_line_1}
                         </p>
                       </div>
                       <div className="flex shrink-0 gap-1">
@@ -386,7 +386,7 @@ export function WizardStepReview({
                       </div>
                     </div>
                     <p className="mt-1.5 line-clamp-2 text-xs text-muted-foreground">
-                      {addr.full_address}
+                      {addr.address_line_2 || `${addr.district}, ${addr.province}`}
                     </p>
                     <div className="mt-1.5">
                       <ReviewBadge

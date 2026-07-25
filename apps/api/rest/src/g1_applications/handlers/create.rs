@@ -40,10 +40,14 @@ pub async fn create_application(
     }
 
     let now = Utc::now();
+    if batch.closed_at <= now {
+        return Err(ApiError::BadRequest(
+            "application window has closed for this batch".into(),
+        ));
+    }
+
     let mut active: applications::ActiveModel = data.into();
     active.id = Set(Uuid::new_v4());
-    active.applied_year = Set(batch.year);
-    active.enrollment_status = Set(EnrollmentStatus::Pending);
     active.created_at = Set(now);
     active.updated_at = Set(now);
     active.created_by = Set(None);
@@ -51,6 +55,7 @@ pub async fn create_application(
 
     let count = applications::Entity::find()
         .filter(applications::Column::BatchId.eq(batch.id))
+        .filter(applications::Column::DeletedAt.is_null())
         .count(db.as_ref())
         .await?;
     active.reference_no = Set(format!("{}-{:04}", batch.batch_code, count + 1));
@@ -83,9 +88,22 @@ pub async fn submit_application(
     let id = id.into_inner();
 
     let existing = applications::Entity::find_by_id(id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+
+    let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
+        .one(db.as_ref())
+        .await?
+        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+
+    let now = Utc::now();
+    if batch.status != BatchStatus::Open || batch.closed_at <= now {
+        return Err(ApiError::BadRequest(
+            "cannot submit application after enrollment batch closed".into(),
+        ));
+    }
 
     if existing.enrollment_status != EnrollmentStatus::Pending {
         return Err(ApiError::BadRequest(
@@ -132,6 +150,7 @@ pub async fn calculate_marks(
     let id = id.into_inner();
 
     let existing = applications::Entity::find_by_id(id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
@@ -267,7 +286,7 @@ pub async fn generate_admission_lists(
         let marked_apps = applications::Entity::find()
             .filter(applications::Column::SchoolId.eq(Some(school.id)))
             .filter(applications::Column::EnrollmentStatus.eq(EnrollmentStatus::PendingApproval))
-            .filter(applications::Column::AppliedYear.eq(batch.year))
+            .filter(applications::Column::DeletedAt.is_null())
             .all(db.as_ref())
             .await?;
 

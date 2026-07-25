@@ -21,19 +21,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { apiClient } from "@/lib/api-client"
-import { listWorkspaceAddressesOptions } from "@/lib/api-client/@tanstack/react-query.gen"
-import type { WorkspaceAddress } from "@/lib/api-client/types.gen"
+import { listAddressesOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+import type { Address } from "@/lib/api-client/types.gen"
 import {
   IconLoader2,
   IconCheck,
-  IconBuilding,
   IconMapPin,
   IconX,
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
 export type AddressEntryValue = {
-  workspace_address_id: string
+  address_id: string
   address_type: string
   residence_type: string
   is_primary: boolean
@@ -80,10 +79,10 @@ export function WizardStepAddress({
   }, [])
 
   const { data: addresses = [] } = useQuery(
-    listWorkspaceAddressesOptions({ client: apiClient })
+    listAddressesOptions({ client: apiClient })
   )
   const addressMap = useMemo(() => {
-    const m = new Map<string, WorkspaceAddress>()
+    const m = new Map<string, Address>()
     for (const a of addresses) m.set(a.id, a)
     return m
   }, [addresses])
@@ -99,9 +98,9 @@ export function WizardStepAddress({
   const updatePrimary = (id: string) => {
     for (const a of selectedAddresses) {
       onUpdate(
-        a.workspace_address_id,
+        a.address_id,
         "is_primary",
-        a.workspace_address_id === id
+        a.address_id === id
       )
     }
   }
@@ -144,11 +143,11 @@ export function WizardStepAddress({
         <ScrollArea className="h-[400px]">
           <div className="grid grid-cols-2 gap-3">
             {displayAddresses.map((entry) => {
-              const addr = addressMap.get(entry.workspace_address_id)
+              const addr = addressMap.get(entry.address_id)
               if (!addr) return null
               return (
                 <div
-                  key={entry.workspace_address_id}
+                  key={entry.address_id}
                   className={cn(
                     "relative space-y-2 rounded-lg border p-3",
                     entry.is_primary && "border-primary/50 bg-primary/5"
@@ -157,8 +156,8 @@ export function WizardStepAddress({
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => onDeselect(entry.workspace_address_id)}
-                    aria-label={`Remove ${addr.name}`}
+                    onClick={() => onDeselect(entry.address_id)}
+                    aria-label={`Remove address`}
                     className="absolute top-1.5 right-1.5 size-6"
                   >
                     <IconX className="size-3.5" />
@@ -166,14 +165,14 @@ export function WizardStepAddress({
 
                   <div className="flex items-center gap-2.5">
                     <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
-                      <IconBuilding className="size-5 text-muted-foreground" />
+                      <IconMapPin className="size-5 text-muted-foreground" />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">
-                        {addr.name}
+                        {addr.address_line_1}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
-                        {addr.full_address}
+                        {addr.address_line_2 || `${addr.district}, ${addr.province}`}
                       </p>
                     </div>
                   </div>
@@ -183,8 +182,7 @@ export function WizardStepAddress({
                       <IconMapPin className="size-3 shrink-0" />
                       <span>
                         {addr.city}
-                        {addr.state ? `, ${addr.state}` : ""}
-                        {addr.postal_code ? ` - ${addr.postal_code}` : ""}
+                        {addr.postal_code ? `, ${addr.postal_code}` : ""}
                       </span>
                     </p>
                   </div>
@@ -195,7 +193,7 @@ export function WizardStepAddress({
                       onValueChange={(val) =>
                         val &&
                         onUpdate(
-                          entry.workspace_address_id,
+                          entry.address_id,
                           "address_type",
                           val
                         )
@@ -217,7 +215,7 @@ export function WizardStepAddress({
                       onValueChange={(val) =>
                         val &&
                         onUpdate(
-                          entry.workspace_address_id,
+                          entry.address_id,
                           "residence_type",
                           val
                         )
@@ -241,7 +239,7 @@ export function WizardStepAddress({
                         name="primary-address"
                         checked={entry.is_primary}
                         onChange={() =>
-                          updatePrimary(entry.workspace_address_id)
+                          updatePrimary(entry.address_id)
                         }
                         className="size-3.5 accent-primary"
                       />

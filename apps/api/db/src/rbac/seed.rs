@@ -6,6 +6,7 @@ use crate::entity::{user::permission, user::role, user::role_permission};
 pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
     let roles = vec![
         ("admin", "Full system access"),
+        ("office_staff", "Can create and edit records but cannot delete, verify, or approve"),
         ("unknown", "Logged-in basic user"),
         ("unauthenticated", "No JWT / public user"),
     ];
@@ -90,11 +91,30 @@ pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
     let perm_map: HashMap<String, i32> = perm_ids.into_iter().collect();
 
     let admin_role_id = role_map.get("admin").unwrap();
+    let office_staff_role_id = role_map.get("office_staff").unwrap();
     let unknown_role_id = role_map.get("unknown").unwrap();
     let unauth_role_id = role_map.get("unauthenticated").unwrap();
 
     let role_perms: Vec<(&i32, Vec<&str>)> = vec![
         (admin_role_id, vec!["*:*"]),
+        (
+            office_staff_role_id,
+            vec![
+                "profile:read",
+                "profile:update",
+                "counter:read",
+                "counter:increment",
+                "file:upload",
+                "g1:application:create",
+                "g1:application:read",
+                "g1:application:update",
+                "g1:application:submit",
+                "g1:document:upload",
+                "g1:document:verify",
+                "enrollment-batch:read",
+                "g1:report:read",
+            ],
+        ),
         (
             unknown_role_id,
             vec![

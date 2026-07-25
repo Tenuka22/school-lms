@@ -18,7 +18,6 @@ import {
   IconArrowLeft,
   IconLoader2,
   IconCheck,
-  IconTrophy,
 } from "@tabler/icons-react"
 
 const CATEGORIES = [
@@ -123,18 +122,6 @@ export function ScoringDashboard({ enrollmentId }: Props) {
     : 0
   const hasMarks = totalMarks > 0
 
-  const rankedCategories = [...CATEGORIES]
-    .map((c) => {
-      const weightedMax = c.weight
-      return {
-        ...c,
-        weightedScore: hasMarks ? weightedMax * (totalMarks / 100) : 0,
-      }
-    })
-    .sort((a, b) => b.weightedScore - a.weightedScore)
-
-  const bestCategory = hasMarks ? rankedCategories[0] : null
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -151,7 +138,7 @@ export function ScoringDashboard({ enrollmentId }: Props) {
           <div>
             <h2 className="text-xl font-semibold">Scoring & Marks</h2>
             <p className="text-sm text-muted-foreground">
-              {application.full_name} &middot; {application.reference_no}
+              {application.reference_no}
             </p>
           </div>
         </div>
@@ -165,28 +152,15 @@ export function ScoringDashboard({ enrollmentId }: Props) {
         </Button>
       </div>
 
-      {hasMarks && bestCategory && (
+      {hasMarks && (
         <Card className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
-                <IconTrophy className="size-7" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Best Performing Category
-                </p>
-                <p className="text-lg font-bold">{bestCategory.label}</p>
-                <p className="text-sm text-muted-foreground">
-                  Weight: {bestCategory.weight}% &middot; Estimated
-                  contribution: {bestCategory.weightedScore.toFixed(2)} pts
-                </p>
-              </div>
               <div className="ms-auto text-right">
                 <p className="text-3xl font-bold tabular-nums">
                   {totalMarks.toFixed(2)}
                 </p>
-                <p className="text-xs text-muted-foreground">Total Marks</p>
+                <p className="text-xs text-muted-foreground">Total Marks (out of 100)</p>
               </div>
             </div>
           </CardContent>
@@ -196,7 +170,7 @@ export function ScoringDashboard({ enrollmentId }: Props) {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {CATEGORIES.map((cat) => {
           return (
-            <Card key={cat.code} className="opacity-60">
+            <Card key={cat.code}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -210,34 +184,16 @@ export function ScoringDashboard({ enrollmentId }: Props) {
               </CardHeader>
               <Separator />
               <CardContent className="space-y-2 pt-4">
-                {!hasValue && (
-                  <p className="py-4 text-center text-xs text-muted-foreground">
-                    No data provided for this category
-                  </p>
-                )}
-                {hasValue && (
-                  <>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Raw Score</span>
-                      <span className="font-mono font-medium tabular-nums">
-                        {raw.toFixed(2)} / 100
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        Weighted Score
-                      </span>
-                      <span className="font-mono font-bold tabular-nums">
-                        {weighted.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={`h-full ${cat.color} rounded-full transition-all`}
-                        style={{ width: `${raw}%` }}
-                      />
-                    </div>
-                  </>
+                <p className="text-xs text-muted-foreground">
+                  {cat.desc}
+                </p>
+                {hasMarks && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Est. Weighted</span>
+                    <span className="font-mono font-bold tabular-nums">
+                      {(cat.weight * (totalMarks / 100)).toFixed(2)}
+                    </span>
+                  </div>
                 )}
               </CardContent>
             </Card>

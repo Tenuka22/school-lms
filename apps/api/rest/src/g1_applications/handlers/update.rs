@@ -1,9 +1,10 @@
 use actix_web::{web, web::Json};
 use apistos::api_operation;
 use chrono::Utc;
+use db::entity::common::enrollment_batches;
 use db::entity::g1::applications;
 use log::info;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
@@ -27,9 +28,22 @@ pub async fn update_application(
     info!("[update_application] user={user_id:?} app={id}");
 
     let existing = applications::Entity::find_by_id(id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+
+    let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
+        .one(db.as_ref())
+        .await?
+        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+
+    let now = Utc::now();
+    if batch.status != db::entity::common::enums::BatchStatus::Open || batch.closed_at <= now {
+        return Err(ApiError::BadRequest(
+            "cannot edit application after enrollment batch closed".into(),
+        ));
+    }
 
     info!(
         "[update_application] found existing app status={:?} wizard_step={:?}",
@@ -41,13 +55,12 @@ pub async fn update_application(
     let m = body.into_inner();
 
     info!(
-        "[update_application] incoming full_name={:?} gender={:?} school_id={:?} wizard_step={:?}",
-        m.full_name, m.gender, m.school_id, m.wizard_step
+        "[update_application] incoming school_id={:?} wizard_step={:?}",
+        m.school_id, m.wizard_step
     );
     let active = applications::ActiveModel {
         id: Set(id),
         reference_no: Set(m.reference_no),
-        applied_year: Set(m.applied_year),
         school_id: Set(m.school_id),
         total_marks: Set(m.total_marks),
         rank_number: Set(m.rank_number),
@@ -60,17 +73,10 @@ pub async fn update_application(
         user_agent: Set(m.user_agent),
         created_at: Set(m.created_at),
         updated_at: Set(Utc::now()),
-        student_id: Set(m.student_id),
+        child_id: Set(m.child_id),
+        guardian_id: Set(m.guardian_id),
         batch_id: Set(m.batch_id),
         enrollment_status: Set(m.enrollment_status),
-        medium_of_instruction: Set(m.medium_of_instruction),
-        full_name: Set(m.full_name),
-        name_with_initials: Set(m.name_with_initials),
-        date_of_birth: Set(m.date_of_birth),
-        gender: Set(m.gender),
-        birth_certificate_number: Set(m.birth_certificate_number),
-        nationality: Set(m.nationality),
-        religion: Set(m.religion),
         birth_certificate_verified: Set(m.birth_certificate_verified),
         age_eligibility_verified: Set(m.age_eligibility_verified),
         residence_verified: Set(m.residence_verified),
@@ -86,6 +92,9 @@ pub async fn update_application(
         created_by: Set(m.created_by),
         updated_by: Set(m.updated_by),
         wizard_step: Set(m.wizard_step),
+        waiting_position: Set(m.waiting_position),
+        promoted_at: Set(m.promoted_at),
+        deleted_at: Set(None),
     };
 
     let saved = active.update(db.as_ref()).await?;

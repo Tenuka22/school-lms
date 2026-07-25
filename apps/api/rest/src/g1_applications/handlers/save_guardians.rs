@@ -51,6 +51,7 @@ pub async fn save_guardians(
     info!("[save_guardians] user={user_id:?} app={app_id} requested_ids={requested_ids:?}");
 
     applications::Entity::find_by_id(app_id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| {

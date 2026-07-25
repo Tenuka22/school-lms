@@ -85,6 +85,7 @@ import {
   IconCheck,
   IconUser,
   IconPencil,
+  IconAlertTriangle,
 } from "@tabler/icons-react"
 import type { Guardian, CreateGuardianBody } from "@/lib/api-client/types.gen"
 import professions from "professions"
@@ -383,7 +384,7 @@ function CreateWorkspaceAddressForm({
 }) {
   const form = useForm({
     defaultValues: addressFormDefaults,
-    validators: { onSubmit: vCreateWorkspaceAddressBody as any },
+    validators: { onSubmit: vCreateWorkspaceAddressBody as unknown as Parameters<typeof useForm<typeof addressFormDefaults>>[0]['validators']['onSubmit'] },
     onSubmit: async ({ value }) => {
       const data = value
       onSubmit({
@@ -1916,6 +1917,37 @@ function PastPupilBadge({ guardianId }: { guardianId: string }) {
   )
 }
 
+interface BlacklistEntry {
+  id: string
+  guardian_id: string
+  reason: string
+  blacklisted_at: string
+  expires_at: string
+  status: string
+}
+
+function BlacklistBadge({ entry }: { entry: BlacklistEntry }) {
+  return (
+    <HoverCard>
+      <HoverCardTrigger>
+        <span className="inline-flex items-center gap-1 rounded-md border border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium text-destructive">
+          <IconAlertTriangle className="size-3" />
+          Blacklisted
+        </span>
+      </HoverCardTrigger>
+      <HoverCardContent side="right" align="start" sideOffset={4} className="w-64 p-3 text-xs">
+        <div className="space-y-1">
+          <p className="font-medium text-destructive">Blacklisted</p>
+          <p className="text-muted-foreground">{entry.reason}</p>
+          <p className="text-muted-foreground/60">
+            Since {new Date(entry.blacklisted_at).toLocaleDateString()}
+          </p>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  )
+}
+
 function StaffBadge({ guardianId }: { guardianId: string }) {
   const { data: staffDetails } = useQuery({
     ...listStaffDetailsOptions({
@@ -2136,6 +2168,26 @@ export function GuardianSelector({ selectedIds, onSelect, onDeselect }: Props) {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
   const paged = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE)
+  const pagedIds = useMemo(() => paged.map((g) => g.id), [paged])
+
+  const { data: blacklistedMap } = useQuery({
+    queryKey: ["blacklist", "active", pagedIds],
+    queryFn: async () => {
+      if (pagedIds.length === 0) return {}
+      const res = await apiClient.get({
+        url: "/api/blacklist",
+        query: { guardian_ids: pagedIds },
+      })
+      if (res.error) return {}
+      const entries = (res.data ?? []) as BlacklistEntry[]
+      const map: Record<string, BlacklistEntry> = {}
+      for (const e of entries) {
+        map[e.guardian_id] = e
+      }
+      return map
+    },
+    enabled: pagedIds.length > 0,
+  })
 
   const handlePageChange = (p: number) => {
     setPage(Math.max(0, Math.min(p, totalPages - 1)))
@@ -2166,6 +2218,7 @@ export function GuardianSelector({ selectedIds, onSelect, onDeselect }: Props) {
         <div className="space-y-1">
           {paged.map((g) => {
             const isSelected = selectedIds.includes(g.id)
+            const blacklisted = blacklistedMap?.[g.id]
             return (
               <HoverCard key={g.id}>
                 <HoverCardTrigger>
@@ -2203,6 +2256,7 @@ export function GuardianSelector({ selectedIds, onSelect, onDeselect }: Props) {
                         {g.workplace_name && <span>{g.workplace_name}</span>}
                       </div>
                       <div className="mt-1 flex flex-wrap gap-1">
+                        {blacklisted && <BlacklistBadge entry={blacklisted} />}
                         {g.is_school_staff && <StaffBadge guardianId={g.id} />}
                         {g.is_past_pupil && (
                           <PastPupilBadge guardianId={g.id} />

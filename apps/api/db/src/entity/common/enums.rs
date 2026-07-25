@@ -135,6 +135,8 @@ pub enum StudentStatus {
 )]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum EnrollmentStatus {
+    #[sea_orm(string_value = "Draft")]
+    Draft,
     #[sea_orm(string_value = "Pending")]
     Pending,
     #[sea_orm(string_value = "Completed")]
@@ -149,8 +151,6 @@ pub enum EnrollmentStatus {
     Rejected,
     #[sea_orm(string_value = "Withdrawn")]
     Withdrawn,
-    #[sea_orm(string_value = "Removed")]
-    Removed,
 }
 
 #[derive(
@@ -172,6 +172,10 @@ pub enum BatchStatus {
     Open,
     #[sea_orm(string_value = "Closed")]
     Closed,
+    #[sea_orm(string_value = "ListsPublished")]
+    ListsPublished,
+    #[sea_orm(string_value = "AppealsPeriod")]
+    AppealsPeriod,
     #[sea_orm(string_value = "Archived")]
     Archived,
 }
@@ -326,6 +330,10 @@ pub enum AuditOperation {
     Mark,
     #[sea_orm(string_value = "AppealDecide")]
     AppealDecide,
+    #[sea_orm(string_value = "ListGenerate")]
+    ListGenerate,
+    #[sea_orm(string_value = "Promote")]
+    Promote,
 }
 
 #[derive(
@@ -762,6 +770,10 @@ pub enum AuditAction {
     Mark,
     #[sea_orm(string_value = "APPEAL_DECIDE")]
     AppealDecide,
+    #[sea_orm(string_value = "LIST_GENERATE")]
+    ListGenerate,
+    #[sea_orm(string_value = "PROMOTE")]
+    Promote,
 }
 
 #[derive(

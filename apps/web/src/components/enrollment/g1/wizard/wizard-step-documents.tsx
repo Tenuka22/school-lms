@@ -203,7 +203,8 @@ export function WizardStepDocuments({
   const removeDoc = useCallback(
     async (docKey: string) => {
       const doc = docsRef.current.find((d) => d.doc_type === docKey)
-      if (doc?.file_key) {
+      if (!doc) return
+      if (doc.file_key) {
         try {
           await apiClient.delete({
             url: `/api/uploads/${encodeURIComponent(doc.file_key)}`,

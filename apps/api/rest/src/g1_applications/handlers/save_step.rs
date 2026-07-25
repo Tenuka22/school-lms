@@ -2,10 +2,11 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
+use db::entity::common::enrollment_batches;
 use db::entity::g1::applications;
 use log::info;
 use schemars::JsonSchema;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -42,12 +43,25 @@ pub async fn save_wizard_step(
     );
 
     let existing = applications::Entity::find_by_id(app_id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| {
             info!("[save_wizard_step] application {app_id} not found");
             ApiError::NotFound("Application not found".into())
         })?;
+
+    let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
+        .one(db.as_ref())
+        .await?
+        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+
+    let now = Utc::now();
+    if batch.status != db::entity::common::enums::BatchStatus::Open || batch.closed_at <= now {
+        return Err(ApiError::BadRequest(
+            "cannot save wizard step after enrollment batch closed".into(),
+        ));
+    }
 
     info!(
         "[save_wizard_step] current wizard_step={:?} -> setting to {step}",

@@ -148,7 +148,7 @@ export function WizardStepSiblings({
           </Button>
           <Button
             onClick={handleNext}
-            disabled={status !== "idle" || selectedStudentIds.length === 0}
+            disabled={status !== "idle"}
           >
             {status === "saving" && (
               <IconLoader2 className="mr-1.5 size-4 animate-spin" />

@@ -38,6 +38,7 @@ pub async fn list_schools(
             id: s.id,
             name_si: s.school_name_si,
             name_en: s.school_name_en,
+            district_id: s.district_id,
         })
         .collect();
 
@@ -49,4 +50,5 @@ pub struct SchoolSummary {
     pub id: uuid::Uuid,
     pub name_si: String,
     pub name_en: Option<String>,
+    pub district_id: Option<uuid::Uuid>,
 }

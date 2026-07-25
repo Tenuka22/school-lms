@@ -3,9 +3,9 @@ pub mod handlers;
 use apistos::web;
 
 use handlers::{
-    create, create_sibling, delete, get, get_documents, get_guardians, get_siblings,
-    get_workspace_addresses, list, save_documents, save_guardians, save_siblings, save_step,
-    save_workspace_addresses, update,
+    create, create_sibling, delete, get, get_addresses, get_documents, get_guardians,
+    get_siblings, list, save_addresses, save_documents, save_guardians, save_siblings,
+    save_step, update,
 };
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
@@ -48,12 +48,12 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
             web::put().to(save_guardians::save_guardians),
         )
         .route(
-            "/g1-applications/{id}/workspace-addresses",
-            web::get().to(get_workspace_addresses::get_application_workspace_addresses),
+            "/g1-applications/{id}/addresses",
+            web::get().to(get_addresses::get_application_addresses),
         )
         .route(
-            "/g1-applications/{id}/workspace-addresses",
-            web::put().to(save_workspace_addresses::save_workspace_addresses),
+            "/g1-applications/{id}/addresses",
+            web::put().to(save_addresses::save_addresses),
         )
         .route(
             "/g1-applications/{id}/siblings",

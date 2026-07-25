@@ -1,7 +1,7 @@
 use actix_web::{web, web::Json};
 use apistos::api_operation;
 use db::entity::g1::applications;
-use sea_orm::{DatabaseConnection, EntityTrait};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
@@ -18,6 +18,7 @@ pub async fn get_application(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let application = applications::Entity::find_by_id(id.into_inner())
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;

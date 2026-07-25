@@ -1,6 +1,10 @@
 mod auth;
+mod blacklist;
 mod counter;
 pub mod docs;
+mod addresses;
+mod children;
+mod districts;
 mod enrollment_batches;
 pub mod error;
 mod g1_applications;
@@ -24,10 +28,14 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
                 actix_web::middleware::TrailingSlash::Trim,
             ))
             .wrap(auth::AuthMiddleware)
+            .configure(blacklist::routes)
+            .configure(children::routes)
             .configure(counter::routes)
+            .configure(districts::routes)
             .configure(g1_applications::routes)
             .configure(enrollment_batches::routes)
             .configure(guardians::routes)
+            .configure(addresses::routes)
             .configure(past_pupil_details::routes)
             .configure(schools::routes)
             .configure(staff_details::routes)

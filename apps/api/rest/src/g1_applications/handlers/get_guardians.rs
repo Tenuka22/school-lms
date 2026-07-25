@@ -28,6 +28,7 @@ pub async fn get_application_guardians(
     let app_id = id.into_inner();
 
     applications::Entity::find_by_id(app_id)
+        .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;

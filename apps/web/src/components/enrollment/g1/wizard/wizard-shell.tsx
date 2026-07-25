@@ -9,26 +9,31 @@ import {
   getApplicationOptions,
   getApplicationQueryKey,
   getApplicationGuardiansOptions,
-  getApplicationWorkspaceAddressesOptions,
+  getApplicationAddressesOptions,
   getApplicationSiblingsOptions,
   getApplicationDocumentsOptions,
   listApplicationsQueryKey,
   updateApplicationMutation,
   saveWizardStepMutation,
   saveGuardiansMutation,
-  saveWorkspaceAddressesMutation,
+  saveAddressesMutation,
   saveSiblingsMutation,
   saveApplicationDocumentsMutation,
-  listWorkspaceAddressesOptions,
+  listAddressesOptions,
   listGuardiansOptions,
+  createChildMutation,
+  updateChildMutation,
+  getChildOptions,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import type {
   Gender,
   Nationality,
   MediumOfInstruction,
-  G1Category,
   Religion,
+  Child,
+  G1Category,
+  G1Application,
 } from "@/lib/api-client/types.gen"
 import { Button } from "@/components/ui/button"
 import { WizardStepChild } from "./wizard-step-child"
@@ -62,7 +67,6 @@ export function WizardShell() {
   const enrollmentId = params.enrollment_id
   const [step, setStep] = useState(1)
   const [savedSteps, setSavedSteps] = useState<number>(0)
-  const [completed, setCompleted] = useState(false)
   const initialStepSet = useRef(false)
 
   const { data: application } = useQuery(
@@ -81,7 +85,7 @@ export function WizardShell() {
   )
 
   const { data: applicationAddressEntries } = useQuery(
-    getApplicationWorkspaceAddressesOptions({
+    getApplicationAddressesOptions({
       path: { id: enrollmentId },
       client: apiClient,
     })
@@ -101,24 +105,28 @@ export function WizardShell() {
     })
   )
 
-  const { data: allWorkspaceAddresses = [] } = useQuery(
-    listWorkspaceAddressesOptions({ client: apiClient })
+  const { data: allAddresses = [] } = useQuery(
+    listAddressesOptions({ client: apiClient })
   )
 
-  useEffect(() => {
-    if (!application) return
-    const dbStep = application.wizard_step ?? 0
-    if (dbStep >= 0) {
-      setSavedSteps((prev) => Math.max(prev, dbStep))
-    }
-    if (dbStep === 6) {
-      setCompleted(true)
-    }
-    if (!initialStepSet.current && dbStep >= 1) {
-      setStep(dbStep + 1)
-      initialStepSet.current = true
-    }
-  }, [application])
+useEffect(() => {
+     if (!application) return
+     const dbStep = application.wizard_step ?? 0
+     if (dbStep >= 0) {
+       setSavedSteps((prev) => Math.max(prev, dbStep))
+     }
+     if (!initialStepSet.current && dbStep >= 1) {
+       setStep(dbStep + 1)
+       initialStepSet.current = true
+     }
+   }, [application])
+
+  const [childId, setChildId] = useState<string | null>(null)
+
+  const { data: childRecord } = useQuery({
+    ...getChildOptions({ path: { id: application?.child_id ?? "" }, client: apiClient }),
+    enabled: !!application?.child_id,
+  })
 
   const [childData, setChildData] = useState<ChildFormData>({
     full_name: "",
@@ -129,9 +137,27 @@ export function WizardShell() {
     religion: "",
     birth_certificate_number: "",
     medium_of_instruction: "Sinhala" as MediumOfInstruction,
-    category: "" as G1Category | "",
+    category: "",
     overseas_arrival_date: "",
   })
+
+  useEffect(() => {
+    if (childRecord) {
+      setChildId(childRecord.id)
+      setChildData({
+        full_name: childRecord.full_name,
+        name_with_initials: childRecord.name_with_initials,
+        date_of_birth: childRecord.date_of_birth,
+        gender: childRecord.gender,
+        nationality: childRecord.nationality,
+        religion: childRecord.religion ?? "",
+        birth_certificate_number: childRecord.birth_certificate_number ?? "",
+        medium_of_instruction: childRecord.medium_of_instruction,
+        category: "" as string,
+        overseas_arrival_date: "",
+      })
+    }
+  }, [childRecord])
 
   const [guardianIds, setGuardianIds] = useState<GuardianFormData>([])
   const initialGuardianLoad = useRef(false)
@@ -156,7 +182,7 @@ export function WizardShell() {
       initialAddressLoad.current = true
       setSelectedAddressEntries(
         applicationAddressEntries.addresses.map((a) => ({
-          workspace_address_id: a.workspace_address_id,
+          address_id: a.address_id,
           address_type: a.address_type,
           residence_type: a.residence_type,
           is_primary: a.is_primary,
@@ -196,6 +222,9 @@ export function WizardShell() {
     updateApplicationMutation({ client: apiClient })
   )
 
+  const createChild = useMutation(createChildMutation({ client: apiClient }))
+  const updateChild = useMutation(updateChildMutation({ client: apiClient }))
+
   const saveStep = useMutation(saveWizardStepMutation({ client: apiClient }))
 
   const saveGuardians = useMutation(
@@ -203,7 +232,7 @@ export function WizardShell() {
   )
 
   const saveAddresses = useMutation(
-    saveWorkspaceAddressesMutation({ client: apiClient })
+    saveAddressesMutation({ client: apiClient })
   )
 
   const saveSiblings = useMutation(saveSiblingsMutation({ client: apiClient }))
@@ -229,26 +258,50 @@ export function WizardShell() {
     [enrollmentId, saveStep]
   )
 
-  const autoSaveChild = useCallback(
+  const saveChildRecord = useCallback(
     async (data: ChildFormData) => {
+      const childPayload = {
+        full_name: data.full_name,
+        name_with_initials: data.name_with_initials,
+        date_of_birth: data.date_of_birth,
+        gender: data.gender as Gender,
+        nationality: data.nationality as Nationality,
+        religion: (data.religion || null) as Religion | null,
+        birth_certificate_number: data.birth_certificate_number || null,
+        medium_of_instruction: data.medium_of_instruction as MediumOfInstruction,
+      } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
+
       try {
+        let savedChild: Child
+        if (childId) {
+          savedChild = await updateChild.mutateAsync({
+            path: { id: childId },
+            body: { ...childPayload, id: childId },
+          })
+        } else {
+          savedChild = await createChild.mutateAsync({
+            body: childPayload as Child,
+          })
+          setChildId(savedChild.id)
+        }
+
+        const appBody = {
+          child_id: savedChild.id,
+          category: (data.category || undefined) as G1Category | undefined,
+          overseas_arrival_date: data.overseas_arrival_date || null,
+          school_id: SEEDED_SCHOOL_ID,
+          batch_id: application?.batch_id ?? "",
+          wizard_step: 1,
+          age_eligibility_verified: false,
+          alternative_age_certificate: false,
+          birth_certificate_verified: false,
+          category_verified: false,
+          interview_completed: false,
+          residence_verified: false,
+        } satisfies G1Application
         await updateApplication.mutateAsync({
           path: { id: enrollmentId },
-          body: {
-            full_name: data.full_name,
-            name_with_initials: data.name_with_initials,
-            date_of_birth: data.date_of_birth,
-            gender: data.gender,
-            nationality: data.nationality,
-            religion: (data.religion || null) as Religion | null,
-            birth_certificate_number: data.birth_certificate_number || null,
-            medium_of_instruction: data.medium_of_instruction,
-            category: data.category || undefined,
-            overseas_arrival_date: data.overseas_arrival_date || null,
-            school_id: SEEDED_SCHOOL_ID,
-            batch_id: application?.batch_id ?? "",
-            wizard_step: 1,
-          },
+          body: appBody,
         })
         setSavedSteps(1)
         queryClient.invalidateQueries({
@@ -261,40 +314,36 @@ export function WizardShell() {
         // silent fail for auto-save
       }
     },
-    [enrollmentId, updateApplication, application]
+    [enrollmentId, childId, updateApplication, createChild, updateChild, application]
   )
 
   const handleComplete = useCallback(async () => {
     try {
+      const completeBody = {
+        school_id: SEEDED_SCHOOL_ID,
+        enrollment_status: "Completed",
+        batch_id: application?.batch_id ?? "",
+        wizard_step: 6,
+        age_eligibility_verified: false,
+        alternative_age_certificate: false,
+        birth_certificate_verified: false,
+        category_verified: false,
+        interview_completed: false,
+        residence_verified: false,
+      } satisfies G1Application
       await updateApplication.mutateAsync({
         path: { id: enrollmentId },
-        body: {
-          full_name: childData.full_name,
-          name_with_initials: childData.name_with_initials,
-          date_of_birth: childData.date_of_birth,
-          gender: childData.gender,
-          nationality: childData.nationality,
-          religion: (childData.religion || null) as Religion | null,
-          birth_certificate_number: childData.birth_certificate_number || null,
-          school_id: SEEDED_SCHOOL_ID,
-          medium_of_instruction: childData.medium_of_instruction,
-          category: childData.category || undefined,
-          overseas_arrival_date: childData.overseas_arrival_date || null,
-          enrollment_status: "Completed" as any,
-          batch_id: application?.batch_id ?? "",
-          wizard_step: 6,
-        },
+        body: completeBody,
       })
       queryClient.invalidateQueries({
         queryKey: listApplicationsQueryKey({ client: apiClient }),
       })
-      setSavedSteps(6)
-      setCompleted(true)
-      toast.success("Enrollment locked. Awaiting processing.")
+       setSavedSteps(6)
+       toast.success("Enrollment completed. Awaiting processing.")
     } catch {
       toast.error("Failed to complete enrollment")
     }
-  }, [enrollmentId, updateApplication, childData, application, navigate])
+  }, [enrollmentId, updateApplication, application, navigate])
 
   const selectedGuardians = (guardians ?? []).filter((g) =>
     guardianIds.includes(g.id)
@@ -372,98 +421,7 @@ export function WizardShell() {
       </div>
 
       <div className="flex gap-6">
-        {completed ? (
-          <div className="flex-1 space-y-6">
-            <div className="space-y-3 rounded-xl border border-green-200 bg-green-50 p-6 text-center dark:border-green-900 dark:bg-green-950/30">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-green-500 text-2xl font-bold text-white">
-                ✓
-              </div>
-              <h2 className="text-xl font-bold text-green-700 dark:text-green-400">
-                Enrollment Locked
-              </h2>
-              <p className="mx-auto max-w-md text-muted-foreground">
-                This enrollment has been completed and locked. No further
-                changes can be made. The application is now awaiting processing.
-              </p>
-              <div className="flex items-center justify-center gap-6 pt-2 text-sm">
-                <div className="text-center">
-                  <div className="font-medium text-foreground">
-                    {application?.full_name || childData.full_name}
-                  </div>
-                  <div className="text-muted-foreground">
-                    {application?.reference_no}
-                  </div>
-                </div>
-                <div className="h-8 w-px bg-border" />
-                <div className="text-center">
-                  <div className="font-medium text-foreground">Completed</div>
-                  <div className="text-muted-foreground">Status</div>
-                </div>
-                <div className="h-8 w-px bg-border" />
-                <div className="text-center">
-                  <div className="font-medium text-foreground tabular-nums">
-                    {application?.applied_year}
-                  </div>
-                  <div className="text-muted-foreground">Year</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4 rounded-xl border bg-card p-6">
-              <h3 className="text-lg font-semibold">Submission Summary</h3>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Full Name</span>
-                  <span className="font-medium">{childData.full_name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Name with Initials
-                  </span>
-                  <span className="font-medium">
-                    {childData.name_with_initials}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Date of Birth</span>
-                  <span className="font-medium">{childData.date_of_birth}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Gender</span>
-                  <span className="font-medium">{childData.gender}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Nationality</span>
-                  <span className="font-medium">{childData.nationality}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Medium</span>
-                  <span className="font-medium">
-                    {childData.medium_of_instruction}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Category</span>
-                  <span className="font-medium">
-                    {childData.category || "—"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  navigate({ to: "/student-management/enrollment/g1" })
-                }
-              >
-                &larr; Back to Pipeline
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
+        <>
             <WizardSidebar
               currentStep={step}
               childData={childData}
@@ -475,18 +433,18 @@ export function WizardShell() {
                 setGuardianIds((prev) => prev.filter((s) => s !== id))
               }
               selectedAddressIds={selectedAddressEntries.map(
-                (a) => a.workspace_address_id
+                (a) => a.address_id
               )}
               onAddressSelect={(id) => {
                 if (
                   !selectedAddressEntries.some(
-                    (a) => a.workspace_address_id === id
+                    (a) => a.address_id === id
                   )
                 ) {
                   setSelectedAddressEntries((prev) => [
                     ...prev,
                     {
-                      workspace_address_id: id,
+                      address_id: id,
                       address_type: "Permanent",
                       residence_type: "Owned",
                       is_primary: prev.length === 0,
@@ -496,7 +454,7 @@ export function WizardShell() {
               }}
               onAddressDeselect={(id) => {
                 setSelectedAddressEntries((prev) => {
-                  const next = prev.filter((a) => a.workspace_address_id !== id)
+                  const next = prev.filter((a) => a.address_id !== id)
                   if (next.length > 0 && !next.some((a) => a.is_primary)) {
                     return next.map((a, i) =>
                       i === 0 ? { ...a, is_primary: true } : a
@@ -520,28 +478,10 @@ export function WizardShell() {
             <div className="flex-1">
               {step === 1 && (
                 <WizardStepChild
-                  defaultValues={
-                    application
-                      ? {
-                          full_name: application.full_name,
-                          name_with_initials: application.name_with_initials,
-                          date_of_birth: application.date_of_birth,
-                          gender: application.gender,
-                          nationality: application.nationality,
-                          religion: application.religion,
-                          birth_certificate_number:
-                            application.birth_certificate_number,
-                          medium_of_instruction:
-                            application.medium_of_instruction,
-                          category: application.category,
-                          overseas_arrival_date:
-                            application.overseas_arrival_date,
-                        }
-                      : childData
-                  }
+                  defaultValues={childData}
                   onSave={async (data) => {
                     setChildData(data)
-                    await autoSaveChild(data)
+                    await saveChildRecord(data)
                   }}
                   onNext={() => setStep(2)}
                 />
@@ -572,7 +512,7 @@ export function WizardShell() {
                   onUpdate={(id, field, value) => {
                     setSelectedAddressEntries((prev) =>
                       prev.map((a) =>
-                        a.workspace_address_id === id
+                        a.address_id === id
                           ? { ...a, [field]: value }
                           : a
                       )
@@ -581,7 +521,7 @@ export function WizardShell() {
                   onDeselect={(id) => {
                     setSelectedAddressEntries((prev) => {
                       const next = prev.filter(
-                        (a) => a.workspace_address_id !== id
+                        (a) => a.address_id !== id
                       )
                       if (next.length > 0 && !next.some((a) => a.is_primary)) {
                         return next.map((a, i) =>
@@ -678,17 +618,16 @@ export function WizardShell() {
                     quota: 100,
                   }}
                   selectedAddresses={selectedAddressEntries}
-                  workspaceAddresses={allWorkspaceAddresses}
+                  addresses={allAddresses}
                   siblingIds={selectedSiblingIds}
                   documents={documentData}
                   onBack={() => setStep(5)}
                   onComplete={handleComplete}
                 />
               )}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
+             </div>
+           </>
+       </div>
+     </div>
+   )
+ }

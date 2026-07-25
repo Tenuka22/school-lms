@@ -17,6 +17,11 @@ fn default_now() -> DateTime<Utc> {
     Utc::now()
 }
 
+fn default_closed_at() -> DateTime<Utc> {
+    let now = Utc::now();
+    DateTime::from(now + chrono::Duration::days(365))
+}
+
 fn default_student_allocation() -> i32 {
     200
 }
@@ -45,6 +50,10 @@ fn default_special_weight() -> i16 {
     1
 }
 
+fn default_waiting_list_size() -> i32 {
+    20
+}
+
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
 )]
@@ -63,6 +72,18 @@ pub struct Model {
     pub enrollment_type: EnrollmentType,
     #[serde(default = "default_batch_status")]
     pub status: BatchStatus,
+
+    #[serde(default = "default_now")]
+    pub opened_at: DateTime<Utc>,
+    #[serde(default = "default_closed_at")]
+    pub closed_at: DateTime<Utc>,
+    #[serde(default)]
+    pub list_published_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub appeal_deadline_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub finalized_at: Option<DateTime<Utc>>,
+
     #[serde(default = "default_now")]
     pub created_at: DateTime<Utc>,
     #[serde(default)]
@@ -73,21 +94,19 @@ pub struct Model {
 
     #[serde(default = "default_proximity_weight")]
     pub proximity_weight: i16,
-
     #[serde(default = "default_staff_weight")]
     pub staff_weight: i16,
-
     #[serde(default = "default_sibling_weight")]
     pub sibling_weight: i16,
-
     #[serde(default = "default_alumni_weight")]
     pub alumni_weight: i16,
-
     #[serde(default = "default_govt_weight")]
     pub govt_weight: i16,
-
     #[serde(default = "default_special_weight")]
     pub special_weight: i16,
+
+    #[serde(default = "default_waiting_list_size")]
+    pub waiting_list_size: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

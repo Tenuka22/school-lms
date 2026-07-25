@@ -8,7 +8,6 @@ import * as v from "valibot"
 import {
   IconPlus,
   IconFolderPlus,
-  IconCalendar,
   IconPencil,
   IconTrash,
   IconLoader2,
@@ -29,12 +28,6 @@ import {
   deleteApplication,
 } from "@/lib/api-client/sdk.gen"
 import { queryClient } from "@/router"
-import {
-  vGender,
-  vNationality,
-  vMediumOfInstruction,
-  vReligion,
-} from "@/lib/api-client/valibot.gen"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -53,19 +46,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
 import { formatDate } from "@/lib/format"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
@@ -109,16 +89,10 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-col
 
 import { Route } from "@/routes/_authenticated/student-management/enrollment/g1"
 import type { DashboardSearch } from "@/routes/_authenticated/student-management/enrollment/g1"
-import type { G1Application } from "@/lib/api-client/types.gen"
+import type { ApplicationWithChild } from "@/lib/api-client/types.gen"
 
 const vDialogApplication = v.object({
-  full_name: v.string(),
-  name_with_initials: v.string(),
-  date_of_birth: v.pipe(v.string(), v.isoDate()),
-  gender: vGender,
-  nationality: vNationality,
-  medium_of_instruction: vMediumOfInstruction,
-  religion: vReligion,
+  batch_id: v.string(),
 })
 
 const WEIGHT_INFO: Record<string, { label: string; desc: string }> = {
@@ -190,19 +164,11 @@ const LANE_CONFIG = [
 const CURRENT_YEAR = new Date().getFullYear()
 
 const FILTER_KEYS = [
-  "full_name",
-  "name_with_initials",
-  "gender",
-  "nationality",
   "category",
-  "medium_of_instruction",
   "enrollment_status",
 ] as const
 const ENUM_KEYS = new Set([
-  "gender",
-  "nationality",
   "category",
-  "medium_of_instruction",
   "enrollment_status",
 ])
 
@@ -230,7 +196,6 @@ export function PipeDashboard() {
   const search: DashboardSearch = Route.useSearch()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [batchId, setBatchId] = useState("")
-  const [newDialogOpen, setNewDialogOpen] = useState(false)
   const [batchDialogOpen, setBatchDialogOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -245,12 +210,7 @@ export function PipeDashboard() {
         page_size: search.page_size ?? undefined,
         sort_by: search.sort_by ?? undefined,
         sort_order: search.sort_order ?? undefined,
-        full_name: search.full_name ?? undefined,
-        name_with_initials: search.name_with_initials ?? undefined,
-        gender: search.gender ?? undefined,
-        nationality: search.nationality ?? undefined,
         category: search.category ?? undefined,
-        medium_of_instruction: search.medium_of_instruction ?? undefined,
         enrollment_status: search.enrollment_status ?? undefined,
         batch_id: batchId || null,
       },
@@ -274,19 +234,22 @@ export function PipeDashboard() {
 
   const enrollmentForm = useForm({
     defaultValues: {
-      full_name: "",
-      name_with_initials: "",
-      date_of_birth: "",
-      gender: "Male",
-      nationality: "SriLankan",
-      medium_of_instruction: "Sinhala",
-      religion: "Buddhism",
+      batch_id: "",
     },
     validators: { onSubmit: vDialogApplication },
     onSubmit: async ({ value }) => {
       if (!batchId) return
       const { data, error } = await createApplication({
-        body: { ...value, batch_id: batchId } as G1Application,
+        body: {
+          ...value,
+          batch_id: batchId,
+          age_eligibility_verified: false,
+          alternative_age_certificate: false,
+          birth_certificate_verified: false,
+          category_verified: false,
+          interview_completed: false,
+          residence_verified: false,
+        },
         client: apiClient,
       })
       if (error || !data) {
@@ -297,7 +260,6 @@ export function PipeDashboard() {
         return
       }
       toast.success("Enrollment created. Complete all details.")
-      setNewDialogOpen(false)
       enrollmentForm.reset()
       queryClient.invalidateQueries({
         queryKey: listApplicationsQueryKey({ client: apiClient }),
@@ -324,7 +286,7 @@ export function PipeDashboard() {
     onSubmit: async ({ value }) => {
       try {
         const r = await createBatch({ body: value, client: apiClient })
-        const newBatchId = r.data?.id ?? (r.data as any)?.id
+        const newBatchId = r.data?.id
         toast.success("Batch created")
         setBatchDialogOpen(false)
         batchForm.reset()
@@ -450,14 +412,44 @@ export function PipeDashboard() {
     [pagination, navigate]
   )
 
-  const columns = useMemo<ColumnDef<G1Application>[]>(
+  const columns = useMemo<ColumnDef<ApplicationWithChild>[]>(
     () => [
       {
-        accessorKey: "full_name",
+        accessorKey: "reference_no",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Reference" />
+        ),
+        enableColumnFilter: false,
+        meta: { label: "Reference No", variant: "text" },
+        cell: ({ getValue, row }) => {
+          const ref = getValue() as string | null | undefined
+          return (
+            <button
+              type="button"
+              className="text-left font-medium transition-colors hover:text-primary hover:underline"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate({
+                  to: "/student-management/enrollment/g1/$enrollment_id",
+                  params: { enrollment_id: row.original.id! },
+                })
+              }}
+            >
+              {ref || (
+                <span className="text-sm text-muted-foreground italic">
+                  No Reference
+                </span>
+              )}
+            </button>
+          )
+        },
+      },
+      {
+        accessorKey: "child_full_name",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Full Name" />
         ),
-        enableColumnFilter: true,
+        enableColumnFilter: false,
         meta: { label: "Full Name", variant: "text" },
         cell: ({ getValue, row }) => {
           const name = getValue() as string | null | undefined
@@ -483,11 +475,11 @@ export function PipeDashboard() {
         },
       },
       {
-        accessorKey: "name_with_initials",
+        accessorKey: "child_name_with_initials",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Initials" />
         ),
-        enableColumnFilter: true,
+        enableColumnFilter: false,
         meta: { label: "Name with Initials", variant: "text" },
         cell: ({ getValue }) => {
           const val = getValue() as string | null | undefined
@@ -499,7 +491,7 @@ export function PipeDashboard() {
         },
       },
       {
-        accessorKey: "date_of_birth",
+        accessorKey: "child_date_of_birth",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="DOB" />
         ),
@@ -511,7 +503,7 @@ export function PipeDashboard() {
         },
       },
       {
-        accessorKey: "gender",
+        accessorKey: "child_gender",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Gender" />
         ),
@@ -525,11 +517,11 @@ export function PipeDashboard() {
           ],
         },
         cell: ({ getValue }) => (
-          <EnumBadge column="gender" value={getValue() as string} />
+          <EnumBadge column="child_gender" value={getValue() as string} />
         ),
       },
       {
-        accessorKey: "nationality",
+        accessorKey: "child_nationality",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Nationality" />
         ),
@@ -544,7 +536,7 @@ export function PipeDashboard() {
           ],
         },
         cell: ({ getValue }) => (
-          <EnumBadge column="nationality" value={getValue() as string} />
+          <EnumBadge column="child_nationality" value={getValue() as string} />
         ),
       },
       {
@@ -574,7 +566,7 @@ export function PipeDashboard() {
         ),
       },
       {
-        accessorKey: "medium_of_instruction",
+        accessorKey: "child_medium_of_instruction",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Medium" />
         ),
@@ -589,7 +581,7 @@ export function PipeDashboard() {
         },
         cell: ({ getValue }) => (
           <EnumBadge
-            column="medium_of_instruction"
+            column="child_medium_of_instruction"
             value={getValue() as string}
           />
         ),
@@ -729,7 +721,7 @@ export function PipeDashboard() {
                   <AlertDialogTitle>Delete Enrollment</AlertDialogTitle>
                   <AlertDialogDescription>
                     Are you sure you want to delete{" "}
-                    {row.original.full_name || "this enrollment"}? This action
+                    {row.original.reference_no || "this enrollment"}? This action
                     cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
@@ -884,9 +876,8 @@ export function PipeDashboard() {
         <h1 className="text-2xl font-bold tracking-tight">
           Grade 1 Admissions Pipeline
         </h1>
-        <Button onClick={() => setNewDialogOpen(true)} disabled={!batchId}>
-          <IconPlus className="mr-2 size-4" />{" "}
-          {batchId ? "New Enrollment" : "Select Batch"}
+        <Button onClick={() => navigate({ to: "/student-management/enrollment/g1" })}>
+          <IconPlus className="mr-2 size-4" /> New Enrollment
         </Button>
       </div>
 
@@ -1196,243 +1187,6 @@ export function PipeDashboard() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={newDialogOpen} onOpenChange={setNewDialogOpen}>
-        <DialogContent className="max-h-[75vh] overflow-y-auto sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>New Enrollment</DialogTitle>
-            <DialogDescription>
-              Fill in the child's details to create a PENDING enrollment.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            id="new-enrollment-form"
-            onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              enrollmentForm.handleSubmit()
-            }}
-          >
-            <FieldGroup>
-              <enrollmentForm.Field
-                name="full_name"
-                children={(field: any) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="John Doe"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <enrollmentForm.Field
-                name="name_with_initials"
-                children={(field: any) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        Name with Initials
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="J. Doe"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <enrollmentForm.Field
-                name="date_of_birth"
-                children={(field: any) => {
-                  const dateValue = field.state.value
-                    ? new Date(field.state.value + "T12:00:00")
-                    : undefined
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        Date of Birth
-                      </FieldLabel>
-                      <Popover>
-                        <PopoverTrigger
-                          id={field.name}
-                          aria-invalid={isInvalid}
-                          render={
-                            <Button
-                              variant="outline"
-                              className="w-full justify-start text-left font-normal"
-                            >
-                              <IconCalendar className="mr-2 size-4 shrink-0" />
-                              {dateValue ? (
-                                formatDate(dateValue)
-                              ) : (
-                                <span className="text-muted-foreground">
-                                  Pick a date
-                                </span>
-                              )}
-                            </Button>
-                          }
-                        />
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={dateValue}
-                            defaultMonth={dateValue}
-                            onSelect={(d) => {
-                              if (!d) {
-                                field.handleChange("")
-                                return
-                              }
-                              const y = d.getFullYear()
-                              const m = String(d.getMonth() + 1).padStart(
-                                2,
-                                "0"
-                              )
-                              const day = String(d.getDate()).padStart(2, "0")
-                              field.handleChange(`${y}-${m}-${day}`)
-                            }}
-                            captionLayout="dropdown"
-                            autoFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <enrollmentForm.Field
-                name="gender"
-                children={(field: any) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
-                      <Select
-                        name={field.name}
-                        value={field.state.value}
-                        onValueChange={(val) => val && field.handleChange(val)}
-                      >
-                        <SelectTrigger id={field.name} aria-invalid={isInvalid}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Male", "Female"].map((opt) => (
-                            <SelectItem key={opt} value={opt}>
-                              {opt}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <enrollmentForm.Field
-                name="nationality"
-                children={(field: any) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Nationality</FieldLabel>
-                      <Select
-                        name={field.name}
-                        value={field.state.value}
-                        onValueChange={(val) => val && field.handleChange(val)}
-                      >
-                        <SelectTrigger id={field.name} aria-invalid={isInvalid}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["SriLankan", "DualCitizen", "Other"].map((opt) => (
-                            <SelectItem key={opt} value={opt}>
-                              {opt}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <enrollmentForm.Field
-                name="medium_of_instruction"
-                children={(field: any) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        Medium of Instruction
-                      </FieldLabel>
-                      <Select
-                        name={field.name}
-                        value={field.state.value}
-                        onValueChange={(val) => val && field.handleChange(val)}
-                      >
-                        <SelectTrigger id={field.name} aria-invalid={isInvalid}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["Sinhala", "Tamil"].map((opt) => (
-                            <SelectItem key={opt} value={opt}>
-                              {opt}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-            </FieldGroup>
-          </form>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNewDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" form="new-enrollment-form">
-              Create
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

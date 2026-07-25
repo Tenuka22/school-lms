@@ -1,5 +1,5 @@
 use super::super::common::enums::{
-    EnrollmentStatus, G1Category, Gender, MediumOfInstruction, Nationality, Religion,
+    ApplicationListCategory, EnrollmentStatus, G1Category,
 };
 use apistos::ApiComponent;
 use chrono::{DateTime, NaiveDate, Utc};
@@ -12,19 +12,23 @@ fn default_id() -> Uuid {
 }
 
 fn default_enrollment_status() -> EnrollmentStatus {
-    EnrollmentStatus::Pending
+    EnrollmentStatus::Draft
 }
 
 fn default_reference_no() -> String {
-    format!("TMP-{}", uuid::Uuid::new_v4())
+    format!("DRAFT-{}", uuid::Uuid::new_v4())
 }
 
-fn default_applied_year() -> i16 {
-    0
+fn default_guardian_id() -> Uuid {
+    Uuid::nil()
 }
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()
+}
+
+fn default_child_id() -> Uuid {
+    Uuid::nil()
 }
 
 #[derive(
@@ -41,14 +45,14 @@ pub struct Model {
     #[serde(default = "default_reference_no")]
     pub reference_no: String,
 
-    #[serde(default = "default_applied_year")]
-    pub applied_year: i16,
     #[serde(default)]
     pub school_id: Option<Uuid>,
 
     pub total_marks: Option<Decimal>,
     pub rank_number: Option<i32>,
-    pub list_category: Option<String>,
+    pub list_category: Option<ApplicationListCategory>,
+    pub waiting_position: Option<i32>,
+    pub promoted_at: Option<DateTime<Utc>>,
 
     pub submitted_at: Option<DateTime<Utc>>,
     pub verified_at: Option<DateTime<Utc>>,
@@ -63,82 +67,51 @@ pub struct Model {
     #[serde(default = "default_now")]
     pub updated_at: DateTime<Utc>,
 
-    #[serde(default)]
-    pub student_id: Option<Uuid>,
+    #[serde(default = "default_child_id")]
+    pub child_id: Uuid,
+
+    #[serde(default = "default_guardian_id")]
+    pub guardian_id: Uuid,
 
     pub batch_id: Uuid,
 
     #[serde(default = "default_enrollment_status")]
     pub enrollment_status: EnrollmentStatus,
 
-    pub medium_of_instruction: MediumOfInstruction,
-    pub full_name: String,
-    pub name_with_initials: String,
-    pub date_of_birth: NaiveDate,
-    pub gender: Gender,
-
-    #[serde(default)]
-    pub birth_certificate_number: Option<String>,
-
-    pub nationality: Nationality,
-
-    #[serde(default)]
-    pub religion: Option<Religion>,
-
-    #[serde(default)]
-    pub birth_certificate_verified: bool,
-
-    #[serde(default)]
-    pub age_eligibility_verified: bool,
-
-    #[serde(default)]
-    pub residence_verified: bool,
-
-    #[serde(default)]
-    pub category_verified: bool,
-
-    #[serde(default)]
-    pub submission_method: Option<String>,
-
-    #[serde(default)]
-    pub interview_date: Option<NaiveDate>,
-
-    #[serde(default)]
-    pub interview_completed: bool,
-
-    #[serde(default)]
-    pub alternative_age_certificate: bool,
-
-    #[serde(default)]
-    pub alternative_age_certificate_ref: Option<String>,
-
-    #[serde(default)]
+    // Application-specific fields (not child data)
     pub category: Option<G1Category>,
-
-    #[serde(default)]
     pub overseas_arrival_date: Option<NaiveDate>,
 
-    #[serde(default)]
+    pub submission_method: Option<String>,
+    pub interview_date: Option<NaiveDate>,
+    pub interview_completed: bool,
+
+    pub birth_certificate_verified: bool,
+    pub age_eligibility_verified: bool,
+    pub residence_verified: bool,
+    pub category_verified: bool,
+
+    pub alternative_age_certificate: bool,
+    pub alternative_age_certificate_ref: Option<String>,
+
     pub rejection_reason: Option<String>,
 
-    #[serde(default)]
     pub created_by: Option<Uuid>,
-
-    #[serde(default)]
     pub updated_by: Option<Uuid>,
 
-    #[serde(default)]
     pub wizard_step: Option<i16>,
+
+    pub deleted_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::super::student::student::Entity",
-        from = "Column::StudentId",
-        to = "super::super::student::student::Column::Id"
+        belongs_to = "super::children::Entity",
+        from = "Column::ChildId",
+        to = "super::children::Column::Id"
     )]
-    Student,
+    Child,
     #[sea_orm(
         belongs_to = "super::super::common::schools::Entity",
         from = "Column::SchoolId",
@@ -169,6 +142,12 @@ pub enum Relation {
     JoinPastPupilDetails,
     #[sea_orm(has_many = "super::join_siblings::Entity")]
     JoinSiblings,
+}
+
+impl Related<super::children::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Child.def()
+    }
 }
 
 impl Related<super::super::common::schools::Entity> for Entity {
