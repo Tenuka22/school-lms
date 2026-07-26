@@ -33,7 +33,25 @@ pub async fn create_past_pupil_detail(
     auth.require_permission(Permission::G1ApplicationCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
-    let input = body.into_inner();
+    let mut input = body.into_inner();
+    input.student_id = input
+        .student_id
+        .map(|v| crate::validation::NonEmpty::new(v, "student_id").map(|x| x.into_inner()))
+        .transpose()?;
+    input.highest_grade = input
+        .highest_grade
+        .map(|v| crate::validation::NonEmpty::new(v, "highest_grade").map(|x| x.into_inner()))
+        .transpose()?;
+    input.left_reason = input
+        .left_reason
+        .map(|v| crate::validation::NonEmpty::new(v, "left_reason").map(|x| x.into_inner()))
+        .transpose()?;
+    input.verification_method = input
+        .verification_method
+        .map(|v| {
+            crate::validation::NonEmpty::new(v, "verification_method").map(|x| x.into_inner())
+        })
+        .transpose()?;
 
     let data = past_pupil_details::ActiveModel {
         id: Set(Uuid::new_v4()),

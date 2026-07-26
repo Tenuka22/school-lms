@@ -89,15 +89,29 @@ pub async fn save_application_documents(
             }
         };
 
+        let _ = crate::validation::NonEmpty::new(entry.doc_type.clone(), "doc_type")?;
+        let validated_file_url =
+            crate::validation::Url::new(entry.file_url.clone())?.into_inner();
+        let validated_file_key =
+            crate::validation::NonEmpty::new(entry.file_key.clone(), "file_key")?.into_inner();
+        let validated_content_type = entry
+            .content_type
+            .as_ref()
+            .map(|v| {
+                crate::validation::NonEmpty::new(v.clone(), "content_type")
+                    .map(|x| x.into_inner())
+            })
+            .transpose()?;
+
         documents::ActiveModel {
             id: Set(Uuid::new_v4()),
             application_id: Set(app_id),
             document_type: Set(doc_type),
-            file_url: Set(entry.file_url.clone()),
-            file_key: Set(entry.file_key.clone()),
+            file_url: Set(validated_file_url),
+            file_key: Set(validated_file_key),
             file_hash: Set(None),
             file_size: Set(entry.file_size),
-            content_type: Set(entry.content_type.clone()),
+            content_type: Set(validated_content_type),
             uploaded_at: Set(now),
             verification_status: Set(DocumentVerificationStatus::Pending),
             verified_by: Set(None),

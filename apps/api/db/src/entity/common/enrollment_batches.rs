@@ -26,27 +26,27 @@ fn default_student_allocation() -> i32 {
     200
 }
 
-fn default_proximity_weight() -> i16 {
+fn default_proximity_percentage() -> i16 {
     50
 }
 
-fn default_staff_weight() -> i16 {
+fn default_staff_percentage() -> i16 {
     25
 }
 
-fn default_sibling_weight() -> i16 {
+fn default_sibling_percentage() -> i16 {
     14
 }
 
-fn default_alumni_weight() -> i16 {
+fn default_alumni_percentage() -> i16 {
     6
 }
 
-fn default_govt_weight() -> i16 {
+fn default_govt_percentage() -> i16 {
     4
 }
 
-fn default_special_weight() -> i16 {
+fn default_special_percentage() -> i16 {
     1
 }
 
@@ -92,18 +92,24 @@ pub struct Model {
     #[serde(default = "default_student_allocation")]
     pub student_allocation: i32,
 
-    #[serde(default = "default_proximity_weight")]
-    pub proximity_weight: i16,
-    #[serde(default = "default_staff_weight")]
-    pub staff_weight: i16,
-    #[serde(default = "default_sibling_weight")]
-    pub sibling_weight: i16,
-    #[serde(default = "default_alumni_weight")]
-    pub alumni_weight: i16,
-    #[serde(default = "default_govt_weight")]
-    pub govt_weight: i16,
-    #[serde(default = "default_special_weight")]
-    pub special_weight: i16,
+    #[serde(default = "default_proximity_percentage")]
+    #[sea_orm(column_name = "proximity_weight")]
+    pub proximity_percentage: i16,
+    #[serde(default = "default_staff_percentage")]
+    #[sea_orm(column_name = "staff_weight")]
+    pub staff_percentage: i16,
+    #[serde(default = "default_sibling_percentage")]
+    #[sea_orm(column_name = "sibling_weight")]
+    pub sibling_percentage: i16,
+    #[serde(default = "default_alumni_percentage")]
+    #[sea_orm(column_name = "alumni_weight")]
+    pub alumni_percentage: i16,
+    #[serde(default = "default_govt_percentage")]
+    #[sea_orm(column_name = "govt_weight")]
+    pub govt_percentage: i16,
+    #[serde(default = "default_special_percentage")]
+    #[sea_orm(column_name = "special_weight")]
+    pub special_percentage: i16,
 
     #[serde(default = "default_waiting_list_size")]
     pub waiting_list_size: i32,

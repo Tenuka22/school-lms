@@ -1,27 +1,218 @@
 "use client"
 
-import { useForm } from "@tanstack/react-form"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import { createBatch } from "@/lib/api-client/sdk.gen"
 import { vCreateBatchBody } from "@/lib/api-client/valibot.gen"
-import type { EnrollmentBatch } from "@/lib/api-client/types.gen"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import type { CreateBatchBody, EnrollmentBatch } from "@/lib/api-client/types.gen"
+import { EntityDialog } from "@/lib/form-builder"
+import type { FormConfig } from "@/lib/form-builder"
 import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
 import {
-  Field,
-  FieldError,
-  FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
+import { useBuildForm } from "@/lib/form-builder/form-context"
+
+const WEIGHT_INFO: Record<string, { label: string; desc: string }> = {
+  proximity: {
+    label: "Proximity",
+    desc: "Priority for children living closest to the school",
+  },
+  staff: {
+    label: "Staff",
+    desc: "Children of staff members employed at the school",
+  },
+  sibling: {
+    label: "Sibling",
+    desc: "Children with siblings already enrolled at the school",
+  },
+  alumni: {
+    label: "Alumni",
+    desc: "Children of former graduates of the school",
+  },
+  govt: {
+    label: "Govt",
+    desc: "Children of government employees transferred to the area",
+  },
+  special: {
+    label: "Special",
+    desc: "Children with special needs or exceptional circumstances",
+  },
+}
+
+function WeightBar({
+  weights,
+  totalAllocation,
+}: {
+  weights: { key: string; value: string; color: string }[]
+  totalAllocation: number
+}) {
+  const totalWeight = weights.reduce((s, w) => s + (parseInt(w.value) || 0), 0)
+  const segments = weights.filter((w) => (parseInt(w.value) || 0) > 0)
+
+  return (
+    <div className="space-y-2">
+      <div className="flex h-8 w-full overflow-hidden rounded-md border">
+        {segments.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center bg-muted text-[10px] text-muted-foreground">
+            No weights set
+          </div>
+        ) : (
+          segments.map((w) => {
+            const info = WEIGHT_INFO[w.key]
+            const pct = (parseInt(w.value) || 0) / totalWeight
+            const seats =
+              totalWeight > 0 ? Math.round(pct * totalAllocation) : 0
+            return (
+              <Tooltip key={w.key}>
+                <TooltipTrigger
+                  className={`${w.color} flex cursor-help items-center justify-center truncate px-0.5 text-[10px] font-medium text-white transition-all`}
+                  style={{ width: `${pct * 100}%` }}
+                >
+                  {pct > 0.08 ? `${(pct * 100).toFixed(0)}%` : ""}
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p className="font-medium">{info.label}</p>
+                  <p className="text-[11px] opacity-80">{info.desc}</p>
+                  <p className="mt-1 text-[11px] opacity-70">
+                    {w.value} pts — {seats} seats
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )
+          })
+        )}
+      </div>
+      <div className="flex flex-wrap gap-x-3 gap-y-1">
+        {segments.map((w) => {
+          const info = WEIGHT_INFO[w.key]
+          const pct = (parseInt(w.value) || 0) / totalWeight
+          const seats = totalWeight > 0 ? Math.round(pct * totalAllocation) : 0
+          return (
+            <Tooltip key={w.key}>
+              <TooltipTrigger className="flex cursor-help items-center gap-1 text-[10px] text-muted-foreground">
+                <div className={`size-2 rounded-full ${w.color}`} />
+                <span>{info.label}</span>
+                <span className="font-medium tabular-nums">{seats}</span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p className="font-medium">{info.label}</p>
+                <p className="text-[11px] opacity-80">{info.desc}</p>
+              </TooltipContent>
+            </Tooltip>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ScoreDistributionSection() {
+  const form = useBuildForm()
+
+  const percentageFields = [
+    { name: "proximity_percentage", label: "Proximity", color: "bg-blue-500" },
+    { name: "staff_percentage", label: "Staff", color: "bg-emerald-500" },
+    { name: "sibling_percentage", label: "Sibling", color: "bg-violet-500" },
+    { name: "alumni_percentage", label: "Alumni", color: "bg-amber-500" },
+    { name: "govt_percentage", label: "Govt", color: "bg-rose-500" },
+    { name: "special_percentage", label: "Special", color: "bg-cyan-500" },
+  ] as const
+
+  return (
+    <div className="space-y-4">
+      <FieldLabel>Score Distribution</FieldLabel>
+
+      <form.Subscribe
+        selector={(s: any) => {
+          const v = s.values
+          return {
+            values: [
+              { key: "proximity", value: String(v.proximity_percentage ?? 0), color: "bg-blue-500" },
+              { key: "staff", value: String(v.staff_percentage ?? 0), color: "bg-emerald-500" },
+              { key: "sibling", value: String(v.sibling_percentage ?? 0), color: "bg-violet-500" },
+              { key: "alumni", value: String(v.alumni_percentage ?? 0), color: "bg-amber-500" },
+              { key: "govt", value: String(v.govt_percentage ?? 0), color: "bg-rose-500" },
+              { key: "special", value: String(v.special_percentage ?? 0), color: "bg-cyan-500" },
+            ],
+            allocation: v.student_allocation ?? 200,
+          }
+        }}
+        children={({ values, allocation }: any) => (
+          <WeightBar weights={values} totalAllocation={allocation} />
+        )}
+      />
+
+      <div className="flex flex-col gap-3">
+        {percentageFields.map((p) => (
+          <form.Field
+            key={p.name}
+            name={p.name}
+            children={(field: any) => {
+              const value = field.state.value as number
+              return (
+                <div className="flex flex-col gap-1">
+                  <FieldLabel htmlFor={field.name}>
+                    {p.label}
+                  </FieldLabel>
+                  <div className="flex items-center gap-2">
+                    <Slider
+                      id={field.name}
+                      value={[value]}
+                      onValueChange={(v) =>
+                        field.handleChange(
+                          Math.round(Array.isArray(v) ? v[0] : v)
+                        )
+                      }
+                      min={0}
+                      max={100}
+                      step={1}
+                      className="flex-1"
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={value}
+                      onChange={(e) =>
+                        field.handleChange(
+                          Math.min(100, Math.max(0, Number(e.target.value) || 0))
+                        )
+                      }
+                      className="w-16 text-center tabular-nums"
+                    />
+                  </div>
+                </div>
+              )
+            }}
+          />
+        ))}
+        <form.Subscribe
+          selector={(s: any) => {
+            const v = s.values
+            return (v.proximity_percentage ?? 0) + (v.staff_percentage ?? 0) +
+              (v.sibling_percentage ?? 0) + (v.alumni_percentage ?? 0) +
+              (v.govt_percentage ?? 0) + (v.special_percentage ?? 0)
+          }}
+          children={(total: number) => (
+            <div className="flex items-center justify-between border-t pt-2 text-sm">
+              <span className="text-muted-foreground">Total</span>
+              <span className={`tabular-nums font-medium ${total !== 100 ? "text-destructive" : "text-green-600"}`}>
+                {total}%
+              </span>
+            </div>
+          )}
+        />
+      </div>
+    </div>
+  )
+}
 
 interface CreateBatchDialogProps {
   open: boolean
@@ -36,93 +227,64 @@ export function CreateBatchDialog({
   onSuccess,
   defaultYear,
 }: CreateBatchDialogProps) {
-  const form = useForm({
-    defaultValues: {
-      year: defaultYear ?? new Date().getFullYear(),
-      enrollment_type: "G1" as const,
-    },
-    validators: {
-      onSubmit: vCreateBatchBody,
-    },
-    onSubmit: async ({ value }) => {
-      try {
+  const config: FormConfig<CreateBatchBody> = {
+    fields: [
+      {
+        name: "year",
+        kind: "number",
+        label: "Year",
+        placeholder: "2026",
+        required: true,
+      },
+      {
+        name: "student_allocation",
+        kind: "slider",
+        label: "Total Seats",
+        inputProps: { min: 10, max: 1000, step: 10 },
+      },
+    ],
+    layout: [
+      { columns: [{ fields: ["year", "student_allocation"] }] },
+    ],
+    renderBelowFields: () => <ScoreDistributionSection />,
+  }
+
+  return (
+    <EntityDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Create Batch"
+      description="Set up a new G1 admission batch with allocation and scoring weights."
+      config={config}
+      defaultValues={{
+        year: defaultYear ?? new Date().getFullYear(),
+        enrollment_type: "G1",
+        student_allocation: 200,
+        proximity_percentage: 50,
+        staff_percentage: 25,
+        sibling_percentage: 14,
+        alumni_percentage: 6,
+        govt_percentage: 4,
+        special_percentage: 1,
+      }}
+      valibotSchema={vCreateBatchBody}
+      onSubmit={async (values) => {
+        const total = (values.proximity_percentage ?? 0) + (values.staff_percentage ?? 0) +
+          (values.sibling_percentage ?? 0) + (values.alumni_percentage ?? 0) +
+          (values.govt_percentage ?? 0) + (values.special_percentage ?? 0)
+        if (total !== 100) {
+          toast.error(`Percentages must add up to 100% (currently ${total}%)`)
+          throw new Error(`Percentages must add up to 100% (currently ${total}%)`)
+        }
         const { data } = await createBatch({
-          body: value,
+          body: values,
           client: apiClient,
         })
         toast.success("Batch created")
-        form.reset()
         onOpenChange(false)
         if (data) onSuccess(data)
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Failed to create batch"
-        toast.error(message)
-      }
-    },
-  })
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Create Batch</DialogTitle>
-          <DialogDescription>
-            Create a new G1 enrollment batch for a specific year.
-          </DialogDescription>
-        </DialogHeader>
-        <form
-          id="create-batch-form"
-          onSubmit={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            form.handleSubmit()
-          }}
-        >
-          <FieldGroup>
-            <form.Field
-              name="year"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Year</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="number"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) =>
-                        field.handleChange(Number(e.target.value))
-                      }
-                      aria-invalid={isInvalid}
-                      placeholder="2026"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                )
-              }}
-            />
-            <input type="hidden" name="enrollment_type" value="G1" />
-          </FieldGroup>
-        </form>
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" form="create-batch-form">
-            Create
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }}
+      actionLabel="Create"
+    />
   )
 }

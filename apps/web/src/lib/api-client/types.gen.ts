@@ -162,18 +162,44 @@ export type CreateAddressBody = {
 };
 
 /**
+ * CreateApplicationBody
+ */
+export type CreateApplicationBody = {
+    batch_id: string;
+    child_id?: string | null;
+    school_id?: string | null;
+};
+
+/**
  * CreateBatchBody
  */
 export type CreateBatchBody = {
-    alumni_weight?: number | null;
+    alumni_percentage?: number | null;
     enrollment_type: EnrollmentType;
-    govt_weight?: number | null;
-    proximity_weight?: number | null;
-    sibling_weight?: number | null;
-    special_weight?: number | null;
-    staff_weight?: number | null;
+    govt_percentage?: number | null;
+    proximity_percentage?: number | null;
+    sibling_percentage?: number | null;
+    special_percentage?: number | null;
+    staff_percentage?: number | null;
     student_allocation?: number | null;
     year: number;
+};
+
+/**
+ * CreateChildBody
+ */
+export type CreateChildBody = {
+    birth_certificate_number?: string | null;
+    date_of_birth: string;
+    disability_status?: boolean | null;
+    disability_type?: string | null;
+    full_name: string;
+    gender: Gender;
+    medium_of_instruction: MediumOfInstruction;
+    name_with_initials: string;
+    nationality: Nationality;
+    photo_url?: string | null;
+    religion?: Religion | null;
 };
 
 /**
@@ -293,7 +319,7 @@ export type DocumentEntry = {
  * EnrollmentBatch
  */
 export type EnrollmentBatch = {
-    alumni_weight?: number;
+    alumni_percentage?: number;
     appeal_deadline_at?: string | null;
     /**
      * Machine-readable code (e.g., "G1-2026")
@@ -308,14 +334,14 @@ export type EnrollmentBatch = {
     created_by?: string | null;
     enrollment_type: EnrollmentType;
     finalized_at?: string | null;
-    govt_weight?: number;
+    govt_percentage?: number;
     id?: string;
     list_published_at?: string | null;
     opened_at?: string;
-    proximity_weight?: number;
-    sibling_weight?: number;
-    special_weight?: number;
-    staff_weight?: number;
+    proximity_percentage?: number;
+    sibling_percentage?: number;
+    special_percentage?: number;
+    staff_percentage?: number;
     status?: BatchStatus;
     student_allocation?: number;
     waiting_list_size?: number;
@@ -694,17 +720,56 @@ export type StudentDuplicate = {
 export type StudentStatus = 'Active' | 'Graduated' | 'Removed';
 
 /**
+ * UpdateApplicationBody
+ */
+export type UpdateApplicationBody = {
+    age_eligibility_verified?: boolean | null;
+    alternative_age_certificate?: boolean | null;
+    alternative_age_certificate_ref?: string | null;
+    birth_certificate_verified?: boolean | null;
+    category?: G1Category | null;
+    category_verified?: boolean | null;
+    child_id?: string | null;
+    guardian_id?: string | null;
+    interview_completed?: boolean | null;
+    interview_date?: string | null;
+    overseas_arrival_date?: string | null;
+    rejection_reason?: string | null;
+    residence_verified?: boolean | null;
+    school_id?: string | null;
+    submission_method?: string | null;
+    wizard_step?: number | null;
+};
+
+/**
  * UpdateBatchBody
  */
 export type UpdateBatchBody = {
-    alumni_weight?: number | null;
-    govt_weight?: number | null;
-    proximity_weight?: number | null;
-    sibling_weight?: number | null;
-    special_weight?: number | null;
-    staff_weight?: number | null;
+    alumni_percentage?: number | null;
+    govt_percentage?: number | null;
+    proximity_percentage?: number | null;
+    sibling_percentage?: number | null;
+    special_percentage?: number | null;
+    staff_percentage?: number | null;
     status?: BatchStatus | null;
     student_allocation?: number | null;
+};
+
+/**
+ * UpdateChildBody
+ */
+export type UpdateChildBody = {
+    birth_certificate_number?: string | null;
+    date_of_birth?: string | null;
+    disability_status?: boolean | null;
+    disability_type?: string | null;
+    full_name?: string | null;
+    gender?: Gender | null;
+    medium_of_instruction?: MediumOfInstruction | null;
+    name_with_initials?: string | null;
+    nationality?: Nationality | null;
+    photo_url?: string | null;
+    religion?: Religion | null;
 };
 
 /**
@@ -881,7 +946,7 @@ export type ListChildrenResponses = {
 export type ListChildrenResponse = ListChildrenResponses[keyof ListChildrenResponses];
 
 export type CreateChildData = {
-    body: Child;
+    body: CreateChildBody;
     path?: never;
     query?: never;
     url: '/api/children';
@@ -984,7 +1049,7 @@ export type GetChildResponses = {
 export type GetChildResponse = GetChildResponses[keyof GetChildResponses];
 
 export type UpdateChildData = {
-    body: Child;
+    body: UpdateChildBody;
     path: {
         /**
          * Uuid
@@ -1297,7 +1362,7 @@ export type ListApplicationsResponses = {
 export type ListApplicationsResponse = ListApplicationsResponses[keyof ListApplicationsResponses];
 
 export type CreateApplicationData = {
-    body: G1Application;
+    body: CreateApplicationBody;
     path?: never;
     query?: never;
     url: '/api/g1-applications';
@@ -1467,7 +1532,7 @@ export type GetApplicationResponses = {
 export type GetApplicationResponse = GetApplicationResponses[keyof GetApplicationResponses];
 
 export type UpdateApplicationData = {
-    body: G1Application;
+    body: UpdateApplicationBody;
     path: {
         /**
          * Uuid
@@ -2170,7 +2235,7 @@ export type CreateBatchResponses = {
      * EnrollmentBatch
      */
     201: {
-        alumni_weight?: number;
+        alumni_percentage?: number;
         appeal_deadline_at?: string | null;
         /**
          * Machine-readable code (e.g., "G1-2026")
@@ -2185,14 +2250,14 @@ export type CreateBatchResponses = {
         created_by?: string | null;
         enrollment_type: EnrollmentType;
         finalized_at?: string | null;
-        govt_weight?: number;
+        govt_percentage?: number;
         id?: string;
         list_published_at?: string | null;
         opened_at?: string;
-        proximity_weight?: number;
-        sibling_weight?: number;
-        special_weight?: number;
-        staff_weight?: number;
+        proximity_percentage?: number;
+        sibling_percentage?: number;
+        special_percentage?: number;
+        staff_percentage?: number;
         status?: BatchStatus;
         student_allocation?: number;
         waiting_list_size?: number;

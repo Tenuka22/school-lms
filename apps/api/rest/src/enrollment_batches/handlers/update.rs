@@ -16,12 +16,12 @@ use db::rbac::Permission;
 pub struct UpdateBatchBody {
     pub status: Option<BatchStatus>,
     pub student_allocation: Option<i32>,
-    pub proximity_weight: Option<i16>,
-    pub staff_weight: Option<i16>,
-    pub sibling_weight: Option<i16>,
-    pub alumni_weight: Option<i16>,
-    pub govt_weight: Option<i16>,
-    pub special_weight: Option<i16>,
+    pub proximity_percentage: Option<i16>,
+    pub staff_percentage: Option<i16>,
+    pub sibling_percentage: Option<i16>,
+    pub alumni_percentage: Option<i16>,
+    pub govt_percentage: Option<i16>,
+    pub special_percentage: Option<i16>,
 }
 
 #[api_operation(tag = "enrollment-batches", operation_id = "update-batch")]
@@ -35,12 +35,47 @@ pub async fn update_batch(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let id = id.into_inner();
-    let patch = body.into_inner();
+    let mut patch = body.into_inner();
+
+    patch.proximity_percentage = patch
+        .proximity_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.staff_percentage = patch
+        .staff_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.sibling_percentage = patch
+        .sibling_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.alumni_percentage = patch
+        .alumni_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.govt_percentage = patch
+        .govt_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.special_percentage = patch
+        .special_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
 
     let existing = enrollment_batches::Entity::find_by_id(id)
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("batch not found".into()))?;
+
+    let pcts = [
+        patch.proximity_percentage.unwrap_or(existing.proximity_percentage),
+        patch.staff_percentage.unwrap_or(existing.staff_percentage),
+        patch.sibling_percentage.unwrap_or(existing.sibling_percentage),
+        patch.alumni_percentage.unwrap_or(existing.alumni_percentage),
+        patch.govt_percentage.unwrap_or(existing.govt_percentage),
+        patch.special_percentage.unwrap_or(existing.special_percentage),
+    ];
+    crate::validation::Percentage::sum(&pcts)?;
 
     let active = enrollment_batches::ActiveModel {
         id: Set(existing.id),
@@ -59,12 +94,12 @@ pub async fn update_batch(
         student_allocation: Set(patch
             .student_allocation
             .unwrap_or(existing.student_allocation)),
-        proximity_weight: Set(patch.proximity_weight.unwrap_or(existing.proximity_weight)),
-        staff_weight: Set(patch.staff_weight.unwrap_or(existing.staff_weight)),
-        sibling_weight: Set(patch.sibling_weight.unwrap_or(existing.sibling_weight)),
-        alumni_weight: Set(patch.alumni_weight.unwrap_or(existing.alumni_weight)),
-        govt_weight: Set(patch.govt_weight.unwrap_or(existing.govt_weight)),
-        special_weight: Set(patch.special_weight.unwrap_or(existing.special_weight)),
+        proximity_percentage: Set(pcts[0]),
+        staff_percentage: Set(pcts[1]),
+        sibling_percentage: Set(pcts[2]),
+        alumni_percentage: Set(pcts[3]),
+        govt_percentage: Set(pcts[4]),
+        special_percentage: Set(pcts[5]),
         waiting_list_size: Set(existing.waiting_list_size),
     };
 

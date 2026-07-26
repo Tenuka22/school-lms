@@ -1,8 +1,6 @@
 "use client"
 
-import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -11,12 +9,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import { FormBuilder } from "@/lib/form-builder"
+import type { FormConfig } from "@/lib/form-builder"
 
 export type SchoolFormData = {
   school_id: string
@@ -39,82 +33,61 @@ export function WizardStepSchool({
   onBack,
   onNext,
 }: Props) {
-  const form = useForm({
-    defaultValues,
-    onSubmit: async (values) => {
-      onSave(values.value)
-      onNext()
-    },
-  })
-
-  const schoolName = form.state.values.school_name_si
-  const schoolType = form.state.values.school_type
-  const schoolCategory = form.state.values.category
-  const schoolQuota = form.state.values.quota
+  const config: FormConfig<SchoolFormData> = {
+    fields: [
+      {
+        name: "school_name_si",
+        kind: "text",
+        label: "School Name",
+        placeholder: "Enter school name",
+      },
+      { name: "school_id", kind: "display", label: "", hidden: true },
+      { name: "school_type", kind: "display", label: "", hidden: true },
+      { name: "category", kind: "display", label: "", hidden: true },
+      { name: "quota", kind: "display", label: "", hidden: true },
+    ],
+    layout: [
+      { columns: [{ fields: ["school_name_si"] }] },
+    ],
+    renderBelowFields: (formValues) =>
+      formValues.school_name_si ? (
+        <div className="mt-4 space-y-2 rounded-lg border p-4">
+          <h4 className="font-semibold">{formValues.school_name_si as string}</h4>
+          <div className="flex gap-2">
+            <Badge variant="outline">{(formValues.school_type as string) || "N/A"}</Badge>
+            <Badge variant="outline">{(formValues.category as string) || "N/A"}</Badge>
+            <Badge>Quota: {formValues.quota != null ? String(formValues.quota) : "\u2014"}</Badge>
+          </div>
+        </div>
+      ) : null,
+  }
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle>Step 3: School Selection</CardTitle>
-          <CardDescription>Enter the school for admission.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup>
-            <form.Field
-              name="school_name_si"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>School Name</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => {
-                        field.handleChange(e.target.value)
-                        form.setFieldValue("school_id", e.target.value)
-                      }}
-                      aria-invalid={isInvalid}
-                      placeholder="Enter school name"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                )
-              }}
-            />
-          </FieldGroup>
-          {schoolName && (
-            <div className="mt-4 space-y-2 rounded-lg border p-4">
-              <h4 className="font-semibold">{schoolName}</h4>
-              <div className="flex gap-2">
-                <Badge variant="outline">{schoolType || "N/A"}</Badge>
-                <Badge variant="outline">{schoolCategory || "N/A"}</Badge>
-                <Badge>Quota: {schoolQuota || "\u2014"}</Badge>
-              </div>
-            </div>
-          )}
-          <div className="flex justify-between pt-4">
-            <Button variant="outline" type="button" onClick={onBack}>
-              Back
-            </Button>
-            <Button type="submit" disabled={!schoolName}>
-              Next
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Step 3: School Selection</CardTitle>
+        <CardDescription>Enter the school for admission.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <FormBuilder<SchoolFormData>
+          config={config}
+          defaultValues={defaultValues}
+          onSubmit={async (values) => {
+            onSave({ ...values, school_id: values.school_name_si })
+            onNext()
+          }}
+          formId="wizard-step-school-form"
+          hideDefaultButtons
+        />
+        <div className="flex justify-between pt-4">
+          <Button variant="outline" type="button" onClick={onBack}>
+            Back
+          </Button>
+          <Button type="submit" form="wizard-step-school-form">
+            Next
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -36,11 +36,15 @@ export const resolveTokenAction = createServerFn({ method: "GET" }).handler(
           expires: accessExp,
           path: "/",
           sameSite: "lax",
+          httpOnly: true,
+          secure: true,
         })
         setCookie("refresh_token", data.refresh_token, {
           expires: refreshExp,
           path: "/",
           sameSite: "lax",
+          httpOnly: true,
+          secure: true,
         })
 
         return data.access_token as string

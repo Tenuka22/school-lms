@@ -69,7 +69,19 @@ pub async fn create_workspace_address(
     auth.require_permission(Permission::G1ApplicationCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
-    let input = body.into_inner();
+    let mut input = body.into_inner();
+
+    input.name = crate::validation::NonEmpty::new(input.name, "name")?.into_inner();
+    input.street_1 =
+        crate::validation::NonEmpty::new(input.street_1, "street_1")?.into_inner();
+    input.city = crate::validation::NonEmpty::new(input.city, "city")?.into_inner();
+    input.country =
+        crate::validation::NonEmpty::new(input.country, "country")?.into_inner();
+    input.postal_code = input
+        .postal_code
+        .map(|v| crate::validation::PostalCode::new(v).map(|x| x.into_inner()))
+        .transpose()?;
+
     let full_address = build_full_address(&input);
 
     let model = workspace_addresses::ActiveModel {

@@ -53,7 +53,32 @@ pub async fn update_guardian(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let id = id.into_inner();
-    let input = body.into_inner();
+    let mut input = body.into_inner();
+
+    input.full_name =
+        crate::validation::FullName::new(input.full_name)?.into_inner();
+    input.nic_number =
+        crate::validation::NicNumber::new(input.nic_number)?.into_inner();
+    input.contact_phone =
+        crate::validation::Phone::new(input.contact_phone)?.into_inner();
+    input.contact_email = input
+        .contact_email
+        .map(|e| crate::validation::Email::new(e).map(|v| v.into_inner()))
+        .transpose()?;
+    input.relationship_type =
+        crate::validation::NonEmpty::new(input.relationship_type, "relationship_type")?.into_inner();
+    input.occupation = input
+        .occupation
+        .map(|o| crate::validation::NonEmpty::new(o, "occupation").map(|v| v.into_inner()))
+        .transpose()?;
+    input.workplace_name = input
+        .workplace_name
+        .map(|w| crate::validation::NonEmpty::new(w, "workplace_name").map(|v| v.into_inner()))
+        .transpose()?;
+    input.employee_id = input
+        .employee_id
+        .map(|e| crate::validation::NonEmpty::new(e, "employee_id").map(|v| v.into_inner()))
+        .transpose()?;
 
     let existing = guardians::Entity::find_by_id(id)
         .one(db.as_ref())

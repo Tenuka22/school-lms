@@ -1,24 +1,20 @@
+use std::collections::BTreeMap;
 use std::fmt;
 
 use actix_web::{HttpResponse, http::StatusCode};
-use apistos::ApiErrorComponent;
+use apistos::{ApiComponent, ApiErrorComponent};
+use apistos::paths::{MediaType, Response};
+use apistos::reference_or::ReferenceOr;
+use apistos::Schema;
 use schemars::JsonSchema;
 use serde::Serialize;
 
-#[derive(Debug, Serialize, JsonSchema)]
+#[derive(Debug, Serialize, JsonSchema, ApiComponent)]
 pub struct ErrorResponse {
     pub error: String,
 }
 
-#[derive(Debug, ApiErrorComponent)]
-#[openapi_error(
-    status(code = 400),
-    status(code = 401),
-    status(code = 403),
-    status(code = 404),
-    status(code = 409),
-    status(code = 500)
-)]
+#[derive(Debug)]
 pub enum ApiError {
     BadRequest(String),
     Unauthorized(String),
@@ -64,5 +60,51 @@ impl actix_web::ResponseError for ApiError {
         HttpResponse::build(self.status_code()).json(ErrorResponse {
             error: self.to_string(),
         })
+    }
+}
+
+const ERROR_SCHEMA_REF: &str = "#/components/schemas/ErrorResponse";
+
+fn error_media_type() -> MediaType {
+    MediaType {
+        schema: Some(ReferenceOr::Reference {
+            _ref: ERROR_SCHEMA_REF.to_string(),
+        }),
+        ..Default::default()
+    }
+}
+
+fn error_response(code: u16, description: &str) -> (String, Response) {
+    (
+        code.to_string(),
+        Response {
+            description: description.to_string(),
+            content: BTreeMap::from_iter(vec![("application/json".to_string(), error_media_type())]),
+            ..Default::default()
+        },
+    )
+}
+
+impl ApiErrorComponent for ApiError {
+    fn schemas_by_status_code() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
+        BTreeMap::from_iter(vec![
+            ("400".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
+            ("401".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
+            ("403".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
+            ("404".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
+            ("409".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
+            ("500".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
+        ])
+    }
+
+    fn error_responses() -> Vec<(String, Response)> {
+        vec![
+            error_response(400, "Bad Request"),
+            error_response(401, "Unauthorized"),
+            error_response(403, "Forbidden"),
+            error_response(404, "Not Found"),
+            error_response(409, "Conflict"),
+            error_response(500, "Internal Server Error"),
+        ]
     }
 }

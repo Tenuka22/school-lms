@@ -41,11 +41,15 @@ export const loginAction = createServerFn({ method: "POST" })
       expires: accessExp,
       path: "/",
       sameSite: "lax",
+      httpOnly: true,
+      secure: true,
     })
     setCookie("refresh_token", data.refresh_token, {
       expires: refreshExp,
       path: "/",
       sameSite: "lax",
+      httpOnly: true,
+      secure: true,
     })
 
     return { ok: true as const }
@@ -71,11 +75,15 @@ export const registerAction = createServerFn({ method: "POST" })
       expires: accessExp,
       path: "/",
       sameSite: "lax",
+      httpOnly: true,
+      secure: true,
     })
     setCookie("refresh_token", data.refresh_token, {
       expires: refreshExp,
       path: "/",
       sameSite: "lax",
+      httpOnly: true,
+      secure: true,
     })
 
     return { ok: true as const }

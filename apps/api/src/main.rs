@@ -3,11 +3,12 @@ mod config;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
-use apistos::ScalarConfig;
+use apistos::{ApiComponent, ScalarConfig};
 use apistos::app::{BuildConfig, OpenApiWrapper};
 use apistos::info::Info;
-use apistos::spec::Spec;
+use apistos::spec::{DefaultParameters, Spec};
 use dotenvy::from_filename;
+use rest::error::ErrorResponse;
 use rest::JwtSecret;
 use rest::storage::Storage;
 
@@ -85,7 +86,7 @@ async fn main() -> std::io::Result<()> {
     log::info!("Starting server on 0.0.0.0:{port} with allowed origin: {frontend_url}");
 
     HttpServer::new(move || {
-        let spec = Spec {
+        let mut spec = Spec {
             info: Info {
                 title: "School LMS API".to_string(),
                 version: "0.1.0".to_string(),
@@ -94,6 +95,13 @@ async fn main() -> std::io::Result<()> {
             },
             ..Default::default()
         };
+
+        if let Some(error_schema) = <ErrorResponse as ApiComponent>::schema() {
+            spec.default_parameters.push(DefaultParameters {
+                components: vec![error_schema],
+                ..Default::default()
+            });
+        }
 
         let cors = Cors::default()
             .allowed_origin(&frontend_url)

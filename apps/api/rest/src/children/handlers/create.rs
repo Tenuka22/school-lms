@@ -1,29 +1,70 @@
 use actix_web::{web, web::Json};
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use chrono::Utc;
+use apistos::ApiComponent;
+use chrono::{NaiveDate, Utc};
+use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
 use db::entity::g1::children;
-use sea_orm::{ActiveModelTrait, DatabaseConnection};
+use schemars::JsonSchema;
+use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
+#[derive(Deserialize, JsonSchema, ApiComponent)]
+pub struct CreateChildBody {
+    pub full_name: String,
+    pub name_with_initials: String,
+    pub date_of_birth: NaiveDate,
+    pub gender: Gender,
+    pub birth_certificate_number: Option<String>,
+    pub nationality: Nationality,
+    pub religion: Option<Religion>,
+    pub medium_of_instruction: MediumOfInstruction,
+    pub disability_status: Option<bool>,
+    pub disability_type: Option<String>,
+    pub photo_url: Option<String>,
+}
+
 #[api_operation(tag = "children", operation_id = "create-child")]
 pub async fn create_child(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
-    body: Json<children::Model>,
+    body: Json<CreateChildBody>,
 ) -> Result<CreatedJson<children::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let mut data = body.into_inner();
-    data.id = Uuid::new_v4();
-    data.created_at = Utc::now();
 
-    let active: children::ActiveModel = data.into();
+    data.full_name =
+        crate::validation::NonEmpty::new(data.full_name, "full_name")?.into_inner();
+    data.name_with_initials =
+        crate::validation::NameWithInitials::new(data.name_with_initials)?.into_inner();
+    data.birth_certificate_number = data.birth_certificate_number
+        .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
+        .transpose()?;
+
+    let active = children::ActiveModel {
+        id: Set(Uuid::new_v4()),
+        student_id: Set(None),
+        full_name: Set(data.full_name),
+        name_with_initials: Set(data.name_with_initials),
+        date_of_birth: Set(data.date_of_birth),
+        gender: Set(data.gender),
+        birth_certificate_number: Set(data.birth_certificate_number),
+        nationality: Set(data.nationality),
+        religion: Set(data.religion),
+        medium_of_instruction: Set(data.medium_of_instruction),
+        disability_status: Set(data.disability_status.unwrap_or(false)),
+        disability_type: Set(data.disability_type),
+        photo_url: Set(data.photo_url),
+        created_at: Set(Utc::now()),
+    };
+
     let saved = active.insert(db.as_ref()).await?;
 
     Ok(CreatedJson(saved))

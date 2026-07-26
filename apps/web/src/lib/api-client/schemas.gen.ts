@@ -24,7 +24,7 @@ export const AddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-07-25T19:09:12.106291Z',
+            default: '2026-07-26T12:09:51.568825Z',
             type: 'string',
             format: 'date-time'
         },
@@ -413,7 +413,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         blacklisted_at: {
-            default: '2026-07-25T19:09:12.079004700Z',
+            default: '2026-07-26T12:09:51.558223400Z',
             type: 'string',
             format: 'date-time'
         },
@@ -427,7 +427,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         expires_at: {
-            default: '2029-07-24T19:09:12.079007Z',
+            default: '2029-07-25T12:09:51.558225600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -436,7 +436,7 @@ export const BlacklistSchema = {
             format: 'uuid'
         },
         id: {
-            default: '71229fcd-140d-480e-93ea-5f3911f27d67',
+            default: '54a3edfc-0ef8-4748-80cb-b19744589e76',
             type: 'string',
             format: 'uuid'
         },
@@ -468,7 +468,7 @@ export const ChildSchema = {
             nullable: true
         },
         created_at: {
-            default: '2026-07-25T19:09:12.081194600Z',
+            default: '2026-07-26T12:09:51.559544Z',
             type: 'string',
             format: 'date-time'
         },
@@ -608,6 +608,30 @@ export const CreateAddressBodySchema = {
     }
 } as const;
 
+export const CreateApplicationBodySchema = {
+    title: 'CreateApplicationBody',
+    type: 'object',
+    required: [
+        'batch_id'
+    ],
+    properties: {
+        batch_id: {
+            type: 'string',
+            format: 'uuid'
+        },
+        child_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        },
+        school_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        }
+    }
+} as const;
+
 export const CreateBatchBodySchema = {
     title: 'CreateBatchBody',
     type: 'object',
@@ -616,7 +640,7 @@ export const CreateBatchBodySchema = {
         'year'
     ],
     properties: {
-        alumni_weight: {
+        alumni_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
@@ -624,27 +648,27 @@ export const CreateBatchBodySchema = {
         enrollment_type: {
             $ref: '#/components/schemas/EnrollmentType'
         },
-        govt_weight: {
+        govt_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        proximity_weight: {
+        proximity_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        sibling_weight: {
+        sibling_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        special_weight: {
+        special_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        staff_weight: {
+        staff_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
@@ -657,6 +681,64 @@ export const CreateBatchBodySchema = {
         year: {
             type: 'integer',
             format: 'int16'
+        }
+    }
+} as const;
+
+export const CreateChildBodySchema = {
+    title: 'CreateChildBody',
+    type: 'object',
+    required: [
+        'date_of_birth',
+        'full_name',
+        'gender',
+        'medium_of_instruction',
+        'name_with_initials',
+        'nationality'
+    ],
+    properties: {
+        birth_certificate_number: {
+            type: 'string',
+            nullable: true
+        },
+        date_of_birth: {
+            type: 'string',
+            format: 'date'
+        },
+        disability_status: {
+            type: 'boolean',
+            nullable: true
+        },
+        disability_type: {
+            type: 'string',
+            nullable: true
+        },
+        full_name: {
+            type: 'string'
+        },
+        gender: {
+            $ref: '#/components/schemas/Gender'
+        },
+        medium_of_instruction: {
+            $ref: '#/components/schemas/MediumOfInstruction'
+        },
+        name_with_initials: {
+            type: 'string'
+        },
+        nationality: {
+            $ref: '#/components/schemas/Nationality'
+        },
+        photo_url: {
+            type: 'string',
+            nullable: true
+        },
+        religion: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/Religion'
+                }
+            ],
+            nullable: true
         }
     }
 } as const;
@@ -1048,7 +1130,7 @@ export const EnrollmentBatchSchema = {
         'year'
     ],
     properties: {
-        alumni_weight: {
+        alumni_percentage: {
             default: 6,
             type: 'integer',
             format: 'int16'
@@ -1068,12 +1150,12 @@ export const EnrollmentBatchSchema = {
             type: 'string'
         },
         closed_at: {
-            default: '2027-07-25T19:09:12.099860200Z',
+            default: '2027-07-26T12:09:51.566148700Z',
             type: 'string',
             format: 'date-time'
         },
         created_at: {
-            default: '2026-07-25T19:09:12.099876700Z',
+            default: '2026-07-26T12:09:51.566160100Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1092,13 +1174,13 @@ export const EnrollmentBatchSchema = {
             format: 'date-time',
             nullable: true
         },
-        govt_weight: {
+        govt_percentage: {
             default: 4,
             type: 'integer',
             format: 'int16'
         },
         id: {
-            default: '2070895c-92f1-497a-8e15-1a2492494c82',
+            default: '0c1abd52-fe99-430c-9070-1c595408ab79',
             type: 'string',
             format: 'uuid'
         },
@@ -1109,26 +1191,26 @@ export const EnrollmentBatchSchema = {
             nullable: true
         },
         opened_at: {
-            default: '2026-07-25T19:09:12.099852400Z',
+            default: '2026-07-26T12:09:51.566144800Z',
             type: 'string',
             format: 'date-time'
         },
-        proximity_weight: {
+        proximity_percentage: {
             default: 50,
             type: 'integer',
             format: 'int16'
         },
-        sibling_weight: {
+        sibling_percentage: {
             default: 14,
             type: 'integer',
             format: 'int16'
         },
-        special_weight: {
+        special_percentage: {
             default: 1,
             type: 'integer',
             format: 'int16'
         },
-        staff_weight: {
+        staff_percentage: {
             default: 25,
             type: 'integer',
             format: 'int16'
@@ -1226,7 +1308,7 @@ export const G1ApplicationSchema = {
             format: 'uuid'
         },
         created_at: {
-            default: '2026-07-25T19:09:12.088488300Z',
+            default: '2026-07-26T12:09:51.562623700Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1259,7 +1341,7 @@ export const G1ApplicationSchema = {
             format: 'uuid'
         },
         id: {
-            default: 'ddf21a45-ee96-4083-b38f-87e65bddfef6',
+            default: 'be6a85ec-33a5-4268-aa7f-48bc8ff490e4',
             type: 'string',
             format: 'uuid'
         },
@@ -1299,7 +1381,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         reference_no: {
-            default: 'DRAFT-67bcdccf-0984-4579-baeb-b1d00db8ca44',
+            default: 'DRAFT-5ffe3dbc-aa2f-4566-9b22-31ba65eb4fa1',
             type: 'string'
         },
         rejection_reason: {
@@ -1330,7 +1412,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         updated_at: {
-            default: '2026-07-25T19:09:12.088540200Z',
+            default: '2026-07-26T12:09:51.562627100Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1523,7 +1605,7 @@ export const GuardianSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-07-25T19:09:12.104002900Z',
+            default: '2026-07-26T12:09:51.567826900Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1641,7 +1723,7 @@ export const ModelSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-07-25T19:09:12.107285800Z',
+            default: '2026-07-26T12:09:51.569371700Z',
             type: 'string',
             format: 'date-time'
         },
@@ -2072,7 +2154,7 @@ export const StaffDetailSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-07-25T19:09:12.108535100Z',
+            default: '2026-07-26T12:09:51.570195600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -2323,36 +2405,117 @@ export const StudentStatusSchema = {
     ]
 } as const;
 
+export const UpdateApplicationBodySchema = {
+    title: 'UpdateApplicationBody',
+    type: 'object',
+    properties: {
+        age_eligibility_verified: {
+            type: 'boolean',
+            nullable: true
+        },
+        alternative_age_certificate: {
+            type: 'boolean',
+            nullable: true
+        },
+        alternative_age_certificate_ref: {
+            type: 'string',
+            nullable: true
+        },
+        birth_certificate_verified: {
+            type: 'boolean',
+            nullable: true
+        },
+        category: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/G1Category'
+                }
+            ],
+            nullable: true
+        },
+        category_verified: {
+            type: 'boolean',
+            nullable: true
+        },
+        child_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        },
+        guardian_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        },
+        interview_completed: {
+            type: 'boolean',
+            nullable: true
+        },
+        interview_date: {
+            type: 'string',
+            format: 'date',
+            nullable: true
+        },
+        overseas_arrival_date: {
+            type: 'string',
+            format: 'date',
+            nullable: true
+        },
+        rejection_reason: {
+            type: 'string',
+            nullable: true
+        },
+        residence_verified: {
+            type: 'boolean',
+            nullable: true
+        },
+        school_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        },
+        submission_method: {
+            type: 'string',
+            nullable: true
+        },
+        wizard_step: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        }
+    }
+} as const;
+
 export const UpdateBatchBodySchema = {
     title: 'UpdateBatchBody',
     type: 'object',
     properties: {
-        alumni_weight: {
+        alumni_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        govt_weight: {
+        govt_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        proximity_weight: {
+        proximity_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        sibling_weight: {
+        sibling_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        special_weight: {
+        special_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
         },
-        staff_weight: {
+        staff_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
@@ -2368,6 +2531,74 @@ export const UpdateBatchBodySchema = {
         student_allocation: {
             type: 'integer',
             format: 'int32',
+            nullable: true
+        }
+    }
+} as const;
+
+export const UpdateChildBodySchema = {
+    title: 'UpdateChildBody',
+    type: 'object',
+    properties: {
+        birth_certificate_number: {
+            type: 'string',
+            nullable: true
+        },
+        date_of_birth: {
+            type: 'string',
+            format: 'date',
+            nullable: true
+        },
+        disability_status: {
+            type: 'boolean',
+            nullable: true
+        },
+        disability_type: {
+            type: 'string',
+            nullable: true
+        },
+        full_name: {
+            type: 'string',
+            nullable: true
+        },
+        gender: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/Gender'
+                }
+            ],
+            nullable: true
+        },
+        medium_of_instruction: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/MediumOfInstruction'
+                }
+            ],
+            nullable: true
+        },
+        name_with_initials: {
+            type: 'string',
+            nullable: true
+        },
+        nationality: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/Nationality'
+                }
+            ],
+            nullable: true
+        },
+        photo_url: {
+            type: 'string',
+            nullable: true
+        },
+        religion: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/Religion'
+                }
+            ],
             nullable: true
         }
     }
@@ -2622,7 +2853,7 @@ export const WorkspaceAddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-07-25T19:09:12.110664400Z',
+            default: '2026-07-26T12:09:51.571475600Z',
             type: 'string',
             format: 'date-time'
         },

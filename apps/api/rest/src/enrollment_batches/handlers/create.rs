@@ -31,12 +31,12 @@ pub struct CreateBatchBody {
     pub enrollment_type: EnrollmentType,
     pub year: i16,
     pub student_allocation: Option<i32>,
-    pub proximity_weight: Option<i16>,
-    pub staff_weight: Option<i16>,
-    pub sibling_weight: Option<i16>,
-    pub alumni_weight: Option<i16>,
-    pub govt_weight: Option<i16>,
-    pub special_weight: Option<i16>,
+    pub proximity_percentage: Option<i16>,
+    pub staff_percentage: Option<i16>,
+    pub sibling_percentage: Option<i16>,
+    pub alumni_percentage: Option<i16>,
+    pub govt_percentage: Option<i16>,
+    pub special_percentage: Option<i16>,
 }
 
 #[api_operation(tag = "enrollment-batches", operation_id = "create-batch")]
@@ -48,7 +48,42 @@ pub async fn create_batch(
     auth.require_permission(Permission::EnrollmentBatchCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
-    let input = body.into_inner();
+    let mut input = body.into_inner();
+    crate::validation::Year::new(input.year)?;
+    input.proximity_percentage = input
+        .proximity_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.staff_percentage = input
+        .staff_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.sibling_percentage = input
+        .sibling_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.alumni_percentage = input
+        .alumni_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.govt_percentage = input
+        .govt_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.special_percentage = input
+        .special_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+
+    let pcts = [
+        input.proximity_percentage.unwrap_or(50),
+        input.staff_percentage.unwrap_or(25),
+        input.sibling_percentage.unwrap_or(14),
+        input.alumni_percentage.unwrap_or(6),
+        input.govt_percentage.unwrap_or(4),
+        input.special_percentage.unwrap_or(1),
+    ];
+    crate::validation::Percentage::sum(&pcts)?;
     let batch_code = generate_batch_code(&input.enrollment_type, input.year);
     let batch_name = generate_batch_name(&input.enrollment_type, input.year);
 
@@ -80,12 +115,12 @@ pub async fn create_batch(
         created_at: now,
         created_by: None,
         student_allocation: input.student_allocation.unwrap_or(200),
-        proximity_weight: input.proximity_weight.unwrap_or(50),
-        staff_weight: input.staff_weight.unwrap_or(25),
-        sibling_weight: input.sibling_weight.unwrap_or(14),
-        alumni_weight: input.alumni_weight.unwrap_or(6),
-        govt_weight: input.govt_weight.unwrap_or(4),
-        special_weight: input.special_weight.unwrap_or(1),
+        proximity_percentage: pcts[0],
+        staff_percentage: pcts[1],
+        sibling_percentage: pcts[2],
+        alumni_percentage: pcts[3],
+        govt_percentage: pcts[4],
+        special_percentage: pcts[5],
         waiting_list_size: 20,
     };
 

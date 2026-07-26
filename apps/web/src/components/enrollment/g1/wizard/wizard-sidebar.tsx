@@ -83,12 +83,14 @@ interface GuardianDirectoryProps {
   selectedIds: string[]
   onSelect: (id: string) => void
   onDeselect: (id: string) => void
+  enrollmentId?: string
 }
 
 function GuardianDirectory({
   selectedIds,
   onSelect,
   onDeselect,
+  enrollmentId,
 }: GuardianDirectoryProps) {
   return (
     <div className="space-y-3">
@@ -104,6 +106,7 @@ function GuardianDirectory({
         selectedIds={selectedIds}
         onSelect={onSelect}
         onDeselect={onDeselect}
+        enrollmentId={enrollmentId}
       />
     </div>
   )
@@ -294,6 +297,7 @@ export function WizardSidebar({
             selectedIds={selectedGuardianIds}
             onSelect={onGuardianSelect}
             onDeselect={onGuardianDeselect}
+            enrollmentId={enrollmentId}
           />
         )}
       {currentStep === 3 &&

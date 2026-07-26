@@ -4,13 +4,17 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { useParams, useNavigate } from "@tanstack/react-router"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import {
   getApplicationOptions,
   getApplicationQueryKey,
   getApplicationGuardiansOptions,
+  getApplicationGuardiansQueryKey,
   getApplicationAddressesOptions,
+  getApplicationAddressesQueryKey,
   getApplicationSiblingsOptions,
+  getApplicationSiblingsQueryKey,
   getApplicationDocumentsOptions,
   listApplicationsQueryKey,
   updateApplicationMutation,
@@ -339,9 +343,10 @@ useEffect(() => {
         queryKey: listApplicationsQueryKey({ client: apiClient }),
       })
        setSavedSteps(6)
-       toast.success("Enrollment completed. Awaiting processing.")
-    } catch {
-      toast.error("Failed to complete enrollment")
+        toast.success("Enrollment completed. Awaiting processing.")
+        navigate({ to: "/student-management/enrollment/g1" })
+    } catch (err) {
+      toastApiError(err, "Failed to complete enrollment")
     }
   }, [enrollmentId, updateApplication, application, navigate])
 
@@ -495,11 +500,22 @@ useEffect(() => {
                   onSave={async (ids) => {
                     setGuardianIds(ids)
                     await autoSaveStep(2)
-                    if (ids.length > 0) {
-                      await saveGuardians.mutateAsync({
-                        path: { id: enrollmentId },
-                        body: { guardian_ids: ids },
+                    try {
+                      if (ids.length > 0) {
+                        await saveGuardians.mutateAsync({
+                          path: { id: enrollmentId },
+                          body: { guardian_ids: ids },
+                        })
+                      }
+                      queryClient.invalidateQueries({
+                        queryKey: getApplicationGuardiansQueryKey({
+                          path: { id: enrollmentId },
+                          client: apiClient,
+                        }),
                       })
+                      toast.success("Guardians saved")
+                    } catch (err) {
+                      toastApiError(err, "Failed to save guardians")
                     }
                   }}
                   onBack={() => setStep(1)}
@@ -534,11 +550,22 @@ useEffect(() => {
                   onSave={async (addresses) => {
                     setSelectedAddressEntries(addresses)
                     await autoSaveStep(3)
-                    if (addresses.length > 0) {
-                      await saveAddresses.mutateAsync({
-                        path: { id: enrollmentId },
-                        body: { addresses },
+                    try {
+                      if (addresses.length > 0) {
+                        await saveAddresses.mutateAsync({
+                          path: { id: enrollmentId },
+                          body: { addresses },
+                        })
+                      }
+                      queryClient.invalidateQueries({
+                        queryKey: getApplicationAddressesQueryKey({
+                          path: { id: enrollmentId },
+                          client: apiClient,
+                        }),
                       })
+                      toast.success("Addresses saved")
+                    } catch (err) {
+                      toastApiError(err, "Failed to save addresses")
                     }
                   }}
                   onBack={() => setStep(2)}
@@ -556,11 +583,22 @@ useEffect(() => {
                   onSave={async (ids) => {
                     setSelectedSiblingIds(ids)
                     await autoSaveStep(4)
-                    if (ids.length > 0) {
-                      await saveSiblings.mutateAsync({
-                        path: { id: enrollmentId },
-                        body: { student_ids: ids },
+                    try {
+                      if (ids.length > 0) {
+                        await saveSiblings.mutateAsync({
+                          path: { id: enrollmentId },
+                          body: { student_ids: ids },
+                        })
+                      }
+                      queryClient.invalidateQueries({
+                        queryKey: getApplicationSiblingsQueryKey({
+                          path: { id: enrollmentId },
+                          client: apiClient,
+                        }),
                       })
+                      toast.success("Siblings saved")
+                    } catch (err) {
+                      toastApiError(err, "Failed to save siblings")
                     }
                   }}
                   onBack={() => setStep(3)}
@@ -596,8 +634,9 @@ useEffect(() => {
                           client: apiClient,
                         }).queryKey,
                       })
-                    } catch {
-                      toast.error("Failed to save documents. Please try again.")
+                      toast.success("Documents saved")
+                    } catch (err) {
+                      toastApiError(err, "Failed to save documents. Please try again.")
                     }
                     await autoSaveStep(5)
                   }}

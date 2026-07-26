@@ -3,25 +3,36 @@ use std::str::FromStr;
 use actix_web::{web, web::Json};
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
+use apistos::ApiComponent;
 use chrono::Utc;
 use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus, IncomeLevel};
-use db::entity::{enrollment_batches, g1::applications, schools};
+use db::entity::g1::applications;
+use db::entity::{enrollment_batches, schools};
 use num_traits::ToPrimitive;
+use schemars::JsonSchema;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
     Set, TransactionTrait,
 };
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
 
+#[derive(Deserialize, JsonSchema, ApiComponent)]
+pub struct CreateApplicationBody {
+    pub batch_id: Uuid,
+    pub school_id: Option<Uuid>,
+    pub child_id: Option<Uuid>,
+}
+
 #[api_operation(tag = "g1-applications", operation_id = "create-application")]
 pub async fn create_application(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,
-    body: Json<applications::Model>,
+    body: Json<CreateApplicationBody>,
 ) -> Result<CreatedJson<applications::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
@@ -46,19 +57,51 @@ pub async fn create_application(
         ));
     }
 
-    let mut active: applications::ActiveModel = data.into();
-    active.id = Set(Uuid::new_v4());
-    active.created_at = Set(now);
-    active.updated_at = Set(now);
-    active.created_by = Set(None);
-    active.updated_by = Set(None);
-
+    let id = Uuid::new_v4();
     let count = applications::Entity::find()
         .filter(applications::Column::BatchId.eq(batch.id))
         .filter(applications::Column::DeletedAt.is_null())
         .count(db.as_ref())
         .await?;
-    active.reference_no = Set(format!("{}-{:04}", batch.batch_code, count + 1));
+
+    let active = applications::ActiveModel {
+        id: Set(id),
+        reference_no: Set(format!("{}-{:04}", batch.batch_code, count + 1)),
+        school_id: Set(data.school_id),
+        batch_id: Set(data.batch_id),
+        enrollment_status: Set(EnrollmentStatus::Draft),
+        created_at: Set(now),
+        updated_at: Set(now),
+        created_by: Set(None),
+        updated_by: Set(None),
+        child_id: Set(data.child_id.unwrap_or(Uuid::nil())),
+        guardian_id: Set(Uuid::nil()),
+        wizard_step: Set(None),
+        total_marks: Set(None),
+        rank_number: Set(None),
+        list_category: Set(None),
+        waiting_position: Set(None),
+        promoted_at: Set(None),
+        submitted_at: Set(None),
+        verified_at: Set(None),
+        verified_by: Set(None),
+        finalized_at: Set(None),
+        ip_address: Set(None),
+        user_agent: Set(None),
+        category: Set(None),
+        overseas_arrival_date: Set(None),
+        submission_method: Set(None),
+        interview_date: Set(None),
+        interview_completed: Set(false),
+        birth_certificate_verified: Set(false),
+        age_eligibility_verified: Set(false),
+        residence_verified: Set(false),
+        category_verified: Set(false),
+        alternative_age_certificate: Set(false),
+        alternative_age_certificate_ref: Set(None),
+        rejection_reason: Set(None),
+        deleted_at: Set(None),
+    };
 
     let saved = active.insert(db.as_ref()).await?;
 

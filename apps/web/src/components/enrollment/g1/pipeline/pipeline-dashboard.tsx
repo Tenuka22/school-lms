@@ -1,10 +1,10 @@
 "use client"
 
-import { useForm } from "@tanstack/react-form"
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate, Link } from "@tanstack/react-router"
 import { useState, useRef, useMemo, useCallback } from "react"
-import * as v from "valibot"
+import { useForm } from "@tanstack/react-form"
+import { useDebounce } from "@/hooks/use-debounce"
 import {
   IconPlus,
   IconFolderPlus,
@@ -13,8 +13,12 @@ import {
   IconLoader2,
   IconDots,
   IconExternalLink,
+  IconSearch,
+  IconUserPlus,
+  IconCalendar,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
+import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import {
   listBatchesOptions,
@@ -24,12 +28,25 @@ import {
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import {
   createApplication,
-  createBatch,
+  createChild,
+  updateChild,
   deleteApplication,
+  listChildren,
 } from "@/lib/api-client/sdk.gen"
 import { queryClient } from "@/router"
+import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
+import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpers"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -38,22 +55,24 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
 import { formatDate } from "@/lib/format"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command"
+import { Calendar } from "@/components/ui/calendar"
+import type { Child, Gender, MediumOfInstruction, Nationality } from "@/lib/api-client/types.gen"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,38 +108,9 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-col
 
 import { Route } from "@/routes/_authenticated/student-management/enrollment/g1"
 import type { DashboardSearch } from "@/routes/_authenticated/student-management/enrollment/g1"
-import type { ApplicationWithChild } from "@/lib/api-client/types.gen"
-
-const vDialogApplication = v.object({
-  batch_id: v.string(),
-})
-
-const WEIGHT_INFO: Record<string, { label: string; desc: string }> = {
-  proximity: {
-    label: "Proximity",
-    desc: "Priority for children living closest to the school",
-  },
-  staff: {
-    label: "Staff",
-    desc: "Children of staff members employed at the school",
-  },
-  sibling: {
-    label: "Sibling",
-    desc: "Children with siblings already enrolled at the school",
-  },
-  alumni: {
-    label: "Alumni",
-    desc: "Children of former graduates of the school",
-  },
-  govt: {
-    label: "Govt",
-    desc: "Children of government employees transferred to the area",
-  },
-  special: {
-    label: "Special",
-    desc: "Children with special needs or exceptional circumstances",
-  },
-}
+import type {
+  ApplicationWithChild,
+} from "@/lib/api-client/types.gen"
 
 const LANE_CONFIG = [
   {
@@ -191,6 +181,318 @@ function EnumBadge({
   )
 }
 
+function ChildCombobox({
+  value,
+  search,
+  onSearchChange,
+  onChange,
+  onCreateNew,
+  onEdit,
+}: {
+  value: Child | null
+  search: string
+  onSearchChange: (v: string) => void
+  onChange: (v: Child | null) => void
+  onCreateNew: () => void
+  onEdit: (child: Child) => void
+}) {
+  const debouncedSearch = useDebounce(search, 300)
+
+  const { data: children = [] } = useQuery({
+    queryKey: ["list-children", debouncedSearch],
+    queryFn: async () => {
+      const res = await listChildren({
+        client: apiClient,
+        query: { search: debouncedSearch || undefined },
+      })
+      return res.data ?? []
+    },
+  })
+
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            role="combobox"
+            className="w-full justify-between font-normal"
+          >
+            {value
+              ? `${value.full_name} (${value.date_of_birth})`
+              : "Search child..."}
+            <IconSearch className="ml-2 size-4 shrink-0 opacity-50" />
+          </Button>
+        }
+      />
+      <PopoverContent className="min-w-[--anchor-width] w-96 p-0">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search by child name..."
+            value={search}
+            onValueChange={onSearchChange}
+          />
+          <CommandList>
+            <CommandEmpty>No children found.</CommandEmpty>
+            <CommandGroup>
+              {children.map((c) => (
+                <CommandItem
+                  key={c.id}
+                  value={c.id}
+                  onSelect={() => {
+                    onChange(c)
+                    setOpen(false)
+                  }}
+                  className="group"
+                >
+                  <div className="flex flex-1 flex-col">
+                    <span>{c.full_name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {c.name_with_initials} &middot; {c.date_of_birth}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="size-6 shrink-0 opacity-0 group-hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setOpen(false)
+                      onEdit(c)
+                    }}
+                  >
+                    <IconPencil className="size-3.5" />
+                  </Button>
+                </CommandItem>
+              ))}
+              <CommandItem
+                value="__create__"
+                className="border-t border-border mt-1 pt-1 text-primary font-medium"
+                onSelect={() => { setOpen(false); onCreateNew() }}
+              >
+                <IconUserPlus className="size-4" />
+                <span>Create new child</span>
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function CreateChildForm({ child, onSuccess }: { child?: Child | null, onSuccess: (child: Child) => void }) {
+  const [saving, setSaving] = useState(false)
+
+  const childForm = useForm({
+    defaultValues: {
+      full_name: child?.full_name ?? "",
+      name_with_initials: child?.name_with_initials ?? "",
+      date_of_birth: child?.date_of_birth ?? "",
+      gender: (child?.gender ?? "") as Gender | "",
+      nationality: (child?.nationality ?? "") as Nationality | "",
+      medium_of_instruction: (child?.medium_of_instruction ?? "") as MediumOfInstruction | "",
+    },
+    onSubmit: async ({ value }) => {
+      setSaving(true)
+      try {
+        if (child) {
+          const { data, error } = await updateChild({
+            path: { id: child.id! },
+            body: {
+              full_name: value.full_name || null,
+              name_with_initials: value.name_with_initials || null,
+              date_of_birth: value.date_of_birth || null,
+              gender: (value.gender || null) as Gender | null,
+              nationality: (value.nationality || null) as Nationality | null,
+              medium_of_instruction: (value.medium_of_instruction || null) as MediumOfInstruction | null,
+            },
+            client: apiClient,
+          })
+          if (error || !data) {
+            toastApiError(error, "Failed to update child")
+            return
+          }
+          toast.success(`${data.full_name} updated`)
+          onSuccess(data as Child)
+        } else {
+          const { data, error } = await createChild({
+            body: {
+              full_name: value.full_name,
+              name_with_initials: value.name_with_initials,
+              date_of_birth: value.date_of_birth,
+              gender: value.gender as Gender,
+              nationality: value.nationality as Nationality,
+              medium_of_instruction: value.medium_of_instruction as MediumOfInstruction,
+            },
+            client: apiClient,
+          })
+          if (error || !data) {
+            toastApiError(error, "Failed to create child")
+            return
+          }
+          toast.success(`${data.full_name} created`)
+          onSuccess(data as Child)
+        }
+      } catch (err) {
+        toastApiError(err, child ? "Failed to update child" : "Failed to create child")
+      } finally {
+        setSaving(false)
+      }
+    },
+  })
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); childForm.handleSubmit() }}>
+      <div className="space-y-3">
+        <childForm.Field
+          name="full_name"
+          children={(field) => (
+            <div className="space-y-1.5">
+              <Label>Full Name</Label>
+              <Input
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="Enter full name"
+              />
+            </div>
+          )}
+        />
+        <childForm.Field
+          name="name_with_initials"
+          children={(field) => (
+            <div className="space-y-1.5">
+              <Label>Name with Initials</Label>
+              <Input
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder="e.g. J. M. Perera"
+              />
+            </div>
+          )}
+        />
+        <childForm.Field
+          name="date_of_birth"
+          children={(field) => {
+            const dateValue = field.state.value
+              ? new Date(field.state.value + "T12:00:00")
+              : undefined
+            return (
+              <div className="space-y-1.5">
+                <Label>Date of Birth</Label>
+                <Popover>
+                  <PopoverTrigger
+                    render={
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <IconCalendar className="mr-2 size-4 shrink-0" />
+                        {dateValue ? (
+                          formatDate(dateValue)
+                        ) : (
+                          <span className="text-muted-foreground">Pick a date</span>
+                        )}
+                      </Button>
+                    }
+                  />
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateValue}
+                      defaultMonth={dateValue}
+                      onSelect={(d: Date | undefined) => {
+                        if (!d) {
+                          field.handleChange("")
+                          return
+                        }
+                        const y = d.getFullYear()
+                        const m = String(d.getMonth() + 1).padStart(2, "0")
+                        const day = String(d.getDate()).padStart(2, "0")
+                        field.handleChange(`${y}-${m}-${day}`)
+                      }}
+                      captionLayout="dropdown"
+                      autoFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )
+          }}
+        />
+        <childForm.Field
+          name="gender"
+          children={(field) => (
+            <div className="space-y-1.5">
+              <Label>Gender</Label>
+              <Select
+                value={field.state.value || undefined}
+                onValueChange={(v) => field.handleChange(v as Gender)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        />
+        <childForm.Field
+          name="nationality"
+          children={(field) => (
+            <div className="space-y-1.5">
+              <Label>Nationality</Label>
+              <Select
+                value={field.state.value || undefined}
+                onValueChange={(v) => field.handleChange(v as Nationality)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select nationality" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SriLankan">Sri Lankan</SelectItem>
+                  <SelectItem value="DualCitizen">Dual Citizen</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        />
+        <childForm.Field
+          name="medium_of_instruction"
+          children={(field) => (
+            <div className="space-y-1.5">
+              <Label>Medium of Instruction</Label>
+              <Select
+                value={field.state.value || undefined}
+                onValueChange={(v) => field.handleChange(v as MediumOfInstruction)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select medium" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Sinhala">Sinhala</SelectItem>
+                  <SelectItem value="Tamil">Tamil</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        />
+      </div>
+      <DialogFooter className="mt-4">
+        <Button type="submit" disabled={saving}>
+          {saving ? "Saving..." : child ? "Update Child" : "Create Child"}
+        </Button>
+      </DialogFooter>
+    </form>
+  )
+}
+
 export function PipeDashboard() {
   const navigate = useNavigate({ from: Route.fullPath })
   const search: DashboardSearch = Route.useSearch()
@@ -199,6 +501,66 @@ export function PipeDashboard() {
   const [batchDialogOpen, setBatchDialogOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [newEnrollmentOpen, setNewEnrollmentOpen] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [childSearch, setChildSearch] = useState("")
+  const [selectedChild, setSelectedChild] = useState<Child | null>(null)
+  const [createChildDialogOpen, setCreateChildDialogOpen] = useState(false)
+  const [editingChild, setEditingChild] = useState<Child | null>(null)
+  const batchIdRef = useRef(batchId)
+  batchIdRef.current = batchId
+
+  const newForm = useForm({
+    defaultValues: {
+      school_id: "",
+    },
+    onSubmit: async ({ value }) => {
+      const currentBatchId = batchIdRef.current
+      if (!currentBatchId) return
+      setCreating(true)
+      try {
+        const childId = selectedChild?.id
+
+        if (!childId) {
+          toastApiError("No child selected or created")
+          return
+        }
+
+        const { data, error } = await createApplication({
+          body: {
+            batch_id: currentBatchId,
+            child_id: childId,
+            school_id: value.school_id || undefined,
+          },
+          client: apiClient,
+        })
+        if (error) {
+          toastApiError(error, "Failed to create enrollment")
+          return
+        }
+                  toast.success(`${selectedChild?.full_name ?? "Child"} enrolled. Fill in remaining details.`)
+        setNewEnrollmentOpen(false)
+        newForm.reset()
+        setChildSearch("")
+        setSelectedChild(null)
+        await queryClient.invalidateQueries({
+          queryKey: listApplicationsQueryKey({ client: apiClient }),
+        })
+        if (!data?.id) {
+          toastApiError("Failed to create enrollment")
+          return
+        }
+        navigate({
+          to: "/student-management/enrollment/g1/$enrollment_id",
+          params: { enrollment_id: data.id },
+        })
+      } catch (err) {
+        toastApiError(err, "Failed to create enrollment")
+      } finally {
+        setCreating(false)
+      }
+    },
+  })
 
   const { data: batches } = useQuery(listBatchesOptions({ client: apiClient }))
 
@@ -232,73 +594,7 @@ export function PipeDashboard() {
     return acc
   }, {})
 
-  const enrollmentForm = useForm({
-    defaultValues: {
-      batch_id: "",
-    },
-    validators: { onSubmit: vDialogApplication },
-    onSubmit: async ({ value }) => {
-      if (!batchId) return
-      const { data, error } = await createApplication({
-        body: {
-          ...value,
-          batch_id: batchId,
-          age_eligibility_verified: false,
-          alternative_age_certificate: false,
-          birth_certificate_verified: false,
-          category_verified: false,
-          interview_completed: false,
-          residence_verified: false,
-        },
-        client: apiClient,
-      })
-      if (error || !data) {
-        toast.error(
-          (error as { message?: string }).message ??
-            "Failed to create enrollment"
-        )
-        return
-      }
-      toast.success("Enrollment created. Complete all details.")
-      enrollmentForm.reset()
-      queryClient.invalidateQueries({
-        queryKey: listApplicationsQueryKey({ client: apiClient }),
-      })
-      navigate({
-        to: "/student-management/enrollment/g1/$enrollment_id",
-        params: { enrollment_id: data.id! },
-      })
-    },
-  })
 
-  const batchForm = useForm({
-    defaultValues: {
-      year: CURRENT_YEAR,
-      enrollment_type: "G1" as const,
-      student_allocation: 200,
-      proximity_weight: 50,
-      staff_weight: 25,
-      sibling_weight: 14,
-      alumni_weight: 6,
-      govt_weight: 4,
-      special_weight: 1,
-    },
-    onSubmit: async ({ value }) => {
-      try {
-        const r = await createBatch({ body: value, client: apiClient })
-        const newBatchId = r.data?.id
-        toast.success("Batch created")
-        setBatchDialogOpen(false)
-        batchForm.reset()
-        await queryClient.invalidateQueries({
-          queryKey: listBatchesQueryKey({ client: apiClient }),
-        })
-        if (newBatchId) setBatchId(newBatchId)
-      } catch {
-        toast.error("Failed to create batch")
-      }
-    },
-  })
 
   const handleDelete = useCallback(async (rowId: string) => {
     setDeleting(true)
@@ -310,7 +606,7 @@ export function PipeDashboard() {
       })
       toast.success("Enrollment deleted")
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Delete failed")
+      toastApiError(err, "Delete failed")
     } finally {
       setDeleting(false)
     }
@@ -517,7 +813,7 @@ export function PipeDashboard() {
           ],
         },
         cell: ({ getValue }) => (
-          <EnumBadge column="child_gender" value={getValue() as string} />
+          <EnumBadge column="gender" value={getValue() as string} />
         ),
       },
       {
@@ -536,7 +832,7 @@ export function PipeDashboard() {
           ],
         },
         cell: ({ getValue }) => (
-          <EnumBadge column="child_nationality" value={getValue() as string} />
+          <EnumBadge column="nationality" value={getValue() as string} />
         ),
       },
       {
@@ -580,10 +876,7 @@ export function PipeDashboard() {
           ],
         },
         cell: ({ getValue }) => (
-          <EnumBadge
-            column="child_medium_of_instruction"
-            value={getValue() as string}
-          />
+          <EnumBadge column="medium_of_instruction" value={getValue() as string} />
         ),
       },
       {
@@ -663,6 +956,14 @@ export function PipeDashboard() {
             className="flex items-center gap-1"
             onClick={(e) => e.stopPropagation()}
           >
+            <Button variant="ghost" size="xs" className="size-8" asChild>
+              <Link
+                to="/student-management/enrollment/g1/$enrollment_id"
+                params={{ enrollment_id: row.original.id! }}
+              >
+                <IconPencil className="size-4" />
+              </Link>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
@@ -773,32 +1074,32 @@ export function PipeDashboard() {
               const miniWeights = [
                 {
                   key: "proximity",
-                  value: String(b.proximity_weight ?? 50),
+                  value: String(b.proximity_percentage ?? 50),
                   color: "bg-blue-500",
                 },
                 {
                   key: "staff",
-                  value: String(b.staff_weight ?? 25),
+                  value: String(b.staff_percentage ?? 25),
                   color: "bg-emerald-500",
                 },
                 {
                   key: "sibling",
-                  value: String(b.sibling_weight ?? 14),
+                  value: String(b.sibling_percentage ?? 14),
                   color: "bg-violet-500",
                 },
                 {
                   key: "alumni",
-                  value: String(b.alumni_weight ?? 6),
+                  value: String(b.alumni_percentage ?? 6),
                   color: "bg-amber-500",
                 },
                 {
                   key: "govt",
-                  value: String(b.govt_weight ?? 4),
+                  value: String(b.govt_percentage ?? 4),
                   color: "bg-rose-500",
                 },
                 {
                   key: "special",
-                  value: String(b.special_weight ?? 1),
+                  value: String(b.special_percentage ?? 1),
                   color: "bg-cyan-500",
                 },
               ]
@@ -876,28 +1177,28 @@ export function PipeDashboard() {
         <h1 className="text-2xl font-bold tracking-tight">
           Grade 1 Admissions Pipeline
         </h1>
-        <Button onClick={() => navigate({ to: "/student-management/enrollment/g1" })}>
+        <Button onClick={() => setNewEnrollmentOpen(true)}>
           <IconPlus className="mr-2 size-4" /> New Enrollment
         </Button>
       </div>
 
       {batchId ? (
         <>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 2xl:grid-cols-6">
             {LANE_CONFIG.map((lane) => {
               const count = grouped[lane.status] ?? 0
               return (
                 <div
                   key={lane.status}
-                  className="rounded-xl border bg-card p-4"
+                  className="min-w-0 rounded-xl border bg-card p-4"
                 >
-                  <div className="mb-1 flex items-center justify-between">
-                    <Badge variant={lane.badgeVariant}>{lane.label}</Badge>
-                    <span className="text-2xl font-bold tabular-nums">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <Badge variant={lane.badgeVariant} className="truncate">{lane.label}</Badge>
+                    <span className="shrink-0 text-2xl font-bold tabular-nums">
                       {count}
                     </span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="truncate text-[11px] text-muted-foreground">
                     {lane.note}
                   </p>
                 </div>
@@ -921,269 +1222,152 @@ export function PipeDashboard() {
         </div>
       )}
 
-      <Dialog open={batchDialogOpen} onOpenChange={setBatchDialogOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+      <CreateBatchDialog
+        open={batchDialogOpen}
+        onOpenChange={setBatchDialogOpen}
+        onSuccess={(batch) => {
+          queryClient.invalidateQueries({
+            queryKey: listBatchesQueryKey({ client: apiClient }),
+          })
+          if (batch?.id) setBatchId(batch.id)
+        }}
+        defaultYear={CURRENT_YEAR}
+      />
+
+      <Dialog open={newEnrollmentOpen} onOpenChange={(open) => {
+        if (!open) { newForm.reset(); setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }
+      }}>
+        <DialogContent className="sm:max-w-lg w-full">
           <DialogHeader>
-            <DialogTitle>Create Batch</DialogTitle>
+            <DialogTitle>New Enrollment</DialogTitle>
             <DialogDescription>
-              Set up a new G1 admission batch with allocation and scoring
-              weights.
+              Create a new G1 enrollment application for the selected batch.
             </DialogDescription>
           </DialogHeader>
-          <form
-            id="create-batch-form"
-            onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              batchForm.handleSubmit()
-            }}
-          >
-            <FieldGroup>
-              <batchForm.Field
-                name="year"
-                children={(field: any) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Year</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="number"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) =>
-                          field.handleChange(Number(e.target.value))
-                        }
-                        aria-invalid={isInvalid}
-                        placeholder="2026"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <batchForm.Field
-                name="student_allocation"
-                children={(field: any) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>
-                        Total Student Allocation
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="number"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) =>
-                          field.handleChange(Number(e.target.value))
-                        }
-                        aria-invalid={isInvalid}
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Batch</Label>
+              {batchId ? (
+                <div className="flex items-center rounded-md border bg-muted px-3 py-2 text-sm">
+                  {batches?.find((b) => b.id === batchId)?.batch_name || "No batch selected"}
+                </div>
+              ) : (
+                <Select value={batchId} onValueChange={setBatchId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a batch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(batches ?? []).map((b: any) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.batch_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
 
-              <div className="space-y-3">
-                <Label>Weight Distribution</Label>
-
-                <batchForm.Subscribe
-                  selector={(state: any) => ({
-                    student_allocation: state.values.student_allocation ?? 0,
-                    proximity_weight: state.values.proximity_weight ?? 0,
-                    staff_weight: state.values.staff_weight ?? 0,
-                    sibling_weight: state.values.sibling_weight ?? 0,
-                    alumni_weight: state.values.alumni_weight ?? 0,
-                    govt_weight: state.values.govt_weight ?? 0,
-                    special_weight: state.values.special_weight ?? 0,
-                  })}
-                  children={(vals: any) => {
-                    const weights = [
-                      {
-                        key: "proximity",
-                        value: String(vals.proximity_weight),
-                        color: "bg-blue-500",
-                      },
-                      {
-                        key: "staff",
-                        value: String(vals.staff_weight),
-                        color: "bg-emerald-500",
-                      },
-                      {
-                        key: "sibling",
-                        value: String(vals.sibling_weight),
-                        color: "bg-violet-500",
-                      },
-                      {
-                        key: "alumni",
-                        value: String(vals.alumni_weight),
-                        color: "bg-amber-500",
-                      },
-                      {
-                        key: "govt",
-                        value: String(vals.govt_weight),
-                        color: "bg-rose-500",
-                      },
-                      {
-                        key: "special",
-                        value: String(vals.special_weight),
-                        color: "bg-cyan-500",
-                      },
-                    ]
-                    return (
-                      <>
-                        <WeightBar
-                          weights={weights}
-                          totalAllocation={vals.student_allocation}
-                        />
-
-                        <div className="space-y-1.5">
-                          {(
-                            [
-                              {
-                                key: "proximity",
-                                label: "proximity_weight",
-                                color: "bg-blue-500",
-                              },
-                              {
-                                key: "staff",
-                                label: "staff_weight",
-                                color: "bg-emerald-500",
-                              },
-                              {
-                                key: "sibling",
-                                label: "sibling_weight",
-                                color: "bg-violet-500",
-                              },
-                              {
-                                key: "alumni",
-                                label: "alumni_weight",
-                                color: "bg-amber-500",
-                              },
-                              {
-                                key: "govt",
-                                label: "govt_weight",
-                                color: "bg-rose-500",
-                              },
-                              {
-                                key: "special",
-                                label: "special_weight",
-                                color: "bg-cyan-500",
-                              },
-                            ] as const
-                          ).map((w: any) => {
-                            const info = WEIGHT_INFO[w.key]
-                            const weight = vals[w.label]
-                            const totalWeight =
-                              vals.proximity_weight +
-                              vals.staff_weight +
-                              vals.sibling_weight +
-                              vals.alumni_weight +
-                              vals.govt_weight +
-                              vals.special_weight
-                            const pct =
-                              totalWeight > 0
-                                ? ((weight / totalWeight) * 100).toFixed(0)
-                                : "0"
-                            const seats =
-                              totalWeight > 0
-                                ? Math.round(
-                                    (weight / totalWeight) *
-                                      vals.student_allocation
-                                  )
-                                : 0
-                            return (
-                              <Tooltip key={w.key}>
-                                <TooltipTrigger
-                                  render={
-                                    <div className="flex cursor-help items-center gap-2" />
-                                  }
-                                >
-                                  <div
-                                    className={`size-3 shrink-0 rounded-full ${w.color}`}
-                                  />
-                                  <span className="w-14 text-xs text-muted-foreground">
-                                    {info.label}
-                                  </span>
-                                  <div className="flex items-center gap-1">
-                                    <button
-                                      type="button"
-                                      className="flex size-6 items-center justify-center rounded border border-input text-xs hover:bg-accent disabled:opacity-30"
-                                      disabled={weight <= 0}
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        batchForm.setFieldValue(
-                                          w.label,
-                                          Math.max(0, weight - 1)
-                                        )
-                                      }}
-                                    >
-                                      −
-                                    </button>
-                                    <span className="w-8 text-center font-mono text-sm tabular-nums">
-                                      {weight}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      className="flex size-6 items-center justify-center rounded border border-input text-xs hover:bg-accent"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        batchForm.setFieldValue(
-                                          w.label,
-                                          weight + 1
-                                        )
-                                      }}
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-                                  <div className="flex-1" />
-                                  <span className="text-xs text-muted-foreground tabular-nums">
-                                    {pct}%
-                                  </span>
-                                  <span className="w-16 text-right text-xs font-medium tabular-nums">
-                                    {seats} seats
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent
-                                  side="left"
-                                  className="max-w-64"
-                                >
-                                  <p className="font-medium">{info.label}</p>
-                                  <p className="text-[11px] opacity-80">
-                                    {info.desc}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            )
-                          })}
-                        </div>
-                      </>
-                    )
-                  }}
+            <div className="space-y-2">
+              <Label>Child</Label>
+              <ChildCombobox
+                  value={selectedChild}
+                  search={childSearch}
+                  onSearchChange={setChildSearch}
+                  onChange={setSelectedChild}
+                  onCreateNew={() => setCreateChildDialogOpen(true)}
+                  onEdit={(child) => { setEditingChild(child); setCreateChildDialogOpen(true) }}
                 />
-              </div>
-            </FieldGroup>
-          </form>
+              {selectedChild && (
+                <p className="text-xs text-muted-foreground">
+                  {selectedChild.full_name} &middot; {selectedChild.date_of_birth}
+                </p>
+              )}
+            </div>
+
+            <newForm.Field
+              name="school_id"
+              children={(field) => (
+                <div className="space-y-2">
+                  <Label>School (optional)</Label>
+                  <SchoolCombobox
+                    value={field.state.value || null}
+                    onChange={(v) => field.handleChange(v ?? "")}
+                  />
+                </div>
+              )}
+            />
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setBatchDialogOpen(false)}>
+            <Button variant="outline" type="button" onClick={() => { newForm.reset(); setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }}>
               Cancel
             </Button>
-            <Button type="submit" form="create-batch-form">
-              Create Batch
+            <Button
+              variant="default"
+              onClick={async () => {
+                const state = newForm.state
+                const currentBatchId = batchIdRef.current
+                if (!currentBatchId || !selectedChild) return
+                setCreating(true)
+                try {
+                  const { data, error } = await createApplication({
+                    body: {
+                      batch_id: currentBatchId,
+                      child_id: selectedChild.id,
+                      school_id: state.values.school_id || undefined,
+                    },
+                    client: apiClient,
+                  })
+                  if (error) {
+                    toastApiError(error, "Failed to create enrollment")
+                    return
+                  }
+        toast.success(`${selectedChild?.full_name ?? "Child"} enrolled. Fill in remaining details.`)
+                  setNewEnrollmentOpen(false)
+                  newForm.reset()
+                  setChildSearch("")
+                  setSelectedChild(null)
+                  await queryClient.invalidateQueries({
+                    queryKey: [{ _id: "listApplications" }],
+                    refetchType: "all",
+                  })
+                  if (!data?.id) {
+                    toastApiError("Failed to create enrollment")
+                    return
+                  }
+                  navigate({
+                    to: "/student-management/enrollment/g1/$enrollment_id",
+                    params: { enrollment_id: data.id },
+                  })
+                } catch (err) {
+                  toastApiError(err, "Failed to create enrollment")
+                } finally {
+                  setCreating(false)
+                }
+              }}
+              disabled={!batchId || creating || !selectedChild}
+            >
+              {creating ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={createChildDialogOpen} onOpenChange={(open) => { if (!open) setEditingChild(null); setCreateChildDialogOpen(open) }}>
+        <DialogContent className="sm:max-w-lg w-full">
+          <DialogHeader>
+            <DialogTitle>{editingChild ? "Edit Child" : "Create New Child"}</DialogTitle>
+            <DialogDescription>
+              {editingChild ? "Update the child's details." : "Enter the required details to create a new child record."}
+            </DialogDescription>
+          </DialogHeader>
+          <CreateChildForm
+            child={editingChild}
+            onSuccess={(child) => {
+              setSelectedChild(child)
+              setCreateChildDialogOpen(false)
+              setEditingChild(null)
+            }}
+          />
         </DialogContent>
       </Dialog>
 
@@ -1191,69 +1375,6 @@ export function PipeDashboard() {
   )
 }
 
-function WeightBar({
-  weights,
-  totalAllocation,
-}: {
-  weights: { key: string; value: string; color: string }[]
-  totalAllocation: number
-}) {
-  const totalWeight = weights.reduce((s, w) => s + (parseInt(w.value) || 0), 0)
-  const segments = weights.filter((w) => (parseInt(w.value) || 0) > 0)
 
-  return (
-    <div className="space-y-2">
-      <div className="flex h-8 w-full overflow-hidden rounded-md border">
-        {segments.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center bg-muted text-[10px] text-muted-foreground">
-            No weights set
-          </div>
-        ) : (
-          segments.map((w) => {
-            const info = WEIGHT_INFO[w.key]
-            const pct = (parseInt(w.value) || 0) / totalWeight
-            const seats =
-              totalWeight > 0 ? Math.round(pct * totalAllocation) : 0
-            return (
-              <Tooltip key={w.key}>
-                <TooltipTrigger
-                  className={`${w.color} flex cursor-help items-center justify-center truncate px-0.5 text-[10px] font-medium text-white transition-all`}
-                  style={{ width: `${pct * 100}%` }}
-                >
-                  {pct > 0.08 ? `${(pct * 100).toFixed(0)}%` : ""}
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p className="font-medium">{info.label}</p>
-                  <p className="text-[11px] opacity-80">{info.desc}</p>
-                  <p className="mt-1 text-[11px] opacity-70">
-                    {w.value} pts — {seats} seats
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            )
-          })
-        )}
-      </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-1">
-        {segments.map((w) => {
-          const info = WEIGHT_INFO[w.key]
-          const pct = (parseInt(w.value) || 0) / totalWeight
-          const seats = totalWeight > 0 ? Math.round(pct * totalAllocation) : 0
-          return (
-            <Tooltip key={w.key}>
-              <TooltipTrigger className="flex cursor-help items-center gap-1 text-[10px] text-muted-foreground">
-                <div className={`size-2 rounded-full ${w.color}`} />
-                <span>{info.label}</span>
-                <span className="font-medium tabular-nums">{seats}</span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p className="font-medium">{info.label}</p>
-                <p className="text-[11px] opacity-80">{info.desc}</p>
-              </TooltipContent>
-            </Tooltip>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
+
+

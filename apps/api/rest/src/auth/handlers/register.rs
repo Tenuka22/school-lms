@@ -18,10 +18,7 @@ pub async fn register(
     body: Json<RegisterRequest>,
     jwt_secret: web::Data<JwtSecret>,
 ) -> Result<CreatedJson<AuthResponse>, ApiError> {
-    if body.email.is_empty() {
-        return Err(ApiError::BadRequest("email is required".into()));
-    }
-
+    crate::validation::Email::new(body.email.clone())?;
     if body.password.len() < 8 {
         return Err(ApiError::BadRequest(
             "password must be at least 8 characters".into(),

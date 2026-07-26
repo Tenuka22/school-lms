@@ -71,6 +71,26 @@ pub async fn create_sibling(
 
     let app_id = id.into_inner();
     let user_id = auth.user_id;
+    let mut body = body.into_inner();
+
+    body.full_name =
+        crate::validation::FullName::new(body.full_name)?.into_inner();
+    body.name_with_initials =
+        crate::validation::NameWithInitials::new(body.name_with_initials)?.into_inner();
+    body.email = body
+        .email
+        .map(|e| crate::validation::Email::new(e).map(|v| v.into_inner()))
+        .transpose()?;
+    body.phone = body
+        .phone
+        .map(|p| crate::validation::Phone::new(p).map(|v| v.into_inner()))
+        .transpose()?;
+    body.birth_certificate_number = body.birth_certificate_number
+        .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
+        .transpose()?;
+    body.nic = body.nic
+        .map(|e| crate::validation::NicNumber::new(e).map(|v| v.into_inner()))
+        .transpose()?;
 
     info!(
         "[create_sibling] user={user_id:?} app={app_id} name={}",

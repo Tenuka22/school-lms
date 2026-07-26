@@ -35,7 +35,9 @@ pub async fn save_wizard_step(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let app_id = id.into_inner();
-    let step = body.wizard_step;
+    let _body = body.into_inner();
+    crate::validation::WizardStep::new(_body.wizard_step)?;
+    let step = _body.wizard_step;
 
     info!(
         "[save_wizard_step] user={:?} app={app_id} step={step}",

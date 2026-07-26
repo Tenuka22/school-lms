@@ -1,11 +1,13 @@
 "use client"
 
-import { useForm } from "@tanstack/react-form"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate, Link } from "@tanstack/react-router"
 import { toast } from "sonner"
+import { toastApiError } from "@/lib/api-error"
 import { registerAction } from "@/lib/server/auth"
 import { vRegisterRequest } from "@/lib/api-client/valibot.gen"
+import { FormBuilder } from "@/lib/form-builder"
+import type { FormConfig } from "@/lib/form-builder"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,11 +21,7 @@ import {
 import {
   Field,
   FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
 } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 
 export function SignupForm({
   className,
@@ -37,27 +35,44 @@ export function SignupForm({
     mutationFn: async (values: { email: string; password: string }) => {
       await registerAction({ data: values })
     },
-    onSuccess: () => {
-      toast.success("Account created successfully!")
+    onSuccess: (_data, variables) => {
+      toast.success(`Account created for ${variables.email}. Welcome!`)
       navigate({ to: redirectTo ?? "/" })
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      toastApiError(error, "Registration failed")
     },
   })
 
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    validators: {
-      onSubmit: vRegisterRequest,
-    },
-    onSubmit: async ({ value }) => {
-      mutation.mutate(value)
-    },
-  })
+  const config: FormConfig<{ email: string; password: string }> = {
+    fields: [
+      {
+        name: "email",
+        kind: "text",
+        label: "Email",
+        placeholder: "m@example.com",
+        required: true,
+        inputProps: { type: "email" },
+      },
+      {
+        name: "password",
+        kind: "text",
+        label: "Password",
+        required: true,
+        inputProps: { type: "password" },
+      },
+    ],
+    layout: [
+      { columns: [{ fields: ["email"] }] },
+      { columns: [{ fields: ["password"] }] },
+    ],
+    renderAboveFields: () =>
+      mutation.error ? (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          {mutation.error.message}
+        </div>
+      ) : null,
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
@@ -69,73 +84,16 @@ export function SignupForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            id="signup-form"
-            onSubmit={(e) => {
-              console.log("Form onSubmit triggered")
-              e.preventDefault()
-              form.handleSubmit()
+          <FormBuilder
+            config={config}
+            defaultValues={{ email: "", password: "" }}
+            valibotSchema={vRegisterRequest}
+            onSubmit={async (values) => {
+              mutation.mutate(values)
             }}
-          >
-            <FieldGroup>
-              {mutation.error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
-                  {mutation.error.message}
-                </div>
-              )}
-              <form.Field
-                name="email"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="email"
-                        placeholder="m@example.com"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        required
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <form.Field
-                name="password"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        required
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-            </FieldGroup>
-          </form>
+            formId="signup-form"
+            hideDefaultButtons
+          />
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Field className="w-full">

@@ -32,7 +32,15 @@ pub async fn create_staff_detail(
     auth.require_permission(Permission::G1ApplicationCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
-    let input = body.into_inner();
+    let mut input = body.into_inner();
+    input.employee_id = input
+        .employee_id
+        .map(|v| crate::validation::NonEmpty::new(v, "employee_id").map(|x| x.into_inner()))
+        .transpose()?;
+    input.designation = input
+        .designation
+        .map(|v| crate::validation::NonEmpty::new(v, "designation").map(|x| x.into_inner()))
+        .transpose()?;
 
     let data = staff_details::ActiveModel {
         id: Set(Uuid::new_v4()),

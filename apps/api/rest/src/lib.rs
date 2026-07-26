@@ -9,12 +9,13 @@ mod enrollment_batches;
 pub mod error;
 mod g1_applications;
 mod guardians;
+mod staff_details;
 mod past_pupil_details;
 mod schools;
-mod staff_details;
 pub mod storage;
 mod students;
 mod uploads;
+pub mod validation;
 mod workspace_addresses;
 
 use apistos::web;

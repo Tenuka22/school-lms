@@ -32,7 +32,9 @@ export function DataTable<TData>({
       {...props}
     >
       {children}
-      <div className="overflow-hidden rounded-md border">
+      <div className="size-full flex">
+      <div className="overflow-x-auto w-52 flex-1 rounded-md border">
+
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -92,6 +94,7 @@ export function DataTable<TData>({
             )}
           </TableBody>
         </Table>
+      </div>
       </div>
       <div className="flex flex-col gap-2.5">
         <DataTablePagination table={table} />

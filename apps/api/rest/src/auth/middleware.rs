@@ -8,9 +8,10 @@ use actix_web::{
     Error, FromRequest, HttpMessage, HttpRequest,
     body::MessageBody,
     dev::{Service, ServiceRequest, ServiceResponse, Transform},
-    error::{ErrorForbidden, ErrorInternalServerError},
     web,
 };
+
+use crate::error::ApiError;
 use apistos::ApiSecurity;
 use jsonwebtoken::{DecodingKey, Validation, decode};
 use sea_orm::DatabaseConnection;
@@ -49,7 +50,7 @@ impl AuthenticatedUser {
                 perm_str,
                 self.permissions
             );
-            Err(ErrorForbidden("insufficient permissions"))
+            Err(ApiError::Forbidden("insufficient permissions".into()).into())
         }
     }
 }
@@ -63,14 +64,14 @@ impl FromRequest for AuthenticatedUser {
         let db = req.app_data::<web::Data<DatabaseConnection>>().cloned();
 
         Box::pin(async move {
-            let db = db.ok_or_else(|| ErrorInternalServerError("DB not configured"))?;
+            let db = db.ok_or_else(|| ApiError::Internal("DB not configured".into()))?;
             let user_id = claims.map(|c| Uuid::parse_str(&c.sub).ok()).flatten();
 
             let permissions = db::rbac::get_user_permissions(&db, user_id.clone())
                 .await
                 .map_err(|e| {
                     log::error!("Failed to load permissions: {e}");
-                    ErrorInternalServerError("permission lookup failed")
+                    ApiError::Internal("permission lookup failed".into())
                 })?;
 
             Ok(AuthenticatedUser {

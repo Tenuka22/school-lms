@@ -43,7 +43,25 @@ pub async fn update_student(
 
     let student_id = id.into_inner();
     let user_id = auth.user_id;
-    let b = body.into_inner();
+    let mut b = body.into_inner();
+
+    b.full_name = crate::validation::FullName::new(b.full_name)?.into_inner();
+    b.name_with_initials =
+        crate::validation::NameWithInitials::new(b.name_with_initials)?.into_inner();
+    b.email = b
+        .email
+        .map(|e| crate::validation::Email::new(e).map(|v| v.into_inner()))
+        .transpose()?;
+    b.phone = b
+        .phone
+        .map(|p| crate::validation::Phone::new(p).map(|v| v.into_inner()))
+        .transpose()?;
+    b.birth_certificate_number = b.birth_certificate_number
+        .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
+        .transpose()?;
+    b.nic = b.nic
+        .map(|e| crate::validation::NicNumber::new(e).map(|v| v.into_inner()))
+        .transpose()?;
 
     info!(
         "[update_student] user={user_id:?} student={student_id} name={}",

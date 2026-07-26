@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { toast } from "sonner"
+import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import {
   getApplicationOptions,
@@ -93,9 +94,9 @@ export function ScoringDashboard({ enrollmentId }: Props) {
       queryClient.invalidateQueries({
         queryKey: listApplicationsQueryKey({ client: apiClient }),
       })
-      toast.success("Marks calculated successfully")
-    } catch {
-      toast.error("Failed to calculate marks")
+      toast.success("Marks calculated")
+    } catch (err) {
+      toastApiError(err, "Failed to calculate marks")
     }
   }
 

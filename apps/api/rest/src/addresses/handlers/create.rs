@@ -51,7 +51,27 @@ pub async fn create_address(
     auth.require_permission(Permission::G1ApplicationCreate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
-    let input = body.into_inner();
+    let mut input = body.into_inner();
+
+    input.address_line_1 =
+        crate::validation::NonEmpty::new(input.address_line_1, "address_line_1")?.into_inner();
+    input.city = crate::validation::NonEmpty::new(input.city, "city")?.into_inner();
+    input.district =
+        crate::validation::NonEmpty::new(input.district, "district")?.into_inner();
+    input.province =
+        crate::validation::NonEmpty::new(input.province, "province")?.into_inner();
+    input.gs_division =
+        crate::validation::NonEmpty::new(input.gs_division, "gs_division")?.into_inner();
+    input.postal_code = input
+        .postal_code
+        .map(|v| crate::validation::PostalCode::new(v).map(|x| x.into_inner()))
+        .transpose()?;
+    if let Some(lat) = input.latitude {
+        input.latitude = Some(crate::validation::Latitude::new(lat)?.0);
+    }
+    if let Some(lng) = input.longitude {
+        input.longitude = Some(crate::validation::Longitude::new(lng)?.0);
+    }
 
     let model = addresses::ActiveModel {
         id: Set(Uuid::new_v4()),

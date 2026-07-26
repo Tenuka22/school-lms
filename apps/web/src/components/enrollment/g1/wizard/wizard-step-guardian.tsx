@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { toast } from "sonner"
+import { toastApiError } from "@/lib/api-error"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -96,7 +96,7 @@ export function WizardStepGuardian({
     } catch (e) {
       console.error("onSave failed:", e)
       setStatus("idle")
-      toast.error("Failed to save. Please try again.")
+      toastApiError(e, "Failed to save. Please try again.")
     }
   }
 

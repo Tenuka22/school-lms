@@ -19,6 +19,7 @@ import {
   IconLoader2,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
+import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import {
   listApplicationsOptions,
@@ -158,8 +159,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
       })
       toast.success("Enrollment deleted")
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Delete failed"
-      toast.error(message)
+      toastApiError(err, "Delete failed")
     } finally {
       setDeleting(false)
     }
