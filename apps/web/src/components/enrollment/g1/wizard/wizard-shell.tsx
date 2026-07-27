@@ -113,14 +113,14 @@ export function WizardShell() {
     listAddressesOptions({ client: apiClient })
   )
 
-useEffect(() => {
+  useEffect(() => {
      if (!application) return
      const dbStep = application.wizard_step ?? 0
      if (dbStep >= 0) {
        setSavedSteps((prev) => Math.max(prev, dbStep))
      }
      if (!initialStepSet.current && dbStep >= 1) {
-       setStep(dbStep + 1)
+       setStep(Math.min(dbStep + 1, STEPS.length))
        initialStepSet.current = true
      }
    }, [application])

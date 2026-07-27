@@ -40,7 +40,7 @@ export type RenderFieldArgs = {
 
 export type FieldRenderer = (args: RenderFieldArgs) => React.ReactNode
 
-type Registry = Partial<Record<FieldKind, FieldRenderer>>
+type Registry = Record<string, FieldRenderer | undefined>
 
 function renderText(args: RenderFieldArgs) {
   return (
@@ -205,9 +205,17 @@ export const registry: Registry = {
   custom: renderCustom,
 }
 
+export function registerFieldRenderer(kind: string, renderer: FieldRenderer) {
+  registry[kind as FieldKind] = renderer
+}
+
 export function getFieldRenderer(kind: FieldKind): FieldRenderer {
   const renderer = registry[kind]
   if (!renderer) {
+    if (kind !== "text" && kind !== "number" && kind !== "textarea" && kind !== "select" && kind !== "checkbox" && kind !== "date" && kind !== "slider" && kind !== "display" && kind !== "custom") {
+      console.warn(`No renderer registered for field kind "${kind}". Register one via registerFieldRenderer(). Rendering as display.`)
+      return renderDisplay
+    }
     return renderText
   }
   return renderer

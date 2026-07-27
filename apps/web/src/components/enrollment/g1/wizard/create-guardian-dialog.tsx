@@ -1,9 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { useMutation } from "@tanstack/react-query"
-import { useForm } from "@tanstack/react-form"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -29,13 +27,7 @@ import {
   ComboboxInput,
   ComboboxEmpty,
 } from "@/components/ui/combobox"
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
@@ -47,8 +39,11 @@ import {
 import { queryClient } from "@/router"
 import { vCreateGuardianBody } from "@/lib/api-client/valibot.gen"
 import { IconPlus } from "@tabler/icons-react"
-import type { CreateGuardianBody } from "@/lib/api-client/types.gen"
 import professions from "professions"
+import {
+  FormBuilder,
+  type FormConfig,
+} from "@/lib/form-builder"
 import {
   RELATIONSHIP_OPTIONS,
   CATEGORY_INFO,
@@ -57,13 +52,10 @@ import {
   WorkspaceAddressSelect,
 } from "./guardian-helpers"
 
-const defaultValues: CreateGuardianBody & {
-  past_pupil_highest_grade: string | null
-  past_pupil_year_left: number | null
-  past_pupil_left_reason: string | null
-  staff_school_id: string | null
-  past_pupil_school_id: string | null
-} = {
+
+type FormData = Record<string, unknown>
+
+const defaultValues: FormData = {
   full_name: "",
   nic_number: "",
   contact_phone: "",
@@ -90,51 +82,231 @@ const defaultValues: CreateGuardianBody & {
 export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId?: string; onCreated: () => void }) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(1)
-  const stepRef = useRef(step)
-  stepRef.current = step
 
   const createGuardian = useMutation(
     createGuardianMutation({ client: apiClient })
   )
 
-  const form = useForm({
-    defaultValues,
-    validators: { onSubmit: vCreateGuardianBody as any },
-    onSubmit: async ({ value }) => {
-      if (stepRef.current === 1) {
-        setStep(2)
-        return
-      }
-      try {
-        await createGuardian.mutateAsync({
-          body: value,
-        })
-        queryClient.invalidateQueries({
-          queryKey: listGuardiansQueryKey({ client: apiClient }),
-        })
-        if (enrollmentId) {
-          queryClient.invalidateQueries({
-            queryKey: getApplicationGuardiansQueryKey({
-              path: { id: enrollmentId },
-              client: apiClient,
-            }),
-          })
-        }
-        toast.success(`${value.full_name} created`)
-        setOpen(false)
-        setStep(1)
-        form.reset()
-        onCreated()
-      } catch (err) {
-        toastApiError(err, "Failed to create guardian")
-      }
+  const formConfig: FormConfig<FormData> = {
+    fields: [
+      { name: "relationship_type", kind: "select", label: "Relationship", required: true, options: RELATIONSHIP_OPTIONS.map((r) => ({ value: r, label: r })), section: "step1",
+        inputProps: { placeholder: "Select relationship" } },
+      { name: "full_name", kind: "text", label: "Full Name", required: true, section: "step1", placeholder: "e.g. John Doe" },
+      { name: "nic_number", kind: "text", label: "NIC Number", required: true, section: "step1", placeholder: "e.g. 952312345V" },
+      { name: "contact_phone", kind: "text", label: "Phone Number", required: true, section: "step1", placeholder: "e.g. +94 77 123 4567" },
+      { name: "contact_email", kind: "text", label: "Email Address", section: "step1", placeholder: "e.g. john@example.com",
+        inputProps: { type: "email" } },
+      {
+        name: "occupation", kind: "custom", label: "Occupation", section: "step1",
+        customRenderer: ({ value, onChange }) => (
+          <Combobox
+            items={professions}
+            value={String(value ?? "")}
+            onValueChange={(v) => onChange(v || null)}
+          >
+            <ComboboxInput
+              placeholder="Search or type occupation..."
+              showClear
+            />
+            <ComboboxContent>
+              <ComboboxEmpty>No matching title. Type your own.</ComboboxEmpty>
+              <ComboboxList>
+                {(item) => (
+                  <ComboboxItem key={item} value={item}>
+                    {item}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        ),
+      },
+      {
+        name: "workplace_name", kind: "custom", label: "Workspace", section: "step1",
+        customRenderer: ({ setFieldValue }) => (
+          <WorkspaceAddressSelect
+            onChange={(name, address) => {
+              setFieldValue("workplace_name", name)
+              setFieldValue("workplace_address", address)
+            }}
+          />
+        ),
+      },
+      { name: "workplace_address", kind: "text", label: "", hidden: true },
+      ...CATEGORY_INFO.map((cat) => ({
+        name: cat.key, kind: "custom" as const, label: cat.label, section: "step2",
+        customRenderer: ({ value, onChange, formValues, setFieldValue }: any) => {
+          const checked = !!value
+          return (
+            <div
+              className={`cursor-pointer rounded-lg border p-3 transition-colors ${
+                checked
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:bg-accent/50"
+              }`}
+              onClick={(e) => {
+                const target = e.target as HTMLElement
+                if (
+                  target.closest(
+                    '[role="option"], [role="combobox"], [role="listbox"], input, select, button'
+                  )
+                )
+                  return
+                onChange(!checked)
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={(v) => onChange(v === true)}
+                  />
+                  <span className="text-sm font-medium">{cat.label}</span>
+                </div>
+                <Badge variant="secondary" className="text-xs">
+                  +{cat.weight}
+                </Badge>
+              </div>
+              <p className="mt-1 ml-7 text-xs text-muted-foreground">
+                {cat.desc}
+              </p>
+              {cat.key === "is_school_staff" && checked && (
+                <div className="mt-2 ml-7 space-y-2">
+                  <SchoolCombobox
+                    value={formValues.staff_school_id as string | null}
+                    onChange={(v) => setFieldValue("staff_school_id", v)}
+                  />
+                  <Select
+                    value={String(formValues.staff_type ?? "")}
+                    onValueChange={(v) => setFieldValue("staff_type", v || null)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Staff type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Teacher">Teacher</SelectItem>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                      <SelectItem value="Worker">Worker</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    placeholder="Employee ID (optional)"
+                    value={String(formValues.employee_id ?? "")}
+                    onChange={(e) => setFieldValue("employee_id", e.target.value || null)}
+                  />
+                  <Input
+                    placeholder="Designation (optional)"
+                    value={String(formValues.occupation ?? "")}
+                    onChange={(e) => setFieldValue("occupation", e.target.value || null)}
+                  />
+                </div>
+              )}
+              {cat.key === "is_govt_employee" && checked && (
+                <div className="mt-2 ml-7">
+                  <Input
+                    placeholder="Years of government service"
+                    type="number"
+                    value={formValues.govt_service_years ?? ""}
+                    onChange={(e) =>
+                      setFieldValue(
+                        "govt_service_years",
+                        e.target.value ? Number(e.target.value) : null
+                      )
+                    }
+                  />
+                </div>
+              )}
+              {cat.key === "is_past_pupil" && checked && (
+                <div className="mt-2 ml-7 space-y-2">
+                  <SchoolCombobox
+                    value={formValues.past_pupil_school_id as string | null}
+                    onChange={(v) => setFieldValue("past_pupil_school_id", v)}
+                  />
+                  <StudentCombobox
+                    value={formValues.past_pupil_student_id as string | null}
+                    onChange={(v) => setFieldValue("past_pupil_student_id", v)}
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select
+                      value={String(formValues.past_pupil_highest_grade ?? "")}
+                      onValueChange={(v) => setFieldValue("past_pupil_highest_grade", v || null)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Highest grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GCE_AL">GCE A/L</SelectItem>
+                        <SelectItem value="GCE_OL">GCE O/L</SelectItem>
+                        <SelectItem value="Grade_11">Grade 11</SelectItem>
+                        <SelectItem value="Grade_10">Grade 10</SelectItem>
+                        <SelectItem value="Below_Grade_10">Below Grade 10</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select
+                      value={String(formValues.past_pupil_left_reason ?? "")}
+                      onValueChange={(v) => setFieldValue("past_pupil_left_reason", v || null)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Reason" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Transferred">Transferred</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Input
+                    placeholder="Year left school (e.g. 2015)"
+                    type="number"
+                    value={formValues.past_pupil_year_left ?? ""}
+                    onChange={(e) =>
+                      setFieldValue(
+                        "past_pupil_year_left",
+                        e.target.value ? Number(e.target.value) : null
+                      )
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )
+        },
+      })),
+      {
+        name: "income_level", kind: "select", label: "Monthly Income (LKR)", section: "step2",
+        options: [
+          { value: "below_25000", label: "Below 25,000" },
+          { value: "25000_50000", label: "25,000 – 50,000" },
+          { value: "50000_100000", label: "50,000 – 100,000" },
+          { value: "100000_200000", label: "100,000 – 200,000" },
+          { value: "200000_500000", label: "200,000 – 500,000" },
+          { value: "above_500000", label: "Above 500,000" },
+        ],
+        inputProps: { placeholder: "Select income range (optional)" },
+      },
+    ],
+    layout: [
+      { columns: [{ fields: ["relationship_type"], span: 12 }] },
+      { columns: [{ fields: ["full_name"], span: 12 }] },
+      { columns: [{ fields: ["nic_number"], span: 6 }, { fields: ["contact_phone"], span: 6 }] },
+      { columns: [{ fields: ["contact_email"], span: 6 }, { fields: ["occupation"], span: 6 }] },
+      { columns: [{ fields: ["workplace_name"], span: 12 }] },
+      { columns: [{ fields: ["is_school_staff"], span: 12 }] },
+      { columns: [{ fields: ["is_past_pupil"], span: 12 }] },
+      { columns: [{ fields: ["is_govt_employee"], span: 12 }] },
+      { columns: [{ fields: ["income_level"], span: 12 }] },
+    ],
+    sections: [
+      { id: "step1", title: "Guardian Details", step: 1 },
+      { id: "step2", title: "Enrollment Categories", step: 2 },
+    ],
+    submitLabel: step === 1 ? undefined : "Save Guardian",
+    cancelLabel: "Cancel",
+    onCancel: () => {
+      setOpen(false)
+      setStep(1)
     },
-  })
-
-  const handleClose = () => {
-    setOpen(false)
-    setStep(1)
-    form.reset()
   }
 
   return (
@@ -142,10 +314,7 @@ export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId
       open={open}
       onOpenChange={(v) => {
         setOpen(v)
-        if (!v) {
-          setStep(1)
-          form.reset()
-        }
+        if (!v) setStep(1)
       }}
     >
       <DialogTrigger
@@ -157,559 +326,74 @@ export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId
         }
       />
       <DialogContent className="sm:max-w-lg">
-        <form
-          id="create-guardian-form"
-          onSubmit={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            form.handleSubmit()
+        <DialogHeader>
+          <DialogTitle>
+            {step === 1 ? "Guardian Details" : "Enrollment Categories"}
+          </DialogTitle>
+        </DialogHeader>
+        <FormBuilder
+          config={formConfig}
+          defaultValues={defaultValues}
+          valibotSchema={step === 2 ? vCreateGuardianBody : undefined}
+          onSubmit={async (data) => {
+            const v = data as any
+            try {
+              await createGuardian.mutateAsync({
+                body: v,
+              })
+              queryClient.invalidateQueries({
+                queryKey: listGuardiansQueryKey({ client: apiClient }),
+              })
+              if (enrollmentId) {
+                queryClient.invalidateQueries({
+                  queryKey: getApplicationGuardiansQueryKey({
+                    path: { id: enrollmentId },
+                    client: apiClient,
+                  }),
+                })
+              }
+              toast.success(`${v.full_name} created`)
+              setOpen(false)
+              setStep(1)
+              onCreated()
+            } catch (err) {
+              toastApiError(err, "Failed to create guardian")
+            }
           }}
+          formId="create-guardian-form"
+          currentStep={step}
+          hideDefaultButtons
         >
-          <DialogHeader>
-            <DialogTitle>
-              {step === 1 ? "Guardian Details" : "Enrollment Categories"}
-            </DialogTitle>
-          </DialogHeader>
-
-          <FieldGroup>
-            {step === 1 && (
-              <div className="grid max-h-[55vh] grid-cols-2 gap-x-4 gap-y-4 overflow-y-auto pr-1">
-                <div className="col-span-2">
-                  <form.Field
-                    name="relationship_type"
-                    children={(field) => {
-                      const isInvalid =
-                        field.state.meta.isTouched && !field.state.meta.isValid
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>
-                            Relationship{" "}
-                            <span className="text-destructive">*</span>
-                          </FieldLabel>
-                          <Select
-                            name={field.name}
-                            value={field.state.value}
-                            onValueChange={(v) => field.handleChange(v ?? "")}
-                          >
-                            <SelectTrigger
-                              id={field.name}
-                              aria-invalid={isInvalid}
-                              className="w-full"
-                            >
-                              <SelectValue placeholder="Select relationship" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {RELATIONSHIP_OPTIONS.map((r) => (
-                                <SelectItem key={r} value={r}>
-                                  {r}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FieldDescription>
-                            Guardian&apos;s relationship to the applicant.
-                          </FieldDescription>
-                          {isInvalid && (
-                            <FieldError errors={field.state.meta.errors} />
-                          )}
-                        </Field>
-                      )
-                    }}
-                  />
-                </div>
-                <div className="col-span-2">
-                  <form.Field
-                    name="full_name"
-                    children={(field) => {
-                      const isInvalid =
-                        field.state.meta.isTouched && !field.state.meta.isValid
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>
-                            Full Name{" "}
-                            <span className="text-destructive">*</span>
-                          </FieldLabel>
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            aria-invalid={isInvalid}
-                            placeholder="e.g. John Doe"
-                          />
-                          {isInvalid && (
-                            <FieldError errors={field.state.meta.errors} />
-                          )}
-                        </Field>
-                      )
-                    }}
-                  />
-                </div>
-                <form.Field
-                  name="nic_number"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          NIC Number <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                          placeholder="e.g. 952312345V"
-                        />
-                        <FieldDescription>
-                          National Identity Card number.
-                        </FieldDescription>
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                />
-                <form.Field
-                  name="contact_phone"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          Phone Number <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                          placeholder="e.g. +94 77 123 4567"
-                        />
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                />
-                <form.Field
-                  name="contact_email"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>
-                          Email Address
-                        </FieldLabel>
-                        <Input
-                          id={field.name}
-                          name={field.name}
-                          type="email"
-                          value={String(field.state.value ?? "")}
-                          onBlur={field.handleBlur}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value || null)
-                          }
-                          aria-invalid={isInvalid}
-                          placeholder="e.g. john@example.com"
-                        />
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                />
-                <form.Field
-                  name="occupation"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Occupation</FieldLabel>
-                        <Combobox
-                          items={professions}
-                          value={String(field.state.value ?? "")}
-                          onValueChange={(v) => field.handleChange(v || null)}
-                        >
-                          <ComboboxInput
-                            id={field.name}
-                            placeholder="Search or type occupation..."
-                            showClear
-                            aria-invalid={isInvalid ? true : undefined}
-                          />
-                          <ComboboxContent>
-                            <ComboboxEmpty>
-                              No matching title. Type your own.
-                            </ComboboxEmpty>
-                            <ComboboxList>
-                              {(item) => (
-                                <ComboboxItem key={item} value={item}>
-                                  {item}
-                                </ComboboxItem>
-                              )}
-                            </ComboboxList>
-                          </ComboboxContent>
-                        </Combobox>
-                        <FieldDescription>
-                          Current occupation or job title.
-                        </FieldDescription>
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                />
-                <div className="col-span-2">
-                  <Field>
-                    <FieldLabel>Workspace</FieldLabel>
-                    <WorkspaceAddressSelect
-                      onChange={(name, address) => {
-                        form.setFieldValue("workplace_name", name)
-                        form.setFieldValue("workplace_address", address)
-                      }}
-                    />
-                    <FieldDescription>
-                      Search for an existing workspace address or type a new
-                      one.
-                    </FieldDescription>
-                  </Field>
-                </div>
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="max-h-[55vh] space-y-3 overflow-y-auto pr-1">
-                <p className="text-xs text-muted-foreground">
-                  Select categories that apply to this guardian. These affect
-                  enrollment scoring weight.
-                </p>
-                {CATEGORY_INFO.map((cat) => (
-                  <form.Field
-                    key={cat.key}
-                    name={cat.key}
-                    children={(field: any) => {
-                      const checked = field.state.value
-                      return (
-                        <div
-                          className={`cursor-pointer rounded-lg border p-3 transition-colors ${
-                            checked
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:bg-accent/50"
-                          }`}
-                          onClick={(e) => {
-                            const target = e.target as HTMLElement
-                            if (
-                              target.closest(
-                                '[role="option"], [role="combobox"], [role="listbox"], input, select, button'
-                              )
-                            )
-                              return
-                            field.handleChange(!checked)
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                id={field.name}
-                                name={field.name}
-                                checked={checked}
-                                onCheckedChange={(v) =>
-                                  field.handleChange(v === true)
-                                }
-                              />
-                              <span className="text-sm font-medium">
-                                {cat.label}
-                              </span>
-                            </div>
-                            <Badge variant="secondary" className="text-xs">
-                              +{cat.weight}
-                            </Badge>
-                          </div>
-                          <p className="mt-1 ml-7 text-xs text-muted-foreground">
-                            {cat.desc}
-                          </p>
-                          {cat.key === "is_school_staff" && checked && (
-                            <div className="mt-2 ml-7 space-y-2">
-                              <form.Field
-                                name="staff_school_id"
-                                children={(subField: any) => (
-                                  <SchoolCombobox
-                                    value={subField.state.value}
-                                    onChange={(v) => subField.handleChange(v)}
-                                  />
-                                )}
-                              />
-                              <form.Field
-                                name="staff_type"
-                                children={(subField: any) => (
-                                  <Select
-                                    name={subField.name}
-                                    value={String(subField.state.value ?? "")}
-                                    onValueChange={(v) =>
-                                      subField.handleChange(v || null)
-                                    }
-                                  >
-                                    <SelectTrigger className="w-full">
-                                      <SelectValue placeholder="Staff type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Teacher">
-                                        Teacher
-                                      </SelectItem>
-                                      <SelectItem value="Admin">
-                                        Admin
-                                      </SelectItem>
-                                      <SelectItem value="Worker">
-                                        Worker
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                )}
-                              />
-                              <form.Field
-                                name="employee_id"
-                                children={(subField: any) => (
-                                  <Input
-                                    placeholder="Employee ID (optional)"
-                                    value={String(subField.state.value ?? "")}
-                                    onChange={(e) =>
-                                      subField.handleChange(
-                                        e.target.value || null
-                                      )
-                                    }
-                                  />
-                                )}
-                              />
-                              <form.Field
-                                name="occupation"
-                                children={(subField: any) => (
-                                  <Input
-                                    placeholder="Designation (optional)"
-                                    value={String(subField.state.value ?? "")}
-                                    onChange={(e) =>
-                                      subField.handleChange(
-                                        e.target.value || null
-                                      )
-                                    }
-                                  />
-                                )}
-                              />
-                            </div>
-                          )}
-                          {cat.key === "is_govt_employee" && checked && (
-                            <div className="mt-2 ml-7">
-                              <form.Field
-                                name="govt_service_years"
-                                children={(subField: any) => (
-                                  <Input
-                                    placeholder="Years of government service"
-                                    type="number"
-                                    value={subField.state.value ?? ""}
-                                    onChange={(e) =>
-                                      subField.handleChange(
-                                        e.target.value
-                                          ? Number(e.target.value)
-                                          : null
-                                      )
-                                    }
-                                  />
-                                )}
-                              />
-                            </div>
-                          )}
-                          {cat.key === "is_past_pupil" && checked && (
-                            <div className="mt-2 ml-7 space-y-2">
-                              <form.Field
-                                name="past_pupil_school_id"
-                                children={(subField: any) => (
-                                  <SchoolCombobox
-                                    value={subField.state.value}
-                                    onChange={(v) => subField.handleChange(v)}
-                                  />
-                                )}
-                              />
-                              <form.Field
-                                name="past_pupil_student_id"
-                                children={(subField: any) => (
-                                  <StudentCombobox
-                                    value={subField.state.value}
-                                    onChange={(v) => subField.handleChange(v)}
-                                  />
-                                )}
-                              />
-                              <div className="grid grid-cols-2 gap-2">
-                                <form.Field
-                                  name="past_pupil_highest_grade"
-                                  children={(subField: any) => (
-                                    <Select
-                                      name={subField.name}
-                                      value={String(subField.state.value ?? "")}
-                                      onValueChange={(v) =>
-                                        subField.handleChange(v || null)
-                                      }
-                                    >
-                                      <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Highest grade" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="GCE_AL">
-                                          GCE A/L
-                                        </SelectItem>
-                                        <SelectItem value="GCE_OL">
-                                          GCE O/L
-                                        </SelectItem>
-                                        <SelectItem value="Grade_11">
-                                          Grade 11
-                                        </SelectItem>
-                                        <SelectItem value="Grade_10">
-                                          Grade 10
-                                        </SelectItem>
-                                        <SelectItem value="Below_Grade_10">
-                                          Below Grade 10
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  )}
-                                />
-                                <form.Field
-                                  name="past_pupil_left_reason"
-                                  children={(subField: any) => (
-                                    <Select
-                                      name={subField.name}
-                                      value={String(subField.state.value ?? "")}
-                                      onValueChange={(v) =>
-                                        subField.handleChange(v || null)
-                                      }
-                                    >
-                                      <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Reason" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="Completed">
-                                          Completed
-                                        </SelectItem>
-                                        <SelectItem value="Transferred">
-                                          Transferred
-                                        </SelectItem>
-                                        <SelectItem value="Other">
-                                          Other
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  )}
-                                />
-                              </div>
-                              <form.Field
-                                name="past_pupil_year_left"
-                                children={(subField: any) => (
-                                  <Input
-                                    placeholder="Year left school (e.g. 2015)"
-                                    type="number"
-                                    value={subField.state.value ?? ""}
-                                    onChange={(e) =>
-                                      subField.handleChange(
-                                        e.target.value
-                                          ? Number(e.target.value)
-                                          : null
-                                      )
-                                    }
-                                  />
-                                )}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      )
-                    }}
-                  />
-                ))}
-                <form.Field
-                  name="income_level"
-                  children={(field: any) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel>Monthly Income (LKR)</FieldLabel>
-                        <Select
-                          name={field.name}
-                          value={String(field.state.value ?? "")}
-                          onValueChange={(v) =>
-                            (field as any).handleChange(v ?? null)
-                          }
-                        >
-                          <SelectTrigger aria-invalid={isInvalid}>
-                            <SelectValue placeholder="Select income range (optional)" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="below_25000">
-                              Below 25,000
-                            </SelectItem>
-                            <SelectItem value="25000_50000">
-                              25,000 – 50,000
-                            </SelectItem>
-                            <SelectItem value="50000_100000">
-                              50,000 – 100,000
-                            </SelectItem>
-                            <SelectItem value="100000_200000">
-                              100,000 – 200,000
-                            </SelectItem>
-                            <SelectItem value="200000_500000">
-                              200,000 – 500,000
-                            </SelectItem>
-                            <SelectItem value="above_500000">
-                              Above 500,000
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                />
-              </div>
-            )}
-          </FieldGroup>
-
           <div className="flex justify-between gap-2 border-t pt-2">
             <div>
               {step === 2 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setStep(1)}
-                >
+                <Button type="button" variant="ghost" onClick={() => setStep(1)}>
                   &larr; Back
                 </Button>
               )}
             </div>
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={handleClose}>
+              <Button type="button" variant="outline" onClick={() => {
+                setOpen(false)
+                setStep(1)
+              }}>
                 Cancel
               </Button>
               {step === 1 ? (
-                <Button type="submit">Next &rarr;</Button>
+                <Button
+                  type="button"
+                  onClick={() => setStep(2)}
+                >
+                  Next &rarr;
+                </Button>
               ) : (
-                <Button type="submit">Save Guardian</Button>
+                <Button type="submit" form="create-guardian-form">
+                  Save Guardian
+                </Button>
               )}
             </div>
           </div>
-        </form>
+        </FormBuilder>
       </DialogContent>
     </Dialog>
   )

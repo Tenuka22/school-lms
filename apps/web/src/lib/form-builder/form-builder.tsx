@@ -141,6 +141,8 @@ export function FormBuilder<TData extends Record<string, unknown>>(
                   value: fieldApi.state.value,
                   onChange: (val) => fieldApi.handleChange(val),
                   name: field.name,
+                  formValues: formValues as Record<string, unknown>,
+                  setFieldValue: (n, v) => form.setFieldValue(n as any, v),
                 })}
               </div>
             )
@@ -176,7 +178,7 @@ export function FormBuilder<TData extends Record<string, unknown>>(
             label: field.label,
             description: field.description,
             placeholder: field.placeholder,
-            disabled: field.disabled,
+            disabled: isFieldDisabled(field),
             required: field.required,
             options: field.options,
             isInvalid,
@@ -193,13 +195,27 @@ export function FormBuilder<TData extends Record<string, unknown>>(
     )
   }
 
+  function isFieldHidden(field: FieldEntry<TData>): boolean {
+    if (typeof field.hidden === "function") {
+      return field.hidden(formValues as Record<string, unknown>)
+    }
+    return !!field.hidden
+  }
+
+  function isFieldDisabled(field: FieldEntry<TData>): boolean {
+    if (typeof field.disabled === "function") {
+      return field.disabled(formValues as Record<string, unknown>)
+    }
+    return !!field.disabled
+  }
+
   function getSectionRows(
     sectionId: string | undefined,
   ): RowConfig[] {
     const rowIds: number[] = []
     const sectionFieldNames = new Set(
       config.fields
-        .filter((f) => f.section === sectionId && !f.hidden)
+        .filter((f) => f.section === sectionId && !isFieldHidden(f))
         .map((f) => f.name),
     )
     config.layout.forEach((row, idx) => {
@@ -212,7 +228,7 @@ export function FormBuilder<TData extends Record<string, unknown>>(
   }
 
   const systemFields = config.fields.filter((f) => f.systemManaged)
-  const hiddenFields = config.fields.filter((f) => f.hidden)
+  const hiddenFields = config.fields.filter((f) => isFieldHidden(f))
 
   function renderLayoutContent(rows: RowConfig[]) {
     const SPAN_CLASSES = ["md:col-span-4", "md:col-span-6", "md:col-span-8", "md:col-span-12"] as const
@@ -243,10 +259,13 @@ export function FormBuilder<TData extends Record<string, unknown>>(
 
   function renderLayout() {
     const visibleRows = config.layout
+    const visibleSections = props.currentStep != null
+      ? (config.sections ?? []).filter((s) => s.step == null || s.step === props.currentStep)
+      : (config.sections ?? [])
 
     return (
       <FieldGroup>
-        {config.sections?.map((section) => {
+        {visibleSections.map((section) => {
           const sectionRows = getSectionRows(section.id)
           if (sectionRows.length === 0) return null
 
@@ -290,7 +309,11 @@ export function FormBuilder<TData extends Record<string, unknown>>(
             const allFields = row.columns.flatMap((c) => c.fields)
             return allFields.some((fn) => {
               const field = findField(config.fields, fn)
-              return field && !field.section && !field.systemManaged && !field.hidden
+              if (!field) return false
+              if (isFieldHidden(field)) return false
+              if (field.systemManaged) return false
+              if (field.section) return false
+              return true
             })
           })
           .map((row) => (

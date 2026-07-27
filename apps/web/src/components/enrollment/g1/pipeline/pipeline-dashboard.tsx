@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate, Link } from "@tanstack/react-router"
 import { useState, useRef, useMemo, useCallback } from "react"
-import { useForm } from "@tanstack/react-form"
 import { useDebounce } from "@/hooks/use-debounce"
 import {
   IconPlus,
@@ -15,7 +14,6 @@ import {
   IconExternalLink,
   IconSearch,
   IconUserPlus,
-  IconCalendar,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
@@ -28,15 +26,16 @@ import {
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import {
   createApplication,
-  createChild,
-  updateChild,
   deleteApplication,
   listChildren,
 } from "@/lib/api-client/sdk.gen"
 import { queryClient } from "@/router"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
+import { CreateChildForm } from "@/components/enrollment/g1/create-child-form"
 import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpers"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -44,9 +43,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -71,8 +67,8 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command"
-import { Calendar } from "@/components/ui/calendar"
-import type { Child, Gender, MediumOfInstruction, Nationality } from "@/lib/api-client/types.gen"
+import { FormBuilder } from "@/lib/form-builder"
+import type { Child } from "@/lib/api-client/types.gen"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -283,215 +279,7 @@ function ChildCombobox({
   )
 }
 
-function CreateChildForm({ child, onSuccess }: { child?: Child | null, onSuccess: (child: Child) => void }) {
-  const [saving, setSaving] = useState(false)
 
-  const childForm = useForm({
-    defaultValues: {
-      full_name: child?.full_name ?? "",
-      name_with_initials: child?.name_with_initials ?? "",
-      date_of_birth: child?.date_of_birth ?? "",
-      gender: (child?.gender ?? "") as Gender | "",
-      nationality: (child?.nationality ?? "") as Nationality | "",
-      medium_of_instruction: (child?.medium_of_instruction ?? "") as MediumOfInstruction | "",
-    },
-    onSubmit: async ({ value }) => {
-      setSaving(true)
-      try {
-        if (child) {
-          const { data, error } = await updateChild({
-            path: { id: child.id! },
-            body: {
-              full_name: value.full_name || null,
-              name_with_initials: value.name_with_initials || null,
-              date_of_birth: value.date_of_birth || null,
-              gender: (value.gender || null) as Gender | null,
-              nationality: (value.nationality || null) as Nationality | null,
-              medium_of_instruction: (value.medium_of_instruction || null) as MediumOfInstruction | null,
-            },
-            client: apiClient,
-          })
-          if (error || !data) {
-            toastApiError(error, "Failed to update child")
-            return
-          }
-          toast.success(`${data.full_name} updated`)
-          onSuccess(data as Child)
-        } else {
-          const { data, error } = await createChild({
-            body: {
-              full_name: value.full_name,
-              name_with_initials: value.name_with_initials,
-              date_of_birth: value.date_of_birth,
-              gender: value.gender as Gender,
-              nationality: value.nationality as Nationality,
-              medium_of_instruction: value.medium_of_instruction as MediumOfInstruction,
-            },
-            client: apiClient,
-          })
-          if (error || !data) {
-            toastApiError(error, "Failed to create child")
-            return
-          }
-          toast.success(`${data.full_name} created`)
-          onSuccess(data as Child)
-        }
-      } catch (err) {
-        toastApiError(err, child ? "Failed to update child" : "Failed to create child")
-      } finally {
-        setSaving(false)
-      }
-    },
-  })
-
-  return (
-    <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); childForm.handleSubmit() }}>
-      <div className="space-y-3">
-        <childForm.Field
-          name="full_name"
-          children={(field) => (
-            <div className="space-y-1.5">
-              <Label>Full Name</Label>
-              <Input
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="Enter full name"
-              />
-            </div>
-          )}
-        />
-        <childForm.Field
-          name="name_with_initials"
-          children={(field) => (
-            <div className="space-y-1.5">
-              <Label>Name with Initials</Label>
-              <Input
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="e.g. J. M. Perera"
-              />
-            </div>
-          )}
-        />
-        <childForm.Field
-          name="date_of_birth"
-          children={(field) => {
-            const dateValue = field.state.value
-              ? new Date(field.state.value + "T12:00:00")
-              : undefined
-            return (
-              <div className="space-y-1.5">
-                <Label>Date of Birth</Label>
-                <Popover>
-                  <PopoverTrigger
-                    render={
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <IconCalendar className="mr-2 size-4 shrink-0" />
-                        {dateValue ? (
-                          formatDate(dateValue)
-                        ) : (
-                          <span className="text-muted-foreground">Pick a date</span>
-                        )}
-                      </Button>
-                    }
-                  />
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dateValue}
-                      defaultMonth={dateValue}
-                      onSelect={(d: Date | undefined) => {
-                        if (!d) {
-                          field.handleChange("")
-                          return
-                        }
-                        const y = d.getFullYear()
-                        const m = String(d.getMonth() + 1).padStart(2, "0")
-                        const day = String(d.getDate()).padStart(2, "0")
-                        field.handleChange(`${y}-${m}-${day}`)
-                      }}
-                      captionLayout="dropdown"
-                      autoFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )
-          }}
-        />
-        <childForm.Field
-          name="gender"
-          children={(field) => (
-            <div className="space-y-1.5">
-              <Label>Gender</Label>
-              <Select
-                value={field.state.value || undefined}
-                onValueChange={(v) => field.handleChange(v as Gender)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        />
-        <childForm.Field
-          name="nationality"
-          children={(field) => (
-            <div className="space-y-1.5">
-              <Label>Nationality</Label>
-              <Select
-                value={field.state.value || undefined}
-                onValueChange={(v) => field.handleChange(v as Nationality)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select nationality" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SriLankan">Sri Lankan</SelectItem>
-                  <SelectItem value="DualCitizen">Dual Citizen</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        />
-        <childForm.Field
-          name="medium_of_instruction"
-          children={(field) => (
-            <div className="space-y-1.5">
-              <Label>Medium of Instruction</Label>
-              <Select
-                value={field.state.value || undefined}
-                onValueChange={(v) => field.handleChange(v as MediumOfInstruction)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select medium" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Sinhala">Sinhala</SelectItem>
-                  <SelectItem value="Tamil">Tamil</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        />
-      </div>
-      <DialogFooter className="mt-4">
-        <Button type="submit" disabled={saving}>
-          {saving ? "Saving..." : child ? "Update Child" : "Create Child"}
-        </Button>
-      </DialogFooter>
-    </form>
-  )
-}
 
 export function PipeDashboard() {
   const navigate = useNavigate({ from: Route.fullPath })
@@ -509,58 +297,6 @@ export function PipeDashboard() {
   const [editingChild, setEditingChild] = useState<Child | null>(null)
   const batchIdRef = useRef(batchId)
   batchIdRef.current = batchId
-
-  const newForm = useForm({
-    defaultValues: {
-      school_id: "",
-    },
-    onSubmit: async ({ value }) => {
-      const currentBatchId = batchIdRef.current
-      if (!currentBatchId) return
-      setCreating(true)
-      try {
-        const childId = selectedChild?.id
-
-        if (!childId) {
-          toastApiError("No child selected or created")
-          return
-        }
-
-        const { data, error } = await createApplication({
-          body: {
-            batch_id: currentBatchId,
-            child_id: childId,
-            school_id: value.school_id || undefined,
-          },
-          client: apiClient,
-        })
-        if (error) {
-          toastApiError(error, "Failed to create enrollment")
-          return
-        }
-                  toast.success(`${selectedChild?.full_name ?? "Child"} enrolled. Fill in remaining details.`)
-        setNewEnrollmentOpen(false)
-        newForm.reset()
-        setChildSearch("")
-        setSelectedChild(null)
-        await queryClient.invalidateQueries({
-          queryKey: listApplicationsQueryKey({ client: apiClient }),
-        })
-        if (!data?.id) {
-          toastApiError("Failed to create enrollment")
-          return
-        }
-        navigate({
-          to: "/student-management/enrollment/g1/$enrollment_id",
-          params: { enrollment_id: data.id },
-        })
-      } catch (err) {
-        toastApiError(err, "Failed to create enrollment")
-      } finally {
-        setCreating(false)
-      }
-    },
-  })
 
   const { data: batches } = useQuery(listBatchesOptions({ client: apiClient }))
 
@@ -956,14 +692,6 @@ export function PipeDashboard() {
             className="flex items-center gap-1"
             onClick={(e) => e.stopPropagation()}
           >
-            <Button variant="ghost" size="xs" className="size-8" asChild>
-              <Link
-                to="/student-management/enrollment/g1/$enrollment_id"
-                params={{ enrollment_id: row.original.id! }}
-              >
-                <IconPencil className="size-4" />
-              </Link>
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
@@ -1235,7 +963,7 @@ export function PipeDashboard() {
       />
 
       <Dialog open={newEnrollmentOpen} onOpenChange={(open) => {
-        if (!open) { newForm.reset(); setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }
+        if (!open) { setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }
       }}>
         <DialogContent className="sm:max-w-lg w-full">
           <DialogHeader>
@@ -1284,27 +1012,33 @@ export function PipeDashboard() {
               )}
             </div>
 
-            <newForm.Field
-              name="school_id"
-              children={(field) => (
-                <div className="space-y-2">
-                  <Label>School (optional)</Label>
-                  <SchoolCombobox
-                    value={field.state.value || null}
-                    onChange={(v) => field.handleChange(v ?? "")}
-                  />
-                </div>
-              )}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" type="button" onClick={() => { newForm.reset(); setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }}>
-              Cancel
-            </Button>
-            <Button
-              variant="default"
-              onClick={async () => {
-                const state = newForm.state
+            <FormBuilder<{ school_id: string }>
+              config={{
+                fields: [
+                  {
+                    name: "school_id",
+                    kind: "custom",
+                    label: "School (optional)",
+                    customRenderer: ({ value, onChange }) => (
+                      <SchoolCombobox
+                        value={(value as string) || null}
+                        onChange={(v) => onChange(v ?? "")}
+                      />
+                    ),
+                  },
+                ],
+                layout: [{ columns: [{ fields: ["school_id"] }] }],
+                submitLabel: "Create",
+                cancelLabel: "Cancel",
+                onCancel: () => {
+                  setNewEnrollmentOpen(false)
+                  setChildSearch("")
+                  setSelectedChild(null)
+                },
+              }}
+              defaultValues={{ school_id: "" }}
+              formId="new-enrollment-form"
+              onSubmit={async (value) => {
                 const currentBatchId = batchIdRef.current
                 if (!currentBatchId || !selectedChild) return
                 setCreating(true)
@@ -1313,7 +1047,7 @@ export function PipeDashboard() {
                     body: {
                       batch_id: currentBatchId,
                       child_id: selectedChild.id,
-                      school_id: state.values.school_id || undefined,
+                      school_id: value.school_id || undefined,
                     },
                     client: apiClient,
                   })
@@ -1321,14 +1055,12 @@ export function PipeDashboard() {
                     toastApiError(error, "Failed to create enrollment")
                     return
                   }
-        toast.success(`${selectedChild?.full_name ?? "Child"} enrolled. Fill in remaining details.`)
+                  toast.success(`${selectedChild?.full_name ?? "Child"} enrolled. Fill in remaining details.`)
                   setNewEnrollmentOpen(false)
-                  newForm.reset()
                   setChildSearch("")
                   setSelectedChild(null)
                   await queryClient.invalidateQueries({
-                    queryKey: [{ _id: "listApplications" }],
-                    refetchType: "all",
+                    queryKey: listApplicationsQueryKey({ client: apiClient }),
                   })
                   if (!data?.id) {
                     toastApiError("Failed to create enrollment")
@@ -1344,6 +1076,16 @@ export function PipeDashboard() {
                   setCreating(false)
                 }
               }}
+              hideDefaultButtons
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={() => { setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="new-enrollment-form"
               disabled={!batchId || creating || !selectedChild}
             >
               {creating ? "Creating..." : "Create"}

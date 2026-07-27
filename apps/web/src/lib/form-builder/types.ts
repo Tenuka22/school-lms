@@ -11,6 +11,7 @@ export type FieldKind =
   | "slider"
   | "display"
   | "custom"
+  | (string & {})
 
 export type SelectOption = {
   value: string
@@ -27,8 +28,8 @@ export type FieldEntry<
   placeholder?: string
   options?: SelectOption[] | (() => SelectOption[] | Promise<SelectOption[]>)
   systemManaged?: boolean
-  hidden?: boolean
-  disabled?: boolean
+  hidden?: boolean | ((values: Record<string, unknown>) => boolean)
+  disabled?: boolean | ((values: Record<string, unknown>) => boolean)
   required?: boolean
   layout?: { row: number; column: number; columnSpan?: number }
   section?: string
@@ -42,6 +43,10 @@ export type FieldEntry<
     value: unknown
     onChange: (val: unknown) => void
     name: string
+    /** All current form values */
+    formValues: Record<string, unknown>
+    /** Set any field value on the form */
+    setFieldValue: (name: string, value: unknown) => void
   }) => React.ReactNode
   /** Override the label rendering for this field */
   renderLabel?: (label: string) => React.ReactNode
@@ -60,6 +65,8 @@ export type SectionConfig = {
   description?: string
   collapsible?: boolean
   defaultOpen?: boolean
+  /** If set, this section belongs to a step. Only sections matching the current step are shown. */
+  step?: number
   /** Render custom content after section fields. Receives form values. */
   renderCustom?: (values: Record<string, unknown>) => React.ReactNode
 }
@@ -107,4 +114,6 @@ export type FormBuilderProps<
   /** Hide the default submit/cancel buttons (you render them yourself) */
   hideDefaultButtons?: boolean
   submitting?: boolean
+  /** When set, only sections matching this step are rendered */
+  currentStep?: number
 }
