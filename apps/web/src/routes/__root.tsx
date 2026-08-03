@@ -48,7 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-            <ThemeProvider defaultTheme="system" storageKey="theme">
+              <ThemeProvider defaultTheme="light" storageKey="theme">
               {children}
             </ThemeProvider>
           </TooltipProvider>

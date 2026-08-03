@@ -39,6 +39,8 @@ export type ChildFormData = {
   medium_of_instruction: MediumOfInstruction
   category: string
   overseas_arrival_date: string
+  disability_status: boolean
+  disability_type: string
 }
 
 interface Props {
@@ -125,8 +127,30 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
         label: "Medium of Instruction",
         options: optionsFromSchema(MediumOfInstructionSchema),
       },
-      { name: "category", kind: "display", label: "", hidden: true },
-      { name: "overseas_arrival_date", kind: "date", label: "" },
+      {
+        name: "disability_status",
+        kind: "custom",
+        label: "Disability Status",
+        section: "step1",
+        customRenderer: ({ value, onChange }) => (
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={!!value}
+              onChange={(e) => onChange(e.target.checked)}
+              className="size-4"
+            />
+            <span className="text-sm">Has a disability?</span>
+          </div>
+        ),
+      },
+      {
+        name: "disability_type",
+        kind: "text",
+        label: "Disability Type",
+        placeholder: "e.g. Visual Impairment",
+        section: "step1",
+      },
     ],
     layout: [
       { columns: [{ fields: ["full_name", "name_with_initials"] }] },

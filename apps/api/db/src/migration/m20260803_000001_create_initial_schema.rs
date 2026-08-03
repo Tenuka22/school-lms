@@ -1,0 +1,1699 @@
+use sea_orm_migration::prelude::*;
+
+#[derive(DeriveMigrationName)]
+pub struct Migration;
+
+#[async_trait::async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        // ── User/Auth domain ──────────────────────────────────────
+        manager
+            .create_table(
+                Table::create()
+                    .table(User::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(User::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(User::Username).string().not_null().unique_key())
+                    .col(ColumnDef::new(User::Email).string().not_null().unique_key())
+                    .col(ColumnDef::new(User::PasswordHash).string().not_null())
+                    .col(ColumnDef::new(User::SchoolId).uuid())
+                    .col(ColumnDef::new(User::IsActive).boolean().not_null())
+                    .col(ColumnDef::new(User::LastLogin).timestamp_with_time_zone())
+                    .col(ColumnDef::new(User::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(User::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Role::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Role::Id).integer().primary_key().not_null().auto_increment())
+                    .col(ColumnDef::new(Role::Name).string().not_null().unique_key())
+                    .col(ColumnDef::new(Role::Description).string())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Permission::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Permission::Id).integer().primary_key().not_null().auto_increment())
+                    .col(ColumnDef::new(Permission::Name).string().not_null().unique_key())
+                    .col(ColumnDef::new(Permission::Resource).string().not_null())
+                    .col(ColumnDef::new(Permission::Action).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(RolePermission::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(RolePermission::RoleId).integer().not_null())
+                    .col(ColumnDef::new(RolePermission::PermissionId).integer().not_null())
+                    .primary_key(
+                        Index::create()
+                            .col(RolePermission::RoleId)
+                            .col(RolePermission::PermissionId),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_role_permission_role")
+                            .from(RolePermission::Table, RolePermission::RoleId)
+                            .to(Role::Table, Role::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_role_permission_permission")
+                            .from(RolePermission::Table, RolePermission::PermissionId)
+                            .to(Permission::Table, Permission::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(UserRole::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(UserRole::UserId).uuid().not_null())
+                    .col(ColumnDef::new(UserRole::RoleId).integer().not_null())
+                    .primary_key(
+                        Index::create()
+                            .col(UserRole::UserId)
+                            .col(UserRole::RoleId),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_user_role_user")
+                            .from(UserRole::Table, UserRole::UserId)
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_user_role_role")
+                            .from(UserRole::Table, UserRole::RoleId)
+                            .to(Role::Table, Role::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Session::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Session::Id).integer().primary_key().not_null().auto_increment())
+                    .col(ColumnDef::new(Session::UserId).uuid().not_null())
+                    .col(ColumnDef::new(Session::RefreshTokenHash).string().not_null())
+                    .col(ColumnDef::new(Session::IssuedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(Session::ExpiresAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(Session::RevokedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Session::UserAgent).string())
+                    .col(ColumnDef::new(Session::Ip).string())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_session_user")
+                            .from(Session::Table, Session::UserId)
+                            .to(User::Table, User::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        // ── Common domain ────────────────────────────────────────
+        manager
+            .create_table(
+                Table::create()
+                    .table(Districts::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Districts::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Districts::NameSi).string().not_null())
+                    .col(ColumnDef::new(Districts::NameEn).string().not_null())
+                    .col(ColumnDef::new(Districts::Province).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Schools::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Schools::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Schools::SchoolNameSi).string().not_null())
+                    .col(ColumnDef::new(Schools::SchoolNameEn).string())
+                    .col(ColumnDef::new(Schools::SchoolType).string().not_null())
+                    .col(ColumnDef::new(Schools::Address).string())
+                    .col(ColumnDef::new(Schools::DistrictId).uuid())
+                    .col(ColumnDef::new(Schools::Category).string().not_null())
+                    .col(ColumnDef::new(Schools::Grade1Quota).integer().not_null())
+                    .col(ColumnDef::new(Schools::GeoLatitude).decimal())
+                    .col(ColumnDef::new(Schools::GeoLongitude).decimal())
+                    .col(ColumnDef::new(Schools::Status).string().not_null())
+                    .col(ColumnDef::new(Schools::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_schools_district")
+                            .from(Schools::Table, Schools::DistrictId)
+                            .to(Districts::Table, Districts::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Addresses::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Addresses::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Addresses::AddressLine1).string().not_null())
+                    .col(ColumnDef::new(Addresses::AddressLine2).string())
+                    .col(ColumnDef::new(Addresses::City).string().not_null())
+                    .col(ColumnDef::new(Addresses::District).string().not_null())
+                    .col(ColumnDef::new(Addresses::Province).string().not_null())
+                    .col(ColumnDef::new(Addresses::GsDivision).string().not_null())
+                    .col(ColumnDef::new(Addresses::PostalCode).string())
+                    .col(ColumnDef::new(Addresses::Latitude).decimal())
+                    .col(ColumnDef::new(Addresses::Longitude).decimal())
+                    .col(ColumnDef::new(Addresses::DistanceToSchoolKm).decimal())
+                    .col(ColumnDef::new(Addresses::VerifiedByMap).boolean().not_null())
+                    .col(ColumnDef::new(Addresses::ResidenceType).string())
+                    .col(ColumnDef::new(Addresses::OwnershipProof).string())
+                    .col(ColumnDef::new(Addresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Guardians::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Guardians::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Guardians::RelationshipType).string().not_null())
+                    .col(ColumnDef::new(Guardians::FullName).string().not_null())
+                    .col(ColumnDef::new(Guardians::NicNumber).string().not_null().unique_key())
+                    .col(ColumnDef::new(Guardians::ContactPhone).string().not_null())
+                    .col(ColumnDef::new(Guardians::ContactEmail).string())
+                    .col(ColumnDef::new(Guardians::Occupation).string())
+                    .col(ColumnDef::new(Guardians::WorkplaceName).string())
+                    .col(ColumnDef::new(Guardians::WorkplaceAddress).string())
+                    .col(ColumnDef::new(Guardians::IsGovtEmployee).boolean().not_null())
+                    .col(ColumnDef::new(Guardians::GovtServiceYears).integer())
+                    .col(ColumnDef::new(Guardians::IsSchoolStaff).boolean().not_null())
+                    .col(ColumnDef::new(Guardians::IsPastPupil).boolean().not_null())
+                    .col(ColumnDef::new(Guardians::PastPupilVerified).boolean().not_null())
+                    .col(ColumnDef::new(Guardians::IncomeLevel).string())
+                    .col(ColumnDef::new(Guardians::AddressId).uuid())
+                    .col(ColumnDef::new(Guardians::CreatedAt).timestamp_with_time_zone().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(StaffDetails::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(StaffDetails::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(StaffDetails::GuardianId).uuid().not_null())
+                    .col(ColumnDef::new(StaffDetails::SchoolId).uuid().not_null())
+                    .col(ColumnDef::new(StaffDetails::StaffType).string())
+                    .col(ColumnDef::new(StaffDetails::EmployeeId).string())
+                    .col(ColumnDef::new(StaffDetails::Designation).string())
+                    .col(ColumnDef::new(StaffDetails::EmploymentType).string())
+                    .col(ColumnDef::new(StaffDetails::ServiceStartDate).date())
+                    .col(ColumnDef::new(StaffDetails::ServiceEndDate).date())
+                    .col(ColumnDef::new(StaffDetails::IsCurrent).boolean().not_null())
+                    .col(ColumnDef::new(StaffDetails::VerificationDoc).string())
+                    .col(ColumnDef::new(StaffDetails::DistanceFromResidenceKm).decimal())
+                    .col(ColumnDef::new(StaffDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_staff_details_guardian")
+                            .from(StaffDetails::Table, StaffDetails::GuardianId)
+                            .to(Guardians::Table, Guardians::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_staff_details_school")
+                            .from(StaffDetails::Table, StaffDetails::SchoolId)
+                            .to(Schools::Table, Schools::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(PastPupilDetails::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(PastPupilDetails::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(PastPupilDetails::GuardianId).uuid().not_null())
+                    .col(ColumnDef::new(PastPupilDetails::SchoolId).uuid().not_null())
+                    .col(ColumnDef::new(PastPupilDetails::StudentId).string())
+                    .col(ColumnDef::new(PastPupilDetails::HighestGrade).string())
+                    .col(ColumnDef::new(PastPupilDetails::YearLeft).small_integer())
+                    .col(ColumnDef::new(PastPupilDetails::LeftReason).string())
+                    .col(ColumnDef::new(PastPupilDetails::Verified).boolean().not_null())
+                    .col(ColumnDef::new(PastPupilDetails::VerificationMethod).string())
+                    .col(ColumnDef::new(PastPupilDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_past_pupil_guardian")
+                            .from(PastPupilDetails::Table, PastPupilDetails::GuardianId)
+                            .to(Guardians::Table, Guardians::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_past_pupil_school")
+                            .from(PastPupilDetails::Table, PastPupilDetails::SchoolId)
+                            .to(Schools::Table, Schools::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Siblings::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Siblings::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Siblings::StudentId).uuid().not_null())
+                    .col(ColumnDef::new(Siblings::SchoolId).uuid().not_null())
+                    .col(ColumnDef::new(Siblings::SiblingName).string().not_null())
+                    .col(ColumnDef::new(Siblings::CurrentGrade).small_integer())
+                    .col(ColumnDef::new(Siblings::AdmissionYear).small_integer())
+                    .col(ColumnDef::new(Siblings::Verified).boolean().not_null())
+                    .col(ColumnDef::new(Siblings::VerificationDoc).string())
+                    .col(ColumnDef::new(Siblings::CreatedAt).timestamp_with_time_zone().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(EnrollmentBatches::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(EnrollmentBatches::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::Year).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::BatchCode).string().not_null().unique_key())
+                    .col(ColumnDef::new(EnrollmentBatches::BatchName).string().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::EnrollmentType).string().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::Status).string().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::OpenedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::ClosedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::ListPublishedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(EnrollmentBatches::AppealDeadlineAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(EnrollmentBatches::FinalizedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(EnrollmentBatches::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::CreatedBy).uuid())
+                    .col(ColumnDef::new(EnrollmentBatches::StudentAllocation).integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::ProximityWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::StaffWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::SiblingWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::AlumniWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::GovtWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::SpecialWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::BuddhismWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::CatholicismWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::IslamWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::HinduismWeight).small_integer().not_null())
+                    .col(ColumnDef::new(EnrollmentBatches::WaitingListSize).integer().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(WorkspaceAddresses::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(WorkspaceAddresses::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(WorkspaceAddresses::Name).string().not_null())
+                    .col(ColumnDef::new(WorkspaceAddresses::Building).string())
+                    .col(ColumnDef::new(WorkspaceAddresses::Street1).string().not_null())
+                    .col(ColumnDef::new(WorkspaceAddresses::Street2).string())
+                    .col(ColumnDef::new(WorkspaceAddresses::City).string().not_null())
+                    .col(ColumnDef::new(WorkspaceAddresses::State).string())
+                    .col(ColumnDef::new(WorkspaceAddresses::PostalCode).string())
+                    .col(ColumnDef::new(WorkspaceAddresses::Country).string().not_null())
+                    .col(ColumnDef::new(WorkspaceAddresses::FullAddress).string().not_null())
+                    .col(ColumnDef::new(WorkspaceAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Counter::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Counter::Id).integer().primary_key().not_null().auto_increment())
+                    .col(ColumnDef::new(Counter::Name).string().not_null().unique_key())
+                    .col(ColumnDef::new(Counter::Value).integer().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(SecureCounter::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(SecureCounter::Id).integer().primary_key().not_null().auto_increment())
+                    .col(ColumnDef::new(SecureCounter::Name).string().not_null().unique_key())
+                    .col(ColumnDef::new(SecureCounter::Value).integer().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Blacklist::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Blacklist::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Blacklist::GuardianId).uuid().not_null())
+                    .col(ColumnDef::new(Blacklist::ApplicationId).uuid())
+                    .col(ColumnDef::new(Blacklist::Reason).string().not_null())
+                    .col(ColumnDef::new(Blacklist::EvidenceUrl).string())
+                    .col(ColumnDef::new(Blacklist::BlacklistedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(Blacklist::ExpiresAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(Blacklist::BlacklistedBy).uuid())
+                    .col(ColumnDef::new(Blacklist::Status).string().not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(AuditLogs::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(AuditLogs::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(AuditLogs::TableName).string().not_null())
+                    .col(ColumnDef::new(AuditLogs::RecordId).uuid().not_null())
+                    .col(ColumnDef::new(AuditLogs::Action).string().not_null())
+                    .col(ColumnDef::new(AuditLogs::OldValues).json_binary())
+                    .col(ColumnDef::new(AuditLogs::NewValues).json_binary())
+                    .col(ColumnDef::new(AuditLogs::PerformedBy).uuid())
+                    .col(ColumnDef::new(AuditLogs::PerformedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(AuditLogs::IpAddress).string())
+                    .col(ColumnDef::new(AuditLogs::Reason).string())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(AddressesAudit::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(AddressesAudit::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(AddressesAudit::AddressId).uuid())
+                    .col(ColumnDef::new(AddressesAudit::Operation).string().not_null())
+                    .col(ColumnDef::new(AddressesAudit::ChangedFields).json_binary())
+                    .col(ColumnDef::new(AddressesAudit::OldValues).json_binary())
+                    .col(ColumnDef::new(AddressesAudit::NewValues).json_binary())
+                    .col(ColumnDef::new(AddressesAudit::ChangedBy).uuid())
+                    .col(ColumnDef::new(AddressesAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(AddressesAudit::Context).string())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(GuardiansAudit::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(GuardiansAudit::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(GuardiansAudit::GuardianId).uuid())
+                    .col(ColumnDef::new(GuardiansAudit::Operation).string().not_null())
+                    .col(ColumnDef::new(GuardiansAudit::ChangedFields).json_binary())
+                    .col(ColumnDef::new(GuardiansAudit::OldValues).json_binary())
+                    .col(ColumnDef::new(GuardiansAudit::NewValues).json_binary())
+                    .col(ColumnDef::new(GuardiansAudit::ChangedBy).uuid())
+                    .col(ColumnDef::new(GuardiansAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(GuardiansAudit::Context).string())
+                    .to_owned(),
+            )
+            .await?;
+
+        // ── Student domain ───────────────────────────────────────
+        manager
+            .create_table(
+                Table::create()
+                    .table(Students::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Students::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Students::AdmissionNumber).string().unique_key())
+                    .col(ColumnDef::new(Students::FullName).string().not_null())
+                    .col(ColumnDef::new(Students::NameWithInitials).string().not_null())
+                    .col(ColumnDef::new(Students::DateOfBirth).date().not_null())
+                    .col(ColumnDef::new(Students::Gender).string().not_null())
+                    .col(ColumnDef::new(Students::BirthCertificateNumber).string().unique_key())
+                    .col(ColumnDef::new(Students::Nic).string().unique_key())
+                    .col(ColumnDef::new(Students::PassportNumber).string().unique_key())
+                    .col(ColumnDef::new(Students::Nationality).string().not_null())
+                    .col(ColumnDef::new(Students::Religion).string())
+                    .col(ColumnDef::new(Students::MediumOfInstruction).string().not_null())
+                    .col(ColumnDef::new(Students::Phone).string())
+                    .col(ColumnDef::new(Students::Email).string())
+                    .col(ColumnDef::new(Students::Status).string().not_null())
+                    .col(ColumnDef::new(Students::AdmissionDate).date())
+                    .col(ColumnDef::new(Students::CurrentGrade).small_integer())
+                    .col(ColumnDef::new(Students::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(Students::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(Students::CreatedBy).uuid())
+                    .col(ColumnDef::new(Students::UpdatedBy).uuid())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(StudentJoinAddresses::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(StudentJoinAddresses::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(StudentJoinAddresses::StudentId).uuid().not_null())
+                    .col(ColumnDef::new(StudentJoinAddresses::AddressId).uuid().not_null())
+                    .col(ColumnDef::new(StudentJoinAddresses::AddressType).string().not_null())
+                    .col(ColumnDef::new(StudentJoinAddresses::IsPrimary).boolean().not_null())
+                    .col(ColumnDef::new(StudentJoinAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_student_join_addr_student")
+                            .from(StudentJoinAddresses::Table, StudentJoinAddresses::StudentId)
+                            .to(Students::Table, Students::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_student_join_addr_address")
+                            .from(StudentJoinAddresses::Table, StudentJoinAddresses::AddressId)
+                            .to(Addresses::Table, Addresses::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(StudentJoinGuardians::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(StudentJoinGuardians::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(StudentJoinGuardians::StudentId).uuid().not_null())
+                    .col(ColumnDef::new(StudentJoinGuardians::GuardianId).uuid().not_null())
+                    .col(ColumnDef::new(StudentJoinGuardians::Relationship).string().not_null())
+                    .col(ColumnDef::new(StudentJoinGuardians::IsPrimary).boolean().not_null())
+                    .col(ColumnDef::new(StudentJoinGuardians::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_student_join_guard_student")
+                            .from(StudentJoinGuardians::Table, StudentJoinGuardians::StudentId)
+                            .to(Students::Table, Students::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_student_join_guard_guardian")
+                            .from(StudentJoinGuardians::Table, StudentJoinGuardians::GuardianId)
+                            .to(Guardians::Table, Guardians::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(StudentsAudit::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(StudentsAudit::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(StudentsAudit::StudentId).uuid())
+                    .col(ColumnDef::new(StudentsAudit::Operation).string().not_null())
+                    .col(ColumnDef::new(StudentsAudit::ChangedFields).json_binary())
+                    .col(ColumnDef::new(StudentsAudit::OldValues).json_binary())
+                    .col(ColumnDef::new(StudentsAudit::NewValues).json_binary())
+                    .col(ColumnDef::new(StudentsAudit::ChangedBy).uuid())
+                    .col(ColumnDef::new(StudentsAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(StudentsAudit::Context).string())
+                    .to_owned(),
+            )
+            .await?;
+
+        // ── G1 admission domain ──────────────────────────────────
+        manager
+            .create_table(
+                Table::create()
+                    .table(Children::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Children::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(Children::StudentId).uuid())
+                    .col(ColumnDef::new(Children::FullName).string().not_null())
+                    .col(ColumnDef::new(Children::NameWithInitials).string().not_null())
+                    .col(ColumnDef::new(Children::DateOfBirth).date().not_null())
+                    .col(ColumnDef::new(Children::Gender).string().not_null())
+                    .col(ColumnDef::new(Children::BirthCertificateNumber).string().unique_key())
+                    .col(ColumnDef::new(Children::Nationality).string().not_null())
+                    .col(ColumnDef::new(Children::Religion).string())
+                    .col(ColumnDef::new(Children::MediumOfInstruction).string().not_null())
+                    .col(ColumnDef::new(Children::DisabilityStatus).boolean().not_null())
+                    .col(ColumnDef::new(Children::DisabilityType).string())
+                    .col(ColumnDef::new(Children::PhotoUrl).string())
+                    .col(ColumnDef::new(Children::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_children_student")
+                            .from(Children::Table, Children::StudentId)
+                            .to(Students::Table, Students::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1Applications::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1Applications::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1Applications::ReferenceNo).string().not_null().unique_key())
+                    .col(ColumnDef::new(G1Applications::SchoolId).uuid())
+                    .col(ColumnDef::new(G1Applications::TotalMarks).decimal())
+                    .col(ColumnDef::new(G1Applications::RankNumber).integer())
+                    .col(ColumnDef::new(G1Applications::ListCategory).string())
+                    .col(ColumnDef::new(G1Applications::WaitingPosition).integer())
+                    .col(ColumnDef::new(G1Applications::PromotedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(G1Applications::SubmittedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(G1Applications::VerifiedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(G1Applications::VerifiedBy).uuid())
+                    .col(ColumnDef::new(G1Applications::FinalizedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(G1Applications::IpAddress).string())
+                    .col(ColumnDef::new(G1Applications::UserAgent).string())
+                    .col(ColumnDef::new(G1Applications::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(G1Applications::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(G1Applications::ChildId).uuid().not_null())
+                    .col(ColumnDef::new(G1Applications::GuardianId).uuid().not_null())
+                    .col(ColumnDef::new(G1Applications::BatchId).uuid().not_null())
+                    .col(ColumnDef::new(G1Applications::EnrollmentStatus).string().not_null())
+                    .col(ColumnDef::new(G1Applications::Category).string())
+                    .col(ColumnDef::new(G1Applications::OverseasArrivalDate).date())
+                    .col(ColumnDef::new(G1Applications::SubmissionMethod).string())
+                    .col(ColumnDef::new(G1Applications::InterviewDate).date())
+                    .col(ColumnDef::new(G1Applications::InterviewCompleted).boolean().not_null())
+                    .col(ColumnDef::new(G1Applications::BirthCertificateVerified).boolean().not_null())
+                    .col(ColumnDef::new(G1Applications::AgeEligibilityVerified).boolean().not_null())
+                    .col(ColumnDef::new(G1Applications::ResidenceVerified).boolean().not_null())
+                    .col(ColumnDef::new(G1Applications::CategoryVerified).boolean().not_null())
+                    .col(ColumnDef::new(G1Applications::AlternativeAgeCertificate).boolean().not_null())
+                    .col(ColumnDef::new(G1Applications::AlternativeAgeCertificateRef).string())
+                    .col(ColumnDef::new(G1Applications::RejectionReason).string())
+                    .col(ColumnDef::new(G1Applications::CreatedBy).uuid())
+                    .col(ColumnDef::new(G1Applications::UpdatedBy).uuid())
+                    .col(ColumnDef::new(G1Applications::WizardStep).small_integer())
+                    .col(ColumnDef::new(G1Applications::DeletedAt).timestamp_with_time_zone())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_app_child")
+                            .from(G1Applications::Table, G1Applications::ChildId)
+                            .to(Children::Table, Children::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_app_school")
+                            .from(G1Applications::Table, G1Applications::SchoolId)
+                            .to(Schools::Table, Schools::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_app_batch")
+                            .from(G1Applications::Table, G1Applications::BatchId)
+                            .to(EnrollmentBatches::Table, EnrollmentBatches::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1JoinAddresses::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1JoinAddresses::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1JoinAddresses::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinAddresses::AddressId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinAddresses::AddressType).string().not_null())
+                    .col(ColumnDef::new(G1JoinAddresses::ResidenceType).string().not_null())
+                    .col(ColumnDef::new(G1JoinAddresses::IsPrimary).boolean().not_null())
+                    .col(ColumnDef::new(G1JoinAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_addr_app")
+                            .from(G1JoinAddresses::Table, G1JoinAddresses::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_addr_addr")
+                            .from(G1JoinAddresses::Table, G1JoinAddresses::AddressId)
+                            .to(Addresses::Table, Addresses::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1JoinGuardians::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1JoinGuardians::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1JoinGuardians::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinGuardians::GuardianId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinGuardians::Relationship).string().not_null())
+                    .col(ColumnDef::new(G1JoinGuardians::IsPrimary).boolean().not_null())
+                    .col(ColumnDef::new(G1JoinGuardians::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_guard_app")
+                            .from(G1JoinGuardians::Table, G1JoinGuardians::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_guard_guard")
+                            .from(G1JoinGuardians::Table, G1JoinGuardians::GuardianId)
+                            .to(Guardians::Table, Guardians::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1JoinStaffDetails::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1JoinStaffDetails::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1JoinStaffDetails::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinStaffDetails::StaffDetailId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinStaffDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_staff_app")
+                            .from(G1JoinStaffDetails::Table, G1JoinStaffDetails::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_staff_staff")
+                            .from(G1JoinStaffDetails::Table, G1JoinStaffDetails::StaffDetailId)
+                            .to(StaffDetails::Table, StaffDetails::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1JoinPastPupilDetails::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1JoinPastPupilDetails::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1JoinPastPupilDetails::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinPastPupilDetails::PastPupilDetailId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinPastPupilDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_past_pupil_app")
+                            .from(G1JoinPastPupilDetails::Table, G1JoinPastPupilDetails::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_past_pupil_detail")
+                            .from(G1JoinPastPupilDetails::Table, G1JoinPastPupilDetails::PastPupilDetailId)
+                            .to(PastPupilDetails::Table, PastPupilDetails::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1JoinSiblings::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1JoinSiblings::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1JoinSiblings::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinSiblings::SiblingId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinSiblings::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_sib_app")
+                            .from(G1JoinSiblings::Table, G1JoinSiblings::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_sib_sib")
+                            .from(G1JoinSiblings::Table, G1JoinSiblings::SiblingId)
+                            .to(Siblings::Table, Siblings::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1JoinWorkspaceAddresses::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::WorkspaceAddressId).uuid().not_null())
+                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::AddressType).string().not_null())
+                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::ResidenceType).string().not_null())
+                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::IsPrimary).boolean().not_null())
+                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_join_ws_app")
+                            .from(G1JoinWorkspaceAddresses::Table, G1JoinWorkspaceAddresses::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1Documents::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1Documents::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1Documents::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(G1Documents::DocumentType).string().not_null())
+                    .col(ColumnDef::new(G1Documents::FileUrl).string().not_null())
+                    .col(ColumnDef::new(G1Documents::FileKey).string().not_null())
+                    .col(ColumnDef::new(G1Documents::FileHash).string())
+                    .col(ColumnDef::new(G1Documents::FileSize).big_integer())
+                    .col(ColumnDef::new(G1Documents::ContentType).string())
+                    .col(ColumnDef::new(G1Documents::UploadedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(G1Documents::VerificationStatus).string().not_null())
+                    .col(ColumnDef::new(G1Documents::VerifiedBy).uuid())
+                    .col(ColumnDef::new(G1Documents::VerifiedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(G1Documents::RejectionReason).string())
+                    .col(ColumnDef::new(G1Documents::FraudFlag).boolean().not_null())
+                    .col(ColumnDef::new(G1Documents::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(G1Documents::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_g1_doc_app")
+                            .from(G1Documents::Table, G1Documents::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(MarksBreakdown::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(MarksBreakdown::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(MarksBreakdown::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(MarksBreakdown::CategoryCode).string().not_null())
+                    .col(ColumnDef::new(MarksBreakdown::RawMarks).decimal())
+                    .col(ColumnDef::new(MarksBreakdown::MaxRawMarks).decimal())
+                    .col(ColumnDef::new(MarksBreakdown::WeightPercentage).decimal())
+                    .col(ColumnDef::new(MarksBreakdown::WeightedScore).decimal())
+                    .col(ColumnDef::new(MarksBreakdown::DistanceKm).decimal())
+                    .col(ColumnDef::new(MarksBreakdown::DistanceBand).string())
+                    .col(ColumnDef::new(MarksBreakdown::CalculatedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(MarksBreakdown::CalculationRule).string())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_marks_app")
+                            .from(MarksBreakdown::Table, MarksBreakdown::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(AppealHistory::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(AppealHistory::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(AppealHistory::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(AppealHistory::AppealReference).string().not_null())
+                    .col(ColumnDef::new(AppealHistory::AppealType).string().not_null())
+                    .col(ColumnDef::new(AppealHistory::ReasonText).string().not_null())
+                    .col(ColumnDef::new(AppealHistory::SupportingDocs).json_binary())
+                    .col(ColumnDef::new(AppealHistory::Status).string().not_null())
+                    .col(ColumnDef::new(AppealHistory::FiledAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(AppealHistory::ReviewedBy).uuid())
+                    .col(ColumnDef::new(AppealHistory::ReviewedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(AppealHistory::OriginalMarks).decimal())
+                    .col(ColumnDef::new(AppealHistory::RevisedMarks).decimal())
+                    .col(ColumnDef::new(AppealHistory::DecisionReason).string())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_appeal_app")
+                            .from(AppealHistory::Table, AppealHistory::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(AdmissionLists::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(AdmissionLists::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(AdmissionLists::ApplicationId).uuid().not_null())
+                    .col(ColumnDef::new(AdmissionLists::SchoolId).uuid().not_null())
+                    .col(ColumnDef::new(AdmissionLists::ListType).string().not_null())
+                    .col(ColumnDef::new(AdmissionLists::PositionNumber).integer())
+                    .col(ColumnDef::new(AdmissionLists::QuotaCategory).string().not_null())
+                    .col(ColumnDef::new(AdmissionLists::Admitted).boolean().not_null())
+                    .col(ColumnDef::new(AdmissionLists::AdmittedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(AdmissionLists::AdmittedBy).uuid())
+                    .col(ColumnDef::new(AdmissionLists::WaitingPosition).integer())
+                    .col(ColumnDef::new(AdmissionLists::PromotedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(AdmissionLists::PromotedFrom).integer())
+                    .col(ColumnDef::new(AdmissionLists::CreatedAt).timestamp_with_time_zone().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_admission_app")
+                            .from(AdmissionLists::Table, AdmissionLists::ApplicationId)
+                            .to(G1Applications::Table, G1Applications::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_admission_school")
+                            .from(AdmissionLists::Table, AdmissionLists::SchoolId)
+                            .to(Schools::Table, Schools::Id)
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1ApplicationsAudit::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1ApplicationsAudit::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1ApplicationsAudit::ApplicationId).uuid())
+                    .col(ColumnDef::new(G1ApplicationsAudit::Operation).string().not_null())
+                    .col(ColumnDef::new(G1ApplicationsAudit::ChangedFields).json_binary())
+                    .col(ColumnDef::new(G1ApplicationsAudit::OldValues).json_binary())
+                    .col(ColumnDef::new(G1ApplicationsAudit::NewValues).json_binary())
+                    .col(ColumnDef::new(G1ApplicationsAudit::ChangedBy).uuid())
+                    .col(ColumnDef::new(G1ApplicationsAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(G1ApplicationsAudit::Context).string())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(G1DocumentsAudit::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(G1DocumentsAudit::Id).uuid().primary_key().not_null())
+                    .col(ColumnDef::new(G1DocumentsAudit::DocumentId).uuid())
+                    .col(ColumnDef::new(G1DocumentsAudit::Operation).string().not_null())
+                    .col(ColumnDef::new(G1DocumentsAudit::ChangedFields).json_binary())
+                    .col(ColumnDef::new(G1DocumentsAudit::OldValues).json_binary())
+                    .col(ColumnDef::new(G1DocumentsAudit::NewValues).json_binary())
+                    .col(ColumnDef::new(G1DocumentsAudit::ChangedBy).uuid())
+                    .col(ColumnDef::new(G1DocumentsAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(ColumnDef::new(G1DocumentsAudit::Context).string())
+                    .to_owned(),
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        // Drop in reverse order to respect foreign keys
+        let tables = [
+            "g1_documents_audit",
+            "g1_applications_audit",
+            "admission_lists",
+            "appeal_history",
+            "marks_breakdown",
+            "g1_documents",
+            "g1_join_workspace_addresses",
+            "g1_join_siblings",
+            "g1_join_past_pupil_details",
+            "g1_join_staff_details",
+            "g1_join_guardians",
+            "g1_join_addresses",
+            "g1_applications",
+            "children",
+            "students_audit",
+            "student_join_guardians",
+            "student_join_addresses",
+            "students",
+            "guardians_audit",
+            "addresses_audit",
+            "audit_logs",
+            "blacklist",
+            "secure_counter",
+            "counter",
+            "workspace_addresses",
+            "enrollment_batches",
+            "siblings",
+            "past_pupil_details",
+            "staff_details",
+            "guardians",
+            "addresses",
+            "schools",
+            "districts",
+            "session",
+            "user_role",
+            "role_permission",
+            "permission",
+            "role",
+            "user",
+        ];
+
+        for name in tables {
+            manager
+                .drop_table(Table::drop().table(sea_orm::sea_query::Alias::new(name)).if_exists().to_owned())
+                .await?;
+        }
+
+        Ok(())
+    }
+}
+
+// ── Table identifiers ────────────────────────────────────────────
+
+#[derive(Iden)]
+enum User {
+    Table,
+    Id,
+    Username,
+    Email,
+    PasswordHash,
+    SchoolId,
+    IsActive,
+    LastLogin,
+    CreatedAt,
+    UpdatedAt,
+}
+
+#[derive(Iden)]
+enum Role {
+    Table,
+    Id,
+    Name,
+    Description,
+}
+
+#[derive(Iden)]
+enum Permission {
+    Table,
+    Id,
+    Name,
+    Resource,
+    Action,
+}
+
+#[derive(Iden)]
+enum RolePermission {
+    Table,
+    RoleId,
+    PermissionId,
+}
+
+#[derive(Iden)]
+enum UserRole {
+    Table,
+    UserId,
+    RoleId,
+}
+
+#[derive(Iden)]
+enum Session {
+    Table,
+    Id,
+    UserId,
+    RefreshTokenHash,
+    IssuedAt,
+    ExpiresAt,
+    RevokedAt,
+    UserAgent,
+    Ip,
+}
+
+#[derive(Iden)]
+enum Districts {
+    Table,
+    Id,
+    NameSi,
+    NameEn,
+    Province,
+}
+
+enum Schools {
+    Table,
+    Id,
+    SchoolNameSi,
+    SchoolNameEn,
+    SchoolType,
+    Address,
+    DistrictId,
+    Category,
+    Grade1Quota,
+    GeoLatitude,
+    GeoLongitude,
+    Status,
+    CreatedAt,
+}
+
+impl Iden for Schools {
+    fn unquoted(&self) -> &str {
+        match self {
+            Self::Table => "schools",
+            Self::Id => "id",
+            Self::SchoolNameSi => "school_name_si",
+            Self::SchoolNameEn => "school_name_en",
+            Self::SchoolType => "school_type",
+            Self::Address => "address",
+            Self::DistrictId => "district_id",
+            Self::Category => "category",
+            Self::Grade1Quota => "grade_1_quota",
+            Self::GeoLatitude => "geo_latitude",
+            Self::GeoLongitude => "geo_longitude",
+            Self::Status => "status",
+            Self::CreatedAt => "created_at",
+        }
+    }
+}
+
+#[derive(Iden)]
+enum Addresses {
+    Table,
+    Id,
+    AddressLine1,
+    AddressLine2,
+    City,
+    District,
+    Province,
+    GsDivision,
+    PostalCode,
+    Latitude,
+    Longitude,
+    DistanceToSchoolKm,
+    VerifiedByMap,
+    ResidenceType,
+    OwnershipProof,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum Guardians {
+    Table,
+    Id,
+    RelationshipType,
+    FullName,
+    NicNumber,
+    ContactPhone,
+    ContactEmail,
+    Occupation,
+    WorkplaceName,
+    WorkplaceAddress,
+    IsGovtEmployee,
+    GovtServiceYears,
+    IsSchoolStaff,
+    IsPastPupil,
+    PastPupilVerified,
+    IncomeLevel,
+    AddressId,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum StaffDetails {
+    Table,
+    Id,
+    GuardianId,
+    SchoolId,
+    StaffType,
+    EmployeeId,
+    Designation,
+    EmploymentType,
+    ServiceStartDate,
+    ServiceEndDate,
+    IsCurrent,
+    VerificationDoc,
+    DistanceFromResidenceKm,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum PastPupilDetails {
+    Table,
+    Id,
+    GuardianId,
+    SchoolId,
+    StudentId,
+    HighestGrade,
+    YearLeft,
+    LeftReason,
+    Verified,
+    VerificationMethod,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum Siblings {
+    Table,
+    Id,
+    StudentId,
+    SchoolId,
+    SiblingName,
+    CurrentGrade,
+    AdmissionYear,
+    Verified,
+    VerificationDoc,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum EnrollmentBatches {
+    Table,
+    Id,
+    Year,
+    BatchCode,
+    BatchName,
+    EnrollmentType,
+    Status,
+    OpenedAt,
+    ClosedAt,
+    ListPublishedAt,
+    AppealDeadlineAt,
+    FinalizedAt,
+    CreatedAt,
+    CreatedBy,
+    StudentAllocation,
+    ProximityWeight,
+    StaffWeight,
+    SiblingWeight,
+    AlumniWeight,
+    GovtWeight,
+    SpecialWeight,
+    BuddhismWeight,
+    CatholicismWeight,
+    IslamWeight,
+    HinduismWeight,
+    WaitingListSize,
+}
+
+enum WorkspaceAddresses {
+    Table,
+    Id,
+    Name,
+    Building,
+    Street1,
+    Street2,
+    City,
+    State,
+    PostalCode,
+    Country,
+    FullAddress,
+    CreatedAt,
+}
+
+impl Iden for WorkspaceAddresses {
+    fn unquoted(&self) -> &str {
+        match self {
+            Self::Table => "workspace_addresses",
+            Self::Id => "id",
+            Self::Name => "name",
+            Self::Building => "building",
+            Self::Street1 => "street_1",
+            Self::Street2 => "street_2",
+            Self::City => "city",
+            Self::State => "state",
+            Self::PostalCode => "postal_code",
+            Self::Country => "country",
+            Self::FullAddress => "full_address",
+            Self::CreatedAt => "created_at",
+        }
+    }
+}
+
+#[derive(Iden)]
+enum Counter {
+    Table,
+    Id,
+    Name,
+    Value,
+}
+
+#[derive(Iden)]
+enum SecureCounter {
+    Table,
+    Id,
+    Name,
+    Value,
+}
+
+#[derive(Iden)]
+enum Blacklist {
+    Table,
+    Id,
+    GuardianId,
+    ApplicationId,
+    Reason,
+    EvidenceUrl,
+    BlacklistedAt,
+    ExpiresAt,
+    BlacklistedBy,
+    Status,
+}
+
+#[derive(Iden)]
+enum AuditLogs {
+    Table,
+    Id,
+    TableName,
+    RecordId,
+    Action,
+    OldValues,
+    NewValues,
+    PerformedBy,
+    PerformedAt,
+    IpAddress,
+    Reason,
+}
+
+#[derive(Iden)]
+enum AddressesAudit {
+    Table,
+    Id,
+    AddressId,
+    Operation,
+    ChangedFields,
+    OldValues,
+    NewValues,
+    ChangedBy,
+    ChangedAt,
+    Context,
+}
+
+#[derive(Iden)]
+enum GuardiansAudit {
+    Table,
+    Id,
+    GuardianId,
+    Operation,
+    ChangedFields,
+    OldValues,
+    NewValues,
+    ChangedBy,
+    ChangedAt,
+    Context,
+}
+
+#[derive(Iden)]
+enum Students {
+    Table,
+    Id,
+    AdmissionNumber,
+    FullName,
+    NameWithInitials,
+    DateOfBirth,
+    Gender,
+    BirthCertificateNumber,
+    Nic,
+    PassportNumber,
+    Nationality,
+    Religion,
+    MediumOfInstruction,
+    Phone,
+    Email,
+    Status,
+    AdmissionDate,
+    CurrentGrade,
+    CreatedAt,
+    UpdatedAt,
+    CreatedBy,
+    UpdatedBy,
+}
+
+#[derive(Iden)]
+enum StudentJoinAddresses {
+    Table,
+    Id,
+    StudentId,
+    AddressId,
+    AddressType,
+    IsPrimary,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum StudentJoinGuardians {
+    Table,
+    Id,
+    StudentId,
+    GuardianId,
+    Relationship,
+    IsPrimary,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum StudentsAudit {
+    Table,
+    Id,
+    StudentId,
+    Operation,
+    ChangedFields,
+    OldValues,
+    NewValues,
+    ChangedBy,
+    ChangedAt,
+    Context,
+}
+
+#[derive(Iden)]
+enum Children {
+    Table,
+    Id,
+    StudentId,
+    FullName,
+    NameWithInitials,
+    DateOfBirth,
+    Gender,
+    BirthCertificateNumber,
+    Nationality,
+    Religion,
+    MediumOfInstruction,
+    DisabilityStatus,
+    DisabilityType,
+    PhotoUrl,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1Applications {
+    Table,
+    Id,
+    ReferenceNo,
+    SchoolId,
+    TotalMarks,
+    RankNumber,
+    ListCategory,
+    WaitingPosition,
+    PromotedAt,
+    SubmittedAt,
+    VerifiedAt,
+    VerifiedBy,
+    FinalizedAt,
+    IpAddress,
+    UserAgent,
+    CreatedAt,
+    UpdatedAt,
+    ChildId,
+    GuardianId,
+    BatchId,
+    EnrollmentStatus,
+    Category,
+    OverseasArrivalDate,
+    SubmissionMethod,
+    InterviewDate,
+    InterviewCompleted,
+    BirthCertificateVerified,
+    AgeEligibilityVerified,
+    ResidenceVerified,
+    CategoryVerified,
+    AlternativeAgeCertificate,
+    AlternativeAgeCertificateRef,
+    RejectionReason,
+    CreatedBy,
+    UpdatedBy,
+    WizardStep,
+    DeletedAt,
+}
+
+#[derive(Iden)]
+enum G1JoinAddresses {
+    Table,
+    Id,
+    ApplicationId,
+    AddressId,
+    AddressType,
+    ResidenceType,
+    IsPrimary,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1JoinGuardians {
+    Table,
+    Id,
+    ApplicationId,
+    GuardianId,
+    Relationship,
+    IsPrimary,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1JoinStaffDetails {
+    Table,
+    Id,
+    ApplicationId,
+    StaffDetailId,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1JoinPastPupilDetails {
+    Table,
+    Id,
+    ApplicationId,
+    PastPupilDetailId,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1JoinSiblings {
+    Table,
+    Id,
+    ApplicationId,
+    SiblingId,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1JoinWorkspaceAddresses {
+    Table,
+    Id,
+    ApplicationId,
+    WorkspaceAddressId,
+    AddressType,
+    ResidenceType,
+    IsPrimary,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1Documents {
+    Table,
+    Id,
+    ApplicationId,
+    DocumentType,
+    FileUrl,
+    FileKey,
+    FileHash,
+    FileSize,
+    ContentType,
+    UploadedAt,
+    VerificationStatus,
+    VerifiedBy,
+    VerifiedAt,
+    RejectionReason,
+    FraudFlag,
+    CreatedAt,
+    UpdatedAt,
+}
+
+#[derive(Iden)]
+enum MarksBreakdown {
+    Table,
+    Id,
+    ApplicationId,
+    CategoryCode,
+    RawMarks,
+    MaxRawMarks,
+    WeightPercentage,
+    WeightedScore,
+    DistanceKm,
+    DistanceBand,
+    CalculatedAt,
+    CalculationRule,
+}
+
+#[derive(Iden)]
+enum AppealHistory {
+    Table,
+    Id,
+    ApplicationId,
+    AppealReference,
+    AppealType,
+    ReasonText,
+    SupportingDocs,
+    Status,
+    FiledAt,
+    ReviewedBy,
+    ReviewedAt,
+    OriginalMarks,
+    RevisedMarks,
+    DecisionReason,
+}
+
+#[derive(Iden)]
+enum AdmissionLists {
+    Table,
+    Id,
+    ApplicationId,
+    SchoolId,
+    ListType,
+    PositionNumber,
+    QuotaCategory,
+    Admitted,
+    AdmittedAt,
+    AdmittedBy,
+    WaitingPosition,
+    PromotedAt,
+    PromotedFrom,
+    CreatedAt,
+}
+
+#[derive(Iden)]
+enum G1ApplicationsAudit {
+    Table,
+    Id,
+    ApplicationId,
+    Operation,
+    ChangedFields,
+    OldValues,
+    NewValues,
+    ChangedBy,
+    ChangedAt,
+    Context,
+}
+
+#[derive(Iden)]
+enum G1DocumentsAudit {
+    Table,
+    Id,
+    DocumentId,
+    Operation,
+    ChangedFields,
+    OldValues,
+    NewValues,
+    ChangedBy,
+    ChangedAt,
+    Context,
+}

@@ -1,18 +1,18 @@
-# Docker Infrastructure
+# Podman Infrastructure
 
 ## Directory Structure
 
 ```
-infra/docker/
-├── api/                # API (Rust/Actix) Dockerfiles
-│   ├── Dockerfile.dev
-│   └── Dockerfile.prod
-├── web/                # Web (React/Bun) Dockerfiles
-│   ├── Dockerfile.dev
-│   └── Dockerfile.prod
-└── compose/            # Docker Compose environment files
-    ├── docker-compose.dev.yml
-    └── docker-compose.prod.yml
+infra/podman/
+├── api/                # API (Rust/Actix) Containerfiles
+│   ├── Containerfile.dev
+│   └── Containerfile.prod
+├── web/                # Web (React/Bun) Containerfiles
+│   ├── Containerfile.dev
+│   └── Containerfile.prod
+└── compose/            # Podman Compose environment files
+    ├── compose.dev.yml
+    └── compose.prod.yml
 ```
 
 ## Development
@@ -61,7 +61,7 @@ just prod
 ```
 
 This starts two tasks in parallel:
-1. **`prod-infra`** — `docker compose -f .../docker-compose.prod.yml up -d` (postgres)
+1. **`prod-infra`** — `podman-compose -f .../compose.prod.yml up -d` (postgres)
 2. **`prod-api`** — `cargo run` (API server directly on the host)
 
 ### Services
@@ -74,20 +74,20 @@ This starts two tasks in parallel:
 
 ### Environment
 
-The API server loads `apps/api/.env.production` at startup. The same file is referenced by `docker-compose.prod.yml` for the postgres service.
+The API server loads `apps/api/.env.production` at startup. The same file is referenced by `compose.prod.yml` for the postgres service.
 
-### Docker-only Deployment
+### Podman-only Deployment
 
-To run everything (including the API) in Docker:
+To run everything (including the API) in Podman:
 
 ```sh
 just prod-build
-docker compose -f infra/docker/compose/docker-compose.prod.yml up -d
+podman-compose -f infra/podman/compose/compose.prod.yml up -d
 ```
 
-## Dockerfiles Reference
+## Containerfiles Reference
 
-### `Dockerfile.dev` (Web)
+### `Containerfile.dev` (Web)
 
 ```dockerfile
 FROM oven/bun:latest
@@ -98,7 +98,7 @@ COPY . .
 CMD ["bun", "dev", "--host", "0.0.0.0"]
 ```
 
-### `Dockerfile.dev` (API)
+### `Containerfile.dev` (API)
 
 ```dockerfile
 FROM rust:latest
@@ -108,9 +108,9 @@ RUN cargo install cargo-watch
 CMD ["cargo", "watch", "-x", "run"]
 ```
 
-## .dockerignore
+## .containerignore
 
 | File | Ignores |
 |------|---------|
-| `apps/web/.dockerignore` | `node_modules/`, `.tanstack/`, `.git/` |
-| `apps/api/.dockerignore` | `target/`, `.git/` |
+| `apps/web/.containerignore` | `node_modules/`, `.tanstack/`, `.git/` |
+| `apps/api/.containerignore` | `target/`, `.git/` |

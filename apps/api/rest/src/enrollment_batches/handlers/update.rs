@@ -22,6 +22,10 @@ pub struct UpdateBatchBody {
     pub alumni_percentage: Option<i16>,
     pub govt_percentage: Option<i16>,
     pub special_percentage: Option<i16>,
+    pub buddhism_percentage: Option<i16>,
+    pub catholicism_percentage: Option<i16>,
+    pub islam_percentage: Option<i16>,
+    pub hinduism_percentage: Option<i16>,
 }
 
 #[api_operation(tag = "enrollment-batches", operation_id = "update-batch")]
@@ -61,6 +65,22 @@ pub async fn update_batch(
         .special_percentage
         .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
         .transpose()?;
+    patch.buddhism_percentage = patch
+        .buddhism_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.catholicism_percentage = patch
+        .catholicism_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.islam_percentage = patch
+        .islam_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    patch.hinduism_percentage = patch
+        .hinduism_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
 
     let existing = enrollment_batches::Entity::find_by_id(id)
         .one(db.as_ref())
@@ -76,6 +96,14 @@ pub async fn update_batch(
         patch.special_percentage.unwrap_or(existing.special_percentage),
     ];
     crate::validation::Percentage::sum(&pcts)?;
+
+    let religion_pcts = [
+        patch.buddhism_percentage.unwrap_or(existing.buddhism_percentage),
+        patch.catholicism_percentage.unwrap_or(existing.catholicism_percentage),
+        patch.islam_percentage.unwrap_or(existing.islam_percentage),
+        patch.hinduism_percentage.unwrap_or(existing.hinduism_percentage),
+    ];
+    crate::validation::Percentage::sum(&religion_pcts)?;
 
     let active = enrollment_batches::ActiveModel {
         id: Set(existing.id),
@@ -100,6 +128,10 @@ pub async fn update_batch(
         alumni_percentage: Set(pcts[3]),
         govt_percentage: Set(pcts[4]),
         special_percentage: Set(pcts[5]),
+        buddhism_percentage: Set(religion_pcts[0]),
+        catholicism_percentage: Set(religion_pcts[1]),
+        islam_percentage: Set(religion_pcts[2]),
+        hinduism_percentage: Set(religion_pcts[3]),
         waiting_list_size: Set(existing.waiting_list_size),
     };
 

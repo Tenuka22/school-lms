@@ -2,9 +2,9 @@
 **/.github
 **/*.md
 **/docs
-infra/docker
+infra/podman
 packages
-.dockerignore
+.containerignore
 justfile
 README.md
 CONTRIBUTING.md

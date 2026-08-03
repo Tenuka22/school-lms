@@ -37,6 +37,10 @@ pub struct CreateBatchBody {
     pub alumni_percentage: Option<i16>,
     pub govt_percentage: Option<i16>,
     pub special_percentage: Option<i16>,
+    pub buddhism_percentage: Option<i16>,
+    pub catholicism_percentage: Option<i16>,
+    pub islam_percentage: Option<i16>,
+    pub hinduism_percentage: Option<i16>,
 }
 
 #[api_operation(tag = "enrollment-batches", operation_id = "create-batch")]
@@ -74,6 +78,22 @@ pub async fn create_batch(
         .special_percentage
         .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
         .transpose()?;
+    input.buddhism_percentage = input
+        .buddhism_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.catholicism_percentage = input
+        .catholicism_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.islam_percentage = input
+        .islam_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
+    input.hinduism_percentage = input
+        .hinduism_percentage
+        .map(|v| crate::validation::Percentage::new(v).map(|p| p.0))
+        .transpose()?;
 
     let pcts = [
         input.proximity_percentage.unwrap_or(50),
@@ -84,6 +104,14 @@ pub async fn create_batch(
         input.special_percentage.unwrap_or(1),
     ];
     crate::validation::Percentage::sum(&pcts)?;
+
+    let religion_pcts = [
+        input.buddhism_percentage.unwrap_or(74),
+        input.catholicism_percentage.unwrap_or(12),
+        input.islam_percentage.unwrap_or(14),
+        input.hinduism_percentage.unwrap_or(0),
+    ];
+    crate::validation::Percentage::sum(&religion_pcts)?;
     let batch_code = generate_batch_code(&input.enrollment_type, input.year);
     let batch_name = generate_batch_name(&input.enrollment_type, input.year);
 
@@ -121,6 +149,10 @@ pub async fn create_batch(
         alumni_percentage: pcts[3],
         govt_percentage: pcts[4],
         special_percentage: pcts[5],
+        buddhism_percentage: religion_pcts[0],
+        catholicism_percentage: religion_pcts[1],
+        islam_percentage: religion_pcts[2],
+        hinduism_percentage: religion_pcts[3],
         waiting_list_size: 20,
     };
 

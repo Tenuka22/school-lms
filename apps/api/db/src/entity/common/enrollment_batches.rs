@@ -50,6 +50,22 @@ fn default_special_percentage() -> i16 {
     1
 }
 
+fn default_buddhism_percentage() -> i16 {
+    74
+}
+
+fn default_catholicism_percentage() -> i16 {
+    12
+}
+
+fn default_islam_percentage() -> i16 {
+    14
+}
+
+fn default_hinduism_percentage() -> i16 {
+    0
+}
+
 fn default_waiting_list_size() -> i32 {
     20
 }
@@ -110,6 +126,19 @@ pub struct Model {
     #[serde(default = "default_special_percentage")]
     #[sea_orm(column_name = "special_weight")]
     pub special_percentage: i16,
+
+    #[serde(default = "default_buddhism_percentage")]
+    #[sea_orm(column_name = "buddhism_weight")]
+    pub buddhism_percentage: i16,
+    #[serde(default = "default_catholicism_percentage")]
+    #[sea_orm(column_name = "catholicism_weight")]
+    pub catholicism_percentage: i16,
+    #[serde(default = "default_islam_percentage")]
+    #[sea_orm(column_name = "islam_weight")]
+    pub islam_percentage: i16,
+    #[serde(default = "default_hinduism_percentage")]
+    #[sea_orm(column_name = "hinduism_weight")]
+    pub hinduism_percentage: i16,
 
     #[serde(default = "default_waiting_list_size")]
     pub waiting_list_size: i32,

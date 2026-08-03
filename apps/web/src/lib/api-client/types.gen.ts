@@ -175,8 +175,12 @@ export type CreateApplicationBody = {
  */
 export type CreateBatchBody = {
     alumni_percentage?: number | null;
+    buddhism_percentage?: number | null;
+    catholicism_percentage?: number | null;
     enrollment_type: EnrollmentType;
     govt_percentage?: number | null;
+    hinduism_percentage?: number | null;
+    islam_percentage?: number | null;
     proximity_percentage?: number | null;
     sibling_percentage?: number | null;
     special_percentage?: number | null;
@@ -329,13 +333,17 @@ export type EnrollmentBatch = {
      * Human-readable name (e.g., "Grade 1 Admission 2026")
      */
     batch_name: string;
+    buddhism_percentage?: number;
+    catholicism_percentage?: number;
     closed_at?: string;
     created_at?: string;
     created_by?: string | null;
     enrollment_type: EnrollmentType;
     finalized_at?: string | null;
     govt_percentage?: number;
+    hinduism_percentage?: number;
     id?: string;
+    islam_percentage?: number;
     list_published_at?: string | null;
     opened_at?: string;
     proximity_percentage?: number;
@@ -746,7 +754,11 @@ export type UpdateApplicationBody = {
  */
 export type UpdateBatchBody = {
     alumni_percentage?: number | null;
+    buddhism_percentage?: number | null;
+    catholicism_percentage?: number | null;
     govt_percentage?: number | null;
+    hinduism_percentage?: number | null;
+    islam_percentage?: number | null;
     proximity_percentage?: number | null;
     sibling_percentage?: number | null;
     special_percentage?: number | null;

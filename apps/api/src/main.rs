@@ -50,10 +50,7 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    db.get_schema_registry("db::entity::*")
-        .sync(&db)
-        .await
-        .expect("Schema sync failed");
+    db::migrate(&db).await.expect("Schema migration failed");
 
     if let Err(e) = db::rbac::seed_defaults(&db).await {
         log::warn!("RBAC seeding failed: {e}");

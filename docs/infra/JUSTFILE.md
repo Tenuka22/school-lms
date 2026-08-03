@@ -4,18 +4,18 @@
 
 | Command                | Description                                              |
 |------------------------|----------------------------------------------------------|
-| `just dev`             | Start infra (Docker) + API + Web in parallel             |
-| `just dev-infra`       | Start dev infrastructure (`docker compose up -d`)        |
+| `just dev`             | Start infra (Podman) + API + Web in parallel             |
+| `just dev-infra`       | Start dev infrastructure (`podman-compose up -d`)        |
 | `just dev-down`        | Stop and remove dev containers                           |
-| `just dev-build`       | Build dev Docker images                                  |
+| `just dev-build`       | Build dev Podman images                                  |
 | `just dev-api`         | Run the API server with hot-reload (`cargo watch`)       |
 | `just dev-web`         | Run the Web dev server (`bun run dev`)                   |
-| `just prod`            | Start infra (Docker) + API server in parallel            |
+| `just prod`            | Start infra (Podman) + API server in parallel            |
 | `just prod-infra`      | Start production infrastructure (postgres)               |
 | `just prod-api`        | Run the API server directly (`cargo run`)                |
-| `just prod-build`      | Build Docker images for production                       |
+| `just prod-build`      | Build Podman images for production                       |
 | `just prod-down`       | Stop and remove production containers                    |
-| `just clean`           | Stop all containers and prune Docker system              |
+| `just clean`           | Stop all containers and prune Podman system              |
 | `just`                 | List all available commands                              |
 
 ## CI / Code Quality Commands
@@ -56,6 +56,6 @@ prek run --hook-type pre-push
 
 | Environment | File                     | Loaded By             |
 |-------------|--------------------------|-----------------------|
-| Development | `apps/api/.env.local`    | Docker Compose (dev)  |
-| Production  | `apps/api/.env.production` | API server + Docker Compose (prod) |
+| Development | `apps/api/.env.local`    | Podman Compose (dev)  |
+| Production  | `apps/api/.env.production` | API server + Podman Compose (prod) |
 

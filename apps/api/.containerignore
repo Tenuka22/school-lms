@@ -4,6 +4,7 @@ target/
 **/node_modules/
 **/target/
 Dockerfile*
-docker-compose*
+Containerfile*
+compose*
 .gitignore
 README.md

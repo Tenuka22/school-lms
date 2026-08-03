@@ -645,10 +645,30 @@ export const CreateBatchBodySchema = {
             format: 'int16',
             nullable: true
         },
+        buddhism_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        catholicism_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
         enrollment_type: {
             $ref: '#/components/schemas/EnrollmentType'
         },
         govt_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        hinduism_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        islam_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true
@@ -1149,6 +1169,16 @@ export const EnrollmentBatchSchema = {
             description: 'Human-readable name (e.g., "Grade 1 Admission 2026")',
             type: 'string'
         },
+        buddhism_percentage: {
+            default: 74,
+            type: 'integer',
+            format: 'int16'
+        },
+        catholicism_percentage: {
+            default: 12,
+            type: 'integer',
+            format: 'int16'
+        },
         closed_at: {
             default: '2027-07-26T12:09:51.566148700Z',
             type: 'string',
@@ -1179,10 +1209,20 @@ export const EnrollmentBatchSchema = {
             type: 'integer',
             format: 'int16'
         },
+        hinduism_percentage: {
+            default: 0,
+            type: 'integer',
+            format: 'int16'
+        },
         id: {
             default: '0c1abd52-fe99-430c-9070-1c595408ab79',
             type: 'string',
             format: 'uuid'
+        },
+        islam_percentage: {
+            default: 14,
+            type: 'integer',
+            format: 'int16'
         },
         list_published_at: {
             default: null,
@@ -2495,7 +2535,27 @@ export const UpdateBatchBodySchema = {
             format: 'int16',
             nullable: true
         },
+        buddhism_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        catholicism_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
         govt_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        hinduism_percentage: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        islam_percentage: {
             type: 'integer',
             format: 'int16',
             nullable: true

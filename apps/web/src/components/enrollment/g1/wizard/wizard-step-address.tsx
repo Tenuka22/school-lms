@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useMemo, useRef, useEffect } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { toastApiError } from "@/lib/api-error"
+import { useMutation } from "@tanstack/react-query"
+import { toast } from "sonner"
+import { presignedUploadUrlMutation } from "@/lib/api-client/@tanstack/react-query.gen"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -36,6 +37,8 @@ export type AddressEntryValue = {
   address_type: string
   residence_type: string
   is_primary: boolean
+  ownership_proof?: string
+  ownership_proof_url?: string
 }
 
 interface Props {
@@ -53,6 +56,7 @@ interface Props {
 
 const ADDRESS_TYPE_OPTIONS = ["Permanent", "Temporary"] as const
 const RESIDENCE_TYPE_OPTIONS = ["Owned", "Rented", "Relative", "Other"] as const
+const OWNERSHIP_PROOF_OPTIONS = ["Deed", "Lease", "GN Certificate", "Other"] as const
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -78,9 +82,36 @@ export function WizardStepAddress({
     }
   }, [])
 
-  const { data: addresses = [] } = useQuery(
-    listAddressesOptions({ client: apiClient })
+  const presignedUrl = useMutation(
+    presignedUploadUrlMutation({ client: apiClient })
   )
+
+  const uploadProof = async (id: string, file: File) => {
+    try {
+      const {
+        key,
+        url: presignedUrlStr,
+        public_url,
+      } = await presignedUrl.mutateAsync({
+        body: {
+          file_name: file.name,
+          content_type: file.type,
+          file_size: file.size as unknown as bigint,
+        },
+        client: apiClient,
+      })
+      const response = await fetch(presignedUrlStr, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      })
+      if (!response.ok) throw new Error("Upload failed")
+      onUpdate(id, "ownership_proof_url", public_url)
+      toast.success("Proof uploaded")
+    } catch (e) {
+      toastApiError(e, "Upload failed")
+    }
+  }
   const addressMap = useMemo(() => {
     const m = new Map<string, Address>()
     for (const a of addresses) m.set(a.id, a)
@@ -187,7 +218,7 @@ export function WizardStepAddress({
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 border-t pt-1">
+                    <div className="grid grid-cols-2 gap-2 border-t pt-1">
                     <Select
                       value={entry.address_type}
                       onValueChange={(val) =>
@@ -233,10 +264,50 @@ export function WizardStepAddress({
                       </SelectContent>
                     </Select>
 
-                    <div className="flex items-center gap-2 pt-0.5">
+                    <Select
+                      value={entry.ownership_proof ?? ""}
+                      onValueChange={(val) =>
+                        onUpdate(
+                          entry.address_id,
+                          "ownership_proof",
+                          val
+                        )
+                      }
+                    >
+                      <SelectTrigger className="h-7 w-full text-xs">
+                        <SelectValue placeholder="Ownership Proof" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {OWNERSHIP_PROOF_OPTIONS.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => {
+                        const input = document.createElement("input")
+                        input.type = "file"
+                        input.accept = "image/*,.pdf"
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0]
+                          if (file) uploadProof(entry.address_id, file)
+                        }
+                        input.click()
+                      }}
+                    >
+                      {entry.ownership_proof_url ? "Change Proof" : "Upload Proof"}
+                    </Button>
+
+                    <div className="flex items-center gap-2 pt-0.5 col-span-2">
                       <input
                         type="radio"
-                        name="primary-address"
+                        name={`primary-address-${entry.address_id}`}
                         checked={entry.is_primary}
                         onChange={() =>
                           updatePrimary(entry.address_id)
@@ -256,6 +327,7 @@ export function WizardStepAddress({
                       )}
                     </div>
                   </div>
+
                 </div>
               )
             })}

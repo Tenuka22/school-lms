@@ -59,7 +59,7 @@ services:
   api:
     build:
       context: ../../../apps/api
-      dockerfile: ../../infra/docker/api/Dockerfile.prod
+      dockerfile: ../../infra/podman/api/Containerfile.prod
     restart: always
     ports:
       - "8001:8001"
@@ -78,7 +78,7 @@ services:
   web:
     build:
       context: ../../../apps/web
-      dockerfile: ../../infra/docker/web/Dockerfile.prod
+      dockerfile: ../../infra/podman/web/Containerfile.prod
     restart: always
     ports:
       - "8000:8000"
