@@ -24,17 +24,30 @@ import {
   IconPhone,
   IconId,
   IconBriefcase,
+  IconChevronDown,
+  IconChevronUp,
 } from "@tabler/icons-react"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
+
+export type ElectoralData = {
+  electoral_year: number
+  polling_district: string
+  gn_division: string
+  polling_area: string
+  voter_names: string[]
+  household_head_name: string
+}
 
 export type GuardianFormData = string[]
 
 interface Props {
   selectedIds: string[]
+  electoralData: ElectoralData
   onDeselect: (id: string) => void
-  onSave: (guardianIds: string[]) => Promise<void>
+  onSave: (guardianIds: string[], electoralData: ElectoralData) => Promise<void>
   onBack: () => void
   onNext: () => void
+  onElectoralChange: (data: ElectoralData) => void
 }
 
 type FilterCategory = "staff" | "alumni" | "govt" | "all"
@@ -48,13 +61,17 @@ const FILTERS: { key: FilterCategory; label: string }[] = [
 
 export function WizardStepGuardian({
   selectedIds,
+  electoralData,
   onDeselect,
   onSave,
   onBack,
   onNext,
+  onElectoralChange,
 }: Props) {
   const [filter, setFilter] = useState<FilterCategory>("all")
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+  const [electoralOpen, setElectoralOpen] = useState(false)
+  const [voterInput, setVoterInput] = useState("")
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -90,7 +107,7 @@ export function WizardStepGuardian({
   const handleNext = async () => {
     setStatus("saving")
     try {
-      await onSave(selectedIds)
+      await onSave(selectedIds, electoralData)
       setStatus("done")
       navigateTimer.current = setTimeout(() => onNext(), 400)
     } catch (e) {
@@ -98,6 +115,24 @@ export function WizardStepGuardian({
       setStatus("idle")
       toastApiError(e, "Failed to save. Please try again.")
     }
+  }
+
+  const addVoter = () => {
+    const trimmed = voterInput.trim()
+    if (trimmed && !electoralData.voter_names.includes(trimmed)) {
+      onElectoralChange({
+        ...electoralData,
+        voter_names: [...electoralData.voter_names, trimmed],
+      })
+      setVoterInput("")
+    }
+  }
+
+  const removeVoter = (name: string) => {
+    onElectoralChange({
+      ...electoralData,
+      voter_names: electoralData.voter_names.filter((v) => v !== name),
+    })
   }
 
   return (
@@ -215,6 +250,139 @@ export function WizardStepGuardian({
             )}
           </div>
         </ScrollArea>
+
+        <div className="rounded-lg border">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium"
+            onClick={() => setElectoralOpen(!electoralOpen)}
+          >
+            Electoral Register
+            {electoralOpen ? (
+              <IconChevronUp className="size-4" />
+            ) : (
+              <IconChevronDown className="size-4" />
+            )}
+          </button>
+          {electoralOpen && (
+            <div className="space-y-4 border-t px-4 pb-4 pt-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Electoral Year</label>
+                  <input
+                    type="number"
+                    value={electoralData.electoral_year || ""}
+                    onChange={(e) =>
+                      onElectoralChange({
+                        ...electoralData,
+                        electoral_year: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    placeholder="2024"
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Polling District</label>
+                  <input
+                    type="text"
+                    value={electoralData.polling_district}
+                    onChange={(e) =>
+                      onElectoralChange({
+                        ...electoralData,
+                        polling_district: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. District 01"
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">GN Division</label>
+                  <input
+                    type="text"
+                    value={electoralData.gn_division}
+                    onChange={(e) =>
+                      onElectoralChange({
+                        ...electoralData,
+                        gn_division: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. GN 123"
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Polling Area</label>
+                  <input
+                    type="text"
+                    value={electoralData.polling_area}
+                    onChange={(e) =>
+                      onElectoralChange({
+                        ...electoralData,
+                        polling_area: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. Area A"
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Household Head Name</label>
+                  <input
+                    type="text"
+                    value={electoralData.household_head_name}
+                    onChange={(e) =>
+                      onElectoralChange({
+                        ...electoralData,
+                        household_head_name: e.target.value,
+                      })
+                    }
+                    placeholder="Name of household head"
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium">Voter Names</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={voterInput}
+                    onChange={(e) => setVoterInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault()
+                        addVoter()
+                      }
+                    }}
+                    placeholder="Type a name and press Enter"
+                    className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+                  />
+                  <Button type="button" variant="outline" onClick={addVoter}>
+                    Add
+                  </Button>
+                </div>
+                {electoralData.voter_names.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {electoralData.voter_names.map((name) => (
+                      <Badge key={name} variant="secondary" className="gap-1">
+                        {name}
+                        <button
+                          type="button"
+                          onClick={() => removeVoter(name)}
+                          className="ml-0.5 rounded-full p-0.5 hover:bg-muted"
+                        >
+                          <IconX className="size-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex justify-between border-t pt-4">
           <Button variant="outline" onClick={onBack}>

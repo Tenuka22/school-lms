@@ -103,8 +103,11 @@ interface Props {
   addresses: Address[]
   siblingIds: string[]
   documents: DocumentFormData[]
+  preferredSchoolIds: string[]
+  declarationAgreed: boolean
   onBack: () => void
   onComplete: () => void
+  onDeclarationChange: (agreed: boolean) => void
 }
 
 export function WizardStepReview({
@@ -115,8 +118,11 @@ export function WizardStepReview({
   addresses,
   siblingIds,
   documents,
+  preferredSchoolIds: _preferredSchoolIds,
+  declarationAgreed,
   onBack,
   onComplete,
+  onDeclarationChange,
 }: Props) {
   const addressMap = new Map(addresses.map((a) => [a.id, a]))
   const { data: students = [] } = useQuery(
@@ -505,6 +511,29 @@ export function WizardStepReview({
         </Card>
       </div>
 
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold">Declaration</h3>
+            <p className="text-sm text-muted-foreground">
+              I declare that the information provided is true and accurate. I understand that
+              providing false information may result in rejection of this application.
+            </p>
+            <label className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                checked={declarationAgreed}
+                onChange={(e) => onDeclarationChange(e.target.checked)}
+                className="mt-1 size-4"
+              />
+              <span className="text-sm">
+                I agree to the declaration above
+              </span>
+            </label>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between border-t pt-2">
         <Button variant="outline" onClick={onBack}>
           Back
@@ -512,8 +541,9 @@ export function WizardStepReview({
         <div className="flex items-center gap-3">
           <AlertDialog>
             <AlertDialogTrigger
+              disabled={!declarationAgreed}
               render={
-                <Button>
+                <Button disabled={!declarationAgreed}>
                   <IconCheck className="size-4" />
                   Complete Enrollment
                 </Button>

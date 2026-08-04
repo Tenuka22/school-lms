@@ -43,7 +43,7 @@ import { Button } from "@/components/ui/button"
 import { WizardStepChild } from "./wizard-step-child"
 import type { ChildFormData } from "./wizard-step-child"
 import { WizardStepGuardian } from "./wizard-step-guardian"
-import type { GuardianFormData } from "./wizard-step-guardian"
+import type { GuardianFormData, ElectoralData } from "./wizard-step-guardian"
 import { WizardStepAddress } from "./wizard-step-address"
 import type { AddressEntryValue } from "./wizard-step-address"
 import { WizardStepSiblings } from "./wizard-step-siblings"
@@ -135,14 +135,19 @@ export function WizardShell() {
   const [childData, setChildData] = useState<ChildFormData>({
     full_name: "",
     name_with_initials: "",
+    name_with_initials_en: "",
     date_of_birth: "",
     gender: "Male" as Gender,
     nationality: "SriLankan" as Nationality,
     religion: "",
     birth_certificate_number: "",
+    nic: "",
+    passport_number: "",
     medium_of_instruction: "Sinhala" as MediumOfInstruction,
     category: "",
     overseas_arrival_date: "",
+    disability_status: false,
+    disability_type: "",
   })
 
   useEffect(() => {
@@ -151,14 +156,19 @@ export function WizardShell() {
       setChildData({
         full_name: childRecord.full_name,
         name_with_initials: childRecord.name_with_initials,
+        name_with_initials_en: childRecord.name_with_initials_en ?? "",
         date_of_birth: childRecord.date_of_birth,
         gender: childRecord.gender,
         nationality: childRecord.nationality,
         religion: childRecord.religion ?? "",
         birth_certificate_number: childRecord.birth_certificate_number ?? "",
+        nic: childRecord.nic ?? "",
+        passport_number: childRecord.passport_number ?? "",
         medium_of_instruction: childRecord.medium_of_instruction,
         category: "" as string,
         overseas_arrival_date: "",
+        disability_status: childRecord.disability_status ?? false,
+        disability_type: childRecord.disability_type ?? "",
       })
     }
   }, [childRecord])
@@ -173,6 +183,16 @@ export function WizardShell() {
   const initialSiblingLoad = useRef(false)
   const [documentData, setDocumentData] = useState<DocumentFormData[]>([])
   const initialDocLoad = useRef(false)
+  const [electoralData, setElectoralData] = useState<ElectoralData>({
+    electoral_year: 0,
+    polling_district: "",
+    gn_division: "",
+    polling_area: "",
+    voter_names: [],
+    household_head_name: "",
+  })
+  const [declarationAgreed, setDeclarationAgreed] = useState(false)
+  const [preferredSchoolIds] = useState<string[]>([])
 
   useEffect(() => {
     if (applicationGuardianIds && !initialGuardianLoad.current) {
@@ -267,6 +287,7 @@ export function WizardShell() {
       const childPayload = {
         full_name: data.full_name,
         name_with_initials: data.name_with_initials,
+        name_with_initials_en: data.name_with_initials_en || null,
         date_of_birth: data.date_of_birth,
         gender: data.gender as Gender,
         nationality: data.nationality as Nationality,
@@ -494,11 +515,13 @@ export function WizardShell() {
               {step === 2 && (
                 <WizardStepGuardian
                   selectedIds={guardianIds}
+                  electoralData={electoralData}
                   onDeselect={(id) =>
                     setGuardianIds((prev) => prev.filter((s) => s !== id))
                   }
-                  onSave={async (ids) => {
+                  onSave={async (ids, elecData) => {
                     setGuardianIds(ids)
+                    setElectoralData(elecData)
                     await autoSaveStep(2)
                     try {
                       if (ids.length > 0) {
@@ -520,6 +543,7 @@ export function WizardShell() {
                   }}
                   onBack={() => setStep(1)}
                   onNext={() => setStep(3)}
+                  onElectoralChange={setElectoralData}
                 />
               )}
               {step === 3 && (
@@ -660,8 +684,11 @@ export function WizardShell() {
                   addresses={allAddresses}
                   siblingIds={selectedSiblingIds}
                   documents={documentData}
+                  preferredSchoolIds={preferredSchoolIds}
+                  declarationAgreed={declarationAgreed}
                   onBack={() => setStep(5)}
                   onComplete={handleComplete}
+                  onDeclarationChange={setDeclarationAgreed}
                 />
               )}
              </div>

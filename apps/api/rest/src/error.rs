@@ -37,6 +37,12 @@ impl fmt::Display for ApiError {
     }
 }
 
+impl From<db::domain::error::TransitionError> for ApiError {
+    fn from(e: db::domain::error::TransitionError) -> Self {
+        ApiError::BadRequest(e.to_string())
+    }
+}
+
 impl From<sea_orm::DbErr> for ApiError {
     fn from(e: sea_orm::DbErr) -> Self {
         log::error!("Database error: {e}");

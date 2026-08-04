@@ -1,8 +1,11 @@
+use std::marker::PhantomData;
+
 use actix_web::{web, web::Json};
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::Utc;
+use db::domain::g1_application::{Draft, G1Application, WizardStep6};
 use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
 use db::entity::g1::applications;
 use db::entity::enrollment_batches;
@@ -23,6 +26,7 @@ pub struct CreateApplicationBody {
     pub batch_id: Uuid,
     pub school_id: Option<Uuid>,
     pub child_id: Option<Uuid>,
+    pub preferred_school_ids: Option<Vec<Uuid>>,
 }
 
 #[api_operation(tag = "g1-applications", operation_id = "create-application")]
@@ -54,26 +58,34 @@ pub async fn create_application(
         ));
     }
 
-    let id = Uuid::new_v4();
     let count = applications::Entity::find()
         .filter(applications::Column::BatchId.eq(batch.id))
         .filter(applications::Column::DeletedAt.is_null())
         .count(db.as_ref())
         .await?;
 
+    let reference_no = format!("{}-{:04}", batch.batch_code, count + 1);
+    let mut app = G1Application::<Draft>::new(data.batch_id, reference_no);
+    app.model.school_id = data.school_id;
+    app.model.child_id = data.child_id.unwrap_or(Uuid::nil());
+    app.model.preferred_school_ids = data
+        .preferred_school_ids
+        .map(|ids| serde_json::to_value(ids).ok())
+        .flatten();
+
     let active = applications::ActiveModel {
-        id: Set(id),
-        reference_no: Set(format!("{}-{:04}", batch.batch_code, count + 1)),
-        school_id: Set(data.school_id),
-        batch_id: Set(data.batch_id),
-        enrollment_status: Set(EnrollmentStatus::Draft),
-        created_at: Set(now),
-        updated_at: Set(now),
+        id: Set(app.model.id),
+        reference_no: Set(app.model.reference_no),
+        school_id: Set(app.model.school_id),
+        batch_id: Set(app.model.batch_id),
+        enrollment_status: Set(app.model.enrollment_status),
+        created_at: Set(app.model.created_at),
+        updated_at: Set(app.model.updated_at),
         created_by: Set(None),
         updated_by: Set(None),
-        child_id: Set(data.child_id.unwrap_or(Uuid::nil())),
-        guardian_id: Set(Uuid::nil()),
-        wizard_step: Set(None),
+        child_id: Set(app.model.child_id),
+        guardian_id: Set(app.model.guardian_id),
+        wizard_step: Set(app.model.wizard_step),
         total_marks: Set(None),
         rank_number: Set(None),
         list_category: Set(None),
@@ -98,6 +110,15 @@ pub async fn create_application(
         alternative_age_certificate_ref: Set(None),
         rejection_reason: Set(None),
         deleted_at: Set(None),
+        preferred_school_ids: Set(app.model.preferred_school_ids),
+        electoral_year: Set(None),
+        polling_district: Set(None),
+        gn_division: Set(None),
+        polling_area: Set(None),
+        voter_names: Set(None),
+        household_head_name: Set(None),
+        declaration_agreed: Set(false),
+        declaration_signed_at: Set(None),
     };
 
     let saved = active.insert(db.as_ref()).await?;
@@ -145,17 +166,29 @@ pub async fn submit_application(
         ));
     }
 
-    if existing.enrollment_status != EnrollmentStatus::Pending {
-        return Err(ApiError::BadRequest(
-            "only pending applications can be submitted".into(),
-        ));
-    }
-
     let txn = db.begin().await?;
 
-    let mut active: applications::ActiveModel = existing.clone().into();
-    active.enrollment_status = Set(EnrollmentStatus::Completed);
-    active.submitted_at = Set(Some(Utc::now()));
+    let submitted = match existing.enrollment_status {
+        EnrollmentStatus::Draft | EnrollmentStatus::Pending => {
+            if existing.wizard_step != Some(6) {
+                return Err(ApiError::BadRequest(
+                    "application wizard must be completed before submitting".into(),
+                ));
+            }
+            let app = G1Application::<WizardStep6> {
+                model: existing.clone(),
+                _state: PhantomData,
+            };
+            app.submit()?
+        }
+        _ => {
+            return Err(ApiError::BadRequest(
+                "only draft or pending applications can be submitted".into(),
+            ));
+        }
+    };
+
+    let mut active: applications::ActiveModel = submitted.model.into();
     active.ip_address = Set(None);
     active.user_agent = Set(None);
     active.updated_at = Set(Utc::now());

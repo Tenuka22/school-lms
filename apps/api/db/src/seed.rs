@@ -66,7 +66,75 @@ pub async fn seed_schools(db: &DatabaseConnection) -> Result<(), DbErr> {
     .insert(db)
     .await?;
 
-    log::info!("Seeded school: St. Aloysius College, Galle");
+    schools::ActiveModel {
+        id: Set(Uuid::parse_str("00000000-0000-0000-0000-000000000002").unwrap()),
+        school_name_si: Set("Southlands College, Galle".to_string()),
+        school_name_en: Set(Some("Southlands College, Galle".to_string())),
+        school_type: Set(SchoolType::OneAB),
+        address: Set(Some("Galle, Sri Lanka".to_string())),
+        district_id: Set(Some(district_id)),
+        category: Set(SchoolCategory::Urban),
+        grade_1_quota: Set(100),
+        geo_latitude: Set(None),
+        geo_longitude: Set(None),
+        status: Set("Active".to_string()),
+        created_at: Set(now),
+    }
+    .insert(db)
+    .await?;
+
+    schools::ActiveModel {
+        id: Set(Uuid::parse_str("00000000-0000-0000-0000-000000000003").unwrap()),
+        school_name_si: Set("Gangamiththa College, Galle".to_string()),
+        school_name_en: Set(Some("Gangamiththa College, Galle".to_string())),
+        school_type: Set(SchoolType::OneAB),
+        address: Set(Some("Galle, Sri Lanka".to_string())),
+        district_id: Set(Some(district_id)),
+        category: Set(SchoolCategory::Urban),
+        grade_1_quota: Set(80),
+        geo_latitude: Set(None),
+        geo_longitude: Set(None),
+        status: Set("Active".to_string()),
+        created_at: Set(now),
+    }
+    .insert(db)
+    .await?;
+
+    schools::ActiveModel {
+        id: Set(Uuid::parse_str("00000000-0000-0000-0000-000000000004").unwrap()),
+        school_name_si: Set("Mahinda College, Galle".to_string()),
+        school_name_en: Set(Some("Mahinda College, Galle".to_string())),
+        school_type: Set(SchoolType::OneAB),
+        address: Set(Some("Galle, Sri Lanka".to_string())),
+        district_id: Set(Some(district_id)),
+        category: Set(SchoolCategory::Urban),
+        grade_1_quota: Set(120),
+        geo_latitude: Set(None),
+        geo_longitude: Set(None),
+        status: Set("Active".to_string()),
+        created_at: Set(now),
+    }
+    .insert(db)
+    .await?;
+
+    schools::ActiveModel {
+        id: Set(Uuid::parse_str("00000000-0000-0000-0000-000000000005").unwrap()),
+        school_name_si: Set("Richmond College, Galle".to_string()),
+        school_name_en: Set(Some("Richmond College, Galle".to_string())),
+        school_type: Set(SchoolType::OneAB),
+        address: Set(Some("Galle, Sri Lanka".to_string())),
+        district_id: Set(Some(district_id)),
+        category: Set(SchoolCategory::Urban),
+        grade_1_quota: Set(100),
+        geo_latitude: Set(None),
+        geo_longitude: Set(None),
+        status: Set("Active".to_string()),
+        created_at: Set(now),
+    }
+    .insert(db)
+    .await?;
+
+    log::info!("Seeded 5 schools");
     Ok(())
 }
 

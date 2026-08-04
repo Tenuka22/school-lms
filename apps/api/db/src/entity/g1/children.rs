@@ -35,6 +35,8 @@ pub struct Model {
     #[sea_orm(unique)]
     pub passport_number: Option<String>,
 
+    pub name_with_initials_en: Option<String>,
+
     pub nationality: Nationality,
     pub religion: Option<Religion>,
     pub medium_of_instruction: MediumOfInstruction,

@@ -1,3 +1,4 @@
+pub mod domain;
 pub mod entity;
 pub mod migration;
 pub mod rbac;

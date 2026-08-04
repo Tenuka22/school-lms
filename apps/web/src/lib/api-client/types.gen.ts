@@ -128,6 +128,7 @@ export type Child = {
     id: string;
     medium_of_instruction: MediumOfInstruction;
     name_with_initials: string;
+    name_with_initials_en?: string | null;
     nationality: Nationality;
     nic?: string | null;
     passport_number?: string | null;
@@ -203,6 +204,7 @@ export type CreateChildBody = {
     gender: Gender;
     medium_of_instruction: MediumOfInstruction;
     name_with_initials: string;
+    name_with_initials_en?: string | null;
     nationality: Nationality;
     photo_url?: string | null;
     religion?: Religion | null;
@@ -377,15 +379,23 @@ export type G1Application = {
     created_at?: string;
     created_by?: string | null;
     deleted_at?: string | null;
+    declaration_agreed?: boolean;
+    declaration_signed_at?: string | null;
+    electoral_year?: number | null;
     enrollment_status?: EnrollmentStatus;
     finalized_at?: string | null;
+    gn_division?: string | null;
     guardian_id?: string;
+    household_head_name?: string | null;
     id?: string;
     interview_completed: boolean;
     interview_date?: string | null;
     ip_address?: string | null;
     list_category?: ApplicationListCategory | null;
     overseas_arrival_date?: string | null;
+    polling_area?: string | null;
+    polling_district?: string | null;
+    preferred_school_ids?: any;
     promoted_at?: string | null;
     rank_number?: number | null;
     reference_no?: string;
@@ -400,6 +410,7 @@ export type G1Application = {
     user_agent?: string | null;
     verified_at?: string | null;
     verified_by?: string | null;
+    voter_names?: any;
     waiting_position?: number | null;
     wizard_step?: number | null;
 };
@@ -467,6 +478,7 @@ export type Guardian = {
     is_govt_employee: boolean;
     is_past_pupil: boolean;
     is_school_staff: boolean;
+    is_sri_lankan_citizen?: boolean;
     nic_number: string;
     occupation?: string | null;
     past_pupil_verified: boolean;
@@ -740,14 +752,24 @@ export type UpdateApplicationBody = {
     category?: G1Category | null;
     category_verified?: boolean | null;
     child_id?: string | null;
+    declaration_agreed?: boolean | null;
+    declaration_signed_at?: string | null;
+    electoral_year?: number | null;
+    finalized_at?: string | null;
+    gn_division?: string | null;
     guardian_id?: string | null;
+    household_head_name?: string | null;
     interview_completed?: boolean | null;
     interview_date?: string | null;
     overseas_arrival_date?: string | null;
+    polling_area?: string | null;
+    polling_district?: string | null;
+    preferred_school_ids?: any;
     rejection_reason?: string | null;
     residence_verified?: boolean | null;
     school_id?: string | null;
     submission_method?: string | null;
+    voter_names?: any;
     wizard_step?: number | null;
 };
 
@@ -781,6 +803,7 @@ export type UpdateChildBody = {
     gender?: Gender | null;
     medium_of_instruction?: MediumOfInstruction | null;
     name_with_initials?: string | null;
+    name_with_initials_en?: string | null;
     nationality?: Nationality | null;
     photo_url?: string | null;
     religion?: Religion | null;

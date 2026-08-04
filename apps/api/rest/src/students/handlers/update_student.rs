@@ -2,6 +2,7 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
+use db::domain::student::{Active, Student};
 use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
 use db::entity::student::student;
 use log::info;
@@ -72,6 +73,8 @@ pub async fn update_student(
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("Student not found".into()))?;
+
+    let _student = Student::<Active>::new(existing.clone());
 
     let active = student::ActiveModel {
         id: Set(existing.id),

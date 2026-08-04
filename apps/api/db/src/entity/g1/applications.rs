@@ -102,6 +102,16 @@ pub struct Model {
     pub wizard_step: Option<i16>,
 
     pub deleted_at: Option<DateTime<Utc>>,
+
+    pub preferred_school_ids: Option<Json>,
+    pub electoral_year: Option<i16>,
+    pub polling_district: Option<String>,
+    pub gn_division: Option<String>,
+    pub polling_area: Option<String>,
+    pub voter_names: Option<Json>,
+    pub household_head_name: Option<String>,
+    pub declaration_agreed: bool,
+    pub declaration_signed_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

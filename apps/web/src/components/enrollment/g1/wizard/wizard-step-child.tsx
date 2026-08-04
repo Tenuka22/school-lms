@@ -31,6 +31,7 @@ import type {
 export type ChildFormData = {
   full_name: string
   name_with_initials: string
+  name_with_initials_en: string
   date_of_birth: string
   gender: Gender
   nationality: Nationality
@@ -94,6 +95,12 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
         kind: "text",
         label: "Name with Initials",
         placeholder: "N. Perera",
+      },
+      {
+        name: "name_with_initials_en",
+        kind: "text",
+        label: "Name with Initials (English)",
+        placeholder: "B.S.S. Peiris",
       },
       { name: "date_of_birth", kind: "date", label: "Date of Birth" },
       {
@@ -168,6 +175,7 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
     ],
     layout: [
       { columns: [{ fields: ["full_name", "name_with_initials"] }] },
+      { columns: [{ fields: ["name_with_initials_en"] }] },
       { columns: [{ fields: ["date_of_birth"] }] },
       { columns: [{ fields: ["gender"], span: 4 }, { fields: ["nationality"], span: 4 }, { fields: ["religion"], span: 4 }] },
       { columns: [{ fields: ["birth_certificate_number"] }] },

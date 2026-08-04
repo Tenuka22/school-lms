@@ -2,6 +2,7 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
+use db::domain::student::{Active, Student};
 use db::entity::common::enums::{
     Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
 };
@@ -179,6 +180,8 @@ pub async fn create_sibling(
     }
     .insert(db.as_ref())
     .await?;
+
+    let _student = Student::<Active>::new(new_student.clone());
 
     info!("[create_sibling] created student_id={}", new_student.id);
 

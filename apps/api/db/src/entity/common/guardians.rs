@@ -35,6 +35,7 @@ pub struct Model {
     pub income_level: Option<IncomeLevel>,
     #[serde(default)]
     pub address_id: Option<Uuid>,
+    pub is_sri_lankan_citizen: Option<bool>,
     #[serde(default = "default_now")]
     pub created_at: DateTime<Utc>,
 }
