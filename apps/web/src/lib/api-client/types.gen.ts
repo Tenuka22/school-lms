@@ -130,7 +130,13 @@ export type Child = {
     name_with_initials: string;
     name_with_initials_en?: string | null;
     nationality: Nationality;
+    /**
+     * National Identity Card number (for older children)
+     */
     nic?: string | null;
+    /**
+     * Passport number (for overseas arrivals)
+     */
     passport_number?: string | null;
     photo_url?: string | null;
     religion?: Religion | null;
@@ -170,6 +176,7 @@ export type CreateAddressBody = {
 export type CreateApplicationBody = {
     batch_id: string;
     child_id?: string | null;
+    preferred_school_ids?: Array<string> | null;
     school_id?: string | null;
 };
 
@@ -204,8 +211,15 @@ export type CreateChildBody = {
     gender: Gender;
     medium_of_instruction: MediumOfInstruction;
     name_with_initials: string;
-    name_with_initials_en?: string | null;
     nationality: Nationality;
+    /**
+     * National Identity Card number (for older children)
+     */
+    nic?: string | null;
+    /**
+     * Passport number (for overseas arrivals)
+     */
+    passport_number?: string | null;
     photo_url?: string | null;
     religion?: Religion | null;
 };
@@ -365,6 +379,13 @@ export type EnrollmentStatus = 'Draft' | 'Pending' | 'Completed' | 'PendingAppro
 export type EnrollmentType = 'G1';
 
 /**
+ * ErrorResponse
+ */
+export type ErrorResponse = {
+    error: string;
+};
+
+/**
  * G1Application
  */
 export type G1Application = {
@@ -378,9 +399,9 @@ export type G1Application = {
     child_id?: string;
     created_at?: string;
     created_by?: string | null;
-    deleted_at?: string | null;
-    declaration_agreed?: boolean;
+    declaration_agreed: boolean;
     declaration_signed_at?: string | null;
+    deleted_at?: string | null;
     electoral_year?: number | null;
     enrollment_status?: EnrollmentStatus;
     finalized_at?: string | null;
@@ -395,7 +416,7 @@ export type G1Application = {
     overseas_arrival_date?: string | null;
     polling_area?: string | null;
     polling_district?: string | null;
-    preferred_school_ids?: any;
+    preferred_school_ids?: unknown;
     promoted_at?: string | null;
     rank_number?: number | null;
     reference_no?: string;
@@ -410,7 +431,7 @@ export type G1Application = {
     user_agent?: string | null;
     verified_at?: string | null;
     verified_by?: string | null;
-    voter_names?: any;
+    voter_names?: unknown;
     waiting_position?: number | null;
     wizard_step?: number | null;
 };
@@ -418,22 +439,6 @@ export type G1Application = {
 export type G1Category = 'CloseResident' | 'PastPupilChild' | 'Sibling' | 'MOEOrUGCStaffChild' | 'GovernmentTransferOfficerChild' | 'OverseasArrival' | 'ArmedForcesReserved' | 'SpecialNeeds' | 'LowIncome';
 
 export type Gender = 'Male' | 'Female';
-
-/**
- * GenerateListsRequest
- */
-export type GenerateListsRequest = {
-    batch_id: string;
-};
-
-/**
- * GenerateListsResponse
- */
-export type GenerateListsResponse = {
-    batch_id: string;
-    schools: Array<SchoolListSummary>;
-    total_generated: number;
-};
 
 /**
  * GetApplicationAddressesResponse
@@ -478,7 +483,7 @@ export type Guardian = {
     is_govt_employee: boolean;
     is_past_pupil: boolean;
     is_school_staff: boolean;
-    is_sri_lankan_citizen?: boolean;
+    is_sri_lankan_citizen?: boolean | null;
     nic_number: string;
     occupation?: string | null;
     past_pupil_verified: boolean;
@@ -650,13 +655,6 @@ export type SaveStepResponse = {
     wizard_step: number;
 };
 
-export type SchoolListSummary = {
-    main_list_count: number;
-    school_id: string;
-    school_name: string;
-    waiting_list_count: number;
-};
-
 /**
  * SchoolSummary
  */
@@ -752,24 +750,14 @@ export type UpdateApplicationBody = {
     category?: G1Category | null;
     category_verified?: boolean | null;
     child_id?: string | null;
-    declaration_agreed?: boolean | null;
-    declaration_signed_at?: string | null;
-    electoral_year?: number | null;
-    finalized_at?: string | null;
-    gn_division?: string | null;
     guardian_id?: string | null;
-    household_head_name?: string | null;
     interview_completed?: boolean | null;
     interview_date?: string | null;
     overseas_arrival_date?: string | null;
-    polling_area?: string | null;
-    polling_district?: string | null;
-    preferred_school_ids?: any;
     rejection_reason?: string | null;
     residence_verified?: boolean | null;
     school_id?: string | null;
     submission_method?: string | null;
-    voter_names?: any;
     wizard_step?: number | null;
 };
 
@@ -803,8 +791,15 @@ export type UpdateChildBody = {
     gender?: Gender | null;
     medium_of_instruction?: MediumOfInstruction | null;
     name_with_initials?: string | null;
-    name_with_initials_en?: string | null;
     nationality?: Nationality | null;
+    /**
+     * National Identity Card number (for older children)
+     */
+    nic?: string | null;
+    /**
+     * Passport number (for overseas arrivals)
+     */
+    passport_number?: string | null;
     photo_url?: string | null;
     religion?: Religion | null;
 };
@@ -911,28 +906,30 @@ export type ListBlacklistErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListBlacklistError = ListBlacklistErrors[keyof ListBlacklistErrors];
 
 export type ListBlacklistResponses = {
     200: Array<Blacklist>;
@@ -953,28 +950,30 @@ export type ListChildrenErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListChildrenError = ListChildrenErrors[keyof ListChildrenErrors];
 
 export type ListChildrenResponses = {
     200: Array<Child>;
@@ -993,28 +992,30 @@ export type CreateChildErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateChildError = CreateChildErrors[keyof CreateChildErrors];
 
 export type CreateChildResponses = {
     /**
@@ -1031,7 +1032,16 @@ export type CreateChildResponses = {
         id: string;
         medium_of_instruction: MediumOfInstruction;
         name_with_initials: string;
+        name_with_initials_en?: string | null;
         nationality: Nationality;
+        /**
+         * National Identity Card number (for older children)
+         */
+        nic?: string | null;
+        /**
+         * Passport number (for overseas arrivals)
+         */
+        passport_number?: string | null;
         photo_url?: string | null;
         religion?: Religion | null;
         student_id?: string | null;
@@ -1056,28 +1066,30 @@ export type GetChildErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetChildError = GetChildErrors[keyof GetChildErrors];
 
 export type GetChildResponses = {
     200: Child;
@@ -1101,28 +1113,30 @@ export type UpdateChildErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type UpdateChildError = UpdateChildErrors[keyof UpdateChildErrors];
 
 export type UpdateChildResponses = {
     200: Child;
@@ -1146,28 +1160,30 @@ export type GetCounterErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetCounterError = GetCounterErrors[keyof GetCounterErrors];
 
 export type GetCounterResponses = {
     200: CounterResponse;
@@ -1191,28 +1207,30 @@ export type IncrementCounterErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type IncrementCounterError = IncrementCounterErrors[keyof IncrementCounterErrors];
 
 export type IncrementCounterResponses = {
     200: CounterResponse;
@@ -1236,28 +1254,30 @@ export type GetSecureCounterErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetSecureCounterError = GetSecureCounterErrors[keyof GetSecureCounterErrors];
 
 export type GetSecureCounterResponses = {
     200: CounterResponse;
@@ -1281,28 +1301,30 @@ export type IncrementSecureCounterErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type IncrementSecureCounterError = IncrementSecureCounterErrors[keyof IncrementSecureCounterErrors];
 
 export type IncrementSecureCounterResponses = {
     200: CounterResponse;
@@ -1321,28 +1343,30 @@ export type ListDistrictsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListDistrictsError = ListDistrictsErrors[keyof ListDistrictsErrors];
 
 export type ListDistrictsResponses = {
     200: Array<District>;
@@ -1369,28 +1393,30 @@ export type ListApplicationsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListApplicationsError = ListApplicationsErrors[keyof ListApplicationsErrors];
 
 export type ListApplicationsResponses = {
     200: PaginatedApplicationsResponse;
@@ -1409,28 +1435,30 @@ export type CreateApplicationErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateApplicationError = CreateApplicationErrors[keyof CreateApplicationErrors];
 
 export type CreateApplicationResponses = {
     /**
@@ -1447,16 +1475,24 @@ export type CreateApplicationResponses = {
         child_id?: string;
         created_at?: string;
         created_by?: string | null;
+        declaration_agreed: boolean;
+        declaration_signed_at?: string | null;
         deleted_at?: string | null;
+        electoral_year?: number | null;
         enrollment_status?: EnrollmentStatus;
         finalized_at?: string | null;
+        gn_division?: string | null;
         guardian_id?: string;
+        household_head_name?: string | null;
         id?: string;
         interview_completed: boolean;
         interview_date?: string | null;
         ip_address?: string | null;
         list_category?: ApplicationListCategory | null;
         overseas_arrival_date?: string | null;
+        polling_area?: string | null;
+        polling_district?: string | null;
+        preferred_school_ids?: unknown;
         promoted_at?: string | null;
         rank_number?: number | null;
         reference_no?: string;
@@ -1471,6 +1507,7 @@ export type CreateApplicationResponses = {
         user_agent?: string | null;
         verified_at?: string | null;
         verified_by?: string | null;
+        voter_names?: unknown;
         waiting_position?: number | null;
         wizard_step?: number | null;
     };
@@ -1494,28 +1531,30 @@ export type DeleteApplicationErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type DeleteApplicationError = DeleteApplicationErrors[keyof DeleteApplicationErrors];
 
 export type DeleteApplicationResponses = {
     200: MessageResponse;
@@ -1539,28 +1578,30 @@ export type GetApplicationErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetApplicationError = GetApplicationErrors[keyof GetApplicationErrors];
 
 export type GetApplicationResponses = {
     200: G1Application;
@@ -1584,28 +1625,30 @@ export type UpdateApplicationErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type UpdateApplicationError = UpdateApplicationErrors[keyof UpdateApplicationErrors];
 
 export type UpdateApplicationResponses = {
     200: G1Application;
@@ -1629,119 +1672,36 @@ export type SubmitApplicationErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type SubmitApplicationError = SubmitApplicationErrors[keyof SubmitApplicationErrors];
 
 export type SubmitApplicationResponses = {
     200: G1Application;
 };
 
 export type SubmitApplicationResponse = SubmitApplicationResponses[keyof SubmitApplicationResponses];
-
-export type CalculateMarksData = {
-    body?: never;
-    path: {
-        /**
-         * Uuid
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/g1-applications/{id}/calculate-marks';
-};
-
-export type CalculateMarksErrors = {
-    /**
-     * Bad Request
-     */
-    400: unknown;
-    /**
-     * Unauthorized
-     */
-    401: unknown;
-    /**
-     * Forbidden
-     */
-    403: unknown;
-    /**
-     * Not Found
-     */
-    404: unknown;
-    /**
-     * Conflict
-     */
-    409: unknown;
-    /**
-     * Internal Server Error
-     */
-    500: unknown;
-};
-
-export type CalculateMarksResponses = {
-    200: G1Application;
-};
-
-export type CalculateMarksResponse = CalculateMarksResponses[keyof CalculateMarksResponses];
-
-export type GenerateAdmissionListsData = {
-    body: GenerateListsRequest;
-    path?: never;
-    query?: never;
-    url: '/api/g1-applications/generate-lists';
-};
-
-export type GenerateAdmissionListsErrors = {
-    /**
-     * Bad Request
-     */
-    400: unknown;
-    /**
-     * Unauthorized
-     */
-    401: unknown;
-    /**
-     * Forbidden
-     */
-    403: unknown;
-    /**
-     * Not Found
-     */
-    404: unknown;
-    /**
-     * Conflict
-     */
-    409: unknown;
-    /**
-     * Internal Server Error
-     */
-    500: unknown;
-};
-
-export type GenerateAdmissionListsResponses = {
-    200: GenerateListsResponse;
-};
-
-export type GenerateAdmissionListsResponse = GenerateAdmissionListsResponses[keyof GenerateAdmissionListsResponses];
 
 export type SaveWizardStepData = {
     body: SaveStepRequest;
@@ -1759,28 +1719,30 @@ export type SaveWizardStepErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type SaveWizardStepError = SaveWizardStepErrors[keyof SaveWizardStepErrors];
 
 export type SaveWizardStepResponses = {
     200: SaveStepResponse;
@@ -1804,28 +1766,30 @@ export type GetApplicationGuardiansErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetApplicationGuardiansError = GetApplicationGuardiansErrors[keyof GetApplicationGuardiansErrors];
 
 export type GetApplicationGuardiansResponses = {
     200: GetApplicationGuardiansResponse;
@@ -1849,28 +1813,30 @@ export type SaveGuardiansErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type SaveGuardiansError = SaveGuardiansErrors[keyof SaveGuardiansErrors];
 
 export type SaveGuardiansResponses = {
     200: SaveGuardiansResponse;
@@ -1894,28 +1860,30 @@ export type GetApplicationAddressesErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetApplicationAddressesError = GetApplicationAddressesErrors[keyof GetApplicationAddressesErrors];
 
 export type GetApplicationAddressesResponses = {
     200: GetApplicationAddressesResponse;
@@ -1939,28 +1907,30 @@ export type SaveAddressesErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type SaveAddressesError = SaveAddressesErrors[keyof SaveAddressesErrors];
 
 export type SaveAddressesResponses = {
     200: SaveAddressesResponse;
@@ -1984,28 +1954,30 @@ export type GetApplicationSiblingsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetApplicationSiblingsError = GetApplicationSiblingsErrors[keyof GetApplicationSiblingsErrors];
 
 export type GetApplicationSiblingsResponses = {
     200: GetApplicationSiblingsResponse;
@@ -2029,28 +2001,30 @@ export type SaveSiblingsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type SaveSiblingsError = SaveSiblingsErrors[keyof SaveSiblingsErrors];
 
 export type SaveSiblingsResponses = {
     200: SaveSiblingsResponse;
@@ -2074,28 +2048,30 @@ export type CreateSiblingErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateSiblingError = CreateSiblingErrors[keyof CreateSiblingErrors];
 
 export type CreateSiblingResponses = {
     200: CreateSiblingResponse;
@@ -2119,28 +2095,30 @@ export type GetApplicationDocumentsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetApplicationDocumentsError = GetApplicationDocumentsErrors[keyof GetApplicationDocumentsErrors];
 
 export type GetApplicationDocumentsResponses = {
     200: GetDocumentsResponse;
@@ -2164,28 +2142,30 @@ export type SaveApplicationDocumentsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type SaveApplicationDocumentsError = SaveApplicationDocumentsErrors[keyof SaveApplicationDocumentsErrors];
 
 export type SaveApplicationDocumentsResponses = {
     200: SaveDocumentsResponse;
@@ -2204,28 +2184,30 @@ export type ListBatchesErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListBatchesError = ListBatchesErrors[keyof ListBatchesErrors];
 
 export type ListBatchesResponses = {
     200: Array<EnrollmentBatch>;
@@ -2244,28 +2226,30 @@ export type CreateBatchErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateBatchError = CreateBatchErrors[keyof CreateBatchErrors];
 
 export type CreateBatchResponses = {
     /**
@@ -2282,13 +2266,17 @@ export type CreateBatchResponses = {
          * Human-readable name (e.g., "Grade 1 Admission 2026")
          */
         batch_name: string;
+        buddhism_percentage?: number;
+        catholicism_percentage?: number;
         closed_at?: string;
         created_at?: string;
         created_by?: string | null;
         enrollment_type: EnrollmentType;
         finalized_at?: string | null;
         govt_percentage?: number;
+        hinduism_percentage?: number;
         id?: string;
+        islam_percentage?: number;
         list_published_at?: string | null;
         opened_at?: string;
         proximity_percentage?: number;
@@ -2320,28 +2308,30 @@ export type DeleteBatchErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type DeleteBatchError = DeleteBatchErrors[keyof DeleteBatchErrors];
 
 export type DeleteBatchResponses = {
     200: MessageResponse;
@@ -2365,28 +2355,30 @@ export type GetBatchErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetBatchError = GetBatchErrors[keyof GetBatchErrors];
 
 export type GetBatchResponses = {
     200: EnrollmentBatch;
@@ -2410,28 +2402,30 @@ export type UpdateBatchErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type UpdateBatchError = UpdateBatchErrors[keyof UpdateBatchErrors];
 
 export type UpdateBatchResponses = {
     200: EnrollmentBatch;
@@ -2450,28 +2444,30 @@ export type ListGuardiansErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListGuardiansError = ListGuardiansErrors[keyof ListGuardiansErrors];
 
 export type ListGuardiansResponses = {
     200: Array<Guardian>;
@@ -2490,28 +2486,30 @@ export type CreateGuardianErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateGuardianError = CreateGuardianErrors[keyof CreateGuardianErrors];
 
 export type CreateGuardianResponses = {
     /**
@@ -2529,6 +2527,7 @@ export type CreateGuardianResponses = {
         is_govt_employee: boolean;
         is_past_pupil: boolean;
         is_school_staff: boolean;
+        is_sri_lankan_citizen?: boolean | null;
         nic_number: string;
         occupation?: string | null;
         past_pupil_verified: boolean;
@@ -2556,28 +2555,30 @@ export type GetGuardianErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetGuardianError = GetGuardianErrors[keyof GetGuardianErrors];
 
 export type GetGuardianResponses = {
     200: Guardian;
@@ -2601,28 +2602,30 @@ export type UpdateGuardianErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type UpdateGuardianError = UpdateGuardianErrors[keyof UpdateGuardianErrors];
 
 export type UpdateGuardianResponses = {
     200: Guardian;
@@ -2643,28 +2646,30 @@ export type ListAddressesErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListAddressesError = ListAddressesErrors[keyof ListAddressesErrors];
 
 export type ListAddressesResponses = {
     200: Array<Address>;
@@ -2683,28 +2688,30 @@ export type CreateAddressErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateAddressError = CreateAddressErrors[keyof CreateAddressErrors];
 
 export type CreateAddressResponses = {
     /**
@@ -2747,28 +2754,30 @@ export type GetAddressErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetAddressError = GetAddressErrors[keyof GetAddressErrors];
 
 export type GetAddressResponses = {
     200: Address;
@@ -2789,28 +2798,30 @@ export type ListPastPupilDetailsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListPastPupilDetailsError = ListPastPupilDetailsErrors[keyof ListPastPupilDetailsErrors];
 
 export type ListPastPupilDetailsResponses = {
     200: Array<Model>;
@@ -2829,28 +2840,30 @@ export type CreatePastPupilDetailErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreatePastPupilDetailError = CreatePastPupilDetailErrors[keyof CreatePastPupilDetailErrors];
 
 export type CreatePastPupilDetailResponses = {
     /**
@@ -2885,28 +2898,30 @@ export type ListSchoolsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListSchoolsError = ListSchoolsErrors[keyof ListSchoolsErrors];
 
 export type ListSchoolsResponses = {
     200: Array<SchoolSummary>;
@@ -2927,28 +2942,30 @@ export type ListStaffDetailsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListStaffDetailsError = ListStaffDetailsErrors[keyof ListStaffDetailsErrors];
 
 export type ListStaffDetailsResponses = {
     200: Array<StaffDetail>;
@@ -2967,28 +2984,30 @@ export type CreateStaffDetailErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateStaffDetailError = CreateStaffDetailErrors[keyof CreateStaffDetailErrors];
 
 export type CreateStaffDetailResponses = {
     /**
@@ -3026,28 +3045,30 @@ export type ListStudentsErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListStudentsError = ListStudentsErrors[keyof ListStudentsErrors];
 
 export type ListStudentsResponses = {
     200: Array<Student>;
@@ -3071,28 +3092,30 @@ export type UpdateStudentErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type UpdateStudentError = UpdateStudentErrors[keyof UpdateStudentErrors];
 
 export type UpdateStudentResponses = {
     200: Student;
@@ -3113,28 +3136,30 @@ export type ListWorkspaceAddressesErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type ListWorkspaceAddressesError = ListWorkspaceAddressesErrors[keyof ListWorkspaceAddressesErrors];
 
 export type ListWorkspaceAddressesResponses = {
     200: Array<WorkspaceAddress>;
@@ -3153,28 +3178,30 @@ export type CreateWorkspaceAddressErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type CreateWorkspaceAddressError = CreateWorkspaceAddressErrors[keyof CreateWorkspaceAddressErrors];
 
 export type CreateWorkspaceAddressResponses = {
     /**
@@ -3213,28 +3240,30 @@ export type GetWorkspaceAddressErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type GetWorkspaceAddressError = GetWorkspaceAddressErrors[keyof GetWorkspaceAddressErrors];
 
 export type GetWorkspaceAddressResponses = {
     200: WorkspaceAddress;
@@ -3253,28 +3282,30 @@ export type PresignedUploadUrlErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type PresignedUploadUrlError = PresignedUploadUrlErrors[keyof PresignedUploadUrlErrors];
 
 export type PresignedUploadUrlResponses = {
     200: PresignedUploadResponse;
@@ -3293,28 +3324,30 @@ export type UploadFileErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type UploadFileError = UploadFileErrors[keyof UploadFileErrors];
 
 export type UploadFileResponses = {
     200: UploadResponse;
@@ -3338,28 +3371,30 @@ export type DeleteUploadErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type DeleteUploadError = DeleteUploadErrors[keyof DeleteUploadErrors];
 
 export type DeleteUploadResponses = {
     200: MessageResponse;
@@ -3378,28 +3413,30 @@ export type RegisterErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type RegisterError = RegisterErrors[keyof RegisterErrors];
 
 export type RegisterResponses = {
     /**
@@ -3425,28 +3462,30 @@ export type LoginErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type LoginError = LoginErrors[keyof LoginErrors];
 
 export type LoginResponses = {
     200: AuthResponse;
@@ -3465,28 +3504,30 @@ export type RefreshErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type RefreshError = RefreshErrors[keyof RefreshErrors];
 
 export type RefreshResponses = {
     200: AuthResponse;
@@ -3505,28 +3546,30 @@ export type LogoutErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type LogoutError = LogoutErrors[keyof LogoutErrors];
 
 export type LogoutResponses = {
     200: MessageResponse;
@@ -3545,28 +3588,30 @@ export type LogoutAllErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type LogoutAllError = LogoutAllErrors[keyof LogoutAllErrors];
 
 export type LogoutAllResponses = {
     200: MessageResponse;
@@ -3585,28 +3630,30 @@ export type MeErrors = {
     /**
      * Bad Request
      */
-    400: unknown;
+    400: ErrorResponse;
     /**
      * Unauthorized
      */
-    401: unknown;
+    401: ErrorResponse;
     /**
      * Forbidden
      */
-    403: unknown;
+    403: ErrorResponse;
     /**
      * Not Found
      */
-    404: unknown;
+    404: ErrorResponse;
     /**
      * Conflict
      */
-    409: unknown;
+    409: ErrorResponse;
     /**
      * Internal Server Error
      */
-    500: unknown;
+    500: ErrorResponse;
 };
+
+export type MeError = MeErrors[keyof MeErrors];
 
 export type MeResponses = {
     200: UserResponse;

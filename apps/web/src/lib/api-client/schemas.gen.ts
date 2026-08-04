@@ -24,7 +24,7 @@ export const AddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-07-26T12:09:51.568825Z',
+            default: '2026-08-04T13:50:07.156080600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -413,7 +413,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         blacklisted_at: {
-            default: '2026-07-26T12:09:51.558223400Z',
+            default: '2026-08-04T13:50:07.133988200Z',
             type: 'string',
             format: 'date-time'
         },
@@ -427,7 +427,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         expires_at: {
-            default: '2029-07-25T12:09:51.558225600Z',
+            default: '2029-08-03T13:50:07.133991Z',
             type: 'string',
             format: 'date-time'
         },
@@ -436,7 +436,7 @@ export const BlacklistSchema = {
             format: 'uuid'
         },
         id: {
-            default: '54a3edfc-0ef8-4748-80cb-b19744589e76',
+            default: 'd3110a54-0824-4b4b-b74b-bca5e4cab25f',
             type: 'string',
             format: 'uuid'
         },
@@ -468,7 +468,7 @@ export const ChildSchema = {
             nullable: true
         },
         created_at: {
-            default: '2026-07-26T12:09:51.559544Z',
+            default: '2026-08-04T13:50:07.136753800Z',
             type: 'string',
             format: 'date-time'
         },
@@ -501,14 +501,20 @@ export const ChildSchema = {
         name_with_initials: {
             type: 'string'
         },
+        name_with_initials_en: {
+            type: 'string',
+            nullable: true
+        },
         nationality: {
             $ref: '#/components/schemas/Nationality'
         },
         nic: {
+            description: 'National Identity Card number (for older children)',
             type: 'string',
             nullable: true
         },
         passport_number: {
+            description: 'Passport number (for overseas arrivals)',
             type: 'string',
             nullable: true
         },
@@ -630,6 +636,14 @@ export const CreateApplicationBodySchema = {
         child_id: {
             type: 'string',
             format: 'uuid',
+            nullable: true
+        },
+        preferred_school_ids: {
+            type: 'array',
+            items: {
+                type: 'string',
+                format: 'uuid'
+            },
             nullable: true
         },
         school_id: {
@@ -757,10 +771,12 @@ export const CreateChildBodySchema = {
             $ref: '#/components/schemas/Nationality'
         },
         nic: {
+            description: 'National Identity Card number (for older children)',
             type: 'string',
             nullable: true
         },
         passport_number: {
+            description: 'Passport number (for overseas arrivals)',
             type: 'string',
             nullable: true
         },
@@ -1196,12 +1212,12 @@ export const EnrollmentBatchSchema = {
             format: 'int16'
         },
         closed_at: {
-            default: '2027-07-26T12:09:51.566148700Z',
+            default: '2027-08-04T13:50:07.151515200Z',
             type: 'string',
             format: 'date-time'
         },
         created_at: {
-            default: '2026-07-26T12:09:51.566160100Z',
+            default: '2026-08-04T13:50:07.151537500Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1231,7 +1247,7 @@ export const EnrollmentBatchSchema = {
             format: 'int16'
         },
         id: {
-            default: '0c1abd52-fe99-430c-9070-1c595408ab79',
+            default: 'f05c9833-8796-4a48-a570-24fbf5d7a6cb',
             type: 'string',
             format: 'uuid'
         },
@@ -1247,7 +1263,7 @@ export const EnrollmentBatchSchema = {
             nullable: true
         },
         opened_at: {
-            default: '2026-07-26T12:09:51.566144800Z',
+            default: '2026-08-04T13:50:07.151508300Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1317,6 +1333,19 @@ export const EnrollmentTypeSchema = {
     ]
 } as const;
 
+export const ErrorResponseSchema = {
+    title: 'ErrorResponse',
+    type: 'object',
+    required: [
+        'error'
+    ],
+    properties: {
+        error: {
+            type: 'string'
+        }
+    }
+} as const;
+
 export const G1ApplicationSchema = {
     title: 'G1Application',
     type: 'object',
@@ -1326,6 +1355,7 @@ export const G1ApplicationSchema = {
         'batch_id',
         'birth_certificate_verified',
         'category_verified',
+        'declaration_agreed',
         'interview_completed',
         'residence_verified'
     ],
@@ -1364,7 +1394,7 @@ export const G1ApplicationSchema = {
             format: 'uuid'
         },
         created_at: {
-            default: '2026-07-26T12:09:51.562623700Z',
+            default: '2026-08-04T13:50:07.143578600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1373,9 +1403,22 @@ export const G1ApplicationSchema = {
             format: 'uuid',
             nullable: true
         },
+        declaration_agreed: {
+            type: 'boolean'
+        },
+        declaration_signed_at: {
+            type: 'string',
+            format: 'date-time',
+            nullable: true
+        },
         deleted_at: {
             type: 'string',
             format: 'date-time',
+            nullable: true
+        },
+        electoral_year: {
+            type: 'integer',
+            format: 'int16',
             nullable: true
         },
         enrollment_status: {
@@ -1391,13 +1434,21 @@ export const G1ApplicationSchema = {
             format: 'date-time',
             nullable: true
         },
+        gn_division: {
+            type: 'string',
+            nullable: true
+        },
         guardian_id: {
             default: '00000000-0000-0000-0000-000000000000',
             type: 'string',
             format: 'uuid'
         },
+        household_head_name: {
+            type: 'string',
+            nullable: true
+        },
         id: {
-            default: 'be6a85ec-33a5-4268-aa7f-48bc8ff490e4',
+            default: 'e2066dd1-b7c1-4255-bb9f-88c9cb3580a4',
             type: 'string',
             format: 'uuid'
         },
@@ -1426,6 +1477,17 @@ export const G1ApplicationSchema = {
             format: 'date',
             nullable: true
         },
+        polling_area: {
+            type: 'string',
+            nullable: true
+        },
+        polling_district: {
+            type: 'string',
+            nullable: true
+        },
+        preferred_school_ids: {
+            nullable: true
+        },
         promoted_at: {
             type: 'string',
             format: 'date-time',
@@ -1437,7 +1499,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         reference_no: {
-            default: 'DRAFT-5ffe3dbc-aa2f-4566-9b22-31ba65eb4fa1',
+            default: 'DRAFT-658bab74-90d4-47c1-807e-da77453c7a8d',
             type: 'string'
         },
         rejection_reason: {
@@ -1468,7 +1530,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         updated_at: {
-            default: '2026-07-26T12:09:51.562627100Z',
+            default: '2026-08-04T13:50:07.143588Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1489,6 +1551,9 @@ export const G1ApplicationSchema = {
         verified_by: {
             type: 'string',
             format: 'uuid',
+            nullable: true
+        },
+        voter_names: {
             nullable: true
         },
         waiting_position: {
@@ -1525,47 +1590,6 @@ export const GenderSchema = {
         'Male',
         'Female'
     ]
-} as const;
-
-export const GenerateListsRequestSchema = {
-    title: 'GenerateListsRequest',
-    type: 'object',
-    required: [
-        'batch_id'
-    ],
-    properties: {
-        batch_id: {
-            type: 'string',
-            format: 'uuid'
-        }
-    }
-} as const;
-
-export const GenerateListsResponseSchema = {
-    title: 'GenerateListsResponse',
-    type: 'object',
-    required: [
-        'batch_id',
-        'schools',
-        'total_generated'
-    ],
-    properties: {
-        batch_id: {
-            type: 'string',
-            format: 'uuid'
-        },
-        schools: {
-            type: 'array',
-            items: {
-                $ref: '#/components/schemas/SchoolListSummary'
-            }
-        },
-        total_generated: {
-            type: 'integer',
-            format: 'uint',
-            minimum: 0
-        }
-    }
 } as const;
 
 export const GetApplicationAddressesResponseSchema = {
@@ -1663,7 +1687,7 @@ export const GuardianSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-07-26T12:09:51.567826900Z',
+            default: '2026-08-04T13:50:07.154375200Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1695,6 +1719,10 @@ export const GuardianSchema = {
         },
         is_school_staff: {
             type: 'boolean'
+        },
+        is_sri_lankan_citizen: {
+            type: 'boolean',
+            nullable: true
         },
         nic_number: {
             type: 'string'
@@ -1781,7 +1809,7 @@ export const ModelSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-07-26T12:09:51.569371700Z',
+            default: '2026-08-04T13:50:07.156944600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -2145,35 +2173,6 @@ export const SaveStepResponseSchema = {
     }
 } as const;
 
-export const SchoolListSummarySchema = {
-    type: 'object',
-    required: [
-        'main_list_count',
-        'school_id',
-        'school_name',
-        'waiting_list_count'
-    ],
-    properties: {
-        main_list_count: {
-            type: 'integer',
-            format: 'uint',
-            minimum: 0
-        },
-        school_id: {
-            type: 'string',
-            format: 'uuid'
-        },
-        school_name: {
-            type: 'string'
-        },
-        waiting_list_count: {
-            type: 'integer',
-            format: 'uint',
-            minimum: 0
-        }
-    }
-} as const;
-
 export const SchoolSummarySchema = {
     title: 'SchoolSummary',
     type: 'object',
@@ -2212,7 +2211,7 @@ export const StaffDetailSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-07-26T12:09:51.570195600Z',
+            default: '2026-08-04T13:50:07.158191600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -2667,6 +2666,16 @@ export const UpdateChildBodySchema = {
             ],
             nullable: true
         },
+        nic: {
+            description: 'National Identity Card number (for older children)',
+            type: 'string',
+            nullable: true
+        },
+        passport_number: {
+            description: 'Passport number (for overseas arrivals)',
+            type: 'string',
+            nullable: true
+        },
         photo_url: {
             type: 'string',
             nullable: true
@@ -2931,7 +2940,7 @@ export const WorkspaceAddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-07-26T12:09:51.571475600Z',
+            default: '2026-08-04T13:50:07.160969600Z',
             type: 'string',
             format: 'date-time'
         },
