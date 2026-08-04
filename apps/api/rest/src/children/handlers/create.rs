@@ -68,6 +68,7 @@ pub async fn create_child(
         disability_status: Set(data.disability_status.unwrap_or(false)),
         disability_type: Set(data.disability_type),
         photo_url: Set(data.photo_url),
+        name_with_initials_en: Set(None),
         created_at: Set(Utc::now()),
     };
 

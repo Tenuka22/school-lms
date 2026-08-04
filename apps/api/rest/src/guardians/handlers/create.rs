@@ -91,6 +91,7 @@ pub async fn create_guardian(
         past_pupil_verified: false,
         income_level: input.income_level,
         address_id: None,
+        is_sri_lankan_citizen: None,
         created_at: Utc::now(),
     };
 

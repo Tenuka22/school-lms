@@ -102,6 +102,7 @@ pub async fn update_guardian(
         past_pupil_verified: Set(existing.past_pupil_verified),
         income_level: Set(input.income_level),
         address_id: Set(input.address_id),
+        is_sri_lankan_citizen: Set(existing.is_sri_lankan_citizen),
         created_at: Set(existing.created_at),
     };
 

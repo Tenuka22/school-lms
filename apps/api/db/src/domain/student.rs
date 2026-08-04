@@ -8,7 +8,7 @@ pub enum Removed {}
 
 pub struct Student<S> {
     pub model: student::Model,
-    _state: PhantomData<S>,
+    pub _state: PhantomData<S>,
 }
 
 impl<S> Student<S> {

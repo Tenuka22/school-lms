@@ -83,6 +83,7 @@ pub async fn update_child(
         disability_status: Set(m.disability_status.unwrap_or(existing.disability_status)),
         disability_type: Set(m.disability_type.or(existing.disability_type)),
         photo_url: Set(m.photo_url.or(existing.photo_url)),
+        name_with_initials_en: Set(existing.name_with_initials_en),
         created_at: Set(existing.created_at),
     };
 

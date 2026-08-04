@@ -18,7 +18,7 @@ pub enum Rejected {}
 
 pub struct G1Application<S> {
     pub model: applications::Model,
-    _state: PhantomData<S>,
+    pub _state: PhantomData<S>,
 }
 
 impl<S> G1Application<S> {

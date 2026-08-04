@@ -118,6 +118,15 @@ pub async fn update_application(
         user_agent: Set(existing.user_agent.clone()),
         created_at: Set(existing.created_at),
         created_by: Set(existing.created_by),
+        preferred_school_ids: Set(existing.preferred_school_ids.clone()),
+        electoral_year: Set(existing.electoral_year),
+        polling_district: Set(existing.polling_district.clone()),
+        gn_division: Set(existing.gn_division.clone()),
+        polling_area: Set(existing.polling_area.clone()),
+        voter_names: Set(existing.voter_names.clone()),
+        household_head_name: Set(existing.household_head_name.clone()),
+        declaration_agreed: Set(existing.declaration_agreed),
+        declaration_signed_at: Set(existing.declaration_signed_at),
         deleted_at: Set(existing.deleted_at),
     };
 
