@@ -28,14 +28,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
             web::post().to(create::submit_application),
         )
         .route(
-            "/g1-applications/{id}/calculate-marks",
-            web::post().to(create::calculate_marks),
-        )
-        .route(
-            "/g1-applications/generate-lists",
-            web::post().to(create::generate_admission_lists),
-        )
-        .route(
             "/g1-applications/{id}/wizard-step",
             web::patch().to(save_step::save_wizard_step),
         )

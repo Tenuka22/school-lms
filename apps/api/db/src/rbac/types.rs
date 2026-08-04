@@ -49,8 +49,7 @@ pub enum Permission {
     G1ApplicationDelete,
     G1ApplicationSubmit,
     G1ApplicationVerify,
-    G1ApplicationMark,
-    G1ApplicationGenerateLists,
+
     G1DocumentUpload,
     G1DocumentVerify,
     G1AppealCreate,
@@ -81,8 +80,7 @@ impl Permission {
             Permission::G1ApplicationDelete => "g1:application:delete",
             Permission::G1ApplicationSubmit => "g1:application:submit",
             Permission::G1ApplicationVerify => "g1:application:verify",
-            Permission::G1ApplicationMark => "g1:application:mark",
-            Permission::G1ApplicationGenerateLists => "g1:application:generate-lists",
+
             Permission::G1DocumentUpload => "g1:document:upload",
             Permission::G1DocumentVerify => "g1:document:verify",
             Permission::G1AppealCreate => "g1:appeal:create",

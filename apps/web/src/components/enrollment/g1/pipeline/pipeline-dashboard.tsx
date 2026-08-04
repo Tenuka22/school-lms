@@ -119,7 +119,7 @@ const LANE_CONFIG = [
     status: "Completed",
     label: "Completed",
     badgeVariant: "default" as const,
-    note: "Data entered, ready for marks",
+    note: "Data entry complete",
   },
   {
     status: "PendingApproval",
@@ -642,33 +642,6 @@ export function PipeDashboard() {
         ),
       },
       {
-        accessorKey: "total_marks",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Marks" />
-        ),
-        enableColumnFilter: false,
-        meta: { label: "Marks" },
-        cell: ({ getValue }) => {
-          const val = getValue() as string | null | undefined
-          if (!val) return <span className="text-muted-foreground">—</span>
-          const num = parseFloat(val)
-          if (num > 0) {
-            const color =
-              num >= 75
-                ? "text-green-600"
-                : num >= 50
-                  ? "text-amber-600"
-                  : "text-red-600"
-            return (
-              <span className={`font-semibold tabular-nums ${color}`}>
-                {num.toFixed(2)}
-              </span>
-            )
-          }
-          return <span className="tabular-nums">{val}</span>
-        },
-      },
-      {
         accessorKey: "created_at",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Created" />
@@ -801,45 +774,6 @@ export function PipeDashboard() {
           <div ref={scrollRef} className="flex min-w-max gap-2 pb-1">
             {(batches ?? []).map((b: any) => {
               const isActive = b.id === batchId
-              const miniWeights = [
-                {
-                  key: "proximity",
-                  value: String(b.proximity_percentage ?? 50),
-                  color: "bg-blue-500",
-                },
-                {
-                  key: "staff",
-                  value: String(b.staff_percentage ?? 25),
-                  color: "bg-emerald-500",
-                },
-                {
-                  key: "sibling",
-                  value: String(b.sibling_percentage ?? 14),
-                  color: "bg-violet-500",
-                },
-                {
-                  key: "alumni",
-                  value: String(b.alumni_percentage ?? 6),
-                  color: "bg-amber-500",
-                },
-                {
-                  key: "govt",
-                  value: String(b.govt_percentage ?? 4),
-                  color: "bg-rose-500",
-                },
-                {
-                  key: "special",
-                  value: String(b.special_percentage ?? 1),
-                  color: "bg-cyan-500",
-                },
-              ]
-              const miniTotalW = miniWeights.reduce(
-                (s, w) => s + (parseInt(w.value) || 0),
-                0
-              )
-              const miniSegments = miniWeights.filter(
-                (w) => (parseInt(w.value) || 0) > 0
-              )
               return (
                 <button
                   key={b.id}
@@ -873,18 +807,6 @@ export function PipeDashboard() {
                     </div>
                     <div className="text-[11px] text-muted-foreground">
                       {b.student_allocation ?? 0} seats
-                    </div>
-                    <div className="flex h-3 w-full overflow-hidden rounded-full">
-                      {miniSegments.map((w: any) => {
-                        const pct = (parseInt(w.value) || 0) / miniTotalW
-                        return (
-                          <div
-                            key={w.key}
-                            className={`${w.color}`}
-                            style={{ width: `${pct * 100}%` }}
-                          />
-                        )
-                      })}
                     </div>
                   </div>
                 </button>
