@@ -19,6 +19,9 @@ type ChildFormValues = {
   date_of_birth: string
   gender: Gender | ""
   nationality: Nationality | ""
+  birth_certificate_number: string
+  nic: string
+  passport_number: string
   medium_of_instruction: MediumOfInstruction | ""
 }
 
@@ -28,6 +31,9 @@ const defaultValues: ChildFormValues = {
   date_of_birth: "",
   gender: "",
   nationality: "",
+  birth_certificate_number: "",
+  nic: "",
+  passport_number: "",
   medium_of_instruction: "",
 }
 
@@ -53,6 +59,9 @@ const formConfig: FormConfig<ChildFormValues> = {
       ],
       inputProps: { placeholder: "Select nationality" },
     },
+    { name: "birth_certificate_number", kind: "text", label: "Birth Certificate Number", placeholder: "Optional" },
+    { name: "nic", kind: "text", label: "NIC Number", placeholder: "Optional (for older children)" },
+    { name: "passport_number", kind: "text", label: "Passport Number", placeholder: "Optional (for overseas arrivals)" },
     {
       name: "medium_of_instruction", kind: "select", label: "Medium of Instruction",
       options: [
@@ -67,6 +76,9 @@ const formConfig: FormConfig<ChildFormValues> = {
     { columns: [{ fields: ["name_with_initials"] }] },
     { columns: [{ fields: ["date_of_birth"] }] },
     { columns: [{ fields: ["gender"], span: 6 }, { fields: ["nationality"], span: 6 }] },
+    { columns: [{ fields: ["birth_certificate_number"] }] },
+    { columns: [{ fields: ["nic"] }] },
+    { columns: [{ fields: ["passport_number"] }] },
     { columns: [{ fields: ["medium_of_instruction"] }] },
   ],
 }
@@ -89,6 +101,9 @@ export function CreateChildForm({
         date_of_birth: child.date_of_birth ?? "",
         gender: (child.gender ?? "") as Gender | "",
         nationality: (child.nationality ?? "") as Nationality | "",
+        birth_certificate_number: child.birth_certificate_number ?? "",
+        nic: child.nic ?? "",
+        passport_number: child.passport_number ?? "",
         medium_of_instruction: (child.medium_of_instruction ?? "") as MediumOfInstruction | "",
       } : defaultValues}
       onSubmit={async (values) => {
@@ -103,6 +118,9 @@ export function CreateChildForm({
                 date_of_birth: values.date_of_birth || null,
                 gender: (values.gender || null) as Gender | null,
                 nationality: (values.nationality || null) as Nationality | null,
+                birth_certificate_number: values.birth_certificate_number || null,
+                nic: values.nic || null,
+                passport_number: values.passport_number || null,
                 medium_of_instruction: (values.medium_of_instruction || null) as MediumOfInstruction | null,
               },
               client: apiClient,
@@ -121,6 +139,9 @@ export function CreateChildForm({
                 date_of_birth: values.date_of_birth,
                 gender: values.gender as Gender,
                 nationality: values.nationality as Nationality,
+                birth_certificate_number: values.birth_certificate_number || null,
+                nic: values.nic || null,
+                passport_number: values.passport_number || null,
                 medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,
               },
               client: apiClient,

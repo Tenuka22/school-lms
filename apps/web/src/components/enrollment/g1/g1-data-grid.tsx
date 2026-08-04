@@ -81,6 +81,8 @@ const ENUM_OPTIONS = {
     },
     { label: "Overseas Arrival", value: "OverseasArrival" },
     { label: "Armed Forces Reserved", value: "ArmedForcesReserved" },
+    { label: "Special Needs", value: "SpecialNeeds" },
+    { label: "Low Income", value: "LowIncome" },
   ],
   enrollment_status: [
     { label: "Pending", value: "Pending" },

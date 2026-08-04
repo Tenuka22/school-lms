@@ -20,6 +20,10 @@ pub struct UpdateChildBody {
     pub date_of_birth: Option<NaiveDate>,
     pub gender: Option<Gender>,
     pub birth_certificate_number: Option<String>,
+    /// National Identity Card number (for older children)
+    pub nic: Option<String>,
+    /// Passport number (for overseas arrivals)
+    pub passport_number: Option<String>,
     pub nationality: Option<Nationality>,
     pub religion: Option<Religion>,
     pub medium_of_instruction: Option<MediumOfInstruction>,
@@ -69,6 +73,8 @@ pub async fn update_child(
         birth_certificate_number: Set(
             m.birth_certificate_number.or(existing.birth_certificate_number),
         ),
+        nic: Set(m.nic.or(existing.nic)),
+        passport_number: Set(m.passport_number.or(existing.passport_number)),
         nationality: Set(m.nationality.unwrap_or(existing.nationality)),
         religion: Set(m.religion.or(existing.religion)),
         medium_of_instruction: Set(

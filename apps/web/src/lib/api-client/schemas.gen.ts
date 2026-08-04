@@ -504,6 +504,14 @@ export const ChildSchema = {
         nationality: {
             $ref: '#/components/schemas/Nationality'
         },
+        nic: {
+            type: 'string',
+            nullable: true
+        },
+        passport_number: {
+            type: 'string',
+            nullable: true
+        },
         photo_url: {
             default: null,
             type: 'string',
@@ -747,6 +755,14 @@ export const CreateChildBodySchema = {
         },
         nationality: {
             $ref: '#/components/schemas/Nationality'
+        },
+        nic: {
+            type: 'string',
+            nullable: true
+        },
+        passport_number: {
+            type: 'string',
+            nullable: true
         },
         photo_url: {
             type: 'string',
@@ -1497,7 +1513,9 @@ export const G1CategorySchema = {
         'MOEOrUGCStaffChild',
         'GovernmentTransferOfficerChild',
         'OverseasArrival',
-        'ArmedForcesReserved'
+        'ArmedForcesReserved',
+        'SpecialNeeds',
+        'LowIncome'
     ]
 } as const;
 

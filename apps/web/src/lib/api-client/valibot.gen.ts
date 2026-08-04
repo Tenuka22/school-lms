@@ -214,7 +214,9 @@ export const vG1Category = v.picklist([
     'MOEOrUGCStaffChild',
     'GovernmentTransferOfficerChild',
     'OverseasArrival',
-    'ArmedForcesReserved'
+    'ArmedForcesReserved',
+    'SpecialNeeds',
+    'LowIncome'
 ]);
 
 /**
@@ -482,6 +484,8 @@ export const vChild = v.object({
     medium_of_instruction: vMediumOfInstruction,
     name_with_initials: v.string(),
     nationality: vNationality,
+    nic: v.nullish(v.string()),
+    passport_number: v.nullish(v.string()),
     photo_url: v.nullish(v.string(), null),
     religion: v.nullish(vReligion),
     student_id: v.nullish(v.pipe(v.string(), v.uuid()), null)
@@ -500,6 +504,8 @@ export const vCreateChildBody = v.object({
     medium_of_instruction: vMediumOfInstruction,
     name_with_initials: v.string(),
     nationality: vNationality,
+    nic: v.nullish(v.string()),
+    passport_number: v.nullish(v.string()),
     photo_url: v.nullish(v.string()),
     religion: v.nullish(vReligion)
 });

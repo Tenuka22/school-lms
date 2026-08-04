@@ -27,6 +27,14 @@ pub struct Model {
     #[sea_orm(unique)]
     pub birth_certificate_number: Option<String>,
 
+    /// National Identity Card number (for older children)
+    #[sea_orm(unique)]
+    pub nic: Option<String>,
+
+    /// Passport number (for overseas arrivals)
+    #[sea_orm(unique)]
+    pub passport_number: Option<String>,
+
     pub nationality: Nationality,
     pub religion: Option<Religion>,
     pub medium_of_instruction: MediumOfInstruction,

@@ -591,6 +591,8 @@ export function PipeDashboard() {
             },
             { label: "Overseas Arrival", value: "OverseasArrival" },
             { label: "Armed Forces Reserved", value: "ArmedForcesReserved" },
+            { label: "Special Needs", value: "SpecialNeeds" },
+            { label: "Low Income", value: "LowIncome" },
           ],
         },
         cell: ({ getValue }) => (

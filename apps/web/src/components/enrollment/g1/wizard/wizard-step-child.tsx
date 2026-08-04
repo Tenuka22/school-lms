@@ -36,6 +36,8 @@ export type ChildFormData = {
   nationality: Nationality
   religion: string
   birth_certificate_number: string
+  nic: string
+  passport_number: string
   medium_of_instruction: MediumOfInstruction
   category: string
   overseas_arrival_date: string
@@ -122,6 +124,18 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
         placeholder: "Optional",
       },
       {
+        name: "nic",
+        kind: "text",
+        label: "NIC Number",
+        placeholder: "Optional (for older children)",
+      },
+      {
+        name: "passport_number",
+        kind: "text",
+        label: "Passport Number",
+        placeholder: "Optional (for overseas arrivals)",
+      },
+      {
         name: "medium_of_instruction",
         kind: "select",
         label: "Medium of Instruction",
@@ -157,6 +171,8 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
       { columns: [{ fields: ["date_of_birth"] }] },
       { columns: [{ fields: ["gender"], span: 4 }, { fields: ["nationality"], span: 4 }, { fields: ["religion"], span: 4 }] },
       { columns: [{ fields: ["birth_certificate_number"] }] },
+      { columns: [{ fields: ["nic"] }] },
+      { columns: [{ fields: ["passport_number"] }] },
       { columns: [{ fields: ["medium_of_instruction"] }] },
     ],
     renderBelowFields: (formValues) =>

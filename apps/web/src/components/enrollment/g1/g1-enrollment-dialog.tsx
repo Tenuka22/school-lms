@@ -76,6 +76,8 @@ type EnrollmentFormData = {
   medium_of_instruction: string
   religion: string | null
   birth_certificate_number: string | null
+  nic: string | null
+  passport_number: string | null
   batch_id: string
 }
 
@@ -312,12 +314,26 @@ export function G1EnrollmentDialog({
         kind: "text",
         label: "Birth Certificate Number",
       },
+      {
+        name: "nic",
+        kind: "text",
+        label: "NIC Number",
+        placeholder: "Optional (for older children)",
+      },
+      {
+        name: "passport_number",
+        kind: "text",
+        label: "Passport Number",
+        placeholder: "Optional (for overseas arrivals)",
+      },
     ],
     layout: [
       { columns: [{ fields: ["full_name", "name_with_initials"] }] },
       { columns: [{ fields: ["gender", "nationality"] }] },
       { columns: [{ fields: ["medium_of_instruction", "religion"] }] },
       { columns: [{ fields: ["birth_certificate_number"] }] },
+      { columns: [{ fields: ["nic"] }] },
+      { columns: [{ fields: ["passport_number"] }] },
     ],
   }
 
@@ -345,6 +361,8 @@ export function G1EnrollmentDialog({
             medium_of_instruction: "Sinhala",
             religion: null,
             birth_certificate_number: null,
+            nic: null,
+            passport_number: null,
             batch_id: enrollment?.batch_id ?? "",
           }}
           onSubmit={async (value) => {
@@ -360,6 +378,8 @@ export function G1EnrollmentDialog({
                   birth_certificate_number: value.birth_certificate_number || null,
                   medium_of_instruction: value.medium_of_instruction as Child['medium_of_instruction'],
                   religion: value.religion as Child['religion'],
+                  nic: value.nic || null,
+                  passport_number: value.passport_number || null,
                 } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
                 const child = await createChild.mutateAsync({
                   body: childBody as Child,
@@ -377,6 +397,8 @@ export function G1EnrollmentDialog({
                   nationality: value.nationality as Child['nationality'],
                   medium_of_instruction: value.medium_of_instruction as Child['medium_of_instruction'],
                   religion: value.religion as Child['religion'],
+                  nic: value.nic || null,
+                  passport_number: value.passport_number || null,
                 }
                 await updateChild.mutateAsync({
                   path: { id: savedChildId },

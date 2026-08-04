@@ -228,6 +228,10 @@ pub enum G1Category {
     OverseasArrival,
     #[sea_orm(string_value = "ArmedForcesReserved")]
     ArmedForcesReserved,
+    #[sea_orm(string_value = "SpecialNeeds")]
+    SpecialNeeds,
+    #[sea_orm(string_value = "LowIncome")]
+    LowIncome,
 }
 
 #[derive(

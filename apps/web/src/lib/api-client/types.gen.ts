@@ -129,6 +129,8 @@ export type Child = {
     medium_of_instruction: MediumOfInstruction;
     name_with_initials: string;
     nationality: Nationality;
+    nic?: string | null;
+    passport_number?: string | null;
     photo_url?: string | null;
     religion?: Religion | null;
     student_id?: string | null;
@@ -402,7 +404,7 @@ export type G1Application = {
     wizard_step?: number | null;
 };
 
-export type G1Category = 'CloseResident' | 'PastPupilChild' | 'Sibling' | 'MOEOrUGCStaffChild' | 'GovernmentTransferOfficerChild' | 'OverseasArrival' | 'ArmedForcesReserved';
+export type G1Category = 'CloseResident' | 'PastPupilChild' | 'Sibling' | 'MOEOrUGCStaffChild' | 'GovernmentTransferOfficerChild' | 'OverseasArrival' | 'ArmedForcesReserved' | 'SpecialNeeds' | 'LowIncome';
 
 export type Gender = 'Male' | 'Female';
 

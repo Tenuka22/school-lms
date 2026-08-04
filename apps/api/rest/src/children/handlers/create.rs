@@ -21,6 +21,10 @@ pub struct CreateChildBody {
     pub date_of_birth: NaiveDate,
     pub gender: Gender,
     pub birth_certificate_number: Option<String>,
+    /// National Identity Card number (for older children)
+    pub nic: Option<String>,
+    /// Passport number (for overseas arrivals)
+    pub passport_number: Option<String>,
     pub nationality: Nationality,
     pub religion: Option<Religion>,
     pub medium_of_instruction: MediumOfInstruction,
@@ -56,6 +60,8 @@ pub async fn create_child(
         date_of_birth: Set(data.date_of_birth),
         gender: Set(data.gender),
         birth_certificate_number: Set(data.birth_certificate_number),
+        nic: Set(data.nic),
+        passport_number: Set(data.passport_number),
         nationality: Set(data.nationality),
         religion: Set(data.religion),
         medium_of_instruction: Set(data.medium_of_instruction),
