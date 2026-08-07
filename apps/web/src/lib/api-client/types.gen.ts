@@ -918,6 +918,7 @@ export type UploadResponse = {
 export type UserResponse = {
     email: string;
     id: string;
+    role: string;
 };
 
 /**

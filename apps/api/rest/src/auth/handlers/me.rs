@@ -21,8 +21,18 @@ pub async fn me(
         .await?
         .ok_or_else(|| ApiError::NotFound("user not found".into()))?;
 
+    let roles = db::rbac::get_user_roles(&db, user_id)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to load roles: {e}");
+            ApiError::Internal("role lookup failed".into())
+        })?;
+
+    let role = roles.first().map(|r| r.to_string()).unwrap_or_else(|| "unknown".into());
+
     Ok(Json(UserResponse {
         id: user.id.to_string(),
         email: user.email,
+        role,
     }))
 }
