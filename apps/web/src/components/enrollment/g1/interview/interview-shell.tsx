@@ -108,13 +108,19 @@ export function InterviewShell() {
     updateApplicationMutation({ client: apiClient })
   )
 
-  const [step, setStep] = useState(application?.wizard_step ?? 1)
+  const [step, setStep] = useState(() => {
+    const saved = application?.wizard_step ?? 1
+    return saved > STEPS.length ? 1 : saved
+  })
   const [interviewDate, setInterviewDate] = useState<string>(
     application?.interview_date ?? new Date().toISOString().split("T")[0]
   )
 
   useEffect(() => {
-    if (application?.wizard_step) setStep(application.wizard_step)
+    if (application?.wizard_step) {
+      const s = application.wizard_step
+      setStep(s > STEPS.length ? 1 : s)
+    }
     if (application?.interview_date) setInterviewDate(application.interview_date)
   }, [application?.wizard_step, application?.interview_date])
 
