@@ -450,6 +450,8 @@ pub enum G1DocumentType {
     GuardianNIC,
     #[sea_orm(string_value = "ResidenceProof")]
     ResidenceProof,
+    #[sea_orm(string_value = "ElectoralProof")]
+    ElectoralProof,
     #[sea_orm(string_value = "SiblingSchoolCertificate")]
     SiblingSchoolCertificate,
     #[sea_orm(string_value = "StaffAppointmentLetter")]
@@ -813,4 +815,65 @@ pub enum IncomeLevel {
     #[serde(rename = "above_500000")]
     #[sea_orm(string_value = "above_500000")]
     Above500000,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    EnumIter,
+    DeriveActiveEnum,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    ApiComponent,
+)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
+pub enum ElectoralDistrict {
+    #[sea_orm(string_value = "Colombo")]
+    Colombo,
+    #[sea_orm(string_value = "Gampaha")]
+    Gampaha,
+    #[sea_orm(string_value = "Kalutara")]
+    Kalutara,
+    #[sea_orm(string_value = "Kandy")]
+    Kandy,
+    #[sea_orm(string_value = "Matale")]
+    Matale,
+    #[sea_orm(string_value = "Nuwara_Eliya")]
+    NuwaraEliya,
+    #[sea_orm(string_value = "Galle")]
+    Galle,
+    #[sea_orm(string_value = "Matara")]
+    Matara,
+    #[sea_orm(string_value = "Hambantota")]
+    Hambantota,
+    #[sea_orm(string_value = "Jaffna")]
+    Jaffna,
+    #[sea_orm(string_value = "Vanni")]
+    Vanni,
+    #[sea_orm(string_value = "Batticaloa")]
+    Batticaloa,
+    #[sea_orm(string_value = "Ampara")]
+    Ampara,
+    #[sea_orm(string_value = "Trincomalee")]
+    Trincomalee,
+    #[sea_orm(string_value = "Kurunegala")]
+    Kurunegala,
+    #[sea_orm(string_value = "Puttalam")]
+    Puttalam,
+    #[sea_orm(string_value = "Anuradhapura")]
+    Anuradhapura,
+    #[sea_orm(string_value = "Polonnaruwa")]
+    Polonnaruwa,
+    #[sea_orm(string_value = "Badulla")]
+    Badulla,
+    #[sea_orm(string_value = "Monaragala")]
+    Monaragala,
+    #[sea_orm(string_value = "Ratnapura")]
+    Ratnapura,
+    #[sea_orm(string_value = "Kegalle")]
+    Kegalle,
 }

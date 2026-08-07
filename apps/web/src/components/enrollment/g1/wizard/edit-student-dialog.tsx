@@ -30,14 +30,8 @@ function buildEditConfig(): FormConfig<EditStudentFormData> {
         name: "religion",
         kind: "select",
         label: "Religion",
-        placeholder: "Select (optional)",
-        options: [
-          { value: "", label: "None" },
-          ...optionsFromSchema(ReligionSchema),
-        ],
-        onChangeOverride: (value, handleChange) => {
-          handleChange(value === "" ? null : value)
-        },
+        required: true,
+        options: optionsFromSchema(ReligionSchema),
       },
       { name: "medium_of_instruction", kind: "select", label: "Medium", required: true, options: optionsFromSchema(MediumOfInstructionSchema) },
       {
@@ -54,8 +48,8 @@ function buildEditConfig(): FormConfig<EditStudentFormData> {
         name: "birth_certificate_number",
         kind: "text",
         label: "Birth Certificate No",
+        required: true,
         placeholder: "e.g. BC123456",
-        section: "optional",
         onChangeOverride: (value, handleChange) => {
           handleChange(value === "" ? null : value)
         },
@@ -122,19 +116,19 @@ function buildEditConfig(): FormConfig<EditStudentFormData> {
           { fields: ["current_grade"], span: 6 },
         ],
       },
+      { columns: [{ fields: ["birth_certificate_number"], span: 12 }] },
       {
         columns: [
-          { fields: ["birth_certificate_number"], span: 6 },
           { fields: ["nic"], span: 6 },
+          { fields: ["passport_number"], span: 6 },
         ],
       },
       {
         columns: [
-          { fields: ["passport_number"], span: 6 },
           { fields: ["phone"], span: 6 },
+          { fields: ["email"], span: 6 },
         ],
       },
-      { columns: [{ fields: ["email"], span: 12 }] },
     ],
     sections: [
       {

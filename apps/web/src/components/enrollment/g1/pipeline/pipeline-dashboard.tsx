@@ -33,6 +33,7 @@ import { queryClient } from "@/router"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
 import { CreateChildForm } from "@/components/enrollment/g1/create-child-form"
 import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpers"
+import { BatchOverviewChart } from "@/components/enrollment/g1/pipeline/batch-overview-chart"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
@@ -791,7 +792,7 @@ export function PipeDashboard() {
                   }}
                   className={`flex min-w-52 shrink-0 items-start gap-3 rounded-xl border px-5 py-3 text-left transition-all ${
                     isActive
-                      ? "border-primary bg-primary/10 ring-2 ring-primary/30"
+                      ? "border-primary bg-primary/5 shadow-sm shadow-primary/20"
                       : "border-border hover:border-primary/40 hover:bg-accent/40"
                   }`}
                   data-batch-id={b.id}
@@ -800,12 +801,12 @@ export function PipeDashboard() {
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-base font-bold">{b.year}</span>
                       <span
-                        className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${getEnumStyle("batch_status", b.status) ?? "border-border bg-muted text-muted-foreground"}`}
+                        className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${getEnumStyle("batch_status", b.status) ?? "border-border bg-muted text-muted-foreground"}`}
                       >
                         {getEnumLabel("batch_status", b.status)}
                       </span>
                     </div>
-                    <div className="text-[11px] text-muted-foreground">
+                    <div className="text-[11px] font-medium text-foreground/70">
                       {b.student_allocation ?? 0} seats
                     </div>
                   </div>
@@ -815,7 +816,7 @@ export function PipeDashboard() {
             <button
               type="button"
               onClick={() => setBatchDialogOpen(true)}
-              className="flex min-w-52 shrink-0 items-center justify-center gap-2 rounded-xl border border-dashed border-border px-5 py-3 text-sm text-muted-foreground transition-all hover:border-primary/50 hover:text-primary"
+              className="flex min-w-52 shrink-0 items-center justify-center gap-2 rounded-xl border border-dashed border-border px-5 py-3 text-sm font-medium text-foreground/60 transition-all hover:border-primary/50 hover:text-primary"
             >
               <IconFolderPlus className="size-5" />
               New Batch
@@ -824,6 +825,10 @@ export function PipeDashboard() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
+
+      {batchId && (
+        <BatchOverviewChart batch={batches?.find((b) => b.id === batchId)} />
+      )}
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">

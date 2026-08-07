@@ -9,7 +9,7 @@ use db::entity::common::past_pupil_details;
 use db::entity::common::staff_details;
 use db::entity::guardians;
 use schemars::JsonSchema;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -73,6 +73,18 @@ pub async fn create_guardian(
         .workplace_name
         .map(|w| crate::validation::NonEmpty::new(w, "workplace_name").map(|v| v.into_inner()))
         .transpose()?;
+
+    let existing = guardians::Entity::find()
+        .filter(guardians::Column::NicNumber.eq(&input.nic_number))
+        .one(db.as_ref())
+        .await?;
+
+    if let Some(existing_guardian) = existing {
+        return Err(ApiError::Conflict(format!(
+            "A guardian with NIC {} already exists (id: {})",
+            input.nic_number, existing_guardian.id
+        )));
+    }
 
     let data = guardians::Model {
         id: Uuid::new_v4(),

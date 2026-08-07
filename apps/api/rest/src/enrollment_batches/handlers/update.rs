@@ -1,6 +1,9 @@
+use std::marker::PhantomData;
+
 use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
+use db::domain::batch::{AppealsPeriod, Batch, Closed, ListsPublished, Open};
 use db::entity::enrollment_batches;
 use db::entity::enums::BatchStatus;
 use schemars::JsonSchema;
@@ -105,23 +108,96 @@ pub async fn update_batch(
     ];
     crate::validation::Percentage::sum(&religion_pcts)?;
 
+    let model = if let Some(new_status) = patch.status {
+        if new_status == existing.status {
+            existing.clone()
+        } else {
+            match existing.status {
+                BatchStatus::Open => {
+                    let batch = Batch::<Open> {
+                        model: existing.clone(),
+                        _state: PhantomData,
+                    };
+                    if new_status == BatchStatus::Closed {
+                        batch.close()?.into_inner()
+                    } else {
+                        return Err(ApiError::BadRequest(
+                            "invalid transition from Open".into(),
+                        ));
+                    }
+                }
+                BatchStatus::Closed => {
+                    let batch = Batch::<Closed> {
+                        model: existing.clone(),
+                        _state: PhantomData,
+                    };
+                    if new_status == BatchStatus::ListsPublished {
+                        batch.publish_lists()?.into_inner()
+                    } else {
+                        return Err(ApiError::BadRequest(
+                            "invalid transition from Closed".into(),
+                        ));
+                    }
+                }
+                BatchStatus::ListsPublished => {
+                    let batch = Batch::<ListsPublished> {
+                        model: existing.clone(),
+                        _state: PhantomData,
+                    };
+                    if new_status == BatchStatus::AppealsPeriod {
+                        let deadline = existing
+                            .appeal_deadline_at
+                            .unwrap_or(chrono::Utc::now() + chrono::Duration::days(14));
+                        batch.open_appeals(deadline)?.into_inner()
+                    } else {
+                        return Err(ApiError::BadRequest(
+                            "invalid transition from ListsPublished".into(),
+                        ));
+                    }
+                }
+                BatchStatus::AppealsPeriod => {
+                    let batch = Batch::<AppealsPeriod> {
+                        model: existing.clone(),
+                        _state: PhantomData,
+                    };
+                    if new_status == BatchStatus::Archived {
+                        batch.archive()?.into_inner()
+                    } else {
+                        return Err(ApiError::BadRequest(
+                            "invalid transition from AppealsPeriod".into(),
+                        ));
+                    }
+                }
+                BatchStatus::Archived => {
+                    return Err(ApiError::BadRequest(
+                        "cannot transition from Archived".into(),
+                    ));
+                }
+            }
+        }
+    } else {
+        existing.clone()
+    };
+
     let active = enrollment_batches::ActiveModel {
-        id: Set(existing.id),
-        year: Set(existing.year),
-        batch_code: Set(existing.batch_code),
-        batch_name: Set(existing.batch_name),
-        enrollment_type: Set(existing.enrollment_type),
-        status: Set(patch.status.unwrap_or(existing.status)),
-        opened_at: Set(existing.opened_at),
-        closed_at: Set(existing.closed_at),
-        list_published_at: Set(existing.list_published_at),
-        appeal_deadline_at: Set(existing.appeal_deadline_at),
-        finalized_at: Set(existing.finalized_at),
-        created_at: Set(existing.created_at),
-        created_by: Set(existing.created_by),
-        student_allocation: Set(patch
-            .student_allocation
-            .unwrap_or(existing.student_allocation)),
+        id: Set(model.id),
+        year: Set(model.year),
+        batch_code: Set(model.batch_code),
+        batch_name: Set(model.batch_name),
+        enrollment_type: Set(model.enrollment_type),
+        status: Set(model.status),
+        opened_at: Set(model.opened_at),
+        closed_at: Set(model.closed_at),
+        list_published_at: Set(model.list_published_at),
+        appeal_deadline_at: Set(model.appeal_deadline_at),
+        finalized_at: Set(model.finalized_at),
+        created_at: Set(model.created_at),
+        created_by: Set(model.created_by),
+        student_allocation: Set(
+            patch
+                .student_allocation
+                .unwrap_or(model.student_allocation),
+        ),
         proximity_percentage: Set(pcts[0]),
         staff_percentage: Set(pcts[1]),
         sibling_percentage: Set(pcts[2]),
@@ -132,7 +208,7 @@ pub async fn update_batch(
         catholicism_percentage: Set(religion_pcts[1]),
         islam_percentage: Set(religion_pcts[2]),
         hinduism_percentage: Set(religion_pcts[3]),
-        waiting_list_size: Set(existing.waiting_list_size),
+        waiting_list_size: Set(model.waiting_list_size),
     };
 
     let saved = active.update(db.as_ref()).await?;

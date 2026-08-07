@@ -2,9 +2,13 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { IconFileText, IconPhoto } from "@tabler/icons-react"
+import { IconFileText, IconPhoto, IconCalendar, IconMapPin, IconUsers, IconSchool } from "@tabler/icons-react"
+import { useQuery } from "@tanstack/react-query"
+import { apiClient } from "@/lib/api-client"
+import { listSchoolsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { ChildFormData } from "./wizard-step-child"
 import type { DocumentFormData } from "./wizard-step-documents"
+import type { ElectoralEntry } from "./wizard-step-electoral"
 import { GuardianSelector } from "./guardian-selector"
 import { AddressSelector } from "./address-selector"
 import { SiblingSelector } from "./sibling-selector"
@@ -68,13 +72,74 @@ function ChildSummary({ data }: ChildSummaryProps) {
           <span className="text-muted-foreground">Medium</span>
           <span className="text-foreground">{data.medium_of_instruction}</span>
         </div>
-        {data.category && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Category</span>
-            <span className="text-foreground">{data.category}</span>
-          </div>
-        )}
       </div>
+    </div>
+  )
+}
+
+interface ElectoralSummaryProps {
+  entries: ElectoralEntry[]
+}
+
+function ElectoralSummary({ entries }: ElectoralSummaryProps) {
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <h4 className="text-sm font-medium text-muted-foreground">
+          Electoral Entries ({entries.length})
+        </h4>
+        <p className="text-xs text-muted-foreground">
+          Summary of entered electoral register data.
+        </p>
+      </div>
+      {entries.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <IconCalendar className="mb-2 size-8 text-muted-foreground/40" />
+          <p className="text-xs text-muted-foreground">No entries yet</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {entries.map((entry) => (
+            <div
+              key={entry.id}
+              className="rounded-lg border p-3 space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <Badge variant="outline" className="text-xs">
+                  {entry.electoral_year || "—"}
+                </Badge>
+                {entry.voter_names.length > 0 && (
+                  <Badge variant="secondary" className="h-4 px-1.5 text-[10px] gap-0.5">
+                    <IconUsers className="size-2.5" />
+                    {entry.voter_names.length}
+                  </Badge>
+                )}
+              </div>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                {entry.polling_district && (
+                  <div className="flex items-center gap-1.5">
+                    <IconMapPin className="size-3 shrink-0" />
+                    <span>{entry.polling_district}</span>
+                    {entry.polling_division && <span>/ {entry.polling_division}</span>}
+                  </div>
+                )}
+                {entry.gn_name && (
+                  <div className="flex items-center gap-1.5">
+                    <IconMapPin className="size-3 shrink-0" />
+                    <span>{entry.gn_name}-{entry.gn_number}</span>
+                  </div>
+                )}
+                {entry.village_street && (
+                  <p className="truncate">{entry.village_street}</p>
+                )}
+                {entry.household_head_name && (
+                  <p className="truncate">Head: {entry.household_head_name}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -251,17 +316,75 @@ function DocumentsPreview({ documents }: DocumentsPreviewProps) {
   )
 }
 
+interface SchoolPreferencesSummaryProps {
+  preferredSchoolIds: string[]
+  closerSchoolExists: boolean
+}
+
+function SchoolPreferencesSummary({ preferredSchoolIds, closerSchoolExists }: SchoolPreferencesSummaryProps) {
+  const { data: allSchools = [] } = useQuery(listSchoolsOptions({ client: apiClient }))
+  const selectedSchools = preferredSchoolIds
+    .map((id) => allSchools.find((s) => s.id === id))
+    .filter(Boolean)
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <h4 className="text-sm font-medium text-muted-foreground">Selected Schools</h4>
+        <p className="text-xs text-muted-foreground">
+          {preferredSchoolIds.length} of 6 maximum
+        </p>
+      </div>
+      {selectedSchools.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <IconSchool className="mb-2 size-8 text-muted-foreground/40" />
+          <p className="text-xs text-muted-foreground">No schools selected yet</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {selectedSchools.map((school, index) => (
+            <div
+              key={school!.id}
+              className="flex items-center gap-2 rounded-md border bg-muted/30 px-2.5 py-2"
+            >
+              <Badge variant="secondary" className="size-5 shrink-0 justify-center rounded-full text-[10px]">
+                {index + 1}
+              </Badge>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-medium">{school!.name_si}</p>
+                {school!.name_en && (
+                  <p className="truncate text-[10px] text-muted-foreground">{school!.name_en}</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {closerSchoolExists && (
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-2 dark:border-amber-800 dark:bg-amber-950">
+          <p className="text-xs text-amber-700 dark:text-amber-300">
+            Closer school exists: Yes
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface SidebarProps {
   currentStep: number
   childData: ChildFormData
   enrollmentId: string
   schoolId: string
+  electoralEntries?: ElectoralEntry[]
   selectedGuardianIds?: string[]
   onGuardianSelect?: (id: string) => void
   onGuardianDeselect?: (id: string) => void
   selectedAddressIds?: string[]
   onAddressSelect?: (id: string) => void
   onAddressDeselect?: (id: string) => void
+  preferredSchoolIds?: string[]
+  closerSchoolExists?: boolean
   selectedSiblingIds?: string[]
   onSiblingSelect?: (id: string) => void
   onSiblingDeselect?: (id: string) => void
@@ -273,18 +396,21 @@ export function WizardSidebar({
   childData,
   enrollmentId,
   schoolId,
+  electoralEntries,
   selectedGuardianIds,
   onGuardianSelect,
   onGuardianDeselect,
   selectedAddressIds,
   onAddressSelect,
   onAddressDeselect,
+  preferredSchoolIds,
+  closerSchoolExists,
   selectedSiblingIds,
   onSiblingSelect,
   onSiblingDeselect,
   documents,
 }: SidebarProps) {
-  if (currentStep === 6) return null
+  if (currentStep === 8) return null
 
   return (
     <div className="w-80 shrink-0 space-y-6 border-r pr-4">
@@ -300,7 +426,10 @@ export function WizardSidebar({
             enrollmentId={enrollmentId}
           />
         )}
-      {currentStep === 3 &&
+      {currentStep === 3 && electoralEntries && (
+        <ElectoralSummary entries={electoralEntries} />
+      )}
+      {currentStep === 4 &&
         selectedAddressIds &&
         onAddressSelect &&
         onAddressDeselect && (
@@ -310,7 +439,13 @@ export function WizardSidebar({
             onDeselect={onAddressDeselect}
           />
         )}
-      {currentStep === 4 &&
+      {currentStep === 5 && preferredSchoolIds && (
+        <SchoolPreferencesSummary
+          preferredSchoolIds={preferredSchoolIds}
+          closerSchoolExists={closerSchoolExists ?? false}
+        />
+      )}
+      {currentStep === 6 &&
         selectedSiblingIds &&
         onSiblingSelect &&
         onSiblingDeselect && (
@@ -322,7 +457,7 @@ export function WizardSidebar({
             onDeselect={onSiblingDeselect}
           />
         )}
-      {currentStep === 5 && documents && (
+      {currentStep === 7 && documents && (
         <DocumentsPreview documents={documents} />
       )}
     </div>

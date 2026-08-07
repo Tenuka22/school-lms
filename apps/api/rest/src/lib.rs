@@ -8,7 +8,9 @@ mod districts;
 mod enrollment_batches;
 pub mod error;
 mod g1_applications;
+mod gn_divisions;
 mod guardians;
+mod polling_divisions;
 mod staff_details;
 mod past_pupil_details;
 mod schools;
@@ -35,7 +37,9 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .configure(districts::routes)
             .configure(g1_applications::routes)
             .configure(enrollment_batches::routes)
-            .configure(guardians::routes)
+.configure(gn_divisions::routes)
+.configure(polling_divisions::routes)
+.configure(guardians::routes)
             .configure(addresses::routes)
             .configure(past_pupil_details::routes)
             .configure(schools::routes)

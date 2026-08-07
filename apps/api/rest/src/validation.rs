@@ -277,8 +277,8 @@ impl Percentage {
 
 impl WizardStep {
     pub fn new(value: i16) -> Result<Self, ApiError> {
-        if !(1..=6).contains(&value) {
-            return Err(ApiError::BadRequest("wizard step must be between 1 and 6".into()));
+        if !(1..=7).contains(&value) {
+            return Err(ApiError::BadRequest("wizard step must be between 1 and 7".into()));
         }
         Ok(Self(value))
     }

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { FormBuilder } from "@/lib/form-builder"
 import type { FormConfig } from "@/lib/form-builder"
-import type { Child, Gender, MediumOfInstruction, Nationality } from "@/lib/api-client/types.gen"
+import type { Child, Gender, MediumOfInstruction, Nationality, Religion } from "@/lib/api-client/types.gen"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
@@ -19,6 +19,7 @@ type ChildFormValues = {
   date_of_birth: string
   gender: Gender | ""
   nationality: Nationality | ""
+  religion: Religion | ""
   birth_certificate_number: string
   nic: string
   passport_number: string
@@ -29,12 +30,13 @@ const defaultValues: ChildFormValues = {
   full_name: "",
   name_with_initials: "",
   date_of_birth: "",
-  gender: "",
-  nationality: "",
+  gender: "Male",
+  nationality: "SriLankan",
+  religion: "Buddhism",
   birth_certificate_number: "",
   nic: "",
   passport_number: "",
-  medium_of_instruction: "",
+  medium_of_instruction: "Sinhala",
 }
 
 const formConfig: FormConfig<ChildFormValues> = {
@@ -43,7 +45,7 @@ const formConfig: FormConfig<ChildFormValues> = {
     { name: "name_with_initials", kind: "text", label: "Name with Initials", placeholder: "e.g. J. M. Perera" },
     { name: "date_of_birth", kind: "date", label: "Date of Birth" },
     {
-      name: "gender", kind: "select", label: "Gender",
+      name: "gender", kind: "select", label: "Gender", required: true,
       options: [
         { value: "Male", label: "Male" },
         { value: "Female", label: "Female" },
@@ -51,7 +53,7 @@ const formConfig: FormConfig<ChildFormValues> = {
       inputProps: { placeholder: "Select gender" },
     },
     {
-      name: "nationality", kind: "select", label: "Nationality",
+      name: "nationality", kind: "select", label: "Nationality", required: true,
       options: [
         { value: "SriLankan", label: "Sri Lankan" },
         { value: "DualCitizen", label: "Dual Citizen" },
@@ -59,11 +61,23 @@ const formConfig: FormConfig<ChildFormValues> = {
       ],
       inputProps: { placeholder: "Select nationality" },
     },
-    { name: "birth_certificate_number", kind: "text", label: "Birth Certificate Number", placeholder: "Optional" },
+    {
+      name: "religion", kind: "select", label: "Religion", required: true,
+      options: [
+        { value: "Buddhism", label: "Buddhism" },
+        { value: "Hinduism", label: "Hinduism" },
+        { value: "Islam", label: "Islam" },
+        { value: "Christianity", label: "Christianity" },
+        { value: "Catholicism", label: "Catholicism" },
+        { value: "Other", label: "Other" },
+      ],
+      inputProps: { placeholder: "Select religion" },
+    },
+    { name: "birth_certificate_number", kind: "text", label: "Birth Certificate Number", required: true, placeholder: "Enter birth certificate number" },
     { name: "nic", kind: "text", label: "NIC Number", placeholder: "Optional (for older children)" },
     { name: "passport_number", kind: "text", label: "Passport Number", placeholder: "Optional (for overseas arrivals)" },
     {
-      name: "medium_of_instruction", kind: "select", label: "Medium of Instruction",
+      name: "medium_of_instruction", kind: "select", label: "Medium of Instruction", required: true,
       options: [
         { value: "Sinhala", label: "Sinhala" },
         { value: "Tamil", label: "Tamil" },
@@ -75,7 +89,7 @@ const formConfig: FormConfig<ChildFormValues> = {
     { columns: [{ fields: ["full_name"] }] },
     { columns: [{ fields: ["name_with_initials"] }] },
     { columns: [{ fields: ["date_of_birth"] }] },
-    { columns: [{ fields: ["gender"], span: 6 }, { fields: ["nationality"], span: 6 }] },
+    { columns: [{ fields: ["gender"], span: 4 }, { fields: ["nationality"], span: 4 }, { fields: ["religion"], span: 4 }] },
     { columns: [{ fields: ["birth_certificate_number"] }] },
     { columns: [{ fields: ["nic"] }] },
     { columns: [{ fields: ["passport_number"] }] },
@@ -101,6 +115,7 @@ export function CreateChildForm({
         date_of_birth: child.date_of_birth ?? "",
         gender: (child.gender ?? "") as Gender | "",
         nationality: (child.nationality ?? "") as Nationality | "",
+        religion: (child.religion ?? "") as Religion | "",
         birth_certificate_number: child.birth_certificate_number ?? "",
         nic: child.nic ?? "",
         passport_number: child.passport_number ?? "",
@@ -118,6 +133,7 @@ export function CreateChildForm({
                 date_of_birth: values.date_of_birth || null,
                 gender: (values.gender || null) as Gender | null,
                 nationality: (values.nationality || null) as Nationality | null,
+                religion: (values.religion || null) as Religion | null,
                 birth_certificate_number: values.birth_certificate_number || null,
                 nic: values.nic || null,
                 passport_number: values.passport_number || null,
@@ -139,7 +155,8 @@ export function CreateChildForm({
                 date_of_birth: values.date_of_birth,
                 gender: values.gender as Gender,
                 nationality: values.nationality as Nationality,
-                birth_certificate_number: values.birth_certificate_number || null,
+                religion: values.religion as Religion,
+                birth_certificate_number: values.birth_certificate_number,
                 nic: values.nic || null,
                 passport_number: values.passport_number || null,
                 medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,

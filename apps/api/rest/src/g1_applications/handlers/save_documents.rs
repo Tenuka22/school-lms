@@ -1,11 +1,11 @@
 use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
-use chrono::Utc;
-use db::entity::common::enums::{DocumentVerificationStatus, G1DocumentType};
+use db::domain::document::{Document, Uploaded};
+use db::entity::common::enums::G1DocumentType;
 use db::entity::g1::{applications, documents};
 use schemars::JsonSchema;
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -37,6 +37,7 @@ fn parse_doc_type(s: &str) -> Option<G1DocumentType> {
         "BirthCertificate" => Some(G1DocumentType::BirthCertificate),
         "GuardianNIC" => Some(G1DocumentType::GuardianNIC),
         "ResidenceProof" => Some(G1DocumentType::ResidenceProof),
+        "ElectoralProof" => Some(G1DocumentType::ElectoralProof),
         "SiblingSchoolCertificate" => Some(G1DocumentType::SiblingSchoolCertificate),
         "StaffAppointmentLetter" => Some(G1DocumentType::StaffAppointmentLetter),
         "StaffServiceCertificate" => Some(G1DocumentType::StaffServiceCertificate),
@@ -64,21 +65,18 @@ pub async fn save_application_documents(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let app_id = id.into_inner();
-    let _user_id = auth.user_id;
 
     applications::Entity::find_by_id(app_id)
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("Application not found".into()))?;
 
-    // Delete existing documents for this application
     documents::Entity::delete_many()
         .filter(documents::Column::ApplicationId.eq(app_id))
         .exec(db.as_ref())
         .await?;
 
     let mut count = 0;
-    let now = Utc::now();
 
     for entry in &body.documents {
         let doc_type = match parse_doc_type(&entry.doc_type) {
@@ -103,26 +101,14 @@ pub async fn save_application_documents(
             })
             .transpose()?;
 
-        documents::ActiveModel {
-            id: Set(Uuid::new_v4()),
-            application_id: Set(app_id),
-            document_type: Set(doc_type),
-            file_url: Set(validated_file_url),
-            file_key: Set(validated_file_key),
-            file_hash: Set(None),
-            file_size: Set(entry.file_size),
-            content_type: Set(validated_content_type),
-            uploaded_at: Set(now),
-            verification_status: Set(DocumentVerificationStatus::Pending),
-            verified_by: Set(None),
-            verified_at: Set(None),
-            rejection_reason: Set(None),
-            fraud_flag: Set(false),
-            created_at: Set(now),
-            updated_at: Set(now),
-        }
-        .insert(db.as_ref())
-        .await?;
+        let doc = Document::<Uploaded>::new(app_id, doc_type, validated_file_url, validated_file_key);
+
+        let mut model = doc.into_inner();
+        model.file_size = entry.file_size;
+        model.content_type = validated_content_type;
+
+        let active: documents::ActiveModel = model.into();
+        active.insert(db.as_ref()).await?;
         count += 1;
     }
 

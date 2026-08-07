@@ -29,10 +29,11 @@ import {
 } from "@/components/ui/combobox"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { toastApiError } from "@/lib/api-error"
+import { toastApiError, getApiErrorMessage } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import {
   createGuardianMutation,
+  updateGuardianMutation,
   getApplicationGuardiansQueryKey,
   listGuardiansQueryKey,
 } from "@/lib/api-client/@tanstack/react-query.gen"
@@ -79,12 +80,25 @@ const defaultValues: FormData = {
   past_pupil_school_id: null,
 }
 
-export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId?: string; onCreated: () => void }) {
+export function CreateGuardianDialog({
+  enrollmentId,
+  onCreated,
+  onEditExisting,
+}: {
+  enrollmentId?: string
+  onCreated: () => void
+  onEditExisting?: (guardian: any) => void
+}) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(1)
+  const [createdGuardian, setCreatedGuardian] = useState<any>(null)
 
   const createGuardian = useMutation(
     createGuardianMutation({ client: apiClient })
+  )
+
+  const updateGuardian = useMutation(
+    updateGuardianMutation({ client: apiClient })
   )
 
   const formConfig: FormConfig<FormData> = {
@@ -306,7 +320,85 @@ export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId
     onCancel: () => {
       setOpen(false)
       setStep(1)
+      setCreatedGuardian(null)
     },
+  }
+
+  const handleSubmit = async (data: FormData) => {
+    const v = data as any
+    try {
+      if (step === 1) {
+        const result = await createGuardian.mutateAsync({ body: v })
+        setCreatedGuardian(result)
+        setStep(2)
+        toast.success(`${v.full_name} created`)
+      } else {
+        if (!createdGuardian) return
+        await updateGuardian.mutateAsync({
+          path: { id: createdGuardian.id },
+          body: {
+            relationship_type: v.relationship_type,
+            full_name: v.full_name,
+            nic_number: v.nic_number,
+            contact_phone: v.contact_phone,
+            contact_email: v.contact_email ?? null,
+            occupation: v.occupation ?? null,
+            workplace_name: v.workplace_name ?? null,
+            workplace_address: v.workplace_address ?? null,
+            is_govt_employee: v.is_govt_employee,
+            govt_service_years: v.govt_service_years,
+            is_school_staff: v.is_school_staff,
+            staff_type: v.staff_type,
+            employee_id: v.employee_id,
+            staff_school_id: v.staff_school_id,
+            is_past_pupil: v.is_past_pupil,
+            income_level: v.income_level,
+            past_pupil_student_id: v.past_pupil_student_id,
+            past_pupil_highest_grade: v.past_pupil_highest_grade,
+            past_pupil_year_left: v.past_pupil_year_left,
+            past_pupil_left_reason: v.past_pupil_left_reason,
+            past_pupil_school_id: v.past_pupil_school_id,
+          },
+        })
+        queryClient.invalidateQueries({
+          queryKey: listGuardiansQueryKey({ client: apiClient }),
+        })
+        if (enrollmentId) {
+          queryClient.invalidateQueries({
+            queryKey: getApplicationGuardiansQueryKey({
+              path: { id: enrollmentId },
+              client: apiClient,
+            }),
+          })
+        }
+        toast.success(`${v.full_name} updated`)
+        setOpen(false)
+        setStep(1)
+        setCreatedGuardian(null)
+        onCreated()
+      }
+    } catch (err) {
+      if (step === 1) {
+        const msg = getApiErrorMessage(err) ?? ""
+        const idMatch = msg.match(/already exists \(id: ([^)]+)\)/)
+        if (idMatch && onEditExisting) {
+          const existingId = idMatch[1]
+          const guardians = queryClient.getQueryData(
+            listGuardiansQueryKey({ client: apiClient })
+          ) as any[] | undefined
+          const existing = guardians?.find((g: any) => g.id === existingId)
+          if (existing) {
+            toast.info(`Guardian with this NIC already exists. Opening edit form.`)
+            setOpen(false)
+            setStep(1)
+            setCreatedGuardian(null)
+            onEditExisting(existing)
+            return
+          }
+        }
+      }
+      toastApiError(err, step === 1 ? "Failed to create guardian" : "Failed to update guardian")
+    }
   }
 
   return (
@@ -314,7 +406,10 @@ export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId
       open={open}
       onOpenChange={(v) => {
         setOpen(v)
-        if (!v) setStep(1)
+        if (!v) {
+          setStep(1)
+          setCreatedGuardian(null)
+        }
       }}
     >
       <DialogTrigger
@@ -325,7 +420,7 @@ export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? "Guardian Details" : "Enrollment Categories"}
@@ -335,31 +430,7 @@ export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId
           config={formConfig}
           defaultValues={defaultValues}
           valibotSchema={step === 2 ? vCreateGuardianBody : undefined}
-          onSubmit={async (data) => {
-            const v = data as any
-            try {
-              await createGuardian.mutateAsync({
-                body: v,
-              })
-              queryClient.invalidateQueries({
-                queryKey: listGuardiansQueryKey({ client: apiClient }),
-              })
-              if (enrollmentId) {
-                queryClient.invalidateQueries({
-                  queryKey: getApplicationGuardiansQueryKey({
-                    path: { id: enrollmentId },
-                    client: apiClient,
-                  }),
-                })
-              }
-              toast.success(`${v.full_name} created`)
-              setOpen(false)
-              setStep(1)
-              onCreated()
-            } catch (err) {
-              toastApiError(err, "Failed to create guardian")
-            }
-          }}
+          onSubmit={handleSubmit}
           formId="create-guardian-form"
           currentStep={step}
           hideDefaultButtons
@@ -376,14 +447,12 @@ export function CreateGuardianDialog({ enrollmentId, onCreated }: { enrollmentId
               <Button type="button" variant="outline" onClick={() => {
                 setOpen(false)
                 setStep(1)
+                setCreatedGuardian(null)
               }}>
                 Cancel
               </Button>
               {step === 1 ? (
-                <Button
-                  type="button"
-                  onClick={() => setStep(2)}
-                >
+                <Button type="submit" form="create-guardian-form">
                   Next &rarr;
                 </Button>
               ) : (

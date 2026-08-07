@@ -36,17 +36,17 @@ const ENUM_STYLES: Record<string, Record<string, string>> = {
   },
   enrollment_status: {
     Draft:
-      "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700",
+      "bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600",
     Pending:
-      "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
+      "bg-amber-50 text-amber-900 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700",
     ProvisionallyApproved:
-      "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
+      "bg-blue-50 text-blue-900 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700",
     Approved:
-      "bg-green-100 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
+      "bg-green-50 text-green-900 border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
     Rejected:
-      "bg-red-100 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
+      "bg-red-50 text-red-900 border-red-300 dark:bg-red-900 dark:text-red-200 dark:border-red-700",
     Withdrawn:
-      "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700",
+      "bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600",
     Removed:
       "bg-red-100 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
   },
@@ -77,11 +77,11 @@ const ENUM_STYLES: Record<string, Record<string, string>> = {
       "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700",
   },
   batch_status: {
-    Open: "bg-green-100 text-green-800 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
+    Open: "bg-green-50 text-green-900 border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
     Closed:
-      "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700",
+      "bg-slate-50 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600",
     Archived:
-      "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
+      "bg-amber-50 text-amber-900 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700",
   },
   religion: {
     Buddhism:

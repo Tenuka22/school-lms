@@ -112,7 +112,11 @@ export function GuardianSelector({ selectedIds, onSelect, onDeselect, enrollment
         />
       </div>
 
-      <CreateGuardianDialog enrollmentId={enrollmentId} onCreated={handleCreated} />
+      <CreateGuardianDialog
+        enrollmentId={enrollmentId}
+        onCreated={handleCreated}
+        onEditExisting={(g) => setEditTarget(g)}
+      />
 
       <ScrollArea className="h-[360px] pr-2">
         <div className="space-y-1">

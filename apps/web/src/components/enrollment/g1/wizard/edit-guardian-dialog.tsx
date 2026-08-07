@@ -65,7 +65,6 @@ export function EditGuardianDialog({
   onSaved: () => void
   enrollmentId?: string
 }) {
-  const [editing, setEditing] = useState(false)
   const [step, setStep] = useState(1)
 
   const updateGuardian = useMutation(
@@ -97,6 +96,30 @@ export function EditGuardianDialog({
     past_pupil_left_reason: null as string | null,
     past_pupil_school_id: null as string | null,
   }
+
+  const buildUpdateBody = (v: any, includeCategories: boolean) => ({
+    relationship_type: v.relationship_type,
+    full_name: v.full_name,
+    nic_number: v.nic_number,
+    contact_phone: v.contact_phone ?? "0",
+    contact_email: v.contact_email ?? null,
+    occupation: v.occupation ?? null,
+    workplace_name: v.workplace_name ?? null,
+    workplace_address: v.workplace_address ?? null,
+    is_govt_employee: includeCategories ? v.is_govt_employee : guardian.is_govt_employee,
+    govt_service_years: includeCategories ? v.govt_service_years : guardian.govt_service_years,
+    is_school_staff: includeCategories ? v.is_school_staff : guardian.is_school_staff,
+    staff_type: includeCategories ? v.staff_type : null,
+    employee_id: includeCategories ? v.employee_id : null,
+    staff_school_id: includeCategories ? v.staff_school_id : null,
+    is_past_pupil: includeCategories ? v.is_past_pupil : guardian.is_past_pupil,
+    income_level: includeCategories ? v.income_level : guardian.income_level,
+    past_pupil_student_id: includeCategories ? v.past_pupil_student_id : null,
+    past_pupil_highest_grade: includeCategories ? v.past_pupil_highest_grade : null,
+    past_pupil_year_left: includeCategories ? v.past_pupil_year_left : null,
+    past_pupil_left_reason: includeCategories ? v.past_pupil_left_reason : null,
+    past_pupil_school_id: includeCategories ? v.past_pupil_school_id : null,
+  })
 
   const formConfig: FormConfig = {
     fields: [
@@ -320,6 +343,42 @@ export function EditGuardianDialog({
     },
   }
 
+  const handleSubmit = async (data: FormData) => {
+    const v = data as any
+    try {
+      if (step === 1) {
+        await updateGuardian.mutateAsync({
+          path: { id: guardian.id },
+          body: buildUpdateBody(v, false),
+        })
+        setStep(2)
+        toast.success("Guardian details saved")
+      } else {
+        await updateGuardian.mutateAsync({
+          path: { id: guardian.id },
+          body: buildUpdateBody(v, true),
+        })
+        queryClient.invalidateQueries({
+          queryKey: listGuardiansQueryKey({ client: apiClient }),
+        })
+        if (enrollmentId) {
+          queryClient.invalidateQueries({
+            queryKey: getApplicationGuardiansQueryKey({
+              path: { id: enrollmentId },
+              client: apiClient,
+            }),
+          })
+        }
+        toast.success(`${v.full_name} updated`)
+        onOpenChange(false)
+        setStep(1)
+        onSaved()
+      }
+    } catch (err) {
+      toastApiError(err, step === 1 ? "Failed to save guardian details" : "Failed to update guardian")
+    }
+  }
+
   return (
     <Dialog
       open={open}
@@ -328,7 +387,7 @@ export function EditGuardianDialog({
         if (!v) setStep(1)
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? "Edit Guardian" : "Enrollment Categories"}
@@ -338,68 +397,11 @@ export function EditGuardianDialog({
           config={formConfig}
           defaultValues={defaultValues}
           valibotSchema={vCreateGuardianBody as any}
-          onSubmit={async (data) => {
-            const v = data as any
-            try {
-              setEditing(true)
-              const {
-                id: _gi,
-                created_at: _gc,
-                past_pupil_verified: _gp,
-                ...guardianBase
-              } = guardian
-              await updateGuardian.mutateAsync({
-                path: { id: guardian.id },
-                body: {
-                  ...guardianBase,
-                  full_name: v.full_name,
-                  nic_number: v.nic_number,
-                  contact_phone: v.contact_phone ?? "0",
-                  contact_email: v.contact_email ?? null,
-                  occupation: v.occupation ?? null,
-                  workplace_name: v.workplace_name ?? null,
-                  workplace_address: v.workplace_address ?? null,
-                  relationship_type: v.relationship_type,
-                  is_school_staff: v.is_school_staff,
-                  staff_type: v.staff_type,
-                  employee_id: v.employee_id,
-                  staff_school_id: v.staff_school_id,
-                  is_past_pupil: v.is_past_pupil,
-                  is_govt_employee: v.is_govt_employee,
-                  income_level: v.income_level,
-                  govt_service_years: v.govt_service_years,
-                  past_pupil_student_id: v.past_pupil_student_id,
-                  past_pupil_highest_grade: v.past_pupil_highest_grade,
-                  past_pupil_year_left: v.past_pupil_year_left,
-                  past_pupil_left_reason: v.past_pupil_left_reason,
-                  past_pupil_school_id: v.past_pupil_school_id,
-                },
-              })
-              queryClient.invalidateQueries({
-                queryKey: listGuardiansQueryKey({ client: apiClient }),
-              })
-              if (enrollmentId) {
-                queryClient.invalidateQueries({
-                  queryKey: getApplicationGuardiansQueryKey({
-                    path: { id: enrollmentId },
-                    client: apiClient,
-                  }),
-                })
-              }
-              toast.success(`${v.full_name} updated`)
-              onOpenChange(false)
-              setStep(1)
-              onSaved()
-            } catch (err) {
-              toastApiError(err, "Failed to update guardian")
-            } finally {
-              setEditing(false)
-            }
-          }}
+          onSubmit={handleSubmit}
           formId="edit-guardian-form"
           currentStep={step}
           hideDefaultButtons
-          submitting={editing}
+          submitting={updateGuardian.isPending}
         >
           <div className="flex justify-between gap-2 border-t pt-4">
             <div>
@@ -425,15 +427,12 @@ export function EditGuardianDialog({
                 Cancel
               </Button>
               {step === 1 ? (
-                <Button
-                  type="button"
-                  onClick={() => setStep(2)}
-                >
+                <Button type="submit" form="edit-guardian-form">
                   Next <IconChevronRight className="ml-1 size-4" />
                 </Button>
               ) : (
-                <Button type="submit" form="edit-guardian-form" disabled={editing}>
-                  {editing ? "Saving..." : "Save Guardian"}
+                <Button type="submit" form="edit-guardian-form" disabled={updateGuardian.isPending}>
+                  {updateGuardian.isPending ? "Saving..." : "Save Guardian"}
                 </Button>
               )}
             </div>

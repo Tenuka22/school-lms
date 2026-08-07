@@ -337,6 +337,8 @@ export type DocumentEntry = {
     file_url: string;
 };
 
+export type ElectoralDistrict = 'Colombo' | 'Gampaha' | 'Kalutara' | 'Kandy' | 'Matale' | 'NuwaraEliya' | 'Galle' | 'Matara' | 'Hambantota' | 'Jaffna' | 'Vanni' | 'Batticaloa' | 'Ampara' | 'Trincomalee' | 'Kurunegala' | 'Puttalam' | 'Anuradhapura' | 'Polonnaruwa' | 'Badulla' | 'Monaragala' | 'Ratnapura' | 'Kegalle';
+
 /**
  * EnrollmentBatch
  */
@@ -397,6 +399,7 @@ export type G1Application = {
     category?: G1Category | null;
     category_verified: boolean;
     child_id?: string;
+    closer_school_exists?: boolean | null;
     created_at?: string;
     created_by?: string | null;
     declaration_agreed: boolean;
@@ -405,7 +408,8 @@ export type G1Application = {
     electoral_year?: number | null;
     enrollment_status?: EnrollmentStatus;
     finalized_at?: string | null;
-    gn_division?: string | null;
+    gn_name?: string | null;
+    gn_number?: string | null;
     guardian_id?: string;
     household_head_name?: string | null;
     id?: string;
@@ -415,7 +419,8 @@ export type G1Application = {
     list_category?: ApplicationListCategory | null;
     overseas_arrival_date?: string | null;
     polling_area?: string | null;
-    polling_district?: string | null;
+    polling_district?: ElectoralDistrict | null;
+    polling_division?: string | null;
     preferred_school_ids?: unknown;
     promoted_at?: string | null;
     rank_number?: number | null;
@@ -431,6 +436,7 @@ export type G1Application = {
     user_agent?: string | null;
     verified_at?: string | null;
     verified_by?: string | null;
+    village_street?: string | null;
     voter_names?: unknown;
     waiting_position?: number | null;
     wizard_step?: number | null;
@@ -466,6 +472,22 @@ export type GetApplicationSiblingsResponse = {
  */
 export type GetDocumentsResponse = {
     documents: Array<DocumentEntry>;
+};
+
+/**
+ * GnDivisionEntry
+ */
+export type GnDivisionEntry = {
+    id: string;
+    lat: number;
+    lon: number;
+    name_en: string;
+    name_local: string;
+    parent_id: string;
+    parent_name_en: string;
+    parent_name_local: string;
+    postal_code: string;
+    slug: string;
 };
 
 /**
@@ -535,6 +557,16 @@ export type Nationality = 'SriLankan' | 'DualCitizen' | 'Other';
 export type PaginatedApplicationsResponse = {
     items: Array<ApplicationWithChild>;
     total: number;
+};
+
+/**
+ * PollingDivisionEntry
+ */
+export type PollingDivisionEntry = {
+    district: string;
+    label: string;
+    si: string;
+    value: string;
 };
 
 /**
@@ -750,14 +782,26 @@ export type UpdateApplicationBody = {
     category?: G1Category | null;
     category_verified?: boolean | null;
     child_id?: string | null;
+    closer_school_exists?: boolean | null;
+    declaration_agreed?: boolean | null;
+    electoral_year?: number | null;
+    gn_name?: string | null;
+    gn_number?: string | null;
     guardian_id?: string | null;
+    household_head_name?: string | null;
     interview_completed?: boolean | null;
     interview_date?: string | null;
     overseas_arrival_date?: string | null;
+    polling_area?: string | null;
+    polling_district?: ElectoralDistrict | null;
+    polling_division?: string | null;
+    preferred_school_ids?: unknown;
     rejection_reason?: string | null;
     residence_verified?: boolean | null;
     school_id?: string | null;
     submission_method?: string | null;
+    village_street?: string | null;
+    voter_names?: unknown;
     wizard_step?: number | null;
 };
 
@@ -1473,6 +1517,7 @@ export type CreateApplicationResponses = {
         category?: G1Category | null;
         category_verified: boolean;
         child_id?: string;
+        closer_school_exists?: boolean | null;
         created_at?: string;
         created_by?: string | null;
         declaration_agreed: boolean;
@@ -1481,7 +1526,8 @@ export type CreateApplicationResponses = {
         electoral_year?: number | null;
         enrollment_status?: EnrollmentStatus;
         finalized_at?: string | null;
-        gn_division?: string | null;
+        gn_name?: string | null;
+        gn_number?: string | null;
         guardian_id?: string;
         household_head_name?: string | null;
         id?: string;
@@ -1491,7 +1537,8 @@ export type CreateApplicationResponses = {
         list_category?: ApplicationListCategory | null;
         overseas_arrival_date?: string | null;
         polling_area?: string | null;
-        polling_district?: string | null;
+        polling_district?: ElectoralDistrict | null;
+        polling_division?: string | null;
         preferred_school_ids?: unknown;
         promoted_at?: string | null;
         rank_number?: number | null;
@@ -1507,6 +1554,7 @@ export type CreateApplicationResponses = {
         user_agent?: string | null;
         verified_at?: string | null;
         verified_by?: string | null;
+        village_street?: string | null;
         voter_names?: unknown;
         waiting_position?: number | null;
         wizard_step?: number | null;
@@ -2432,6 +2480,32 @@ export type UpdateBatchResponses = {
 };
 
 export type UpdateBatchResponse = UpdateBatchResponses[keyof UpdateBatchResponses];
+
+export type ListGnDivisionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/gn-divisions';
+};
+
+export type ListGnDivisionsResponses = {
+    200: Array<GnDivisionEntry>;
+};
+
+export type ListGnDivisionsResponse = ListGnDivisionsResponses[keyof ListGnDivisionsResponses];
+
+export type ListPollingDivisionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/polling-divisions';
+};
+
+export type ListPollingDivisionsResponses = {
+    200: Array<PollingDivisionEntry>;
+};
+
+export type ListPollingDivisionsResponse = ListPollingDivisionsResponses[keyof ListPollingDivisionsResponses];
 
 export type ListGuardiansData = {
     body?: never;

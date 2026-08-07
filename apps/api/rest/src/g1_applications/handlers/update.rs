@@ -3,6 +3,7 @@ use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
+use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
 use db::entity::g1::applications;
 use log::info;
 use schemars::JsonSchema;
@@ -12,7 +13,6 @@ use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
-use db::entity::common::enums::AuditOperation;
 use db::rbac::Permission;
 
 #[derive(Deserialize, JsonSchema, ApiComponent)]
@@ -33,6 +33,19 @@ pub struct UpdateApplicationBody {
     pub residence_verified: Option<bool>,
     pub category_verified: Option<bool>,
     pub rejection_reason: Option<String>,
+    // Electoral fields
+    pub electoral_year: Option<i16>,
+    pub polling_district: Option<db::entity::common::enums::ElectoralDistrict>,
+    pub polling_division: Option<String>,
+    pub gn_name: Option<String>,
+    pub gn_number: Option<String>,
+    pub polling_area: Option<String>,
+    pub village_street: Option<String>,
+    pub voter_names: Option<serde_json::Value>,
+    pub household_head_name: Option<String>,
+    pub declaration_agreed: Option<bool>,
+    pub preferred_school_ids: Option<serde_json::Value>,
+    pub closer_school_exists: Option<bool>,
 }
 
 #[api_operation(tag = "g1-applications", operation_id = "update-application")]
@@ -55,6 +68,15 @@ pub async fn update_application(
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+
+    match existing.enrollment_status {
+        EnrollmentStatus::Draft | EnrollmentStatus::Pending => {}
+        _ => {
+            return Err(ApiError::BadRequest(
+                "cannot update application in current status".into(),
+            ));
+        }
+    }
 
     let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
         .one(db.as_ref())
@@ -83,51 +105,55 @@ pub async fn update_application(
     );
 
     let active = applications::ActiveModel {
-        id: Set(id),
+        id: Set(existing.id),
+        reference_no: Set(existing.reference_no),
         school_id: Set(m.school_id.or(existing.school_id)),
-        child_id: Set(m.child_id.unwrap_or(existing.child_id)),
-        guardian_id: Set(m.guardian_id.unwrap_or(existing.guardian_id)),
-        wizard_step: Set(m.wizard_step.or(existing.wizard_step)),
-        category: Set(m.category.or(existing.category)),
-        overseas_arrival_date: Set(m.overseas_arrival_date.or(existing.overseas_arrival_date)),
-        submission_method: Set(m.submission_method.or(existing.submission_method)),
-        interview_date: Set(m.interview_date.or(existing.interview_date)),
-        interview_completed: Set(m.interview_completed.unwrap_or(existing.interview_completed)),
-        alternative_age_certificate: Set(m.alternative_age_certificate.unwrap_or(existing.alternative_age_certificate)),
-        alternative_age_certificate_ref: Set(m.alternative_age_certificate_ref.or(existing.alternative_age_certificate_ref)),
-        birth_certificate_verified: Set(m.birth_certificate_verified.unwrap_or(existing.birth_certificate_verified)),
-        age_eligibility_verified: Set(m.age_eligibility_verified.unwrap_or(existing.age_eligibility_verified)),
-        residence_verified: Set(m.residence_verified.unwrap_or(existing.residence_verified)),
-        category_verified: Set(m.category_verified.unwrap_or(existing.category_verified)),
-        rejection_reason: Set(m.rejection_reason.or(existing.rejection_reason)),
-        updated_at: Set(Utc::now()),
-        updated_by: Set(auth.user_id),
-        reference_no: Set(existing.reference_no.clone()),
-        batch_id: Set(existing.batch_id),
         total_marks: Set(existing.total_marks),
         rank_number: Set(existing.rank_number),
         list_category: Set(existing.list_category),
-        enrollment_status: Set(existing.enrollment_status),
         waiting_position: Set(existing.waiting_position),
         promoted_at: Set(existing.promoted_at),
         submitted_at: Set(existing.submitted_at),
         verified_at: Set(existing.verified_at),
         verified_by: Set(existing.verified_by),
         finalized_at: Set(existing.finalized_at),
-        ip_address: Set(existing.ip_address.clone()),
-        user_agent: Set(existing.user_agent.clone()),
+        ip_address: Set(existing.ip_address),
+        user_agent: Set(existing.user_agent),
         created_at: Set(existing.created_at),
+        updated_at: Set(Utc::now()),
+        child_id: Set(m.child_id.unwrap_or(existing.child_id)),
+        guardian_id: Set(m.guardian_id.unwrap_or(existing.guardian_id)),
+        batch_id: Set(existing.batch_id),
+        enrollment_status: Set(existing.enrollment_status),
+        category: Set(m.category.or(existing.category)),
+        overseas_arrival_date: Set(m.overseas_arrival_date.or(existing.overseas_arrival_date)),
+        submission_method: Set(m.submission_method.or(existing.submission_method)),
+        interview_date: Set(m.interview_date.or(existing.interview_date)),
+        interview_completed: Set(m.interview_completed.unwrap_or(existing.interview_completed)),
+        birth_certificate_verified: Set(m.birth_certificate_verified.unwrap_or(existing.birth_certificate_verified)),
+        age_eligibility_verified: Set(m.age_eligibility_verified.unwrap_or(existing.age_eligibility_verified)),
+        residence_verified: Set(m.residence_verified.unwrap_or(existing.residence_verified)),
+        category_verified: Set(m.category_verified.unwrap_or(existing.category_verified)),
+        alternative_age_certificate: Set(m.alternative_age_certificate.unwrap_or(existing.alternative_age_certificate)),
+        alternative_age_certificate_ref: Set(m.alternative_age_certificate_ref.or(existing.alternative_age_certificate_ref)),
+        rejection_reason: Set(m.rejection_reason.or(existing.rejection_reason)),
         created_by: Set(existing.created_by),
-        preferred_school_ids: Set(existing.preferred_school_ids.clone()),
-        electoral_year: Set(existing.electoral_year),
-        polling_district: Set(existing.polling_district.clone()),
-        gn_division: Set(existing.gn_division.clone()),
-        polling_area: Set(existing.polling_area.clone()),
-        voter_names: Set(existing.voter_names.clone()),
-        household_head_name: Set(existing.household_head_name.clone()),
-        declaration_agreed: Set(existing.declaration_agreed),
-        declaration_signed_at: Set(existing.declaration_signed_at),
+        updated_by: Set(auth.user_id),
+        wizard_step: Set(m.wizard_step.or(existing.wizard_step)),
         deleted_at: Set(existing.deleted_at),
+        preferred_school_ids: Set(m.preferred_school_ids.or(existing.preferred_school_ids)),
+        electoral_year: Set(m.electoral_year.or(existing.electoral_year)),
+        polling_district: Set(m.polling_district.or(existing.polling_district)),
+        polling_division: Set(m.polling_division.or(existing.polling_division)),
+        gn_name: Set(m.gn_name.or(existing.gn_name)),
+        gn_number: Set(m.gn_number.or(existing.gn_number)),
+        polling_area: Set(m.polling_area.or(existing.polling_area)),
+        village_street: Set(m.village_street.or(existing.village_street)),
+        voter_names: Set(m.voter_names.or(existing.voter_names)),
+        household_head_name: Set(m.household_head_name.or(existing.household_head_name)),
+        declaration_agreed: Set(m.declaration_agreed.unwrap_or(existing.declaration_agreed)),
+        declaration_signed_at: Set(existing.declaration_signed_at),
+        closer_school_exists: Set(m.closer_school_exists.or(existing.closer_school_exists)),
     };
 
     let saved = active.update(db.as_ref()).await?;

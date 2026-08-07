@@ -15,7 +15,9 @@ fn default_now() -> DateTime<Utc> {
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
+    #[sea_orm(column_name = "address_line1")]
     pub address_line_1: String,
+    #[sea_orm(column_name = "address_line2")]
     pub address_line_2: Option<String>,
     pub city: String,
     pub district: String,

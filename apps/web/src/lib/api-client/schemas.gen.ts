@@ -24,7 +24,7 @@ export const AddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-08-04T13:50:07.156080600Z',
+            default: '2026-08-05T18:50:43.395454500Z',
             type: 'string',
             format: 'date-time'
         },
@@ -413,7 +413,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         blacklisted_at: {
-            default: '2026-08-04T13:50:07.133988200Z',
+            default: '2026-08-05T18:50:43.352669900Z',
             type: 'string',
             format: 'date-time'
         },
@@ -427,7 +427,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         expires_at: {
-            default: '2029-08-03T13:50:07.133991Z',
+            default: '2029-08-04T18:50:43.352679600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -436,7 +436,7 @@ export const BlacklistSchema = {
             format: 'uuid'
         },
         id: {
-            default: 'd3110a54-0824-4b4b-b74b-bca5e4cab25f',
+            default: '4c04fa14-b286-4c56-baa1-ec31d4600d5b',
             type: 'string',
             format: 'uuid'
         },
@@ -468,7 +468,7 @@ export const ChildSchema = {
             nullable: true
         },
         created_at: {
-            default: '2026-08-04T13:50:07.136753800Z',
+            default: '2026-08-05T18:50:43.361413700Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1172,6 +1172,34 @@ export const DocumentEntrySchema = {
     }
 } as const;
 
+export const ElectoralDistrictSchema = {
+    type: 'string',
+    enum: [
+        'Colombo',
+        'Gampaha',
+        'Kalutara',
+        'Kandy',
+        'Matale',
+        'NuwaraEliya',
+        'Galle',
+        'Matara',
+        'Hambantota',
+        'Jaffna',
+        'Vanni',
+        'Batticaloa',
+        'Ampara',
+        'Trincomalee',
+        'Kurunegala',
+        'Puttalam',
+        'Anuradhapura',
+        'Polonnaruwa',
+        'Badulla',
+        'Monaragala',
+        'Ratnapura',
+        'Kegalle'
+    ]
+} as const;
+
 export const EnrollmentBatchSchema = {
     title: 'EnrollmentBatch',
     type: 'object',
@@ -1212,12 +1240,12 @@ export const EnrollmentBatchSchema = {
             format: 'int16'
         },
         closed_at: {
-            default: '2027-08-04T13:50:07.151515200Z',
+            default: '2027-08-05T18:50:43.386985100Z',
             type: 'string',
             format: 'date-time'
         },
         created_at: {
-            default: '2026-08-04T13:50:07.151537500Z',
+            default: '2026-08-05T18:50:43.387020900Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1247,7 +1275,7 @@ export const EnrollmentBatchSchema = {
             format: 'int16'
         },
         id: {
-            default: 'f05c9833-8796-4a48-a570-24fbf5d7a6cb',
+            default: '73f4e8b5-ffbb-4545-913a-3e07d02515be',
             type: 'string',
             format: 'uuid'
         },
@@ -1263,7 +1291,7 @@ export const EnrollmentBatchSchema = {
             nullable: true
         },
         opened_at: {
-            default: '2026-08-04T13:50:07.151508300Z',
+            default: '2026-08-05T18:50:43.386966800Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1393,8 +1421,12 @@ export const G1ApplicationSchema = {
             type: 'string',
             format: 'uuid'
         },
+        closer_school_exists: {
+            type: 'boolean',
+            nullable: true
+        },
         created_at: {
-            default: '2026-08-04T13:50:07.143578600Z',
+            default: '2026-08-05T18:50:43.373725500Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1434,7 +1466,11 @@ export const G1ApplicationSchema = {
             format: 'date-time',
             nullable: true
         },
-        gn_division: {
+        gn_name: {
+            type: 'string',
+            nullable: true
+        },
+        gn_number: {
             type: 'string',
             nullable: true
         },
@@ -1448,7 +1484,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         id: {
-            default: 'e2066dd1-b7c1-4255-bb9f-88c9cb3580a4',
+            default: '1d59ea60-7b71-479e-ad48-78c90e598fc0',
             type: 'string',
             format: 'uuid'
         },
@@ -1482,6 +1518,14 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         polling_district: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/ElectoralDistrict'
+                }
+            ],
+            nullable: true
+        },
+        polling_division: {
             type: 'string',
             nullable: true
         },
@@ -1499,7 +1543,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         reference_no: {
-            default: 'DRAFT-658bab74-90d4-47c1-807e-da77453c7a8d',
+            default: 'DRAFT-ad3bc512-fb2b-408c-8a10-cea9a03c53c3',
             type: 'string'
         },
         rejection_reason: {
@@ -1530,7 +1574,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         updated_at: {
-            default: '2026-08-04T13:50:07.143588Z',
+            default: '2026-08-05T18:50:43.373732900Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1551,6 +1595,10 @@ export const G1ApplicationSchema = {
         verified_by: {
             type: 'string',
             format: 'uuid',
+            nullable: true
+        },
+        village_street: {
+            type: 'string',
             nullable: true
         },
         voter_names: {
@@ -1658,6 +1706,57 @@ export const GetDocumentsResponseSchema = {
     }
 } as const;
 
+export const GnDivisionEntrySchema = {
+    title: 'GnDivisionEntry',
+    type: 'object',
+    required: [
+        'id',
+        'lat',
+        'lon',
+        'name_en',
+        'name_local',
+        'parent_id',
+        'parent_name_en',
+        'parent_name_local',
+        'postal_code',
+        'slug'
+    ],
+    properties: {
+        id: {
+            type: 'string'
+        },
+        lat: {
+            type: 'number',
+            format: 'double'
+        },
+        lon: {
+            type: 'number',
+            format: 'double'
+        },
+        name_en: {
+            type: 'string'
+        },
+        name_local: {
+            type: 'string'
+        },
+        parent_id: {
+            type: 'string'
+        },
+        parent_name_en: {
+            type: 'string'
+        },
+        parent_name_local: {
+            type: 'string'
+        },
+        postal_code: {
+            type: 'string'
+        },
+        slug: {
+            type: 'string'
+        }
+    }
+} as const;
+
 export const GuardianSchema = {
     title: 'Guardian',
     type: 'object',
@@ -1687,7 +1786,7 @@ export const GuardianSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-08-04T13:50:07.154375200Z',
+            default: '2026-08-05T18:50:43.392888Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1809,7 +1908,7 @@ export const ModelSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-08-04T13:50:07.156944600Z',
+            default: '2026-08-05T18:50:43.397071400Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1878,6 +1977,31 @@ export const PaginatedApplicationsResponseSchema = {
         total: {
             type: 'integer',
             format: 'int32'
+        }
+    }
+} as const;
+
+export const PollingDivisionEntrySchema = {
+    title: 'PollingDivisionEntry',
+    type: 'object',
+    required: [
+        'district',
+        'label',
+        'si',
+        'value'
+    ],
+    properties: {
+        district: {
+            type: 'string'
+        },
+        label: {
+            type: 'string'
+        },
+        si: {
+            type: 'string'
+        },
+        value: {
+            type: 'string'
         }
     }
 } as const;
@@ -2211,7 +2335,7 @@ export const StaffDetailSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-08-04T13:50:07.158191600Z',
+            default: '2026-08-05T18:50:43.399474200Z',
             type: 'string',
             format: 'date-time'
         },
@@ -2499,9 +2623,34 @@ export const UpdateApplicationBodySchema = {
             format: 'uuid',
             nullable: true
         },
+        closer_school_exists: {
+            type: 'boolean',
+            nullable: true
+        },
+        declaration_agreed: {
+            type: 'boolean',
+            nullable: true
+        },
+        electoral_year: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        gn_name: {
+            type: 'string',
+            nullable: true
+        },
+        gn_number: {
+            type: 'string',
+            nullable: true
+        },
         guardian_id: {
             type: 'string',
             format: 'uuid',
+            nullable: true
+        },
+        household_head_name: {
+            type: 'string',
             nullable: true
         },
         interview_completed: {
@@ -2516,6 +2665,25 @@ export const UpdateApplicationBodySchema = {
         overseas_arrival_date: {
             type: 'string',
             format: 'date',
+            nullable: true
+        },
+        polling_area: {
+            type: 'string',
+            nullable: true
+        },
+        polling_district: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/ElectoralDistrict'
+                }
+            ],
+            nullable: true
+        },
+        polling_division: {
+            type: 'string',
+            nullable: true
+        },
+        preferred_school_ids: {
             nullable: true
         },
         rejection_reason: {
@@ -2533,6 +2701,13 @@ export const UpdateApplicationBodySchema = {
         },
         submission_method: {
             type: 'string',
+            nullable: true
+        },
+        village_street: {
+            type: 'string',
+            nullable: true
+        },
+        voter_names: {
             nullable: true
         },
         wizard_step: {
@@ -2940,7 +3115,7 @@ export const WorkspaceAddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-08-04T13:50:07.160969600Z',
+            default: '2026-08-05T18:50:43.404224400Z',
             type: 'string',
             format: 'date-time'
         },

@@ -10,6 +10,7 @@ pub enum WizardStep3 {}
 pub enum WizardStep4 {}
 pub enum WizardStep5 {}
 pub enum WizardStep6 {}
+pub enum WizardStep7 {}
 pub enum Submitted {}
 pub enum UnderVerification {}
 pub enum Verified {}
@@ -73,12 +74,16 @@ impl G1Application<Draft> {
             preferred_school_ids: None,
             electoral_year: None,
             polling_district: None,
-            gn_division: None,
+            polling_division: None,
+            gn_name: None,
+            gn_number: None,
             polling_area: None,
+            village_street: None,
             voter_names: None,
             household_head_name: None,
             declaration_agreed: false,
             declaration_signed_at: None,
+            closer_school_exists: None,
         };
         G1Application {
             model,
@@ -137,11 +142,6 @@ impl G1Application<WizardStep3> {
     pub fn advance_to_step4(
         self,
     ) -> Result<G1Application<WizardStep4>, super::error::TransitionError> {
-        if self.model.guardian_id == uuid::Uuid::nil() {
-            return Err(super::error::TransitionError::MissingField(
-                "guardian_id",
-            ));
-        }
         let mut model = self.model;
         model.wizard_step = Some(4);
         model.updated_at = chrono::Utc::now();
@@ -181,16 +181,25 @@ impl G1Application<WizardStep5> {
 }
 
 impl G1Application<WizardStep6> {
+    pub fn advance_to_step7(
+        self,
+    ) -> Result<G1Application<WizardStep7>, super::error::TransitionError> {
+        let mut model = self.model;
+        model.wizard_step = Some(7);
+        model.updated_at = chrono::Utc::now();
+        Ok(G1Application {
+            model,
+            _state: PhantomData,
+        })
+    }
+}
+
+impl G1Application<WizardStep7> {
     pub fn submit(
         self,
     ) -> Result<G1Application<Submitted>, super::error::TransitionError> {
         if self.model.child_id == uuid::Uuid::nil() {
             return Err(super::error::TransitionError::MissingField("child_id"));
-        }
-        if self.model.guardian_id == uuid::Uuid::nil() {
-            return Err(super::error::TransitionError::MissingField(
-                "guardian_id",
-            ));
         }
         if !self.model.declaration_agreed {
             return Err(super::error::TransitionError::MissingField(

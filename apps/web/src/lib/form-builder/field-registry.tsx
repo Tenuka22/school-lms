@@ -227,6 +227,13 @@ export function renderField(args: RenderFieldArgs): React.ReactNode {
 }
 
 export function FieldControl(args: RenderFieldArgs): React.ReactNode {
+  const labelNode = (
+    <>
+      {args.label}
+      {args.required && <span className="text-destructive ml-0.5">*</span>}
+    </>
+  )
+
   return (
     <Field data-invalid={args.isInvalid}>
       {args.kind === "checkbox" ? (
@@ -239,7 +246,7 @@ export function FieldControl(args: RenderFieldArgs): React.ReactNode {
                 htmlFor={args.name}
                 className="flex w-fit gap-2 text-sm leading-none font-medium select-none leading-snug group-data-[disabled=true]/field:opacity-50"
               >
-                {args.label}
+                {labelNode}
               </label>
               {args.description && (
                 <FieldDescription>{args.description}</FieldDescription>
@@ -252,7 +259,7 @@ export function FieldControl(args: RenderFieldArgs): React.ReactNode {
           {args.renderLabel ? (
             args.renderLabel(args.label)
           ) : (
-            <FieldLabel htmlFor={args.name}>{args.label}</FieldLabel>
+            <FieldLabel htmlFor={args.name}>{labelNode}</FieldLabel>
           )}
           {args.description && (
             <FieldDescription>{args.description}</FieldDescription>

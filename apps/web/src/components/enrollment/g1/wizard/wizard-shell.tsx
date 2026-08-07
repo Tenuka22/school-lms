@@ -16,6 +16,7 @@ import {
   getApplicationSiblingsOptions,
   getApplicationSiblingsQueryKey,
   getApplicationDocumentsOptions,
+  getApplicationDocumentsQueryKey,
   listApplicationsQueryKey,
   updateApplicationMutation,
   saveWizardStepMutation,
@@ -23,11 +24,14 @@ import {
   saveAddressesMutation,
   saveSiblingsMutation,
   saveApplicationDocumentsMutation,
+  submitApplicationMutation,
   listAddressesOptions,
   listGuardiansOptions,
   createChildMutation,
   updateChildMutation,
   getChildOptions,
+  getChildQueryKey,
+  meOptions,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import type {
@@ -37,27 +41,33 @@ import type {
   Religion,
   Child,
   G1Category,
-  G1Application,
 } from "@/lib/api-client/types.gen"
 import { Button } from "@/components/ui/button"
+import { IconLock } from "@tabler/icons-react"
 import { WizardStepChild } from "./wizard-step-child"
 import type { ChildFormData } from "./wizard-step-child"
 import { WizardStepGuardian } from "./wizard-step-guardian"
-import type { GuardianFormData, ElectoralData } from "./wizard-step-guardian"
+import type { GuardianFormData } from "./wizard-step-guardian"
+import { WizardStepElectoral } from "./wizard-step-electoral"
+import type { ElectoralEntry } from "./wizard-step-electoral"
 import { WizardStepAddress } from "./wizard-step-address"
 import type { AddressEntryValue } from "./wizard-step-address"
+import { WizardStepSchools } from "./wizard-step-schools"
 import { WizardStepSiblings } from "./wizard-step-siblings"
 import { WizardStepDocuments } from "./wizard-step-documents"
 import type { DocumentFormData } from "./wizard-step-documents"
 import { WizardStepReview } from "./wizard-step-review"
 import { WizardSidebar } from "./wizard-sidebar"
+import { LockedApplicationDialog } from "./locked-application-dialog"
 
 export const SEEDED_SCHOOL_ID = "00000000-0000-0000-0000-000000000001"
 
 const STEPS = [
   "Child",
   "Guardian",
+  "Electoral",
   "Address",
+  "School Preferences",
   "Siblings",
   "Documents",
   "Review & Lock",
@@ -70,12 +80,20 @@ export function WizardShell() {
   const navigate = useNavigate()
   const enrollmentId = params.enrollment_id
   const [step, setStep] = useState(1)
-  const [savedSteps, setSavedSteps] = useState<number>(0)
   const initialStepSet = useRef(false)
 
   const { data: application } = useQuery(
     getApplicationOptions({ path: { id: enrollmentId }, client: apiClient })
   )
+
+  const { data: currentUser } = useQuery(meOptions({ client: apiClient }))
+
+  const isLocked = application?.enrollment_status !== "Draft" && application?.enrollment_status !== "Pending" && application?.enrollment_status !== undefined
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "superadmin"
+  const [lockedDialogOpen, setLockedDialogOpen] = useState(false)
+  const [pendingStep, setPendingStep] = useState<number | null>(null)
+
+  const savedSteps = application?.wizard_step ?? 0
 
   const { data: guardians } = useQuery(
     listGuardiansOptions({ client: apiClient })
@@ -113,20 +131,6 @@ export function WizardShell() {
     listAddressesOptions({ client: apiClient })
   )
 
-  useEffect(() => {
-     if (!application) return
-     const dbStep = application.wizard_step ?? 0
-     if (dbStep >= 0) {
-       setSavedSteps((prev) => Math.max(prev, dbStep))
-     }
-     if (!initialStepSet.current && dbStep >= 1) {
-       setStep(Math.min(dbStep + 1, STEPS.length))
-       initialStepSet.current = true
-     }
-   }, [application])
-
-  const [childId, setChildId] = useState<string | null>(null)
-
   const { data: childRecord } = useQuery({
     ...getChildOptions({ path: { id: application?.child_id ?? "" }, client: apiClient }),
     enabled: !!application?.child_id,
@@ -139,20 +143,27 @@ export function WizardShell() {
     date_of_birth: "",
     gender: "Male" as Gender,
     nationality: "SriLankan" as Nationality,
-    religion: "",
+    religion: undefined as unknown as Religion,
     birth_certificate_number: "",
-    nic: "",
-    passport_number: "",
     medium_of_instruction: "Sinhala" as MediumOfInstruction,
-    category: "",
-    overseas_arrival_date: "",
-    disability_status: false,
-    disability_type: "",
   })
 
   useEffect(() => {
+    if (!application) return
+    if (!initialStepSet.current) {
+      if (isLocked) {
+        setStep(STEPS.length)
+      } else if (savedSteps >= 1) {
+        setStep(Math.min(savedSteps + 1, STEPS.length))
+      }
+      initialStepSet.current = true
+    }
+    if (application.category) setCategory(application.category)
+    if (application.overseas_arrival_date) setOverseasArrivalDate(application.overseas_arrival_date)
+  }, [application])
+
+  useEffect(() => {
     if (childRecord) {
-      setChildId(childRecord.id)
       setChildData({
         full_name: childRecord.full_name,
         name_with_initials: childRecord.name_with_initials,
@@ -160,15 +171,9 @@ export function WizardShell() {
         date_of_birth: childRecord.date_of_birth,
         gender: childRecord.gender,
         nationality: childRecord.nationality,
-        religion: childRecord.religion ?? "",
+        religion: (childRecord.religion ?? undefined) as Religion | undefined,
         birth_certificate_number: childRecord.birth_certificate_number ?? "",
-        nic: childRecord.nic ?? "",
-        passport_number: childRecord.passport_number ?? "",
         medium_of_instruction: childRecord.medium_of_instruction,
-        category: "" as string,
-        overseas_arrival_date: "",
-        disability_status: childRecord.disability_status ?? false,
-        disability_type: childRecord.disability_type ?? "",
       })
     }
   }, [childRecord])
@@ -183,16 +188,48 @@ export function WizardShell() {
   const initialSiblingLoad = useRef(false)
   const [documentData, setDocumentData] = useState<DocumentFormData[]>([])
   const initialDocLoad = useRef(false)
-  const [electoralData, setElectoralData] = useState<ElectoralData>({
-    electoral_year: 0,
-    polling_district: "",
-    gn_division: "",
-    polling_area: "",
-    voter_names: [],
-    household_head_name: "",
-  })
-  const [declarationAgreed, setDeclarationAgreed] = useState(false)
-  const [preferredSchoolIds] = useState<string[]>([])
+  const [electoralEntries, setElectoralEntries] = useState<ElectoralEntry[]>([])
+  const initialElectoralLoad = useRef(false)
+  const [category, setCategory] = useState<string>("")
+  const [overseasArrivalDate, setOverseasArrivalDate] = useState<string>("")
+  const [preferredSchoolIds, setPreferredSchoolIds] = useState<string[]>([])
+  const initialSchoolLoad = useRef(false)
+  const [closerSchoolExists, setCloserSchoolExists] = useState(false)
+
+  useEffect(() => {
+    if (application && !initialElectoralLoad.current && electoralEntries.length === 0) {
+      if (application.electoral_year || application.polling_district || application.gn_name) {
+        initialElectoralLoad.current = true
+        setElectoralEntries([{
+          id: crypto.randomUUID(),
+          electoral_year: application.electoral_year ?? new Date().getFullYear() - 1,
+          polling_district: application.polling_district ?? "",
+          polling_division: application.polling_division ?? "",
+          gn_name: application.gn_name ?? "",
+          gn_number: application.gn_number ?? "",
+          polling_area: application.polling_area ?? "",
+          village_street: application.village_street ?? "",
+          voter_names: (Array.isArray(application.voter_names) ? application.voter_names : []) as string[],
+          household_head_name: application.household_head_name ?? "",
+        }])
+      }
+    }
+  }, [application])
+
+  useEffect(() => {
+    if (application && !initialSchoolLoad.current) {
+      initialSchoolLoad.current = true
+      if (application.preferred_school_ids) {
+        const ids = Array.isArray(application.preferred_school_ids)
+          ? application.preferred_school_ids
+          : []
+        setPreferredSchoolIds(ids as string[])
+      }
+      if (application.closer_school_exists !== undefined && application.closer_school_exists !== null) {
+        setCloserSchoolExists(application.closer_school_exists)
+      }
+    }
+  }, [application])
 
   useEffect(() => {
     if (applicationGuardianIds && !initialGuardianLoad.current) {
@@ -265,118 +302,83 @@ export function WizardShell() {
     saveApplicationDocumentsMutation({ client: apiClient })
   )
 
+  const submitApp = useMutation(
+    submitApplicationMutation({ client: apiClient })
+  )
+
   const autoSaveStep = useCallback(
     async (stepNum: number) => {
+      const appKey = getApplicationQueryKey({
+        path: { id: enrollmentId },
+        client: apiClient,
+      })
+      queryClient.setQueryData(appKey, (old: any) =>
+        old ? { ...old, wizard_step: stepNum } : old
+      )
       await saveStep.mutateAsync({
         path: { id: enrollmentId },
         body: { wizard_step: stepNum },
       })
-      setSavedSteps((prev) => Math.max(prev, stepNum))
-      queryClient.invalidateQueries({
-        queryKey: getApplicationQueryKey({
-          path: { id: enrollmentId },
-          client: apiClient,
-        }),
-      })
+      queryClient.invalidateQueries({ queryKey: appKey })
     },
     [enrollmentId, saveStep]
   )
 
-  const saveChildRecord = useCallback(
-    async (data: ChildFormData) => {
-      const childPayload = {
-        full_name: data.full_name,
-        name_with_initials: data.name_with_initials,
-        name_with_initials_en: data.name_with_initials_en || null,
-        date_of_birth: data.date_of_birth,
-        gender: data.gender as Gender,
-        nationality: data.nationality as Nationality,
-        religion: (data.religion || null) as Religion | null,
-        birth_certificate_number: data.birth_certificate_number || null,
-        medium_of_instruction: data.medium_of_instruction as MediumOfInstruction,
-      } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
-
-      try {
-        let savedChild: Child
-        if (childId) {
-          savedChild = await updateChild.mutateAsync({
-            path: { id: childId },
-            body: { ...childPayload, id: childId },
-          })
-        } else {
-          savedChild = await createChild.mutateAsync({
-            body: childPayload as Child,
-          })
-          setChildId(savedChild.id)
-        }
-
-        const appBody = {
-          child_id: savedChild.id,
-          category: (data.category || undefined) as G1Category | undefined,
-          overseas_arrival_date: data.overseas_arrival_date || null,
-          school_id: SEEDED_SCHOOL_ID,
-          batch_id: application?.batch_id ?? "",
-          wizard_step: 1,
-          age_eligibility_verified: false,
-          alternative_age_certificate: false,
-          birth_certificate_verified: false,
-          category_verified: false,
-          interview_completed: false,
-          residence_verified: false,
-        } satisfies G1Application
-        await updateApplication.mutateAsync({
-          path: { id: enrollmentId },
-          body: appBody,
-        })
-        setSavedSteps(1)
-        queryClient.invalidateQueries({
-          queryKey: getApplicationQueryKey({
-            path: { id: enrollmentId },
-            client: apiClient,
-          }),
-        })
-      } catch {
-        // silent fail for auto-save
-      }
-    },
-    [enrollmentId, childId, updateApplication, createChild, updateChild, application]
-  )
-
-  const handleComplete = useCallback(async () => {
+  const handleComplete = useCallback(async (reviewData: { category: string; overseas_arrival_date: string; declaration_agreed: boolean }) => {
     try {
-      const completeBody = {
-        school_id: SEEDED_SCHOOL_ID,
-        enrollment_status: "Completed",
-        batch_id: application?.batch_id ?? "",
-        wizard_step: 6,
-        age_eligibility_verified: false,
-        alternative_age_certificate: false,
-        birth_certificate_verified: false,
-        category_verified: false,
-        interview_completed: false,
-        residence_verified: false,
-      } satisfies G1Application
+      const appKey = getApplicationQueryKey({
+        path: { id: enrollmentId },
+        client: apiClient,
+      })
+      queryClient.setQueryData(appKey, (old: any) =>
+        old ? { ...old, wizard_step: 8 } : old
+      )
       await updateApplication.mutateAsync({
         path: { id: enrollmentId },
-        body: completeBody,
+        body: {
+          wizard_step: 8,
+          category: (reviewData.category || undefined) as G1Category | undefined,
+          overseas_arrival_date: reviewData.overseas_arrival_date || null,
+          declaration_agreed: reviewData.declaration_agreed,
+          preferred_school_ids: preferredSchoolIds.length > 0 ? preferredSchoolIds : null,
+          closer_school_exists: closerSchoolExists,
+        },
+      })
+      await submitApp.mutateAsync({
+        path: { id: enrollmentId },
       })
       queryClient.invalidateQueries({
         queryKey: listApplicationsQueryKey({ client: apiClient }),
       })
-       setSavedSteps(6)
-        toast.success("Enrollment completed. Awaiting processing.")
-        navigate({ to: "/student-management/enrollment/g1" })
+      toast.success("Enrollment completed. Awaiting processing.")
+      navigate({ to: "/student-management/enrollment/g1" })
     } catch (err) {
       toastApiError(err, "Failed to complete enrollment")
     }
-  }, [enrollmentId, updateApplication, application, navigate])
+  }, [enrollmentId, updateApplication, submitApp, navigate, preferredSchoolIds, closerSchoolExists])
 
   const selectedGuardians = (guardians ?? []).filter((g) =>
     guardianIds.includes(g.id)
   )
 
   const goToStep = (s: number) => {
-    if (s !== step && s <= savedSteps + 1) setStep(s)
+    if (s !== step && s <= savedSteps + 1) {
+      if (isLocked && !isAdmin) {
+        setPendingStep(s)
+        setLockedDialogOpen(true)
+      } else {
+        setStep(s)
+      }
+    }
+  }
+
+  const handleOverrideLock = () => {
+    if (pendingStep !== null) {
+      setStep(pendingStep)
+      setPendingStep(null)
+    }
+    setLockedDialogOpen(false)
+    toast.warning("Admin override: Editing locked application")
   }
 
   return (
@@ -391,22 +393,32 @@ export function WizardShell() {
         <h1 className="text-xl font-bold">Enrollment Wizard</h1>
       </div>
 
-      <div className="flex items-center justify-center gap-2 overflow-x-auto pb-2">
+      {isLocked && (
+        <div className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 dark:border-amber-800 dark:bg-amber-950">
+          <IconLock className="size-4 text-amber-600 dark:text-amber-400" />
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            This application has been submitted and is locked.
+            {isAdmin && " Admin override is enabled."}
+          </p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-center gap-2 pb-2">
         {STEPS.map((label, i) => {
           const stepNum = i + 1
           const isActive = step === stepNum
-          const isCompleted = stepNum <= savedSteps
-          const isLocked = stepNum > savedSteps + 1
+          const isCompleted = isLocked || stepNum <= savedSteps
+          const isFuture = !isLocked && stepNum > savedSteps + 1
           return (
             <div key={label} className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
-                disabled={!isActive && isLocked}
+                disabled={!isActive && isFuture}
                 onClick={() => goToStep(stepNum)}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
                   isActive
                     ? "border-primary font-medium text-primary"
-                    : isLocked
+                    : isFuture
                       ? "cursor-not-allowed border-dashed border-muted-foreground/20 text-muted-foreground/40"
                       : isCompleted
                         ? "cursor-pointer border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20"
@@ -417,7 +429,7 @@ export function WizardShell() {
                   className={`flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                     isActive
                       ? "bg-primary text-primary-foreground"
-                      : isLocked
+                      : isFuture
                         ? "bg-muted/50 text-muted-foreground/40"
                         : isCompleted
                           ? "bg-green-500 text-white"
@@ -428,11 +440,11 @@ export function WizardShell() {
                     ? "\u2713"
                     : isActive
                       ? stepNum
-                      : isLocked
+                      : isFuture
                         ? "\u2715"
                         : stepNum}
                 </span>
-                {label}
+                {!isCompleted && !isLocked && label}
               </button>
               {i < STEPS.length - 1 && (
                 <div
@@ -453,6 +465,7 @@ export function WizardShell() {
               childData={childData}
               enrollmentId={enrollmentId}
               schoolId={SEEDED_SCHOOL_ID}
+              electoralEntries={electoralEntries}
               selectedGuardianIds={guardianIds}
               onGuardianSelect={(id) => setGuardianIds((prev) => [...prev, id])}
               onGuardianDeselect={(id) =>
@@ -489,6 +502,8 @@ export function WizardShell() {
                   return next
                 })
               }}
+              preferredSchoolIds={preferredSchoolIds}
+              closerSchoolExists={closerSchoolExists}
               selectedSiblingIds={selectedSiblingIds}
               onSiblingSelect={(id) =>
                 setSelectedSiblingIds((prev) =>
@@ -506,8 +521,48 @@ export function WizardShell() {
                 <WizardStepChild
                   defaultValues={childData}
                   onSave={async (data) => {
+                    const childPayload = {
+                      full_name: data.full_name,
+                      name_with_initials: data.name_with_initials,
+                      name_with_initials_en: data.name_with_initials_en || null,
+                      date_of_birth: data.date_of_birth,
+                      gender: data.gender as Gender,
+                      nationality: data.nationality as Nationality,
+                      religion: (data.religion || null) as Religion | null,
+                      birth_certificate_number: data.birth_certificate_number || null,
+                      medium_of_instruction: data.medium_of_instruction as MediumOfInstruction,
+                    } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
+
+                    let savedChild: Child
+                    if (application?.child_id) {
+                      savedChild = await updateChild.mutateAsync({
+                        path: { id: application.child_id },
+                        body: childPayload as any,
+                      })
+                    } else {
+                      savedChild = await createChild.mutateAsync({
+                        body: childPayload as Child,
+                      })
+                    }
+
+                    await updateApplication.mutateAsync({
+                      path: { id: enrollmentId },
+                      body: {
+                        child_id: savedChild.id,
+                      },
+                    })
+
+                    await autoSaveStep(1)
+
+                    queryClient.invalidateQueries({
+                      queryKey: getChildQueryKey({
+                        path: { id: savedChild.id },
+                        client: apiClient,
+                      }),
+                    })
+
                     setChildData(data)
-                    await saveChildRecord(data)
+                    toast.success("Child saved")
                   }}
                   onNext={() => setStep(2)}
                 />
@@ -515,38 +570,61 @@ export function WizardShell() {
               {step === 2 && (
                 <WizardStepGuardian
                   selectedIds={guardianIds}
-                  electoralData={electoralData}
                   onDeselect={(id) =>
                     setGuardianIds((prev) => prev.filter((s) => s !== id))
                   }
-                  onSave={async (ids, elecData) => {
+                  onSave={async (ids) => {
                     setGuardianIds(ids)
-                    setElectoralData(elecData)
-                    await autoSaveStep(2)
-                    try {
-                      if (ids.length > 0) {
-                        await saveGuardians.mutateAsync({
-                          path: { id: enrollmentId },
-                          body: { guardian_ids: ids },
-                        })
-                      }
-                      queryClient.invalidateQueries({
-                        queryKey: getApplicationGuardiansQueryKey({
-                          path: { id: enrollmentId },
-                          client: apiClient,
-                        }),
+                    if (ids.length > 0) {
+                      await saveGuardians.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { guardian_ids: ids },
                       })
-                      toast.success("Guardians saved")
-                    } catch (err) {
-                      toastApiError(err, "Failed to save guardians")
                     }
+                    await autoSaveStep(2)
+                    queryClient.invalidateQueries({
+                      queryKey: getApplicationGuardiansQueryKey({
+                        path: { id: enrollmentId },
+                        client: apiClient,
+                      }),
+                    })
+                    toast.success("Guardians saved")
                   }}
                   onBack={() => setStep(1)}
                   onNext={() => setStep(3)}
-                  onElectoralChange={setElectoralData}
                 />
               )}
               {step === 3 && (
+                <WizardStepElectoral
+                  entries={electoralEntries}
+                  onChange={setElectoralEntries}
+                  onBack={() => setStep(2)}
+                  onSave={async (entries) => {
+                    setElectoralEntries(entries)
+                    if (entries.length > 0) {
+                      const first = entries[0]
+                      await updateApplication.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: {
+                          electoral_year: first.electoral_year || null,
+                          polling_district: first.polling_district || null,
+                          polling_division: first.polling_division || null,
+                          gn_name: first.gn_name || null,
+                          gn_number: first.gn_number || null,
+                          polling_area: first.polling_area || null,
+                          village_street: first.village_street || null,
+                          household_head_name: first.household_head_name || null,
+                          voter_names: first.voter_names.length > 0 ? first.voter_names : null,
+                        },
+                      })
+                    }
+                    await autoSaveStep(3)
+                    toast.success("Electoral data saved")
+                  }}
+                  onNext={() => setStep(4)}
+                />
+              )}
+              {step === 4 && (
                 <WizardStepAddress
                   selectedAddresses={selectedAddressEntries}
                   onUpdate={(id, field, value) => {
@@ -573,30 +651,46 @@ export function WizardShell() {
                   }}
                   onSave={async (addresses) => {
                     setSelectedAddressEntries(addresses)
-                    await autoSaveStep(3)
-                    try {
-                      if (addresses.length > 0) {
-                        await saveAddresses.mutateAsync({
-                          path: { id: enrollmentId },
-                          body: { addresses },
-                        })
-                      }
-                      queryClient.invalidateQueries({
-                        queryKey: getApplicationAddressesQueryKey({
-                          path: { id: enrollmentId },
-                          client: apiClient,
-                        }),
+                    if (addresses.length > 0) {
+                      await saveAddresses.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { addresses },
                       })
-                      toast.success("Addresses saved")
-                    } catch (err) {
-                      toastApiError(err, "Failed to save addresses")
                     }
+                    await autoSaveStep(4)
+                    queryClient.invalidateQueries({
+                      queryKey: getApplicationAddressesQueryKey({
+                        path: { id: enrollmentId },
+                        client: apiClient,
+                      }),
+                    })
+                    toast.success("Addresses saved")
                   }}
-                  onBack={() => setStep(2)}
-                  onNext={() => setStep(4)}
+                  onBack={() => setStep(3)}
+                  onNext={() => setStep(5)}
                 />
               )}
-              {step === 4 && (
+              {step === 5 && (
+                <WizardStepSchools
+                  preferredSchoolIds={preferredSchoolIds}
+                  closerSchoolExists={closerSchoolExists}
+                  onChangePreferredSchools={setPreferredSchoolIds}
+                  onChangeCloserSchool={setCloserSchoolExists}
+                  onBack={() => setStep(4)}
+                  onSave={async () => {
+                    await updateApplication.mutateAsync({
+                      path: { id: enrollmentId },
+                      body: {
+                        preferred_school_ids: preferredSchoolIds.length > 0 ? preferredSchoolIds : null,
+                        closer_school_exists: closerSchoolExists,
+                      },
+                    })
+                    await autoSaveStep(5)
+                  }}
+                  onNext={() => setStep(6)}
+                />
+              )}
+              {step === 6 && (
                 <WizardStepSiblings
                   selectedStudentIds={selectedSiblingIds}
                   onDeselect={(id) =>
@@ -606,30 +700,26 @@ export function WizardShell() {
                   }
                   onSave={async (ids) => {
                     setSelectedSiblingIds(ids)
-                    await autoSaveStep(4)
-                    try {
-                      if (ids.length > 0) {
-                        await saveSiblings.mutateAsync({
-                          path: { id: enrollmentId },
-                          body: { student_ids: ids },
-                        })
-                      }
-                      queryClient.invalidateQueries({
-                        queryKey: getApplicationSiblingsQueryKey({
-                          path: { id: enrollmentId },
-                          client: apiClient,
-                        }),
+                    if (ids.length > 0) {
+                      await saveSiblings.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { student_ids: ids },
                       })
-                      toast.success("Siblings saved")
-                    } catch (err) {
-                      toastApiError(err, "Failed to save siblings")
                     }
+                    await autoSaveStep(6)
+                    queryClient.invalidateQueries({
+                      queryKey: getApplicationSiblingsQueryKey({
+                        path: { id: enrollmentId },
+                        client: apiClient,
+                      }),
+                    })
+                    toast.success("Siblings saved")
                   }}
-                  onBack={() => setStep(3)}
-                  onNext={() => setStep(5)}
+                  onBack={() => setStep(5)}
+                  onNext={() => setStep(7)}
                 />
               )}
-              {step === 5 && (
+              {step === 7 && (
                 <WizardStepDocuments
                   defaultValues={documentData}
                   guardians={selectedGuardians}
@@ -638,7 +728,7 @@ export function WizardShell() {
                     const uploadedDocs = data.filter(
                       (d) => d.status === "uploaded" && d.file_key
                     )
-                    try {
+                    if (uploadedDocs.length > 0) {
                       await saveAppDocuments.mutateAsync({
                         path: { id: enrollmentId },
                         body: {
@@ -652,48 +742,63 @@ export function WizardShell() {
                           })),
                         },
                       })
-                      queryClient.invalidateQueries({
-                        queryKey: getApplicationDocumentsOptions({
-                          path: { id: enrollmentId },
-                          client: apiClient,
-                        }).queryKey,
-                      })
-                      toast.success("Documents saved")
-                    } catch (err) {
-                      toastApiError(err, "Failed to save documents. Please try again.")
                     }
-                    await autoSaveStep(5)
+                    await autoSaveStep(7)
+                    queryClient.invalidateQueries({
+                      queryKey: getApplicationDocumentsQueryKey({
+                        path: { id: enrollmentId },
+                        client: apiClient,
+                      }),
+                    })
                   }}
-                  onBack={() => setStep(4)}
-                  onNext={() => setStep(6)}
+                  onBack={() => setStep(6)}
+                  onNext={() => setStep(8)}
                   onDocumentsChange={setDocumentData}
                 />
               )}
-              {step === 6 && (
+              {step === 8 && (
                 <WizardStepReview
                   child={childData}
                   guardians={selectedGuardians}
                   school={{
                     school_id: SEEDED_SCHOOL_ID,
                     school_name_si: "St. Aloysius College, Galle",
-                    school_type: "1AB",
-                    category: "Urban",
-                    quota: 100,
                   }}
                   selectedAddresses={selectedAddressEntries}
                   addresses={allAddresses}
                   siblingIds={selectedSiblingIds}
                   documents={documentData}
-                  preferredSchoolIds={preferredSchoolIds}
-                  declarationAgreed={declarationAgreed}
-                  onBack={() => setStep(5)}
-                  onComplete={handleComplete}
-                  onDeclarationChange={setDeclarationAgreed}
+                   preferredSchoolIds={preferredSchoolIds}
+                    category={category}
+                    overseasArrivalDate={overseasArrivalDate}
+                    declarationAgreed={application?.declaration_agreed ?? false}
+                    onCategoryChange={(cat) => {
+                      setCategory(cat)
+                      updateApplication.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { category: cat as any },
+                      })
+                    }}
+                    onDeclarationChange={(agreed) => {
+                      updateApplication.mutateAsync({
+                        path: { id: enrollmentId },
+                        body: { declaration_agreed: agreed },
+                      })
+                    }}
+                    onBack={() => setStep(7)}
+                   onComplete={handleComplete}
                 />
               )}
              </div>
            </>
        </div>
+
+       <LockedApplicationDialog
+         open={lockedDialogOpen}
+         onOpenChange={setLockedDialogOpen}
+         onOverride={handleOverrideLock}
+         isAdmin={isAdmin}
+       />
      </div>
    )
  }

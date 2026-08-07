@@ -136,7 +136,15 @@ export function FormBuilder<TData extends Record<string, unknown>>(
               handleChange: (val: unknown) => void
             }
             return (
-              <div>
+              <div className="space-y-1.5">
+                {field.label && (
+                  <label className="text-sm font-medium leading-none">
+                    {field.label}
+                    {field.required && (
+                      <span className="text-destructive ml-0.5">*</span>
+                    )}
+                  </label>
+                )}
                 {field.customRenderer!({
                   value: fieldApi.state.value,
                   onChange: (val) => fieldApi.handleChange(val),

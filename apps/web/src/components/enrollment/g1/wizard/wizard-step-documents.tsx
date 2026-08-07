@@ -32,7 +32,7 @@ export type DocumentFormData = {
 interface Props {
   defaultValues: DocumentFormData[]
   guardians: Guardian[]
-  onSave: (data: DocumentFormData[]) => void
+  onSave: (data: DocumentFormData[]) => Promise<void>
   onBack: () => void
   onNext: () => void
   onDocumentsChange?: (docs: DocumentFormData[]) => void
@@ -46,35 +46,16 @@ const DOC_TYPES: {
   { key: "BirthCertificate", label: "Birth Certificate" },
   { key: "GuardianNIC", label: "Guardian NIC" },
   { key: "ResidenceProof", label: "Residence Proof" },
-  {
-    key: "StaffAppointmentLetter",
-    label: "Staff Appointment Letter",
-    condition: (gs) => gs.some((g) => g.is_school_staff),
-  },
-  {
-    key: "StaffServiceCertificate",
-    label: "Staff Service Certificate",
-    condition: (gs) => gs.some((g) => g.is_school_staff),
-  },
-  {
-    key: "AlumniCertificate",
-    label: "Alumni Certificate",
-    condition: (gs) => gs.some((g) => g.is_past_pupil),
-  },
-  {
-    key: "GovtEmployeeCertificate",
-    label: "Govt Employee Certificate",
-    condition: (gs) => gs.some((g) => g.is_govt_employee),
-  },
-  {
-    key: "IncomeCertificate",
-    label: "Income Certificate",
-    condition: (gs) =>
-      gs.some((g) => {
-        const income = g.income_level ? parseFloat(g.income_level) : 0
-        return income > 0 && income < 100000
-      }),
-  },
+  { key: "ElectoralProof", label: "Electoral/Voter Registration" },
+  { key: "SiblingSchoolCertificate", label: "Sibling School Certificate" },
+  { key: "StaffAppointmentLetter", label: "Staff Appointment Letter" },
+  { key: "StaffServiceCertificate", label: "Staff Service Certificate" },
+  { key: "AlumniCertificate", label: "Alumni Certificate" },
+  { key: "GovtEmployeeCertificate", label: "Govt Employee Certificate" },
+  { key: "IncomeCertificate", label: "Income Certificate" },
+  { key: "DisabilityCertificate", label: "Disability Certificate" },
+  { key: "BaptismCertificate", label: "Baptism Certificate" },
+  { key: "Other", label: "Other Document" },
 ]
 
 export function WizardStepDocuments({
@@ -341,7 +322,10 @@ export function WizardStepDocuments({
             <Button variant="outline" onClick={onBack}>
               Back
             </Button>
-            <Button onClick={onNext}>Next</Button>
+            <Button onClick={async () => {
+              await onSave(documents)
+              onNext()
+            }}>Next</Button>
           </div>
         </CardContent>
       </Card>

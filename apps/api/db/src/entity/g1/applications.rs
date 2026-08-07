@@ -105,13 +105,17 @@ pub struct Model {
 
     pub preferred_school_ids: Option<Json>,
     pub electoral_year: Option<i16>,
-    pub polling_district: Option<String>,
-    pub gn_division: Option<String>,
+    pub polling_district: Option<super::super::common::enums::ElectoralDistrict>,
+    pub polling_division: Option<String>,
+    pub gn_name: Option<String>,
+    pub gn_number: Option<String>,
     pub polling_area: Option<String>,
+    pub village_street: Option<String>,
     pub voter_names: Option<Json>,
     pub household_head_name: Option<String>,
     pub declaration_agreed: bool,
     pub declaration_signed_at: Option<DateTime<Utc>>,
+    pub closer_school_exists: Option<bool>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

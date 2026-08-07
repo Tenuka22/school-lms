@@ -5,9 +5,10 @@ use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::Utc;
-use db::domain::g1_application::{Draft, G1Application, WizardStep6};
+use db::domain::g1_application::{Draft, G1Application, WizardStep6, WizardStep7};
 use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
 use db::entity::g1::applications;
+use db::entity::g1::join_guardians;
 use db::entity::enrollment_batches;
 use schemars::JsonSchema;
 use sea_orm::{
@@ -73,54 +74,7 @@ pub async fn create_application(
         .map(|ids| serde_json::to_value(ids).ok())
         .flatten();
 
-    let active = applications::ActiveModel {
-        id: Set(app.model.id),
-        reference_no: Set(app.model.reference_no),
-        school_id: Set(app.model.school_id),
-        batch_id: Set(app.model.batch_id),
-        enrollment_status: Set(app.model.enrollment_status),
-        created_at: Set(app.model.created_at),
-        updated_at: Set(app.model.updated_at),
-        created_by: Set(None),
-        updated_by: Set(None),
-        child_id: Set(app.model.child_id),
-        guardian_id: Set(app.model.guardian_id),
-        wizard_step: Set(app.model.wizard_step),
-        total_marks: Set(None),
-        rank_number: Set(None),
-        list_category: Set(None),
-        waiting_position: Set(None),
-        promoted_at: Set(None),
-        submitted_at: Set(None),
-        verified_at: Set(None),
-        verified_by: Set(None),
-        finalized_at: Set(None),
-        ip_address: Set(None),
-        user_agent: Set(None),
-        category: Set(None),
-        overseas_arrival_date: Set(None),
-        submission_method: Set(None),
-        interview_date: Set(None),
-        interview_completed: Set(false),
-        birth_certificate_verified: Set(false),
-        age_eligibility_verified: Set(false),
-        residence_verified: Set(false),
-        category_verified: Set(false),
-        alternative_age_certificate: Set(false),
-        alternative_age_certificate_ref: Set(None),
-        rejection_reason: Set(None),
-        deleted_at: Set(None),
-        preferred_school_ids: Set(app.model.preferred_school_ids),
-        electoral_year: Set(None),
-        polling_district: Set(None),
-        gn_division: Set(None),
-        polling_area: Set(None),
-        voter_names: Set(None),
-        household_head_name: Set(None),
-        declaration_agreed: Set(false),
-        declaration_signed_at: Set(None),
-    };
-
+    let active: applications::ActiveModel = app.model.into();
     let saved = active.insert(db.as_ref()).await?;
 
     let _ = create_audit_log(
@@ -170,12 +124,21 @@ pub async fn submit_application(
 
     let submitted = match existing.enrollment_status {
         EnrollmentStatus::Draft | EnrollmentStatus::Pending => {
-            if existing.wizard_step != Some(6) {
+            if existing.wizard_step != Some(8) {
                 return Err(ApiError::BadRequest(
                     "application wizard must be completed before submitting".into(),
                 ));
             }
-            let app = G1Application::<WizardStep6> {
+            let guardian_count = join_guardians::Entity::find()
+                .filter(join_guardians::Column::ApplicationId.eq(id))
+                .count(db.as_ref())
+                .await?;
+            if guardian_count == 0 {
+                return Err(ApiError::BadRequest(
+                    "at least one guardian must be added before submitting".into(),
+                ));
+            }
+            let app = G1Application::<WizardStep7> {
                 model: existing.clone(),
                 _state: PhantomData,
             };
@@ -188,10 +151,58 @@ pub async fn submit_application(
         }
     };
 
-    let mut active: applications::ActiveModel = submitted.model.into();
-    active.ip_address = Set(None);
-    active.user_agent = Set(None);
-    active.updated_at = Set(Utc::now());
+    let final_model = submitted.model;
+    let active = applications::ActiveModel {
+        id: Set(final_model.id),
+        reference_no: Set(final_model.reference_no),
+        school_id: Set(final_model.school_id),
+        total_marks: Set(final_model.total_marks),
+        rank_number: Set(final_model.rank_number),
+        list_category: Set(final_model.list_category),
+        waiting_position: Set(final_model.waiting_position),
+        promoted_at: Set(final_model.promoted_at),
+        submitted_at: Set(final_model.submitted_at),
+        verified_at: Set(final_model.verified_at),
+        verified_by: Set(final_model.verified_by),
+        finalized_at: Set(final_model.finalized_at),
+        ip_address: Set(None),
+        user_agent: Set(None),
+        created_at: Set(final_model.created_at),
+        updated_at: Set(Utc::now()),
+        child_id: Set(final_model.child_id),
+        guardian_id: Set(final_model.guardian_id),
+        batch_id: Set(final_model.batch_id),
+        enrollment_status: Set(final_model.enrollment_status),
+        category: Set(final_model.category),
+        overseas_arrival_date: Set(final_model.overseas_arrival_date),
+        submission_method: Set(final_model.submission_method),
+        interview_date: Set(final_model.interview_date),
+        interview_completed: Set(final_model.interview_completed),
+        birth_certificate_verified: Set(final_model.birth_certificate_verified),
+        age_eligibility_verified: Set(final_model.age_eligibility_verified),
+        residence_verified: Set(final_model.residence_verified),
+        category_verified: Set(final_model.category_verified),
+        alternative_age_certificate: Set(final_model.alternative_age_certificate),
+        alternative_age_certificate_ref: Set(final_model.alternative_age_certificate_ref),
+        rejection_reason: Set(final_model.rejection_reason),
+        created_by: Set(final_model.created_by),
+        updated_by: Set(final_model.updated_by),
+        wizard_step: Set(final_model.wizard_step),
+        deleted_at: Set(final_model.deleted_at),
+        preferred_school_ids: Set(final_model.preferred_school_ids),
+        electoral_year: Set(final_model.electoral_year),
+        polling_district: Set(final_model.polling_district),
+        polling_division: Set(final_model.polling_division),
+        gn_name: Set(final_model.gn_name),
+        gn_number: Set(final_model.gn_number),
+        polling_area: Set(final_model.polling_area),
+        village_street: Set(final_model.village_street),
+        voter_names: Set(final_model.voter_names),
+        household_head_name: Set(final_model.household_head_name),
+        declaration_agreed: Set(final_model.declaration_agreed),
+        declaration_signed_at: Set(final_model.declaration_signed_at),
+        closer_school_exists: Set(final_model.closer_school_exists),
+    };
 
     let saved = active.update(&txn).await?;
 

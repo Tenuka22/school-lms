@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { PipeDashboard } from "@/components/enrollment/g1/pipeline/pipeline-dashboard"
+import { apiClient } from "@/lib/api-client"
+import { listBatchesOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 
 export interface DashboardSearch {
   page?: number
@@ -23,6 +25,10 @@ export const Route = createFileRoute(
     enrollment_status: (search.enrollment_status as string) || undefined,
     batch_id: (search.batch_id as string) || undefined,
   }),
+  loader: async ({ context }) => {
+    const { queryClient } = context
+    await queryClient.ensureQueryData(listBatchesOptions({ client: apiClient }))
+  },
   component: RouteComponent,
 })
 

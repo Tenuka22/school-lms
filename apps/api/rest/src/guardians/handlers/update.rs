@@ -85,6 +85,20 @@ pub async fn update_guardian(
         .await?
         .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?;
 
+    if input.nic_number != existing.nic_number {
+        let nic_taken = guardians::Entity::find()
+            .filter(guardians::Column::NicNumber.eq(&input.nic_number))
+            .filter(guardians::Column::Id.ne(id))
+            .one(db.as_ref())
+            .await?;
+        if let Some(conflict) = nic_taken {
+            return Err(ApiError::Conflict(format!(
+                "A guardian with NIC {} already exists (id: {})",
+                input.nic_number, conflict.id
+            )));
+        }
+    }
+
     let active = guardians::ActiveModel {
         id: Set(id),
         relationship_type: Set(input.relationship_type),

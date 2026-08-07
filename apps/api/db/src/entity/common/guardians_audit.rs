@@ -10,7 +10,7 @@ pub struct Model {
     pub id: Uuid,
     pub guardian_id: Option<Uuid>,
     pub operation: AuditOperation,
-    pub changed_fields: Option<Vec<String>>,
+    pub changed_fields: Option<Json>,
     pub old_values: Option<Json>,
     pub new_values: Option<Json>,
     pub changed_by: Option<Uuid>,

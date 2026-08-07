@@ -2,13 +2,12 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use chrono::{DateTime, Utc};
+use db::domain::batch::{Batch, Open};
 use db::entity::enrollment_batches;
-use db::entity::enums::{BatchStatus, EnrollmentType};
+use db::entity::enums::EnrollmentType;
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
@@ -127,36 +126,22 @@ pub async fn create_batch(
         )));
     }
 
-    let now = Utc::now();
-    let data = enrollment_batches::Model {
-        id: Uuid::new_v4(),
-        year: input.year,
-        batch_code,
-        batch_name,
-        enrollment_type: input.enrollment_type,
-        status: BatchStatus::Open,
-        opened_at: now,
-        closed_at: DateTime::from(now + chrono::Duration::days(365)),
-        list_published_at: None,
-        appeal_deadline_at: None,
-        finalized_at: None,
-        created_at: now,
-        created_by: None,
-        student_allocation: input.student_allocation.unwrap_or(200),
-        proximity_percentage: pcts[0],
-        staff_percentage: pcts[1],
-        sibling_percentage: pcts[2],
-        alumni_percentage: pcts[3],
-        govt_percentage: pcts[4],
-        special_percentage: pcts[5],
-        buddhism_percentage: religion_pcts[0],
-        catholicism_percentage: religion_pcts[1],
-        islam_percentage: religion_pcts[2],
-        hinduism_percentage: religion_pcts[3],
-        waiting_list_size: 20,
-    };
+    let batch = Batch::<Open>::new(input.year, batch_code, batch_name);
+    let mut model = batch.model;
+    model.enrollment_type = input.enrollment_type;
+    model.student_allocation = input.student_allocation.unwrap_or(200);
+    model.proximity_percentage = pcts[0];
+    model.staff_percentage = pcts[1];
+    model.sibling_percentage = pcts[2];
+    model.alumni_percentage = pcts[3];
+    model.govt_percentage = pcts[4];
+    model.special_percentage = pcts[5];
+    model.buddhism_percentage = religion_pcts[0];
+    model.catholicism_percentage = religion_pcts[1];
+    model.islam_percentage = religion_pcts[2];
+    model.hinduism_percentage = religion_pcts[3];
 
-    let active: enrollment_batches::ActiveModel = data.into();
+    let active: enrollment_batches::ActiveModel = model.into();
     let saved = active.insert(db.as_ref()).await?;
 
     Ok(CreatedJson(saved))

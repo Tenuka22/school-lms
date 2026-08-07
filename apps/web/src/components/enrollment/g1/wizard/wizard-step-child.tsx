@@ -1,9 +1,8 @@
 "use client"
 
 import { useRef, useState, useEffect } from "react"
+import { toastApiError } from "@/lib/api-error"
 import { Button } from "@/components/ui/button"
-import { FieldLabel } from "@/components/ui/field"
-import { DatePicker } from "@/components/ui/date-picker"
 import {
   Card,
   CardContent,
@@ -12,21 +11,10 @@ import {
   CardDescription,
 } from "@/components/ui/card"
 import { IconLoader2, IconCheck } from "@tabler/icons-react"
-import { FormBuilder } from "@/lib/form-builder"
-import { optionsFromSchema } from "@/lib/form-builder"
+import { FormBuilder, schemaToFormFields } from "@/lib/form-builder"
+import { vCreateChildBody } from "@/lib/api-client/valibot.gen"
 import type { FormConfig } from "@/lib/form-builder"
-import { useBuildForm } from "@/lib/form-builder/form-context"
-import {
-  GenderSchema,
-  NationalitySchema,
-  ReligionSchema,
-  MediumOfInstructionSchema,
-} from "@/lib/api-client/schemas.gen"
-import type {
-  Gender,
-  Nationality,
-  MediumOfInstruction,
-} from "@/lib/api-client/types.gen"
+import type { Gender, Nationality, MediumOfInstruction, Religion } from "@/lib/api-client/types.gen"
 
 export type ChildFormData = {
   full_name: string
@@ -35,15 +23,9 @@ export type ChildFormData = {
   date_of_birth: string
   gender: Gender
   nationality: Nationality
-  religion: string
+  religion: Religion | undefined
   birth_certificate_number: string
-  nic: string
-  passport_number: string
   medium_of_instruction: MediumOfInstruction
-  category: string
-  overseas_arrival_date: string
-  disability_status: boolean
-  disability_type: string
 }
 
 interface Props {
@@ -52,25 +34,17 @@ interface Props {
   onNext: () => void
 }
 
-function OverseasArrivalField() {
-  const form = useBuildForm()
-  return (
-    <form.Field
-      name="overseas_arrival_date"
-      children={(field: any) => (
-        <div>
-          <FieldLabel htmlFor="overseas_arrival_date">
-            Overseas Arrival Date
-          </FieldLabel>
-          <DatePicker
-            value={field.state.value}
-            onChange={(d) => field.handleChange(d)}
-          />
-        </div>
-      )}
-    />
-  )
-}
+const CIRCULAR_CHILD_FIELDS: (keyof ChildFormData)[] = [
+  "full_name",
+  "name_with_initials",
+  "name_with_initials_en",
+  "date_of_birth",
+  "gender",
+  "nationality",
+  "religion",
+  "birth_certificate_number",
+  "medium_of_instruction",
+]
 
 export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
@@ -82,119 +56,35 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
     }
   }, [])
 
-  const config: FormConfig<ChildFormData> = {
-    fields: [
-      {
-        name: "full_name",
-        kind: "text",
-        label: "Full Name",
-        placeholder: "Nimal Perera",
-      },
-      {
-        name: "name_with_initials",
-        kind: "text",
-        label: "Name with Initials",
-        placeholder: "N. Perera",
-      },
-      {
-        name: "name_with_initials_en",
-        kind: "text",
-        label: "Name with Initials (English)",
-        placeholder: "B.S.S. Peiris",
-      },
-      { name: "date_of_birth", kind: "date", label: "Date of Birth" },
-      {
-        name: "gender",
-        kind: "select",
-        label: "Gender",
-        options: optionsFromSchema(GenderSchema),
-      },
-      {
-        name: "nationality",
-        kind: "select",
-        label: "Nationality",
-        options: optionsFromSchema(NationalitySchema),
-      },
-      {
-        name: "religion",
-        kind: "select",
-        label: "Religion",
-        options: [
-          { value: "", label: "None" },
-          ...optionsFromSchema(ReligionSchema),
-        ],
-      },
-      {
-        name: "birth_certificate_number",
-        kind: "text",
-        label: "Birth Certificate Number",
-        placeholder: "Optional",
-      },
-      {
-        name: "nic",
-        kind: "text",
-        label: "NIC Number",
-        placeholder: "Optional (for older children)",
-      },
-      {
-        name: "passport_number",
-        kind: "text",
-        label: "Passport Number",
-        placeholder: "Optional (for overseas arrivals)",
-      },
-      {
-        name: "medium_of_instruction",
-        kind: "select",
-        label: "Medium of Instruction",
-        options: optionsFromSchema(MediumOfInstructionSchema),
-      },
-      {
-        name: "disability_status",
-        kind: "custom",
-        label: "Disability Status",
-        section: "step1",
-        customRenderer: ({ value, onChange }) => (
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={!!value}
-              onChange={(e) => onChange(e.target.checked)}
-              className="size-4"
-            />
-            <span className="text-sm">Has a disability?</span>
-          </div>
-        ),
-      },
-      {
-        name: "disability_type",
-        kind: "text",
-        label: "Disability Type",
-        placeholder: "e.g. Visual Impairment",
-        section: "step1",
-      },
-    ],
-    layout: [
-      { columns: [{ fields: ["full_name", "name_with_initials"] }] },
-      { columns: [{ fields: ["name_with_initials_en"] }] },
-      { columns: [{ fields: ["date_of_birth"] }] },
-      { columns: [{ fields: ["gender"], span: 4 }, { fields: ["nationality"], span: 4 }, { fields: ["religion"], span: 4 }] },
-      { columns: [{ fields: ["birth_certificate_number"] }] },
-      { columns: [{ fields: ["nic"] }] },
-      { columns: [{ fields: ["passport_number"] }] },
-      { columns: [{ fields: ["medium_of_instruction"] }] },
-    ],
-    renderBelowFields: (formValues) =>
-      formValues.category === "OverseasArrival" ? (
-        <OverseasArrivalField />
-      ) : null,
-  }
+  const fields = schemaToFormFields({
+    schema: vCreateChildBody as any,
+    include: CIRCULAR_CHILD_FIELDS as any,
+    overrides: {
+      name_with_initials_en: { placeholder: "e.g. B.S.S. Peiris" },
+      birth_certificate_number: { required: true, placeholder: "Enter birth certificate number" },
+      religion: { required: true },
+      nationality: { required: true },
+      medium_of_instruction: { required: true },
+    },
+  })
+
+  const layout = [
+    { columns: [{ fields: ["full_name", "name_with_initials"] }] },
+    { columns: [{ fields: ["name_with_initials_en"] }] },
+    { columns: [{ fields: ["date_of_birth"] }] },
+    { columns: [{ fields: ["gender", "nationality", "religion"] }] },
+    { columns: [{ fields: ["birth_certificate_number"] }] },
+    { columns: [{ fields: ["medium_of_instruction"] }] },
+  ]
+
+  const config: FormConfig<ChildFormData> = { fields, layout }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Step 1: Child Profile</CardTitle>
         <CardDescription>
-          Enter the child's personal details.
+          Enter the child's personal details as per the birth certificate.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -203,9 +93,15 @@ export function WizardStepChild({ defaultValues, onSave, onNext }: Props) {
           defaultValues={defaultValues}
           onSubmit={async (values) => {
             setStatus("saving")
-            await onSave(values)
-            setStatus("done")
-            navigateTimer.current = setTimeout(() => onNext(), 400)
+            try {
+              await onSave(values)
+              setStatus("done")
+              navigateTimer.current = setTimeout(() => onNext(), 400)
+            } catch (e) {
+              console.error("onSave failed:", e)
+              setStatus("idle")
+              toastApiError(e, "Failed to save. Please try again.")
+            }
           }}
           formId="wizard-step-child-form"
           hideDefaultButtons

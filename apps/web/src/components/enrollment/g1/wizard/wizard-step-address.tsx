@@ -1,9 +1,7 @@
 "use client"
 
 import { useState, useMemo, useRef, useEffect } from "react"
-import { useMutation } from "@tanstack/react-query"
-import { toast } from "sonner"
-import { presignedUploadUrlMutation } from "@/lib/api-client/@tanstack/react-query.gen"
+import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -22,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { apiClient } from "@/lib/api-client"
+import { toastApiError } from "@/lib/api-error"
 import { listAddressesOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { Address } from "@/lib/api-client/types.gen"
 import {
@@ -29,8 +28,13 @@ import {
   IconCheck,
   IconMapPin,
   IconX,
+  IconFile,
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
+import {
+  OwnershipProofDialog,
+  type OwnershipProofEntry,
+} from "./ownership-proof-dialog"
 
 export type AddressEntryValue = {
   address_id: string
@@ -39,6 +43,7 @@ export type AddressEntryValue = {
   is_primary: boolean
   ownership_proof?: string
   ownership_proof_url?: string
+  ownership_proofs?: OwnershipProofEntry[]
 }
 
 interface Props {
@@ -56,7 +61,6 @@ interface Props {
 
 const ADDRESS_TYPE_OPTIONS = ["Permanent", "Temporary"] as const
 const RESIDENCE_TYPE_OPTIONS = ["Owned", "Rented", "Relative", "Other"] as const
-const OWNERSHIP_PROOF_OPTIONS = ["Deed", "Lease", "GN Certificate", "Other"] as const
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -74,6 +78,7 @@ export function WizardStepAddress({
 }: Props) {
   const [filter, setFilter] = useState<string>("all")
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+  const [proofDialogAddressId, setProofDialogAddressId] = useState<string | null>(null)
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -82,36 +87,10 @@ export function WizardStepAddress({
     }
   }, [])
 
-  const presignedUrl = useMutation(
-    presignedUploadUrlMutation({ client: apiClient })
+  const { data: addresses = [] } = useQuery(
+    listAddressesOptions({ client: apiClient })
   )
 
-  const uploadProof = async (id: string, file: File) => {
-    try {
-      const {
-        key,
-        url: presignedUrlStr,
-        public_url,
-      } = await presignedUrl.mutateAsync({
-        body: {
-          file_name: file.name,
-          content_type: file.type,
-          file_size: file.size as unknown as bigint,
-        },
-        client: apiClient,
-      })
-      const response = await fetch(presignedUrlStr, {
-        method: "PUT",
-        body: file,
-        headers: { "Content-Type": file.type },
-      })
-      if (!response.ok) throw new Error("Upload failed")
-      onUpdate(id, "ownership_proof_url", public_url)
-      toast.success("Proof uploaded")
-    } catch (e) {
-      toastApiError(e, "Upload failed")
-    }
-  }
   const addressMap = useMemo(() => {
     const m = new Map<string, Address>()
     for (const a of addresses) m.set(a.id, a)
@@ -264,47 +243,23 @@ export function WizardStepAddress({
                       </SelectContent>
                     </Select>
 
-                    <Select
-                      value={entry.ownership_proof ?? ""}
-                      onValueChange={(val) =>
-                        onUpdate(
-                          entry.address_id,
-                          "ownership_proof",
-                          val
-                        )
-                      }
-                    >
-                      <SelectTrigger className="h-7 w-full text-xs">
-                        <SelectValue placeholder="Ownership Proof" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {OWNERSHIP_PROOF_OPTIONS.map((opt) => (
-                          <SelectItem key={opt} value={opt}>
-                            {opt}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => {
-                        const input = document.createElement("input")
-                        input.type = "file"
-                        input.accept = "image/*,.pdf"
-                        input.onchange = (e) => {
-                          const file = (e.target as HTMLInputElement).files?.[0]
-                          if (file) uploadProof(entry.address_id, file)
-                        }
-                        input.click()
-                      }}
+                      className="h-7 text-xs gap-1"
+                      onClick={() => setProofDialogAddressId(entry.address_id)}
                     >
-                      {entry.ownership_proof_url ? "Change Proof" : "Upload Proof"}
+                      {entry.ownership_proofs && entry.ownership_proofs.length > 0 ? (
+                        <>
+                          <IconFile className="size-3" />
+                          Proofs ({entry.ownership_proofs.length})
+                        </>
+                      ) : (
+                        "Upload Proof"
+                      )}
                     </Button>
 
-                    <div className="flex items-center gap-2 pt-0.5 col-span-2">
+                    <div className="flex items-center gap-2 pt-0.5">
                       <input
                         type="radio"
                         name={`primary-address-${entry.address_id}`}
@@ -365,6 +320,24 @@ export function WizardStepAddress({
           </Button>
         </div>
       </CardContent>
+
+      {proofDialogAddressId && (
+        <OwnershipProofDialog
+          open={!!proofDialogAddressId}
+          onOpenChange={(open) => {
+            if (!open) setProofDialogAddressId(null)
+          }}
+          addressId={proofDialogAddressId}
+          existingProofs={
+            selectedAddresses.find((a) => a.address_id === proofDialogAddressId)
+              ?.ownership_proofs ?? []
+          }
+          onSave={(proofs) => {
+            onUpdate(proofDialogAddressId, "ownership_proofs", proofs as unknown as string | boolean)
+            setProofDialogAddressId(null)
+          }}
+        />
+      )}
     </Card>
   )
 }
