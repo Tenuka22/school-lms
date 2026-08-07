@@ -55,7 +55,7 @@ pub async fn save_wizard_step(
         })?;
 
     match existing.enrollment_status {
-        EnrollmentStatus::Draft | EnrollmentStatus::Pending => {}
+        EnrollmentStatus::Draft | EnrollmentStatus::Pending | EnrollmentStatus::Completed => {}
         _ => {
             return Err(ApiError::BadRequest(
                 "cannot update wizard step after submission".into(),

@@ -47,6 +47,15 @@ const CATEGORY_LABELS: Record<string, string> = {
   LowIncome: "Low Income",
 }
 
+const CATEGORY_PERCENTAGES: Record<string, number> = {
+  CloseResident: 50,
+  PastPupilChild: 25,
+  Sibling: 14,
+  MOEOrUGCStaffChild: 6,
+  GovernmentTransferOfficerChild: 4,
+  OverseasArrival: 1,
+}
+
 const CRITERIA_LABELS: Record<string, Record<string, string>> = {
   CloseResident: {
     residence_duration: "Residence Duration",
@@ -127,6 +136,23 @@ export function InterviewStepSummary({
   const percentage = maxPossible > 0 ? Math.round((totalMarks / maxPossible) * 100) : 0
   const criteriaLabels = CRITERIA_LABELS[category] ?? {}
 
+  const allCategoryTotals = useMemo(() => {
+    const totals: Record<string, { scored: number; max: number; percentage: number; weighted: number }> = {}
+    let grandTotalScored = 0
+
+    for (const [catKey, max] of Object.entries(MAX_POSSIBLE)) {
+      const catMarks = marks[catKey]
+      const scored = catMarks?.totalMarks ?? 0
+      const pct = max > 0 ? Math.round((scored / max) * 100) : 0
+      const weight = CATEGORY_PERCENTAGES[catKey] ?? 0
+      const weighted = Math.round((scored / max) * weight * 100) / 100
+      totals[catKey] = { scored, max, percentage: pct, weighted }
+      grandTotalScored += weighted
+    }
+
+    return { totals, grandTotal: Math.round(grandTotalScored * 100) / 100 }
+  }, [marks])
+
   const scoreRating = useMemo(() => {
     if (percentage >= 80) return { label: "Excellent", color: "text-green-600" }
     if (percentage >= 60) return { label: "Good", color: "text-blue-600" }
@@ -199,12 +225,12 @@ export function InterviewStepSummary({
         </CardContent>
       </Card>
 
-      {/* Score Summary */}
+      {/* Score Summary - Assigned Category */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconAward className="size-4" />
-            Score Summary
+            Score Summary - Assigned Category
           </CardTitle>
           <CardDescription>
             Final scoring breakdown for the {CATEGORY_LABELS[category] ?? category} category.
@@ -274,6 +300,75 @@ export function InterviewStepSummary({
         </CardContent>
       </Card>
 
+      {/* Combined Marks Summary - All Categories */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <IconAward className="size-4" />
+            Combined Marks Summary - All Categories
+          </CardTitle>
+          <CardDescription>
+            Summary of scores across all 6 categories. The grand total shows the weighted score.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {/* Category breakdown */}
+            {Object.entries(allCategoryTotals.totals).map(([catKey, data]) => {
+              const isAssigned = catKey === category
+              const weight = CATEGORY_PERCENTAGES[catKey] ?? 0
+              return (
+                <div
+                  key={catKey}
+                  className={`rounded-lg border p-3 ${isAssigned ? "border-primary bg-primary/5" : ""}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{CATEGORY_LABELS[catKey] ?? catKey}</span>
+                      {isAssigned && <Badge variant="default" className="text-[8px]">Assigned</Badge>}
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold tabular-nums">{data.scored}</span>
+                      <span className="text-xs text-muted-foreground"> / {data.max}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">({data.percentage}%)</span>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all"
+                        style={{ width: `${Math.min(data.percentage, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  {weight > 0 && (
+                    <div className="mt-1 text-[10px] text-muted-foreground">
+                      Weight: {weight}% → Weighted: {data.weighted} pts
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+
+            {/* Grand Total */}
+            <div className="border-t pt-3">
+              <div className="flex items-center justify-between rounded-lg bg-muted/50 p-4">
+                <div>
+                  <p className="text-sm font-medium">Grand Total (Weighted)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Sum of all weighted category scores
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-4xl font-bold tabular-nums">{allCategoryTotals.grandTotal}</span>
+                  <p className="text-xs text-muted-foreground">points</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Provisional List Info */}
       <Card>
         <CardHeader>
@@ -326,8 +421,10 @@ export function InterviewStepSummary({
             <AlertDialogHeader>
               <AlertDialogTitle>Complete Interview Procedure</AlertDialogTitle>
               <AlertDialogDescription>
-                This will mark the interview as completed and save the total score of{' '}
-                <strong>{totalMarks}</strong> points. This action cannot be undone.
+                This will mark the interview as completed and save the scores. The assigned category
+                ({CATEGORY_LABELS[category] ?? category}) has a total of <strong>{totalMarks}</strong> points.
+                The grand total across all categories is <strong>{allCategoryTotals.grandTotal}</strong> weighted points.
+                This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

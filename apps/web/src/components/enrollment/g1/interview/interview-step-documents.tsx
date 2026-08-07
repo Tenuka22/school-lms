@@ -39,9 +39,7 @@ import {
   IconClipboardCheck,
   IconCloudUpload,
   IconEye,
-  IconQrcode,
 } from "@tabler/icons-react"
-import { QrUploadDialog } from "@/components/qr-upload-dialog"
 
 const DOC_TYPES: { key: string; label: string }[] = [
   { key: "BirthCertificate", label: "Birth Certificate" },
@@ -71,8 +69,6 @@ interface Props {
   onDocumentsChange?: (docs: DocumentFormData[]) => void
   onBack: () => void
   onNext: () => void
-  enrollmentId?: string
-  isAdmin?: boolean
 }
 
 export function InterviewStepDocuments({
@@ -80,16 +76,12 @@ export function InterviewStepDocuments({
   onDocumentsChange,
   onBack,
   onNext,
-  enrollmentId,
-  isAdmin,
 }: Props) {
   const [verificationState, setVerificationState] = useState<Record<string, boolean>>({})
   const [previewDoc, setPreviewDoc] = useState<DocumentFormData | null>(null)
   const [showSkipConfirm, setShowSkipConfirm] = useState(false)
   const [dragOverKey, setDragOverKey] = useState<string | null>(null)
   const [uploadingKey, setUploadingKey] = useState<string | null>(null)
-  const [qrDialogOpen, setQrDialogOpen] = useState(false)
-  const [selectedQrDocType, setSelectedQrDocType] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pendingDocType = useRef<string | null>(null)
   const docsRef = useRef(documents)
@@ -187,11 +179,6 @@ export function InterviewStepDocuments({
   const handleVerify = (docType: string, verified: boolean) => {
     setVerificationState((prev) => ({ ...prev, [docType]: verified }))
   }
-
-  const handleQrUpload = useCallback((docKey: string) => {
-    setSelectedQrDocType(docKey)
-    setQrDialogOpen(true)
-  }, [])
 
   const allRequiredVerified = REQUIRED_TYPES.every((docType) => {
     const hasDoc = docMap.has(docType)
@@ -332,19 +319,6 @@ export function InterviewStepDocuments({
                                 <p className="text-xs text-muted-foreground">
                                   Click or drag to upload
                                 </p>
-                                {enrollmentId && isAdmin && (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      handleQrUpload(docType)
-                                    }}
-                                    className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline"
-                                  >
-                                    <IconQrcode className="size-3" />
-                                    Upload from phone
-                                  </button>
-                                )}
                               </>
                             )}
                           </div>
@@ -507,14 +481,6 @@ export function InterviewStepDocuments({
         </AlertDialogContent>
       </AlertDialog>
 
-      {enrollmentId && (
-        <QrUploadDialog
-          open={qrDialogOpen}
-          onOpenChange={setQrDialogOpen}
-          docType={selectedQrDocType}
-          enrollmentId={enrollmentId}
-        />
-      )}
     </>
   )
 }

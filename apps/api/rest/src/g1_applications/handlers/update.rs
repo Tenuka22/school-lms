@@ -70,7 +70,7 @@ pub async fn update_application(
         .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
 
     match existing.enrollment_status {
-        EnrollmentStatus::Draft | EnrollmentStatus::Pending => {}
+        EnrollmentStatus::Draft | EnrollmentStatus::Pending | EnrollmentStatus::Completed => {}
         _ => {
             return Err(ApiError::BadRequest(
                 "cannot update application in current status".into(),

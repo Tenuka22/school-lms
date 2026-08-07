@@ -1,9 +1,9 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import { Slider } from "@/components/ui/slider"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Card,
@@ -11,18 +11,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import type { InterviewMarks } from "./interview-shell"
 import type { Guardian, Address, Student } from "@/lib/api-client/types.gen"
+import type { G1Application } from "@/lib/api-client/types.gen"
+import type { ChildFormData } from "../wizard/wizard-step-child"
 import type { DocumentFormData } from "../wizard/wizard-step-documents"
+import { FieldControl } from "@/lib/form-builder"
 import {
   IconNote,
+  IconUser,
+  IconHome,
+  IconSchool,
+  IconUsers,
+  IconFileText,
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconSparkles,
 } from "@tabler/icons-react"
 
 type CriterionOption = { value: number; label: string; labelSi?: string }
@@ -40,6 +45,7 @@ type Criterion = {
 
 type CategoryConfig = {
   label: string
+  labelSi: string
   percentage: string
   circularRef: string
   criteria: Criterion[]
@@ -48,6 +54,7 @@ type CategoryConfig = {
 const CATEGORY_CRITERIA: Record<string, CategoryConfig> = {
   CloseResident: {
     label: "Close Resident",
+    labelSi: "ආසන්න පදිංචිකරු",
     percentage: "50%",
     circularRef: "7.2",
     criteria: [
@@ -108,6 +115,7 @@ const CATEGORY_CRITERIA: Record<string, CategoryConfig> = {
   },
   PastPupilChild: {
     label: "Past Pupil / Alumni",
+    labelSi: "ආදි ශිෂ්‍ය",
     percentage: "25%",
     circularRef: "7.3",
     criteria: [
@@ -151,6 +159,7 @@ const CATEGORY_CRITERIA: Record<string, CategoryConfig> = {
   },
   Sibling: {
     label: "Sibling of Current Student",
+    labelSi: "වර්තමාන සිසුවෙකුගේ සහෝදරයා",
     percentage: "14%",
     circularRef: "7.4",
     criteria: [
@@ -244,6 +253,7 @@ const CATEGORY_CRITERIA: Record<string, CategoryConfig> = {
   },
   MOEOrUGCStaffChild: {
     label: "MOE / UGC Staff Child",
+    labelSi: "MOE / UGC සේවක දරුවා",
     percentage: "6%",
     circularRef: "7.5",
     criteria: [
@@ -318,6 +328,7 @@ const CATEGORY_CRITERIA: Record<string, CategoryConfig> = {
   },
   GovernmentTransferOfficerChild: {
     label: "Govt Transfer Officer Child",
+    labelSi: "රජයේ මාරු නිලධාරියාගේ දරුවා",
     percentage: "4%",
     circularRef: "7.6",
     criteria: [
@@ -396,6 +407,7 @@ const CATEGORY_CRITERIA: Record<string, CategoryConfig> = {
   },
   OverseasArrival: {
     label: "Overseas Arrival",
+    labelSi: "විදේශ පැමිණීම",
     percentage: "1%",
     circularRef: "7.7",
     criteria: [
@@ -440,222 +452,841 @@ const CATEGORY_CRITERIA: Record<string, CategoryConfig> = {
   },
 }
 
-function ScoringSlider({
-  value,
-  onChange,
-  max,
-}: {
-  value: number
-  onChange: (v: number) => void
-  max: number
-}) {
-  return (
-    <div className="space-y-1">
-      <input
-        type="range"
-        min={0}
-        max={max}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-primary"
-      />
-      <div className="flex justify-between text-[10px] text-muted-foreground">
-        <span>0</span>
-        <span>{max}</span>
-      </div>
-    </div>
-  )
-}
+const CATEGORY_ORDER = [
+  "CloseResident",
+  "PastPupilChild",
+  "Sibling",
+  "MOEOrUGCStaffChild",
+  "GovernmentTransferOfficerChild",
+  "OverseasArrival",
+]
+
+const RESIDENCE_DOC_TYPES = new Set([
+  "ResidenceProof",
+  "ElectoralProof",
+  "BirthCertificate",
+  "GuardianNIC",
+  "MarriageCert",
+  "IncomeCertificate",
+  "Other",
+])
 
 interface Props {
-  category: string
-  marks: Record<string, InterviewMarks>
+  application: G1Application
+  child: ChildFormData
   guardians: Guardian[]
   addresses: Array<{ address_id: string; address_type: string; residence_type: string; is_primary: boolean }>
   allAddresses: Address[]
   siblings: Student[]
   schools: Array<{ id: string; name_si?: string | null; name_en?: string | null }>
   documents: DocumentFormData[]
+  marks: Record<string, InterviewMarks>
   onMarkChange: (category: string, subCriterion: string, marks: number) => void
   onNotesChange: (category: string, notes: string) => void
+  currentCategoryIndex: number
+  onCategoryChange: (index: number) => void
   onBack: () => void
   onNext: () => void
 }
 
 export function InterviewStepCategoryScoring({
-  category,
+  application,
+  child,
+  guardians,
+  addresses,
+  allAddresses,
+  siblings,
+  schools,
+  documents,
   marks,
   onMarkChange,
   onNotesChange,
+  currentCategoryIndex,
+  onCategoryChange,
   onBack,
   onNext,
 }: Props) {
-  const categoryConfig = CATEGORY_CRITERIA[category]
-  const currentMarks = marks[category] || {
-    category,
-    subCriteria: {},
-    totalMarks: 0,
-    notes: "",
+  const currentCategoryKey = CATEGORY_ORDER[currentCategoryIndex]
+  const currentConfig = CATEGORY_CRITERIA[currentCategoryKey]
+  const currentMarks = marks[currentCategoryKey]
+  const totalScored = currentMarks?.totalMarks ?? 0
+  const totalMax = currentConfig?.criteria.reduce((sum, c) => sum + c.maxMarks, 0) ?? 0
+
+  const addressMap = useMemo(() => new Map(allAddresses.map((a) => [a.id, a])), [allAddresses])
+  const primaryAddress = useMemo(() => {
+    const entry = addresses.find((e) => e.is_primary) ?? addresses[0]
+    if (!entry) return null
+    return addressMap.get(entry.address_id) ?? null
+  }, [addresses, addressMap])
+
+  const preferredSchools = useMemo(() => {
+    const ids = Array.isArray(application.preferred_school_ids) ? (application.preferred_school_ids as string[]) : []
+    return ids
+      .map((id) => schools.find((s) => s.id === id))
+      .filter((s): s is NonNullable<typeof s> => !!s)
+  }, [application.preferred_school_ids, schools])
+
+  const autoCalculatedDefaults = useMemo(() => {
+    const defaults: Record<string, Record<string, number>> = {}
+
+    const residenceDocCount = documents.filter(
+      (d) => RESIDENCE_DOC_TYPES.has(d.doc_type) && d.status === "uploaded"
+    ).length
+    const closeResidentSupportingDocs = Math.min(residenceDocCount, 5)
+
+    const highestSiblingGrade = siblings.reduce(
+      (max, s) => Math.max(max, s.current_grade ?? 0),
+      0
+    )
+    const siblingGradesScore = Math.min(highestSiblingGrade * 2, 20)
+    const multipleSiblingsScore = siblings.length >= 2 ? 5 : 0
+
+    defaults.CloseResident = {
+      supporting_documents: closeResidentSupportingDocs,
+    }
+    defaults.Sibling = {
+      sibling_grades: siblingGradesScore,
+      multiple_siblings: multipleSiblingsScore,
+    }
+
+    return defaults
+  }, [documents, siblings])
+
+  const defaultsAppliedRef = useRef(false)
+
+  useEffect(() => {
+    if (defaultsAppliedRef.current) return
+    let changed = false
+    for (const [catKey, criteria] of Object.entries(autoCalculatedDefaults)) {
+      for (const [criterionKey, defaultValue] of Object.entries(criteria)) {
+        if (defaultValue > 0) {
+          const existing = marks[catKey]?.subCriteria[criterionKey]
+          if (existing === undefined || existing === 0) {
+            onMarkChange(catKey, criterionKey, defaultValue)
+            changed = true
+          }
+        }
+      }
+    }
+    if (changed) defaultsAppliedRef.current = true
+  }, [autoCalculatedDefaults, marks, onMarkChange])
+
+  const isAutoCalculated = (catKey: string, criterionKey: string): boolean => {
+    const defaults = autoCalculatedDefaults[catKey]
+    if (!defaults || !(criterionKey in defaults)) return false
+    const val = defaults[criterionKey]
+    const current = marks[catKey]?.subCriteria[criterionKey]
+    return val > 0 && current === val
   }
 
-  const totalPossible = useMemo(() => {
-    if (!categoryConfig) return 0
-    return categoryConfig.criteria.reduce((sum, c) => sum + c.maxMarks, 0)
-  }, [categoryConfig])
-
-  if (!categoryConfig) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-xl font-semibold">Category Scoring</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            No category assigned. Please assign a category first.
-          </p>
-        </div>
-        <div className="flex justify-start border-t pt-4">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-        </div>
-      </div>
-    )
+  const docTypeLabels: Record<string, string> = {
+    BirthCertificate: "Birth Certificate",
+    GuardianNIC: "Guardian NIC",
+    ResidenceProof: "Residence Proof",
+    ElectoralProof: "Electoral / Voter Registration",
+    SiblingSchoolCertificate: "Sibling School Certificate",
+    StaffAppointmentLetter: "Staff Appointment Letter",
+    StaffServiceCertificate: "Staff Service Certificate",
+    AlumniCertificate: "Alumni Certificate",
+    GovtEmployeeCertificate: "Govt Employee Certificate",
+    IncomeCertificate: "Income Certificate",
+    DisabilityCertificate: "Disability Certificate",
+    BaptismCertificate: "Baptism Certificate",
+    MarriageCert: "Marriage Certificate",
+    Other: "Other Document",
   }
 
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-semibold">
-          {categoryConfig.label}
-          <span className="ml-2 text-sm font-normal text-muted-foreground">
-            ({categoryConfig.percentage} of seats)
-          </span>
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Per circular section {categoryConfig.circularRef}, max score is 100 points.
-          <span className="ml-1 text-xs">
-            චක්‍රලේඛ වගුව {categoryConfig.circularRef} යටතේ උපරිම ලකුණු 100.
-          </span>
-        </p>
-      </div>
+      <div className="flex gap-6">
+        {/* Left Sidebar - Context-Specific Data */}
+        <div className="w-72 shrink-0 space-y-3 overflow-y-auto border-r pr-4" style={{ maxHeight: "calc(100vh - 200px)" }}>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {currentConfig?.label} Data
+          </h3>
 
-      {/* Current Total */}
-      <div className="flex items-center justify-between rounded-lg border bg-card p-4">
-        <div>
-          <p className="text-sm font-medium">Current Total</p>
-          <p className="text-xs text-muted-foreground">Out of {totalPossible}</p>
-        </div>
-        <div className="text-right">
-          <span className="text-3xl font-bold tabular-nums">{currentMarks.totalMarks}</span>
-          <span className="text-sm text-muted-foreground"> / {totalPossible}</span>
-        </div>
-      </div>
+          {/* Child Info - Always shown */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <IconUser className="size-4" />
+                Child
+                <span className="text-xs font-normal text-muted-foreground">(ළමයා)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div>
+                <p className="text-xs font-semibold">{child.full_name || "Not provided"}</p>
+                <p className="text-[10px] text-muted-foreground">{child.name_with_initials}</p>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant="secondary" className="text-[9px]">{child.gender}</Badge>
+                <Badge variant="secondary" className="text-[9px]">{child.nationality}</Badge>
+                {child.religion && <Badge variant="secondary" className="text-[9px]">{child.religion}</Badge>}
+                <Badge variant="secondary" className="text-[9px]">{child.medium_of_instruction}</Badge>
+              </div>
+              <div className="text-[10px] text-muted-foreground space-y-0.5">
+                <p>DOB: {child.date_of_birth}</p>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Scoring Criteria */}
-      <div className="space-y-4">
-        {categoryConfig.criteria.map((criterion, index) => {
-          const currentScore = currentMarks.subCriteria[criterion.key] || 0
-
-          return (
-            <Card key={criterion.key}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
+          {/* Close Resident specific: Address, Electoral & Guardians */}
+          {currentCategoryKey === "CloseResident" && (
+            <>
+              <Card>
+                <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-sm">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                      {index + 1}
-                    </span>
-                    <span>
-                      {criterion.label}
-                      <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                        {criterion.labelSi}
-                      </span>
-                    </span>
+                    <IconHome className="size-4" />
+                    Primary Address
+                    <span className="text-xs font-normal text-muted-foreground">(ලිපිනය)</span>
                   </CardTitle>
-                  <Badge variant="outline" className="text-[10px]">
-                    Max: {criterion.maxMarks}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {/* Instructions */}
-                <div className="rounded-md bg-muted/50 px-3 py-2">
-                  <p className="text-xs text-muted-foreground">{criterion.description}</p>
-                  <p className="mt-0.5 text-[11px] text-blue-600 dark:text-blue-400">
-                    {criterion.descriptionSi}
-                  </p>
-                </div>
-
-                {/* Scoring Input */}
-                {criterion.type === "select" && criterion.options ? (
-                  <Select
-                    value={String(currentScore)}
-                    onValueChange={(v) => onMarkChange(category, criterion.key, Number(v))}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select score..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {criterion.options.map((opt) => (
-                        <SelectItem key={opt.value} value={String(opt.value)}>
-                          {opt.label}
-                          {opt.labelSi && (
-                            <span className="ml-1 text-xs text-muted-foreground">({opt.labelSi})</span>
-                          )}
-                        </SelectItem>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {primaryAddress ? (
+                    <>
+                      <div>
+                        <p className="text-xs font-medium">{primaryAddress.address_line_1}</p>
+                        {primaryAddress.address_line_2 && <p className="text-[10px] text-muted-foreground">{primaryAddress.address_line_2}</p>}
+                        <p className="text-[10px] text-muted-foreground">{primaryAddress.city}, {primaryAddress.district}, {primaryAddress.province}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {primaryAddress.residence_type && <Badge variant="outline" className="text-[9px]">{primaryAddress.residence_type}</Badge>}
+                        {primaryAddress.distance_to_school_km && (
+                          <Badge variant="secondary" className="text-[9px]">{primaryAddress.distance_to_school_km} km to school</Badge>
+                        )}
+                      </div>
+                      {primaryAddress.gs_division && (
+                        <p className="text-[10px] text-muted-foreground">GS Division: {primaryAddress.gs_division}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No address on file</p>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconUsers className="size-4" />
+                    Guardians
+                    <span className="text-xs font-normal text-muted-foreground">(භාරකරුවන්)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {guardians.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No guardians</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {guardians.map((g) => (
+                        <div key={g.id} className="rounded-md border p-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-medium">{g.full_name}</span>
+                            <Badge variant="outline" className="text-[8px]">{g.relationship_type}</Badge>
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-x-2 text-[10px] text-muted-foreground">
+                            {g.nic_number && <span>NIC: {g.nic_number}</span>}
+                            {g.contact_phone && <span>Tel: {g.contact_phone}</span>}
+                          </div>
+                        </div>
                       ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min={0}
-                        max={criterion.maxMarks}
-                        value={currentScore || ""}
-                        onChange={(e) => {
-                          const val = Math.min(Math.max(0, Number(e.target.value)), criterion.maxMarks)
-                          onMarkChange(category, criterion.key, val)
-                        }}
-                        className="w-24"
-                      />
-                      <span className="text-sm text-muted-foreground">/ {criterion.maxMarks}</span>
                     </div>
-                    <ScoringSlider
-                      value={currentScore}
-                      onChange={(v) => onMarkChange(category, criterion.key, v)}
-                      max={criterion.maxMarks}
-                    />
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconFileText className="size-4" />
+                    Documents
+                    <span className="text-xs font-normal text-muted-foreground">(ලේඛන)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    {documents.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No documents uploaded</p>
+                    ) : (
+                      documents.map((doc, i) => (
+                        <div key={doc.tempId ?? i} className="flex items-center gap-1.5">
+                          {doc.status === "uploaded" ? (
+                            <IconCheck className="size-3 text-green-600" />
+                          ) : (
+                            <span className="size-3 rounded-full border border-muted-foreground/30" />
+                          )}
+                          <span className="text-[10px]">{docTypeLabels[doc.doc_type] ?? doc.doc_type}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          )
-        })}
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Past Pupil specific: School & Siblings */}
+          {currentCategoryKey === "PastPupilChild" && (
+            <>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconSchool className="size-4" />
+                    School Preferences
+                    <span className="text-xs font-normal text-muted-foreground">(පාසල් මනාප)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {preferredSchools.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">None selected</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {preferredSchools.map((school, i) => (
+                        <div key={school.id} className="flex items-center gap-2">
+                          <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">
+                            {i + 1}
+                          </span>
+                          <span className="text-xs">{school.name_si}</span>
+                          {school.name_en && <span className="text-[10px] text-muted-foreground">({school.name_en})</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconUsers className="size-4" />
+                    Siblings
+                    <span className="text-xs font-normal text-muted-foreground">(සහෝදරයින්)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {siblings.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No siblings at school</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {siblings.map((s) => (
+                        <div key={s.id} className="flex items-center justify-between">
+                          <span className="text-xs font-medium">{s.full_name}</span>
+                          <Badge variant="secondary" className="text-[9px]">Gr.{s.current_grade ?? "?"}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Sibling specific: Siblings & Address */}
+          {currentCategoryKey === "Sibling" && (
+            <>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconUsers className="size-4" />
+                    Siblings at School
+                    <span className="text-xs font-normal text-muted-foreground">(සහෝදරයින්)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {siblings.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No siblings at this school</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {siblings.map((s) => (
+                        <div key={s.id} className="rounded-md border p-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium">{s.full_name}</span>
+                            <Badge variant="secondary" className="text-[9px]">Gr.{s.current_grade ?? "?"}</Badge>
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-x-2 text-[10px] text-muted-foreground">
+                            {s.date_of_birth && <span>DOB: {s.date_of_birth}</span>}
+                            {s.gender && <span>{s.gender}</span>}
+                          </div>
+                        </div>
+                      ))}
+                      <p className="text-[10px] text-muted-foreground">
+                        {siblings.length} sibling{siblings.length > 1 ? "s" : ""} counted
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconHome className="size-4" />
+                    Address
+                    <span className="text-xs font-normal text-muted-foreground">(ලිපිනය)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {primaryAddress ? (
+                    <>
+                      <p className="text-xs font-medium">{primaryAddress.address_line_1}</p>
+                      <p className="text-[10px] text-muted-foreground">{primaryAddress.city}, {primaryAddress.district}</p>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {primaryAddress.residence_type && <Badge variant="outline" className="text-[9px]">{primaryAddress.residence_type}</Badge>}
+                        {primaryAddress.distance_to_school_km && (
+                          <Badge variant="secondary" className="text-[9px]">{primaryAddress.distance_to_school_km} km</Badge>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No address</p>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* MOE/UGC Staff specific: Address, Employment & Documents */}
+          {currentCategoryKey === "MOEOrUGCStaffChild" && (
+            <>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconHome className="size-4" />
+                    Residence
+                    <span className="text-xs font-normal text-muted-foreground">(පදිංචිය)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {primaryAddress ? (
+                    <>
+                      <p className="text-xs font-medium">{primaryAddress.address_line_1}</p>
+                      {primaryAddress.address_line_2 && <p className="text-[10px] text-muted-foreground">{primaryAddress.address_line_2}</p>}
+                      <p className="text-[10px] text-muted-foreground">{primaryAddress.city}, {primaryAddress.district}, {primaryAddress.province}</p>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {primaryAddress.residence_type && <Badge variant="outline" className="text-[9px]">{primaryAddress.residence_type}</Badge>}
+                        {primaryAddress.distance_to_school_km && (
+                          <Badge variant="secondary" className="text-[9px]">{primaryAddress.distance_to_school_km} km to school</Badge>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No address on file</p>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconUsers className="size-4" />
+                    Guardians
+                    <span className="text-xs font-normal text-muted-foreground">(භාරකරුවන්)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {guardians.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No guardians</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {guardians.map((g) => (
+                        <div key={g.id} className="flex items-center gap-2">
+                          <span className="text-xs font-medium">{g.full_name}</span>
+                          <Badge variant="outline" className="text-[8px]">{g.relationship_type}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconFileText className="size-4" />
+                    Documents
+                    <span className="text-xs font-normal text-muted-foreground">(ලේඛන)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    {documents.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No documents uploaded</p>
+                    ) : (
+                      documents.map((doc, i) => (
+                        <div key={doc.tempId ?? i} className="flex items-center gap-1.5">
+                          {doc.status === "uploaded" ? (
+                            <IconCheck className="size-3 text-green-600" />
+                          ) : (
+                            <span className="size-3 rounded-full border border-muted-foreground/30" />
+                          )}
+                          <span className="text-[10px]">{docTypeLabels[doc.doc_type] ?? doc.doc_type}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Govt Transfer specific: Address, Guardians & Documents */}
+          {currentCategoryKey === "GovernmentTransferOfficerChild" && (
+            <>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconHome className="size-4" />
+                    New Residence
+                    <span className="text-xs font-normal text-muted-foreground">(නව පදිංචිය)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {primaryAddress ? (
+                    <>
+                      <p className="text-xs font-medium">{primaryAddress.address_line_1}</p>
+                      {primaryAddress.address_line_2 && <p className="text-[10px] text-muted-foreground">{primaryAddress.address_line_2}</p>}
+                      <p className="text-[10px] text-muted-foreground">{primaryAddress.city}, {primaryAddress.district}, {primaryAddress.province}</p>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {primaryAddress.residence_type && <Badge variant="outline" className="text-[9px]">{primaryAddress.residence_type}</Badge>}
+                        {primaryAddress.distance_to_school_km && (
+                          <Badge variant="secondary" className="text-[9px]">{primaryAddress.distance_to_school_km} km to school</Badge>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No address on file</p>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconUsers className="size-4" />
+                    Guardians
+                    <span className="text-xs font-normal text-muted-foreground">(භාරකරුවන්)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {guardians.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No guardians</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {guardians.map((g) => (
+                        <div key={g.id} className="flex items-center gap-2">
+                          <span className="text-xs font-medium">{g.full_name}</span>
+                          <Badge variant="outline" className="text-[8px]">{g.relationship_type}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconFileText className="size-4" />
+                    Documents
+                    <span className="text-xs font-normal text-muted-foreground">(ලේඛන)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    {documents.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No documents uploaded</p>
+                    ) : (
+                      documents.map((doc, i) => (
+                        <div key={doc.tempId ?? i} className="flex items-center gap-1.5">
+                          {doc.status === "uploaded" ? (
+                            <IconCheck className="size-3 text-green-600" />
+                          ) : (
+                            <span className="size-3 rounded-full border border-muted-foreground/30" />
+                          )}
+                          <span className="text-[10px]">{docTypeLabels[doc.doc_type] ?? doc.doc_type}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Overseas specific: Guardians, Address & Documents */}
+          {currentCategoryKey === "OverseasArrival" && (
+            <>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconUsers className="size-4" />
+                    Guardians
+                    <span className="text-xs font-normal text-muted-foreground">(භාරකරුවන්)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {guardians.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No guardians</p>
+                  ) : (
+                    <div className="space-y-1">
+                      {guardians.map((g) => (
+                        <div key={g.id} className="flex items-center gap-2">
+                          <span className="text-xs font-medium">{g.full_name}</span>
+                          <Badge variant="outline" className="text-[8px]">{g.relationship_type}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconHome className="size-4" />
+                    Address
+                    <span className="text-xs font-normal text-muted-foreground">(ලිපිනය)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {primaryAddress ? (
+                    <>
+                      <p className="text-xs font-medium">{primaryAddress.address_line_1}</p>
+                      <p className="text-[10px] text-muted-foreground">{primaryAddress.city}, {primaryAddress.district}</p>
+                      {primaryAddress.distance_to_school_km && (
+                        <Badge variant="secondary" className="mt-1 text-[9px]">{primaryAddress.distance_to_school_km} km to school</Badge>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">No address</p>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <IconFileText className="size-4" />
+                    Documents
+                    <span className="text-xs font-normal text-muted-foreground">(ලේඛන)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-1">
+                    {documents.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No documents uploaded</p>
+                    ) : (
+                      documents.map((doc, i) => (
+                        <div key={doc.tempId ?? i} className="flex items-center gap-1.5">
+                          {doc.status === "uploaded" ? (
+                            <IconCheck className="size-3 text-green-600" />
+                          ) : (
+                            <span className="size-3 rounded-full border border-muted-foreground/30" />
+                          )}
+                          <span className="text-[10px]">{docTypeLabels[doc.doc_type] ?? doc.doc_type}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Documents - Always shown */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <IconFileText className="size-4" />
+                Documents
+                <span className="text-xs font-normal text-muted-foreground">(ලේඛන)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {documents.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No documents uploaded</p>
+              ) : (
+                <div className="space-y-1">
+                  {documents.slice(0, 5).map((doc, i) => (
+                    <div key={doc.tempId ?? i} className="flex items-center gap-2">
+                      <IconCheck className="size-3 text-green-600" />
+                      <span className="text-[11px]">{docTypeLabels[doc.doc_type] ?? doc.doc_type}</span>
+                    </div>
+                  ))}
+                  {documents.length > 5 && (
+                    <p className="text-[10px] text-muted-foreground">+{documents.length - 5} more</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Content - Scoring Section */}
+        <div className="flex-1 space-y-5 overflow-y-auto" style={{ maxHeight: "calc(100vh - 200px)" }}>
+          {/* Category Header */}
+          <div className="rounded-lg border bg-muted/30 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {currentConfig?.label}
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
+                    ({currentConfig?.labelSi})
+                  </span>
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Circular Section {currentConfig?.circularRef} — {currentConfig?.percentage} of seats
+                </p>
+                <p className="text-[11px] text-blue-600 dark:text-blue-400">
+                  චක්‍රලේඛ වගුව {currentConfig?.circularRef} — ආසනවලින් {currentConfig?.percentage}
+                </p>
+              </div>
+              <div className="text-right">
+                <span className="text-3xl font-bold tabular-nums">{totalScored}</span>
+                <span className="text-sm text-muted-foreground"> / {totalMax}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Scoring Criteria - 2 Column Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {currentConfig?.criteria.map((criterion, index) => {
+              const currentScore = currentMarks?.subCriteria[criterion.key] ?? 0
+
+              return (
+                <Card key={criterion.key}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2 text-sm">
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                          {index + 1}
+                        </span>
+                        <span className="text-xs">
+                          {criterion.label}
+                          <span className="ml-1 font-normal text-muted-foreground">
+                            {criterion.labelSi}
+                          </span>
+                        </span>
+                      </CardTitle>
+                      <Badge variant="outline" className="text-[9px]">
+                        Max: {criterion.maxMarks}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="rounded-md bg-muted/50 px-2 py-1.5">
+                      <p className="text-[10px] text-muted-foreground">{criterion.description}</p>
+                      <p className="mt-0.5 text-[10px] text-blue-600 dark:text-blue-400">
+                        {criterion.descriptionSi}
+                      </p>
+                    </div>
+
+                    {criterion.type === "select" && criterion.options ? (
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1">
+                          <FieldControl
+                            kind="select"
+                            name={criterion.key}
+                            value={String(currentScore)}
+                            label=""
+                            options={criterion.options.map((o) => ({ value: String(o.value), label: o.label }))}
+                            isInvalid={false}
+                            onValueChange={(v) => onMarkChange(currentCategoryKey, criterion.key, Number(v))}
+                            onBlur={() => {}}
+                            errors={[]}
+                            placeholder="Select..."
+                          />
+                        </div>
+                        {isAutoCalculated(currentCategoryKey, criterion.key) && (
+                          <Badge variant="secondary" className="shrink-0 gap-1 text-[9px]">
+                            <IconSparkles className="size-3" />
+                            Auto
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <FieldControl
+                            kind="number"
+                            name={criterion.key}
+                            value={currentScore || ""}
+                            label=""
+                            isInvalid={false}
+                            onValueChange={(v) => {
+                              const val = Math.min(Math.max(0, Number(v)), criterion.maxMarks)
+                              onMarkChange(currentCategoryKey, criterion.key, val)
+                            }}
+                            onBlur={() => {}}
+                            errors={[]}
+                            inputProps={{ min: 0, max: criterion.maxMarks }}
+                          />
+                          <span className="text-xs text-muted-foreground">/ {criterion.maxMarks}</span>
+                          {isAutoCalculated(currentCategoryKey, criterion.key) && (
+                            <Badge variant="secondary" className="shrink-0 gap-1 text-[9px]">
+                              <IconSparkles className="size-3" />
+                              Auto
+                            </Badge>
+                          )}
+                        </div>
+                        <Slider
+                          value={[currentScore]}
+                          onValueChange={(v) => {
+                            const val = Array.isArray(v) ? v[0] : v
+                            onMarkChange(currentCategoryKey, criterion.key, val ?? 0)
+                          }}
+                          min={0}
+                          max={criterion.maxMarks}
+                          step={1}
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+
+          {/* Notes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <IconNote className="size-4" />
+                Interview Notes
+                <span className="text-xs font-normal text-muted-foreground">(සම්මුඛ සටහන්)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={currentMarks?.notes ?? ""}
+                onChange={(e) => onNotesChange(currentCategoryKey, e.target.value)}
+                placeholder="Record observations from the interview panel..."
+                rows={3}
+              />
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      {/* Notes */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <IconNote className="size-4" />
-            Interview Notes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={currentMarks.notes}
-            onChange={(e) => onNotesChange(category, e.target.value)}
-            placeholder="Record observations from the interview panel..."
-            rows={3}
-          />
-        </CardContent>
-      </Card>
-
+      {/* Navigation */}
       <div className="flex items-center justify-between border-t pt-4">
         <Button variant="outline" onClick={onBack}>
           Back
         </Button>
-        <Button onClick={onNext}>
-          Proceed to Summary
-        </Button>
+        <div className="flex gap-2">
+          {currentCategoryIndex > 0 && (
+            <Button
+              variant="outline"
+              onClick={() => onCategoryChange(currentCategoryIndex - 1)}
+            >
+              <IconChevronLeft className="mr-1 size-4" />
+              Previous
+            </Button>
+          )}
+          {currentCategoryIndex < CATEGORY_ORDER.length - 1 ? (
+            <Button
+              onClick={() => onCategoryChange(currentCategoryIndex + 1)}
+            >
+              Next
+              <IconChevronRight className="ml-1 size-4" />
+            </Button>
+          ) : (
+            <Button onClick={onNext}>
+              Proceed to Summary
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

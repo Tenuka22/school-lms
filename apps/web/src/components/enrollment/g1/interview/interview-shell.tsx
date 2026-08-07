@@ -8,6 +8,7 @@ import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import {
   getApplicationOptions,
+  getApplicationQueryKey,
   getApplicationGuardiansOptions,
   getApplicationAddressesOptions,
   getApplicationSiblingsOptions,
@@ -18,15 +19,23 @@ import {
   listStudentsOptions,
   listSchoolsOptions,
   updateApplicationMutation,
+  saveWizardStepMutation,
   listApplicationsQueryKey,
-  meOptions,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import type { Student } from "@/lib/api-client/types.gen"
 import type { ChildFormData } from "../wizard/wizard-step-child"
 import type { DocumentFormData } from "../wizard/wizard-step-documents"
 import { Button } from "@/components/ui/button"
-import { IconArrowLeft } from "@tabler/icons-react"
+import {
+  IconArrowLeft,
+  IconHome,
+  IconSchool,
+  IconUsers,
+  IconBuilding,
+  IconClipboard,
+  IconPlane,
+} from "@tabler/icons-react"
 import { InterviewStepOverview } from "./interview-step-overview"
 import { InterviewStepDocuments } from "./interview-step-documents"
 import { InterviewStepCategoryScoring } from "./interview-step-category-scoring"
@@ -40,6 +49,15 @@ export type InterviewMarks = {
 }
 
 const STEPS = ["Overview", "Document Verification", "Category Scoring", "Summary & Completion"]
+
+const CATEGORY_CONFIGS = [
+  { key: "CloseResident", label: "Close Resident", icon: IconHome, color: "text-green-600", bg: "bg-green-500", border: "border-green-500", hoverBg: "hover:bg-green-50 dark:hover:bg-green-950/20" },
+  { key: "PastPupilChild", label: "Past Pupil", icon: IconSchool, color: "text-blue-600", bg: "bg-blue-500", border: "border-blue-500", hoverBg: "hover:bg-blue-50 dark:hover:bg-blue-950/20" },
+  { key: "Sibling", label: "Sibling", icon: IconUsers, color: "text-purple-600", bg: "bg-purple-500", border: "border-purple-500", hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-950/20" },
+  { key: "MOEOrUGCStaffChild", label: "MOE/UGC", icon: IconBuilding, color: "text-orange-600", bg: "bg-orange-500", border: "border-orange-500", hoverBg: "hover:bg-orange-50 dark:hover:bg-orange-950/20" },
+  { key: "GovernmentTransferOfficerChild", label: "Govt Transfer", icon: IconClipboard, color: "text-red-600", bg: "bg-red-500", border: "border-red-500", hoverBg: "hover:bg-red-50 dark:hover:bg-red-950/20" },
+  { key: "OverseasArrival", label: "Overseas", icon: IconPlane, color: "text-teal-600", bg: "bg-teal-500", border: "border-teal-500", hoverBg: "hover:bg-teal-50 dark:hover:bg-teal-950/20" },
+]
 
 export function InterviewShell() {
   const params = useParams({
@@ -96,9 +114,6 @@ export function InterviewShell() {
     listSchoolsOptions({ client: apiClient })
   )
 
-  const { data: currentUser } = useQuery(meOptions({ client: apiClient }))
-  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "superadmin"
-
   const { data: childRecord } = useQuery({
     ...getChildOptions({ path: { id: application?.child_id ?? "" }, client: apiClient }),
     enabled: !!application?.child_id,
@@ -108,9 +123,16 @@ export function InterviewShell() {
     updateApplicationMutation({ client: apiClient })
   )
 
+  const saveWizardStep = useMutation(saveWizardStepMutation({ client: apiClient }))
+
   const [step, setStep] = useState(() => {
     const saved = application?.wizard_step ?? 1
     return saved > STEPS.length ? 1 : saved
+  })
+  const [categoryStep, setCategoryStep] = useState(() => {
+    const catOrder = ["CloseResident", "PastPupilChild", "Sibling", "MOEOrUGCStaffChild", "GovernmentTransferOfficerChild", "OverseasArrival"]
+    const idx = catOrder.indexOf(application?.category ?? "")
+    return idx >= 0 ? idx : 0
   })
   const [interviewDate, setInterviewDate] = useState<string>(
     application?.interview_date ?? new Date().toISOString().split("T")[0]
@@ -121,22 +143,35 @@ export function InterviewShell() {
       const s = application.wizard_step
       setStep(s > STEPS.length ? 1 : s)
     }
+    if (application?.category) {
+      const catOrder = ["CloseResident", "PastPupilChild", "Sibling", "MOEOrUGCStaffChild", "GovernmentTransferOfficerChild", "OverseasArrival"]
+      const idx = catOrder.indexOf(application.category)
+      if (idx >= 0) setCategoryStep(idx)
+    }
     if (application?.interview_date) setInterviewDate(application.interview_date)
-  }, [application?.wizard_step, application?.interview_date])
+  }, [application?.wizard_step, application?.category, application?.interview_date])
 
   const saveStep = useCallback(
     async (newStep: number) => {
+      const appKey = getApplicationQueryKey({
+        path: { id: enrollmentId },
+        client: apiClient,
+      })
+      queryClient.setQueryData(appKey, (old: any) =>
+        old ? { ...old, wizard_step: newStep } : old
+      )
       setStep(newStep)
       try {
-        await updateApplication.mutateAsync({
+        await saveWizardStep.mutateAsync({
           path: { id: enrollmentId },
           body: { wizard_step: newStep },
         })
+        queryClient.invalidateQueries({ queryKey: appKey })
       } catch {
         // silent — step will be lost on refresh but data is intact
       }
     },
-    [enrollmentId, updateApplication]
+    [enrollmentId, saveWizardStep]
   )
 
   const selectedGuardians = useMemo(() => {
@@ -255,6 +290,7 @@ export function InterviewShell() {
         <h1 className="text-xl font-bold">Interview Procedure</h1>
       </div>
 
+      {/* Main Step Bar */}
       <div className="flex items-center justify-center gap-2 pb-2">
         {STEPS.map((label, i) => {
           const stepNum = i + 1
@@ -299,6 +335,35 @@ export function InterviewShell() {
         })}
       </div>
 
+      {/* Category Sub-Step Bar (only when on step 3) */}
+      {step === 3 && (
+        <div className="flex items-center justify-center gap-2 border-t pt-3">
+          {CATEGORY_CONFIGS.map((cat, catIdx) => {
+            const CatIcon = cat.icon
+            const isCatActive = catIdx === categoryStep
+            const isAssigned = cat.key === application?.category
+            return (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => setCategoryStep(catIdx)}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all ${
+                  isCatActive
+                    ? `border-2 ${cat.border} ${cat.color} font-semibold shadow-sm`
+                    : `border-muted-foreground/20 ${cat.color} opacity-60 hover:opacity-100 ${cat.hoverBg}`
+                }`}
+              >
+                <CatIcon className="size-4" />
+                <span>{cat.label}</span>
+                {isAssigned && (
+                  <span className="ml-0.5 rounded bg-primary/10 px-1 text-[8px] font-bold text-primary">A</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       <div className="flex gap-6">
         <div className="flex-1">
           {step === 1 && (
@@ -320,22 +385,23 @@ export function InterviewShell() {
               onDocumentsChange={(docs) => setDocuments(docs)}
               onBack={() => saveStep(1)}
               onNext={() => saveStep(3)}
-              enrollmentId={enrollmentId}
-              isAdmin={isAdmin}
             />
           )}
           {step === 3 && (
             <InterviewStepCategoryScoring
-              category={application.category ?? ""}
-              marks={interviewMarks}
+              application={application}
+              child={childData}
               guardians={selectedGuardians}
               addresses={selectedAddresses}
               allAddresses={allAddresses}
               siblings={selectedSiblings}
               schools={schools}
               documents={documents}
+              marks={interviewMarks}
               onMarkChange={handleMarkChange}
               onNotesChange={handleNotesChange}
+              currentCategoryIndex={categoryStep}
+              onCategoryChange={setCategoryStep}
               onBack={() => saveStep(2)}
               onNext={() => saveStep(4)}
             />
