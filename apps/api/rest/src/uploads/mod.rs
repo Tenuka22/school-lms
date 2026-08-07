@@ -5,11 +5,13 @@ use apistos::api_operation;
 use apistos::web;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::docs::MessageResponse;
 use crate::error::ApiError;
 use crate::storage::Storage;
+use crate::FrontendUrl;
 use db::rbac::Permission;
 
 #[derive(Debug, Deserialize, JsonSchema, apistos::ApiComponent)]
@@ -158,6 +160,118 @@ pub async fn delete_upload(
     }))
 }
 
+#[derive(Debug, Deserialize, JsonSchema, apistos::ApiComponent)]
+pub struct QrSessionRequest {
+    pub doc_type: String,
+    pub enrollment_id: String,
+}
+
+#[derive(Debug, Serialize, JsonSchema, apistos::ApiComponent)]
+pub struct QrSessionResponse {
+    pub session_id: String,
+    pub upload_url: String,
+}
+
+#[api_operation(tag = "uploads", operation_id = "create-qr-upload-session")]
+pub async fn create_qr_session(
+    auth: AuthenticatedUser,
+    body: Json<QrSessionRequest>,
+    frontend_url: actix_web::web::Data<FrontendUrl>,
+) -> Result<Json<QrSessionResponse>, ApiError> {
+    auth.require_permission(Permission::FileUpload)
+        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+
+    let req = body.into_inner();
+    let session_id = Uuid::new_v4().to_string();
+
+    let base_url = frontend_url.0.trim_end_matches('/');
+    let upload_url = format!(
+        "{}/qr-upload?session={}&doc_type={}&enrollment_id={}",
+        base_url,
+        urlencoding::encode(&session_id),
+        urlencoding::encode(&req.doc_type),
+        urlencoding::encode(&req.enrollment_id),
+    );
+
+    Ok(Json(QrSessionResponse {
+        session_id,
+        upload_url,
+    }))
+}
+
+#[derive(Debug, Deserialize, JsonSchema, apistos::ApiComponent)]
+pub struct QrUploadQuery {
+    pub session: String,
+}
+
+#[derive(Debug, MultipartForm, schemars::JsonSchema, apistos::ApiComponent)]
+pub struct QrUploadForm {
+    #[schemars(skip)]
+    pub file: TempFile,
+}
+
+#[derive(Serialize, schemars::JsonSchema, apistos::ApiComponent)]
+pub struct QrUploadResponse {
+    pub key: String,
+    pub public_url: String,
+    pub file_name: String,
+    pub content_type: String,
+    pub file_size: i64,
+}
+
+#[api_operation(tag = "uploads", operation_id = "qr-upload-file")]
+pub async fn qr_upload_file(
+    storage: actix_web::web::Data<Storage>,
+    MultipartForm(form): MultipartForm<QrUploadForm>,
+    query: actix_web::web::Query<QrUploadQuery>,
+) -> Result<Json<QrUploadResponse>, ApiError> {
+    let _session = &query.session;
+
+    let file = form.file;
+    let file_name = file
+        .file_name
+        .clone()
+        .unwrap_or_else(|| "upload.bin".to_string());
+
+    let size = file.size;
+    if size == 0 {
+        return Err(ApiError::BadRequest("empty file".into()));
+    }
+    if size > 25 * 1024 * 1024 {
+        return Err(ApiError::BadRequest("file exceeds 25MB limit".into()));
+    }
+
+    let data = std::fs::read(&file.file.path()).map_err(|e| {
+        log::error!("failed to read uploaded temp file: {e}");
+        ApiError::Internal("failed to read upload".into())
+    })?;
+
+    let content_type = file
+        .content_type
+        .map(|m| m.to_string())
+        .unwrap_or_else(|| "application/octet-stream".to_string());
+
+    let key = format!("{}-{}", uuid::Uuid::new_v4(), sanitize_filename(&file_name));
+
+    storage
+        .put_object(&key, data, &content_type)
+        .await
+        .map_err(|e| {
+            log::error!("minio put_object failed: {e}");
+            ApiError::Internal("upload failed".into())
+        })?;
+
+    let public_url = storage.public_url(&key);
+
+    Ok(Json(QrUploadResponse {
+        key,
+        public_url,
+        file_name,
+        content_type,
+        file_size: size as i64,
+    }))
+}
+
 fn sanitize_filename(name: &str) -> String {
     name.chars()
         .map(|c| {
@@ -174,4 +288,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.route("/uploads/presigned", web::post().to(presigned_upload_url));
     cfg.route("/uploads", web::post().to(upload_file));
     cfg.route("/uploads/{key}", web::delete().to(delete_upload));
+    cfg.route("/uploads/qr-session", web::post().to(create_qr_session));
+    cfg.route("/uploads/qr-upload", web::post().to(qr_upload_file));
 }

@@ -24,6 +24,8 @@ use apistos::web;
 
 pub use auth::{AuthMiddleware, Claims, JwtSecret};
 
+pub struct FrontendUrl(pub String);
+
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")

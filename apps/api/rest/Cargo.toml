@@ -25,3 +25,4 @@ aws-sdk-s3 = "1"
 uuid = { version = "1.23.5", features = ["v4"] }
 db = { path = "../db" }
 num-traits = "0.2"
+urlencoding = "2.1.3"

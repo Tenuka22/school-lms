@@ -3616,6 +3616,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
+ "urlencoding",
  "uuid 1.23.5",
 ]
 

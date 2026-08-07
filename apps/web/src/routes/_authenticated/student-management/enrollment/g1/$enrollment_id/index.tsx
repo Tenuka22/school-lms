@@ -13,7 +13,7 @@ import {
 } from "@/lib/api-client/@tanstack/react-query.gen"
 
 export const Route = createFileRoute(
-  "/_authenticated/student-management/enrollment/g1/$enrollment_id"
+  "/_authenticated/student-management/enrollment/g1/$enrollment_id/"
 )({
   loader: async ({ context, params }) => {
     const { queryClient } = context

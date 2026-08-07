@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/card"
 import { presignedUploadUrlMutation } from "@/lib/api-client/@tanstack/react-query.gen"
 import { apiClient } from "@/lib/api-client"
-import { IconFileText, IconX, IconCloudUpload } from "@tabler/icons-react"
+import { IconFileText, IconX, IconCloudUpload, IconQrcode } from "@tabler/icons-react"
 import type { Guardian } from "@/lib/api-client/types.gen"
+import { QrUploadDialog } from "@/components/qr-upload-dialog"
 
 export type DocumentFormData = {
   tempId: string
@@ -36,6 +37,8 @@ interface Props {
   onBack: () => void
   onNext: () => void
   onDocumentsChange?: (docs: DocumentFormData[]) => void
+  enrollmentId?: string
+  isAdmin?: boolean
 }
 
 const DOC_TYPES: {
@@ -65,10 +68,14 @@ export function WizardStepDocuments({
   onBack,
   onNext,
   onDocumentsChange,
+  enrollmentId,
+  isAdmin,
 }: Props) {
   const [documents, setDocuments] = useState<DocumentFormData[]>(defaultValues)
   const docsRef = useRef(documents)
   docsRef.current = documents
+  const [qrDialogOpen, setQrDialogOpen] = useState(false)
+  const [selectedQrDocType, setSelectedQrDocType] = useState<string>("")
 
   useEffect(() => {
     setDocuments(defaultValues)
@@ -223,6 +230,11 @@ export function WizardStepDocuments({
     setDragOverKey(null)
   }, [])
 
+  const handleQrUpload = useCallback((docKey: string) => {
+    setSelectedQrDocType(docKey)
+    setQrDialogOpen(true)
+  }, [])
+
   const activeDocs = DOC_TYPES.filter(
     (d) => !d.condition || d.condition(guardians)
   )
@@ -312,6 +324,19 @@ export function WizardStepDocuments({
                           ? "Uploading..."
                           : "Click or drag to upload"}
                       </p>
+                      {!isUploading && enrollmentId && isAdmin && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleQrUpload(doc.key)
+                          }}
+                          className="mt-1 flex items-center gap-1 text-xs text-primary hover:underline"
+                        >
+                          <IconQrcode className="size-3" />
+                          Upload from phone
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -329,6 +354,15 @@ export function WizardStepDocuments({
           </div>
         </CardContent>
       </Card>
+
+      {enrollmentId && (
+        <QrUploadDialog
+          open={qrDialogOpen}
+          onOpenChange={setQrDialogOpen}
+          docType={selectedQrDocType}
+          enrollmentId={enrollmentId}
+        />
+      )}
     </>
   )
 }

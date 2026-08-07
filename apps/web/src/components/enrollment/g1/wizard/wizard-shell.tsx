@@ -75,7 +75,7 @@ const STEPS = [
 
 export function WizardShell() {
   const params = useParams({
-    from: "/_authenticated/student-management/enrollment/g1/$enrollment_id",
+    from: "/_authenticated/student-management/enrollment/g1/$enrollment_id/",
   })
   const navigate = useNavigate()
   const enrollmentId = params.enrollment_id
@@ -754,6 +754,8 @@ export function WizardShell() {
                   onBack={() => setStep(6)}
                   onNext={() => setStep(8)}
                   onDocumentsChange={setDocumentData}
+                  enrollmentId={enrollmentId}
+                  isAdmin={isAdmin}
                 />
               )}
               {step === 8 && (

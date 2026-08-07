@@ -11,9 +11,9 @@ import {
   IconTrash,
   IconLoader2,
   IconDots,
-  IconExternalLink,
   IconSearch,
   IconUserPlus,
+  IconClipboardCheck,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
@@ -685,13 +685,13 @@ export function PipeDashboard() {
                   className="gap-3 pl-3 [&_svg]:size-4"
                   onClick={() =>
                     navigate({
-                      to: "/student-management/enrollment/g1/$enrollment_id",
+                      to: "/student-management/enrollment/g1/$enrollment_id/interview",
                       params: { enrollment_id: row.original.id! },
                     })
                   }
                 >
-                  <IconExternalLink className="size-4" />
-                  View Details
+                  <IconClipboardCheck className="size-4" />
+                  Interview Procedure
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="gap-3 pl-3 [&_svg]:size-4"

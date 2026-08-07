@@ -11,6 +11,7 @@ pub struct Config {
     pub server_port: u16,
     pub jwt_secret: String,
     pub frontend_url: String,
+    pub public_url: Option<String>,
     pub minio_endpoint: String,
     pub minio_access_key: String,
     #[allow(dead_code)]
@@ -39,6 +40,7 @@ impl Config {
                 .map_err(|_| "JWT_SECRET must be set (add to .env file)")?,
             frontend_url: env::var("FRONTEND_URL")
                 .unwrap_or_else(|_| "http://localhost:8000".into()),
+            public_url: env::var("PUBLIC_URL").ok(),
             minio_endpoint: env::var("MINIO_ENDPOINT")
                 .unwrap_or_else(|_| "http://localhost:9000".into()),
             minio_access_key: env::var("MINIO_ACCESS_KEY").unwrap_or_else(|_| "minioadmin".into()),
@@ -64,6 +66,7 @@ impl fmt::Display for Config {
             .field("server_port", &self.server_port)
             .field("jwt_secret", &"****")
             .field("frontend_url", &self.frontend_url)
+            .field("public_url", &self.public_url.as_deref().unwrap_or("not set"))
             .field("minio_endpoint", &self.minio_endpoint)
             .field("minio_access_key", &self.minio_access_key)
             .field("minio_bucket", &self.minio_bucket)

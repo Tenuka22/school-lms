@@ -53,6 +53,18 @@ services:
       exit 0;
       "
 
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: school-lms-ngrok-dev
+    restart: unless-stopped
+    command: "http host.docker.internal:8000"
+    ports:
+      - "4040:4040"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    profiles:
+      - tunnel
+
 volumes:
   postgres_data:
   minio_data:

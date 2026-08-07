@@ -85,6 +85,22 @@ services:
     networks:
       - lms-network
 
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: school-lms-ngrok-prod
+    restart: unless-stopped
+    command: "http web:8000"
+    ports:
+      - "4040:4040"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    depends_on:
+      - web
+    networks:
+      - lms-network
+    profiles:
+      - tunnel
+
 volumes:
   postgres_data:
   minio_data:

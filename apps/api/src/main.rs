@@ -9,6 +9,7 @@ use apistos::info::Info;
 use apistos::spec::{DefaultParameters, Spec};
 use dotenvy::from_filename;
 use rest::error::ErrorResponse;
+use rest::FrontendUrl;
 use rest::JwtSecret;
 use rest::storage::Storage;
 
@@ -77,10 +78,14 @@ async fn main() -> std::io::Result<()> {
     let jwt_data = web::Data::new(JwtSecret(jwt_secret.clone()));
     let data = web::Data::new(db.clone());
     let storage_data = web::Data::new(storage);
+    let frontend_url_data = web::Data::new(FrontendUrl(
+        cfg.public_url.clone().unwrap_or_else(|| cfg.frontend_url.clone()),
+    ));
 
     let port = cfg.server_port;
     let frontend_url = cfg.frontend_url.clone();
-    log::info!("Starting server on 0.0.0.0:{port} with allowed origin: {frontend_url}");
+    let public_url = cfg.public_url.clone().unwrap_or_else(|| frontend_url.clone());
+    log::info!("Starting server on 0.0.0.0:{port} with allowed origins: {frontend_url}, {public_url}");
 
     HttpServer::new(move || {
         let mut spec = Spec {
@@ -102,6 +107,7 @@ async fn main() -> std::io::Result<()> {
 
         let cors = Cors::default()
             .allowed_origin(&frontend_url)
+            .allowed_origin(&public_url)
             .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
             .allowed_headers(vec![
                 actix_web::http::header::AUTHORIZATION,
@@ -117,6 +123,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(data.clone())
             .app_data(jwt_data.clone())
             .app_data(storage_data.clone())
+            .app_data(frontend_url_data.clone())
             .configure(rest::configure)
             .build_with(
                 "/openapi.json",
