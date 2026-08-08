@@ -21,6 +21,8 @@ pub enum ApiError {
     Forbidden(String),
     NotFound(String),
     Conflict(String),
+    /// 409 with duplicate child records for the frontend to display
+    ConflictWithDuplicates(Vec<crate::students::handlers::create_student::DuplicateChild>),
     Internal(String),
 }
 
@@ -32,6 +34,9 @@ impl fmt::Display for ApiError {
             ApiError::Forbidden(msg) => f.write_str(msg),
             ApiError::NotFound(msg) => f.write_str(msg),
             ApiError::Conflict(msg) => f.write_str(msg),
+            ApiError::ConflictWithDuplicates(dups) => {
+                write!(f, "found {} duplicate child(ren)", dups.len())
+            }
             ApiError::Internal(msg) => f.write_str(msg),
         }
     }
@@ -57,15 +62,23 @@ impl actix_web::ResponseError for ApiError {
             ApiError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             ApiError::Forbidden(_) => StatusCode::FORBIDDEN,
             ApiError::NotFound(_) => StatusCode::NOT_FOUND,
-            ApiError::Conflict(_) => StatusCode::CONFLICT,
+            ApiError::Conflict(_) | ApiError::ConflictWithDuplicates(_) => StatusCode::CONFLICT,
             ApiError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code()).json(ErrorResponse {
-            error: self.to_string(),
-        })
+        match self {
+            ApiError::ConflictWithDuplicates(dups) => {
+                HttpResponse::build(self.status_code()).json(serde_json::json!({
+                    "error": self.to_string(),
+                    "duplicates": dups,
+                }))
+            }
+            _ => HttpResponse::build(self.status_code()).json(ErrorResponse {
+                error: self.to_string(),
+            }),
+        }
     }
 }
 

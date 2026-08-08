@@ -4,15 +4,12 @@ import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import { createBatch } from "@/lib/api-client/sdk.gen"
 import { vCreateBatchBody } from "@/lib/api-client/valibot.gen"
-import type { CreateBatchBody, EnrollmentBatch } from "@/lib/api-client/types.gen"
-import { EntityDialog } from "@/lib/form-builder"
-import type { FormConfig } from "@/lib/form-builder"
-import { useBuildForm } from "@/lib/form-builder/form-context"
+import type { EnrollmentBatch } from "@/lib/api-client/types.gen"
+import { EntityDialog, useBuildForm } from "@/lib/form-builder"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
-import {
-  FieldLabel,
-} from "@/components/ui/field"
+import { FieldLabel } from "@/components/ui/field"
+import { batchFormConfig, batchFormDefaults } from "@/components/forms/batch-form"
 
 function ReligionDistributionSection() {
   const form = useBuildForm()
@@ -105,51 +102,19 @@ export function CreateBatchDialog({
   onSuccess,
   defaultYear,
 }: CreateBatchDialogProps) {
-  const config: FormConfig<CreateBatchBody> = {
-    fields: [
-      {
-        name: "year",
-        kind: "number",
-        label: "Year",
-        placeholder: "2026",
-        required: true,
-      },
-      {
-        name: "student_allocation",
-        kind: "slider",
-        label: "Total Seats",
-        inputProps: { min: 10, max: 1000, step: 10 },
-      },
-    ],
-    layout: [
-      { columns: [{ fields: ["year"] }, { fields: ["student_allocation"] }] },
-    ],
-    renderBelowFields: () => (
-      <ReligionDistributionSection />
-    ),
-  }
-
   return (
     <EntityDialog
       open={open}
       onOpenChange={onOpenChange}
       title="Create Batch"
       description="Set up a new G1 admission batch."
-      config={config}
+      config={{
+        ...batchFormConfig,
+        renderBelowFields: () => <ReligionDistributionSection />,
+      }}
       defaultValues={{
+        ...batchFormDefaults,
         year: defaultYear ?? new Date().getFullYear(),
-        enrollment_type: "G1",
-        student_allocation: 200,
-        proximity_percentage: 50,
-        staff_percentage: 25,
-        sibling_percentage: 14,
-        alumni_percentage: 6,
-        govt_percentage: 4,
-        special_percentage: 1,
-        buddhism_percentage: 74,
-        catholicism_percentage: 12,
-        islam_percentage: 14,
-        hinduism_percentage: 0,
       }}
       valibotSchema={vCreateBatchBody}
       size="xl"

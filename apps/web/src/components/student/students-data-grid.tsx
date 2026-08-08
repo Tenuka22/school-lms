@@ -2,11 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useState, useMemo } from "react"
-import { IconSearch, IconDots, IconLoader2, IconPencil } from "@tabler/icons-react"
+import {
+  IconSearch,
+  IconDots,
+  IconLoader2,
+} from "@tabler/icons-react"
 import { apiClient } from "@/lib/api-client"
-import { listChildrenQueryKey } from "@/lib/api-client/@tanstack/react-query.gen"
-import { listChildren } from "@/lib/api-client/sdk.gen"
-
+import { listStudents } from "@/lib/api-client/sdk.gen"
 import { formatDate } from "@/lib/format"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { useDebounce } from "@/hooks/use-debounce"
@@ -21,7 +23,6 @@ import {
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
-import type { Child } from "@/lib/api-client/types.gen"
 import type {
   SortingState,
   ColumnFiltersState,
@@ -36,6 +37,25 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
+
+type StudentRow = {
+  id: string
+  child_id: string
+  created_at: string
+  full_name: string
+  name_with_initials: string
+  date_of_birth: string
+  gender: string
+  birth_certificate_number: string | null
+  nic: string | null
+  nationality: string
+  medium_of_instruction: string
+  admission_number: string | null
+  current_grade: number | null
+  phone: string | null
+  email: string | null
+  status: string
+}
 
 function EnumBadge({
   column,
@@ -56,13 +76,7 @@ function EnumBadge({
   )
 }
 
-export function ChildrenDataGrid({
-  hasStudent,
-  onEdit,
-}: {
-  hasStudent?: boolean
-  onEdit?: (child: Child) => void
-}) {
+export function StudentsDataGrid({}: { refreshKey?: number }) {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 300)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -73,21 +87,18 @@ export function ChildrenDataGrid({
     pageSize: 20,
   })
 
-  const { data: children = [], isLoading } = useQuery({
-    queryKey: [...listChildrenQueryKey({ client: apiClient }), debouncedSearch, hasStudent],
+  const { data: students = [], isLoading } = useQuery({
+    queryKey: ["listStudents", debouncedSearch],
     queryFn: async () => {
-      const { data } = await listChildren({
+      const { data } = await listStudents({
         client: apiClient,
-        query: {
-          search: debouncedSearch || undefined,
-          has_student: hasStudent ?? undefined,
-        },
+        query: { search: debouncedSearch || undefined },
       })
-      return (data ?? []) as Child[]
+      return (data ?? []) as StudentRow[]
     },
   })
 
-  const columns = useMemo<ColumnDef<Child>[]>(
+  const columns = useMemo<ColumnDef<StudentRow>[]>(
     () => [
       {
         accessorKey: "full_name",
@@ -135,96 +146,98 @@ export function ChildrenDataGrid({
         },
       },
       {
-        accessorKey: "birth_certificate_number",
+        accessorKey: "admission_number",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="BC Number" />
-        ),
-        meta: { label: "Birth Certificate Number", variant: "text" },
-      },
-      {
-        accessorKey: "nic",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="NIC" />
+          <DataTableColumnHeader column={column} label="Admission No" />
         ),
         cell: ({ row }) => (
-          <span className="text-sm">
-            {row.getValue("nic") || "—"}
+          <span className="font-mono text-xs">
+            {row.getValue("admission_number") || "—"}
           </span>
         ),
-        meta: { label: "NIC", variant: "text" },
+        meta: { label: "Admission Number", variant: "text" },
       },
       {
-        accessorKey: "nationality",
+        accessorKey: "current_grade",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Nationality" />
+          <DataTableColumnHeader column={column} label="Grade" />
         ),
-        cell: ({ row }) => (
-          <EnumBadge column="nationality" value={row.getValue("nationality") as string} />
-        ),
-        meta: {
-          label: "Nationality",
-          variant: "select",
-          options: [
-            { value: "Sri Lankan", label: "Sri Lankan" },
-            { value: "Indian", label: "Indian" },
-          ],
+        cell: ({ row }) => {
+          const val = row.getValue("current_grade") as number | null
+          return val !== null ? (
+            <span className="text-sm">Grade {val}</span>
+          ) : (
+            <span className="text-sm text-muted-foreground">—</span>
+          )
         },
+        meta: { label: "Current Grade", variant: "text" },
       },
       {
-        accessorKey: "medium_of_instruction",
+        accessorKey: "status",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Medium" />
+          <DataTableColumnHeader column={column} label="Status" />
         ),
         cell: ({ row }) => (
           <EnumBadge
-            column="medium_of_instruction"
-            value={row.getValue("medium_of_instruction") as string}
+            column="student_status"
+            value={row.getValue("status") as string}
           />
         ),
         meta: {
-          label: "Medium of Instruction",
+          label: "Status",
           variant: "select",
           options: [
-            { value: "Sinhala", label: "Sinhala" },
-            { value: "Tamil", label: "Tamil" },
+            { value: "Active", label: "Active" },
+            { value: "Inactive", label: "Inactive" },
+            { value: "Transferred", label: "Transferred" },
+            { value: "Graduated", label: "Graduated" },
           ],
         },
       },
-      ...(onEdit
-        ? [
-            {
-              id: "actions" as const,
-              enableHiding: false,
-              header: () => <span className="sr-only">Actions</span>,
-              cell: ({ row }: { row: import("@tanstack/react-table").Row<Child> }) => (
-                <div className="flex justify-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button variant="ghost" size="icon" className="size-8">
-                          <IconDots className="size-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
-                      }
-                    />
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                        <IconPencil className="mr-2 size-4" />
-                        Edit
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ),
-            },
-          ]
-        : []),
+      {
+        accessorKey: "phone",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Phone" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm">
+            {row.getValue("phone") || "—"}
+          </span>
+        ),
+        meta: { label: "Phone", variant: "text" },
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        header: () => <span className="sr-only">Actions</span>,
+        cell: () => {
+          return (
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <IconDots className="size-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem disabled>
+                    Edit (coming soon)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )
+        },
+      },
     ],
-    [onEdit]
+    []
   )
 
   const table = useReactTable({
-    data: children,
+    data: students,
     columns,
     pageCount: -1,
     onSortingChange: setSorting,
@@ -250,7 +263,7 @@ export function ChildrenDataGrid({
         <div className="relative max-w-sm flex-1">
           <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
-            placeholder="Search children..."
+            placeholder="Search students..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-8"

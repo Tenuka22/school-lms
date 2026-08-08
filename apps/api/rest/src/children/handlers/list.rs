@@ -16,6 +16,8 @@ pub struct ListChildrenQuery {
     pub birth_certificate_number: Option<String>,
     pub nic: Option<String>,
     pub full_name: Option<String>,
+    /// Filter by student status: "true" = has student record, "false" = no student record
+    pub has_student: Option<String>,
 }
 
 #[api_operation(tag = "children", operation_id = "list-children")]
@@ -54,6 +56,13 @@ pub async fn list_children(
                 .add(children::Column::BirthCertificateNumber.contains(search))
                 .add(children::Column::Nic.contains(search)),
         );
+    }
+
+    // Filter by student status
+    match query.has_student.as_deref() {
+        Some("true") => filter = filter.filter(children::Column::StudentId.is_not_null()),
+        Some("false") => filter = filter.filter(children::Column::StudentId.is_null()),
+        _ => {}
     }
 
     let items = filter.all(db.as_ref()).await?;

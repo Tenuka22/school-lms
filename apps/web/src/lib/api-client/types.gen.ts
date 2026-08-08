@@ -989,6 +989,7 @@ export type ListChildrenData = {
     query?: {
         birth_certificate_number?: string | null;
         full_name?: string | null;
+        has_student?: boolean | null;
         nic?: string | null;
         search?: string | null;
     };

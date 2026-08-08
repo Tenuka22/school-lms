@@ -1016,6 +1016,7 @@ export const vListBlacklistResponse = v.array(vBlacklist);
 export const vListChildrenQuery = v.object({
     birth_certificate_number: v.nullish(v.string()),
     full_name: v.nullish(v.string()),
+    has_student: v.nullish(v.boolean()),
     nic: v.nullish(v.string()),
     search: v.nullish(v.string())
 });

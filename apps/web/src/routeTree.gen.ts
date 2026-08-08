@@ -14,6 +14,8 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthenticatedStudentManagementIndexRouteImport } from './routes/_authenticated/student-management/index'
+import { Route as AuthenticatedStudentManagementStudentsRouteImport } from './routes/_authenticated/student-management/students'
+import { Route as AuthenticatedStudentManagementChildrenRouteImport } from './routes/_authenticated/student-management/children'
 import { Route as AuthenticatedStudentManagementEnrollmentG1IndexRouteImport } from './routes/_authenticated/student-management/enrollment/g1/index'
 import { Route as AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRouteImport } from './routes/_authenticated/student-management/enrollment/g1/$enrollment_id/index'
 import { Route as AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRouteImport } from './routes/_authenticated/student-management/enrollment/g1/$enrollment_id/interview'
@@ -43,6 +45,18 @@ const AuthenticatedStudentManagementIndexRoute =
     path: '/student-management/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedStudentManagementStudentsRoute =
+  AuthenticatedStudentManagementStudentsRouteImport.update({
+    id: '/student-management/students',
+    path: '/student-management/students',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementChildrenRoute =
+  AuthenticatedStudentManagementChildrenRouteImport.update({
+    id: '/student-management/children',
+    path: '/student-management/children',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedStudentManagementEnrollmentG1IndexRoute =
   AuthenticatedStudentManagementEnrollmentG1IndexRouteImport.update({
     id: '/student-management/enrollment/g1/',
@@ -70,6 +84,8 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
+  '/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
   '/student-management/': typeof AuthenticatedStudentManagementIndexRoute
   '/student-management/enrollment/g1/': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   '/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -79,6 +95,8 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/': typeof AuthenticatedIndexRoute
+  '/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
+  '/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
   '/student-management': typeof AuthenticatedStudentManagementIndexRoute
   '/student-management/enrollment/g1': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   '/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -90,6 +108,8 @@ export interface FileRoutesById {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
+  '/_authenticated/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
   '/_authenticated/student-management/': typeof AuthenticatedStudentManagementIndexRoute
   '/_authenticated/student-management/enrollment/g1/': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -101,6 +121,8 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/student-management/children'
+    | '/student-management/students'
     | '/student-management/'
     | '/student-management/enrollment/g1/'
     | '/student-management/enrollment/g1/$enrollment_id/interview'
@@ -110,6 +132,8 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/'
+    | '/student-management/children'
+    | '/student-management/students'
     | '/student-management'
     | '/student-management/enrollment/g1'
     | '/student-management/enrollment/g1/$enrollment_id/interview'
@@ -120,6 +144,8 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/_authenticated/'
+    | '/_authenticated/student-management/children'
+    | '/_authenticated/student-management/students'
     | '/_authenticated/student-management/'
     | '/_authenticated/student-management/enrollment/g1/'
     | '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview'
@@ -169,6 +195,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudentManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/student-management/students': {
+      id: '/_authenticated/student-management/students'
+      path: '/student-management/students'
+      fullPath: '/student-management/students'
+      preLoaderRoute: typeof AuthenticatedStudentManagementStudentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/children': {
+      id: '/_authenticated/student-management/children'
+      path: '/student-management/children'
+      fullPath: '/student-management/children'
+      preLoaderRoute: typeof AuthenticatedStudentManagementChildrenRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/student-management/enrollment/g1/': {
       id: '/_authenticated/student-management/enrollment/g1/'
       path: '/student-management/enrollment/g1'
@@ -195,6 +235,8 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedStudentManagementChildrenRoute: typeof AuthenticatedStudentManagementChildrenRoute
+  AuthenticatedStudentManagementStudentsRoute: typeof AuthenticatedStudentManagementStudentsRoute
   AuthenticatedStudentManagementIndexRoute: typeof AuthenticatedStudentManagementIndexRoute
   AuthenticatedStudentManagementEnrollmentG1IndexRoute: typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute: typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -203,6 +245,10 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedStudentManagementChildrenRoute:
+    AuthenticatedStudentManagementChildrenRoute,
+  AuthenticatedStudentManagementStudentsRoute:
+    AuthenticatedStudentManagementStudentsRoute,
   AuthenticatedStudentManagementIndexRoute:
     AuthenticatedStudentManagementIndexRoute,
   AuthenticatedStudentManagementEnrollmentG1IndexRoute:

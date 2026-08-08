@@ -45,12 +45,21 @@ const STUDENT_MANAGEMENT_NAV = {
       ],
     },
     {
-      title: "Children",
-      url: "/student-management",
+      title: "Students",
+      url: "/student-management/students",
       icon: <IconUsers />,
       isActive: true,
       items: [
-        { title: "All Children", url: "/student-management" },
+        { title: "All Students", url: "/student-management/students" },
+      ],
+    },
+    {
+      title: "Children",
+      url: "/student-management/children",
+      icon: <IconUsers />,
+      isActive: true,
+      items: [
+        { title: "All Children", url: "/student-management/children" },
       ],
     },
   ],

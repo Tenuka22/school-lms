@@ -23,9 +23,10 @@ import {
   IconCheck,
   IconMapPin,
 } from "@tabler/icons-react"
-import type { CreateAddressBody } from "@/lib/api-client/types.gen"
 import { useDebounce } from "@/hooks/use-debounce"
-import { EntityDialog, type FormConfig } from "@/lib/form-builder"
+import { EntityDialog } from "@/lib/form-builder"
+import { addressFormConfig, addressFormDefaults } from "@/components/forms/address-form"
+import type { AddressFormValues } from "@/components/forms/address-form"
 
 const PAGE_SIZE = 8
 
@@ -34,89 +35,6 @@ export type AddressEntryValue = {
   address_type: string
   residence_type: string
   is_primary: boolean
-}
-
-type CreateAddressFormData = CreateAddressBody
-
-const addressFormDefaults: CreateAddressFormData = {
-  address_line_1: "",
-  address_line_2: null,
-  city: "Galle",
-  district: "Galle",
-  province: "Southern",
-  gs_division: "",
-  postal_code: null,
-  latitude: null,
-  longitude: null,
-  distance_to_school_km: null,
-  verified_by_map: false,
-  residence_type: null,
-  ownership_proof: null,
-}
-
-const createAddressFormConfig: FormConfig<CreateAddressFormData> = {
-  fields: [
-    {
-      name: "address_line_1",
-      kind: "text",
-      label: "Address Line 1",
-      required: true,
-      placeholder: "e.g. 123 Main Street",
-    },
-    {
-      name: "address_line_2",
-      kind: "text",
-      label: "Address Line 2",
-      placeholder: "e.g. Apt 4B",
-    },
-    {
-      name: "city",
-      kind: "text",
-      label: "City",
-      required: true,
-    },
-    {
-      name: "district",
-      kind: "text",
-      label: "District",
-      required: true,
-    },
-    {
-      name: "province",
-      kind: "text",
-      label: "Province",
-      required: true,
-    },
-    {
-      name: "gs_division",
-      kind: "text",
-      label: "GS Division",
-      required: true,
-    },
-    {
-      name: "postal_code",
-      kind: "text",
-      label: "Postal Code",
-    },
-  ],
-  layout: [
-    { columns: [{ fields: ["address_line_1"], span: 12 }] },
-    { columns: [{ fields: ["address_line_2"], span: 12 }] },
-    {
-      columns: [
-        { fields: ["city"], span: 6 },
-        { fields: ["district"], span: 6 },
-      ],
-    },
-    {
-      columns: [
-        { fields: ["province"], span: 6 },
-        { fields: ["gs_division"], span: 6 },
-      ],
-    },
-    { columns: [{ fields: ["postal_code"], span: 6 }] },
-  ],
-  submitLabel: "Create Address",
 }
 
 function CreateAddressDialog({ onCreated }: { onCreated: () => void }) {
@@ -133,11 +51,11 @@ function CreateAddressDialog({ onCreated }: { onCreated: () => void }) {
         <IconPlus className="mr-1.5 size-4" />
         Create Address
       </Button>
-      <EntityDialog<CreateAddressFormData>
+      <EntityDialog<AddressFormValues>
         open={open}
         onOpenChange={setOpen}
         title="New Address"
-        config={createAddressFormConfig}
+        config={addressFormConfig}
         defaultValues={addressFormDefaults}
         onSubmit={async (values) => {
           try {
