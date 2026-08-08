@@ -986,6 +986,9 @@ export type ListChildrenData = {
     body?: never;
     path?: never;
     query?: {
+        birth_certificate_number?: string | null;
+        full_name?: string | null;
+        nic?: string | null;
         search?: string | null;
     };
     url: '/api/children';
@@ -2511,7 +2514,9 @@ export type ListPollingDivisionsResponse = ListPollingDivisionsResponses[keyof L
 export type ListGuardiansData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        search?: string | null;
+    };
     url: '/api/guardians';
 };
 

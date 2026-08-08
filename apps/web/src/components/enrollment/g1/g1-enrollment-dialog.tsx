@@ -17,10 +17,9 @@ import {
   updateApplicationMutation,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
-import { optionsFromSchema } from "@/lib/form-builder"
+import { optionsFromSchema, useBuildForm } from "@/lib/form-builder"
 import type { FormConfig } from "@/lib/form-builder"
 import { FormBuilder } from "@/lib/form-builder"
-import { useBuildForm } from "@/lib/form-builder/form-context"
 import {
   GenderSchema,
   NationalitySchema,
@@ -56,6 +55,8 @@ import {
 } from "@/components/ui/dialog"
 import type { Child, G1Application, EnrollmentBatch } from "@/lib/api-client/types.gen"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
+import { FieldWithAlert } from "@/components/enrollment/g1/field-with-alert"
+import { FormUniquenessProvider, useUniquenessBlocked } from "@/hooks/use-child-uniqueness"
 
 function getBatchYears(batches?: { year: number }[]): number[] {
   if (!batches) return []
@@ -76,7 +77,6 @@ type EnrollmentFormData = {
   medium_of_instruction: string
   religion: string | null
   birth_certificate_number: string | null
-  nic: string | null
   passport_number: string | null
   batch_id: string
 }
@@ -216,6 +216,42 @@ function BatchSelectorField({
   )
 }
 
+function EnrollmentSubmitFooter({
+  isEdit,
+  needsBatch,
+  selectedBatchYear,
+  setCreateBatchYear,
+  setCreateBatchOpen,
+}: {
+  isEdit: boolean
+  needsBatch: boolean
+  selectedBatchYear: number | undefined
+  setCreateBatchYear: (year: number | undefined) => void
+  setCreateBatchOpen: (open: boolean) => void
+}) {
+  const { isBlocked } = useUniquenessBlocked()
+  return (
+    <DialogFooter>
+      {needsBatch && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setCreateBatchYear(selectedBatchYear)
+            setCreateBatchOpen(true)
+          }}
+        >
+          <IconPlus className="mr-1.5 size-4" />
+          Create Batch
+        </Button>
+      )}
+      <Button type="submit" form="enrollment-form" disabled={isBlocked}>
+        {isEdit ? "Update" : "Create"}
+      </Button>
+    </DialogFooter>
+  )
+}
+
 interface G1EnrollmentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -272,9 +308,16 @@ export function G1EnrollmentDialog({
     fields: [
       {
         name: "full_name",
-        kind: "text",
+        kind: "custom",
         label: "Full Name",
-        placeholder: "John Doe",
+        customRenderer: () => (
+          <FieldWithAlert
+            fieldName="full_name"
+            placeholder="John Doe"
+            checkType="full_name"
+            excludeChildId={childId}
+          />
+        ),
       },
       {
         name: "name_with_initials",
@@ -309,15 +352,16 @@ export function G1EnrollmentDialog({
       },
       {
         name: "birth_certificate_number",
-        kind: "text",
+        kind: "custom",
         label: "Birth Certificate Number",
         required: true,
-      },
-      {
-        name: "nic",
-        kind: "text",
-        label: "NIC Number",
-        placeholder: "Optional (for older children)",
+        customRenderer: () => (
+          <FieldWithAlert
+            fieldName="birth_certificate_number"
+            checkType="birth_certificate_number"
+            excludeChildId={childId}
+          />
+        ),
       },
       {
         name: "passport_number",
@@ -331,7 +375,6 @@ export function G1EnrollmentDialog({
       { columns: [{ fields: ["gender", "nationality"] }] },
       { columns: [{ fields: ["medium_of_instruction", "religion"] }] },
       { columns: [{ fields: ["birth_certificate_number"] }] },
-      { columns: [{ fields: ["nic"] }] },
       { columns: [{ fields: ["passport_number"] }] },
     ],
   }
@@ -349,18 +392,18 @@ export function G1EnrollmentDialog({
               : "Fill in the details to add a new enrollment."}
           </DialogDescription>
         </DialogHeader>
-        <FormBuilder<EnrollmentFormData>
-          config={config}
-          defaultValues={{
-            full_name: "",
-            name_with_initials: "",
-            date_of_birth: "",
-            gender: "Male",
-            nationality: "SriLankan",
-            medium_of_instruction: "Sinhala",
-            religion: "Buddhism",
-            birth_certificate_number: "",
-            nic: null,
+        <FormUniquenessProvider>
+          <FormBuilder<EnrollmentFormData>
+            config={config}
+            defaultValues={{
+              full_name: "",
+              name_with_initials: "",
+              date_of_birth: "",
+              gender: "Male",
+              nationality: "SriLankan",
+              medium_of_instruction: "Sinhala",
+              religion: "Buddhism",
+              birth_certificate_number: "",
             passport_number: null,
             batch_id: enrollment?.batch_id ?? "",
           }}
@@ -377,7 +420,7 @@ export function G1EnrollmentDialog({
                   birth_certificate_number: value.birth_certificate_number || null,
                   medium_of_instruction: value.medium_of_instruction as Child['medium_of_instruction'],
                   religion: value.religion as Child['religion'],
-                  nic: value.nic || null,
+                  nic: null,
                   passport_number: value.passport_number || null,
                 } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
                 const child = await createChild.mutateAsync({
@@ -396,7 +439,7 @@ export function G1EnrollmentDialog({
                   nationality: value.nationality as Child['nationality'],
                   medium_of_instruction: value.medium_of_instruction as Child['medium_of_instruction'],
                   religion: value.religion as Child['religion'],
-                  nic: value.nic || null,
+                  nic: null,
                   passport_number: value.passport_number || null,
                 }
                 await updateChild.mutateAsync({
@@ -467,24 +510,8 @@ export function G1EnrollmentDialog({
             }}
           />
         </FormBuilder>
-        <DialogFooter>
-          {needsBatch && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setCreateBatchYear(selectedBatchYear)
-                setCreateBatchOpen(true)
-              }}
-            >
-              <IconPlus className="mr-1.5 size-4" />
-              Create Batch
-            </Button>
-          )}
-          <Button type="submit" form="enrollment-form">
-            {isEdit ? "Update" : "Create"}
-          </Button>
-        </DialogFooter>
+        <EnrollmentSubmitFooter isEdit={isEdit} needsBatch={needsBatch} selectedBatchYear={selectedBatchYear} setCreateBatchYear={setCreateBatchYear} setCreateBatchOpen={setCreateBatchOpen} />
+        </FormUniquenessProvider>
       </DialogContent>
       <CreateBatchDialog
         open={createBatchOpen}

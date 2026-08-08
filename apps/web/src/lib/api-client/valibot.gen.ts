@@ -1014,6 +1014,9 @@ export const vListBlacklistQuery = v.object({
 export const vListBlacklistResponse = v.array(vBlacklist);
 
 export const vListChildrenQuery = v.object({
+    birth_certificate_number: v.nullish(v.string()),
+    full_name: v.nullish(v.string()),
+    nic: v.nullish(v.string()),
     search: v.nullish(v.string())
 });
 
@@ -1309,6 +1312,10 @@ export const vUpdateBatchResponse = vEnrollmentBatch;
 export const vListGnDivisionsResponse = v.array(vGnDivisionEntry);
 
 export const vListPollingDivisionsResponse = v.array(vPollingDivisionEntry);
+
+export const vListGuardiansQuery = v.object({
+    search: v.nullish(v.string())
+});
 
 export const vListGuardiansResponse = v.array(vGuardian);
 

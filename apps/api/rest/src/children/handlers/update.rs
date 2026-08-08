@@ -5,7 +5,7 @@ use chrono::NaiveDate;
 use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
 use db::entity::g1::children;
 use schemars::JsonSchema;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -62,6 +62,36 @@ pub async fn update_child(
     m.birth_certificate_number = m.birth_certificate_number
         .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
         .transpose()?;
+
+    let new_bc = m.birth_certificate_number.as_deref().or(existing.birth_certificate_number.as_deref());
+    if let Some(bc) = new_bc {
+        let duplicate = children::Entity::find()
+            .filter(children::Column::BirthCertificateNumber.eq(bc))
+            .filter(children::Column::Id.ne(id))
+            .one(db.as_ref())
+            .await?;
+        if duplicate.is_some() {
+            return Err(ApiError::Conflict(format!(
+                "Another child with birth certificate number '{}' already exists",
+                bc
+            )));
+        }
+    }
+
+    let new_nic = m.nic.as_deref().or(existing.nic.as_deref());
+    if let Some(nic) = new_nic {
+        let duplicate = children::Entity::find()
+            .filter(children::Column::Nic.eq(nic))
+            .filter(children::Column::Id.ne(id))
+            .one(db.as_ref())
+            .await?;
+        if duplicate.is_some() {
+            return Err(ApiError::Conflict(format!(
+                "Another child with NIC '{}' already exists",
+                nic
+            )));
+        }
+    }
 
     let active = children::ActiveModel {
         id: Set(id),

@@ -520,6 +520,7 @@ export function WizardShell() {
               {step === 1 && (
                 <WizardStepChild
                   defaultValues={childData}
+                  excludeChildId={application?.child_id}
                   onSave={async (data) => {
                     const childPayload = {
                       full_name: data.full_name,

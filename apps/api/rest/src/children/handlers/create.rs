@@ -6,7 +6,7 @@ use chrono::{NaiveDate, Utc};
 use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
 use db::entity::g1::children;
 use schemars::JsonSchema;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -51,6 +51,32 @@ pub async fn create_child(
     data.birth_certificate_number = data.birth_certificate_number
         .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
         .transpose()?;
+
+    if let Some(ref bc) = data.birth_certificate_number {
+        let existing = children::Entity::find()
+            .filter(children::Column::BirthCertificateNumber.eq(bc.as_str()))
+            .one(db.as_ref())
+            .await?;
+        if existing.is_some() {
+            return Err(ApiError::Conflict(format!(
+                "A child with birth certificate number '{}' already exists",
+                bc
+            )));
+        }
+    }
+
+    if let Some(ref nic) = data.nic {
+        let existing = children::Entity::find()
+            .filter(children::Column::Nic.eq(nic.as_str()))
+            .one(db.as_ref())
+            .await?;
+        if existing.is_some() {
+            return Err(ApiError::Conflict(format!(
+                "A child with NIC '{}' already exists",
+                nic
+            )));
+        }
+    }
 
     let active = children::ActiveModel {
         id: Set(Uuid::new_v4()),
