@@ -51,8 +51,6 @@ pub struct Model {
     pub total_marks: Option<Decimal>,
     pub rank_number: Option<i32>,
     pub list_category: Option<ApplicationListCategory>,
-    pub waiting_position: Option<i32>,
-    pub promoted_at: Option<DateTime<Utc>>,
 
     pub submitted_at: Option<DateTime<Utc>>,
     pub verified_at: Option<DateTime<Utc>>,

@@ -44,6 +44,15 @@ const STUDENT_MANAGEMENT_NAV = {
         { title: "G1 Enrollment", url: "/student-management/enrollment/g1" },
       ],
     },
+    {
+      title: "Children",
+      url: "/student-management",
+      icon: <IconUsers />,
+      isActive: true,
+      items: [
+        { title: "All Children", url: "/student-management" },
+      ],
+    },
   ],
   projects: [],
 }

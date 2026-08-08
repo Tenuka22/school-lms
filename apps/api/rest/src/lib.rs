@@ -1,4 +1,5 @@
 mod auth;
+pub mod audit;
 mod blacklist;
 mod counter;
 pub mod docs;

@@ -3,7 +3,7 @@ use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::{NaiveDate, Utc};
-use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
+use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, StudentStatus};
 use db::entity::g1::children;
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
@@ -13,6 +13,7 @@ use uuid::Uuid;
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
+use db::entity::common::enums::AuditOperation;
 
 #[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct CreateChildBody {
@@ -43,6 +44,8 @@ pub async fn create_child(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let mut data = body.into_inner();
+    let user_id = auth.user_id;
+    let now = Utc::now();
 
     data.full_name =
         crate::validation::NonEmpty::new(data.full_name, "full_name")?.into_inner();
@@ -88,17 +91,37 @@ pub async fn create_child(
         birth_certificate_number: Set(data.birth_certificate_number),
         nic: Set(data.nic),
         passport_number: Set(data.passport_number),
+        name_with_initials_en: Set(None),
         nationality: Set(data.nationality),
         religion: Set(data.religion),
         medium_of_instruction: Set(data.medium_of_instruction),
         disability_status: Set(data.disability_status.unwrap_or(false)),
         disability_type: Set(data.disability_type),
         photo_url: Set(data.photo_url),
-        name_with_initials_en: Set(None),
-        created_at: Set(Utc::now()),
+        admission_number: Set(None),
+        admission_date: Set(None),
+        current_grade: Set(None),
+        phone: Set(None),
+        email: Set(None),
+        status: Set(StudentStatus::Active),
+        created_at: Set(now),
+        updated_at: Set(now),
+        created_by: Set(user_id),
+        updated_by: Set(user_id),
     };
 
     let saved = active.insert(db.as_ref()).await?;
+
+    crate::audit::log_child_change(
+        db.as_ref(),
+        saved.id,
+        AuditOperation::Insert,
+        None,
+        crate::audit::to_json(&saved),
+        &auth,
+        Some("child created".into()),
+    )
+    .await;
 
     Ok(CreatedJson(saved))
 }

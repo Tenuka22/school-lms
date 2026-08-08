@@ -6,8 +6,9 @@ use db::domain::batch::{Batch, Open};
 use db::entity::enrollment_batches;
 use db::entity::enums::EnrollmentType;
 use schemars::JsonSchema;
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::Deserialize;
+use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
@@ -143,6 +144,21 @@ pub async fn create_batch(
 
     let active: enrollment_batches::ActiveModel = model.into();
     let saved = active.insert(db.as_ref()).await?;
+
+    let _ = db::entity::audit_logs::ActiveModel {
+        id: Set(Uuid::new_v4()),
+        table_name: Set("enrollment_batches".to_string()),
+        record_id: Set(saved.id),
+        action: Set(db::entity::common::enums::AuditAction::Insert),
+        old_values: Set(None),
+        new_values: Set(Some(serde_json::to_value(&saved).unwrap_or_default())),
+        performed_by: Set(auth.user_id),
+        performed_at: Set(chrono::Utc::now()),
+        ip_address: Set(None),
+        reason: Set(Some(format!("batch {} created", saved.batch_code))),
+    }
+    .insert(db.as_ref())
+    .await;
 
     Ok(CreatedJson(saved))
 }

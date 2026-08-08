@@ -3,7 +3,7 @@ use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
-use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
+use db::entity::common::enums::{AuditAction, EnrollmentStatus};
 use db::entity::g1::applications;
 use log::info;
 use schemars::JsonSchema;
@@ -111,8 +111,6 @@ pub async fn update_application(
         total_marks: Set(existing.total_marks),
         rank_number: Set(existing.rank_number),
         list_category: Set(existing.list_category),
-        waiting_position: Set(existing.waiting_position),
-        promoted_at: Set(existing.promoted_at),
         submitted_at: Set(existing.submitted_at),
         verified_at: Set(existing.verified_at),
         verified_by: Set(existing.verified_by),
@@ -163,16 +161,17 @@ pub async fn update_application(
     );
     let new_json = serde_json::to_value(&saved).ok();
 
-    db::entity::g1::audit::ActiveModel {
+    db::entity::audit_logs::ActiveModel {
         id: Set(Uuid::new_v4()),
-        application_id: Set(Some(id)),
-        operation: Set(AuditOperation::Update),
-        changed_fields: Set(None),
+        table_name: Set("g1_applications".to_string()),
+        record_id: Set(id),
+        action: Set(AuditAction::Update),
         old_values: Set(old_json),
         new_values: Set(new_json),
-        changed_by: Set(auth.user_id),
-        changed_at: Set(Utc::now()),
-        context: Set(None),
+        performed_by: Set(auth.user_id),
+        performed_at: Set(Utc::now()),
+        ip_address: Set(None),
+        reason: Set(None),
     }
     .insert(db.as_ref())
     .await?;

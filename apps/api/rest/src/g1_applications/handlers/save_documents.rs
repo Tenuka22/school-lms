@@ -2,7 +2,7 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use db::domain::document::{Document, Uploaded};
-use db::entity::common::enums::G1DocumentType;
+use db::entity::common::enums::{G1DocumentType, AuditOperation};
 use db::entity::g1::{applications, documents};
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
@@ -111,6 +111,17 @@ pub async fn save_application_documents(
         active.insert(db.as_ref()).await?;
         count += 1;
     }
+
+    crate::audit::log_application_change(
+        db.as_ref(),
+        app_id,
+        AuditOperation::Update,
+        None,
+        Some(serde_json::json!({"documents_replaced": true, "new_count": count})),
+        &auth,
+        Some(format!("documents saved: {} replaced", count)),
+    )
+    .await;
 
     Ok(web::Json(SaveDocumentsResponse { count }))
 }

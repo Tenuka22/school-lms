@@ -2,7 +2,7 @@ use actix_web::{web, web::Json};
 use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
-use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
+use db::entity::common::enums::{AuditAction, BatchStatus, EnrollmentStatus};
 use db::entity::g1::applications;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use uuid::Uuid;
@@ -58,8 +58,6 @@ pub async fn delete_application(
         total_marks: Set(existing.total_marks),
         rank_number: Set(existing.rank_number),
         list_category: Set(existing.list_category),
-        waiting_position: Set(existing.waiting_position),
-        promoted_at: Set(existing.promoted_at),
         submitted_at: Set(existing.submitted_at),
         verified_at: Set(existing.verified_at),
         verified_by: Set(existing.verified_by),
@@ -105,16 +103,17 @@ pub async fn delete_application(
 
     active.update(db.as_ref()).await?;
 
-    db::entity::g1::audit::ActiveModel {
+    db::entity::audit_logs::ActiveModel {
         id: Set(Uuid::new_v4()),
-        application_id: Set(Some(id)),
-        operation: Set(AuditOperation::Delete),
-        changed_fields: Set(None),
+        table_name: Set("g1_applications".to_string()),
+        record_id: Set(id),
+        action: Set(AuditAction::Delete),
         old_values: Set(old_json),
         new_values: Set(None),
-        changed_by: Set(auth.user_id),
-        changed_at: Set(Utc::now()),
-        context: Set(None),
+        performed_by: Set(auth.user_id),
+        performed_at: Set(Utc::now()),
+        ip_address: Set(None),
+        reason: Set(None),
     }
     .insert(db.as_ref())
     .await?;

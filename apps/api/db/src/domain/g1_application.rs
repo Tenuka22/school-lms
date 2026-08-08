@@ -41,8 +41,6 @@ impl G1Application<Draft> {
             total_marks: None,
             rank_number: None,
             list_category: None,
-            waiting_position: None,
-            promoted_at: None,
             submitted_at: None,
             verified_at: None,
             verified_by: None,

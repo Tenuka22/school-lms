@@ -1,4 +1,4 @@
-use super::super::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
+use super::super::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, StudentStatus};
 use apistos::ApiComponent;
 use chrono::{DateTime, NaiveDate, Utc};
 use schemars::JsonSchema;
@@ -16,9 +16,11 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
 
+    /// Link to student record (populated on admission)
     #[serde(default)]
     pub student_id: Option<Uuid>,
 
+    // Personal identity fields
     pub full_name: String,
     pub name_with_initials: String,
     pub date_of_birth: NaiveDate,
@@ -49,8 +51,22 @@ pub struct Model {
     #[serde(default)]
     pub photo_url: Option<String>,
 
+    // Student-specific fields (moved from students table)
+    #[sea_orm(unique)]
+    pub admission_number: Option<String>,
+    pub admission_date: Option<NaiveDate>,
+    pub current_grade: Option<i16>,
+    pub phone: Option<String>,
+    pub email: Option<String>,
+    pub status: StudentStatus,
+
+    // Audit fields
     #[serde(default = "default_now")]
     pub created_at: DateTime<Utc>,
+    #[serde(default = "default_now")]
+    pub updated_at: DateTime<Utc>,
+    pub created_by: Option<Uuid>,
+    pub updated_by: Option<Uuid>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

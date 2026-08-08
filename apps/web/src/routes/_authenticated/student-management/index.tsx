@@ -1,16 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { ChildrenDataGrid } from "@/components/student/children-data-grid"
 
 export const Route = createFileRoute("/_authenticated/student-management/")({
   component: StudentManagement,
 })
 
 function StudentManagement() {
-  return (
-    <div className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-bold tracking-tight">Student Management</h1>
-      <p className="text-sm text-muted-foreground">
-        Manage students, enrollments, and academic records
-      </p>
-    </div>
-  )
+  return <ChildrenDataGrid />
 }

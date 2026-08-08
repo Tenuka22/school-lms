@@ -3,7 +3,7 @@ use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
-use db::entity::common::enums::EnrollmentStatus;
+use db::entity::common::enums::{EnrollmentStatus, AuditOperation};
 use db::entity::g1::applications;
 use log::info;
 use schemars::JsonSchema;
@@ -87,8 +87,6 @@ pub async fn save_wizard_step(
         total_marks: Set(existing.total_marks),
         rank_number: Set(existing.rank_number),
         list_category: Set(existing.list_category),
-        waiting_position: Set(existing.waiting_position),
-        promoted_at: Set(existing.promoted_at),
         submitted_at: Set(existing.submitted_at),
         verified_at: Set(existing.verified_at),
         verified_by: Set(existing.verified_by),
@@ -132,7 +130,19 @@ pub async fn save_wizard_step(
         closer_school_exists: Set(existing.closer_school_exists),
     };
 
-    active.update(db.as_ref()).await?;
+    let old_step = existing.wizard_step;
+    let _saved = active.update(db.as_ref()).await?;
+
+    crate::audit::log_application_change(
+        db.as_ref(),
+        app_id,
+        AuditOperation::Update,
+        Some(serde_json::json!({"wizard_step": old_step})),
+        Some(serde_json::json!({"wizard_step": step})),
+        &auth,
+        Some(format!("wizard step {} -> {}", old_step.unwrap_or(0), step)),
+    )
+    .await;
 
     info!("[save_wizard_step] saved successfully");
 

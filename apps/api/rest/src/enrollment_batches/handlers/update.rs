@@ -4,8 +4,8 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
 use db::domain::batch::{AppealsPeriod, Batch, Closed, ListsPublished, Open};
+use db::entity::common::enums::{BatchStatus, AuditAction};
 use db::entity::enrollment_batches;
-use db::entity::enums::BatchStatus;
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use serde::Deserialize;
@@ -212,6 +212,21 @@ pub async fn update_batch(
     };
 
     let saved = active.update(db.as_ref()).await?;
+
+    let _ = db::entity::audit_logs::ActiveModel {
+        id: Set(Uuid::new_v4()),
+        table_name: Set("enrollment_batches".to_string()),
+        record_id: Set(saved.id),
+        action: Set(AuditAction::Update),
+        old_values: Set(crate::audit::to_json(&existing)),
+        new_values: Set(crate::audit::to_json(&saved)),
+        performed_by: Set(auth.user_id),
+        performed_at: Set(chrono::Utc::now()),
+        ip_address: Set(None),
+        reason: Set(Some(format!("batch {} updated", saved.batch_code))),
+    }
+    .insert(db.as_ref())
+    .await;
 
     Ok(Json(saved))
 }

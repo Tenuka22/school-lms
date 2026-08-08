@@ -12,6 +12,7 @@ use uuid::Uuid;
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
+use db::entity::common::enums::AuditOperation;
 
 #[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct UpdateChildBody {
@@ -43,6 +44,7 @@ pub async fn update_child(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let id = id.into_inner();
+    let user_id = auth.user_id;
 
     let existing = children::Entity::find_by_id(id)
         .one(db.as_ref())
@@ -93,6 +95,8 @@ pub async fn update_child(
         }
     }
 
+    let old_json = crate::audit::to_json(&existing);
+
     let active = children::ActiveModel {
         id: Set(id),
         student_id: Set(existing.student_id),
@@ -105,6 +109,7 @@ pub async fn update_child(
         ),
         nic: Set(m.nic.or(existing.nic)),
         passport_number: Set(m.passport_number.or(existing.passport_number)),
+        name_with_initials_en: Set(existing.name_with_initials_en),
         nationality: Set(m.nationality.unwrap_or(existing.nationality)),
         religion: Set(m.religion.or(existing.religion)),
         medium_of_instruction: Set(
@@ -113,10 +118,30 @@ pub async fn update_child(
         disability_status: Set(m.disability_status.unwrap_or(existing.disability_status)),
         disability_type: Set(m.disability_type.or(existing.disability_type)),
         photo_url: Set(m.photo_url.or(existing.photo_url)),
-        name_with_initials_en: Set(existing.name_with_initials_en),
+        admission_number: Set(existing.admission_number),
+        admission_date: Set(existing.admission_date),
+        current_grade: Set(existing.current_grade),
+        phone: Set(existing.phone),
+        email: Set(existing.email),
+        status: Set(existing.status),
         created_at: Set(existing.created_at),
+        updated_at: Set(chrono::Utc::now()),
+        created_by: Set(existing.created_by),
+        updated_by: Set(user_id),
     };
 
     let saved = active.update(db.as_ref()).await?;
+
+    crate::audit::log_child_change(
+        db.as_ref(),
+        saved.id,
+        AuditOperation::Update,
+        old_json,
+        crate::audit::to_json(&saved),
+        &auth,
+        Some("child updated".into()),
+    )
+    .await;
+
     Ok(Json(saved))
 }

@@ -4,7 +4,7 @@ use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::addresses;
-use db::entity::common::enums::ResidenceType;
+use db::entity::common::enums::{ResidenceType, AuditOperation};
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
 use serde::Deserialize;
@@ -100,5 +100,17 @@ pub async fn create_address(
     };
 
     let saved = model.insert(db.as_ref()).await?;
+
+    crate::audit::log_address_change(
+        db.as_ref(),
+        saved.id,
+        AuditOperation::Insert,
+        None,
+        crate::audit::to_json(&saved),
+        &auth,
+        Some("address created".into()),
+    )
+    .await;
+
     Ok(CreatedJson(saved))
 }

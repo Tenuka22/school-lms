@@ -2,7 +2,7 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::GuardianRelationship;
+use db::entity::common::enums::AuditOperation;
 use db::entity::common::guardians;
 use db::entity::g1::applications;
 use db::entity::g1::join_guardians;
@@ -15,14 +15,6 @@ use uuid::Uuid;
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use db::rbac::Permission;
-
-fn parse_relationship(s: &str) -> GuardianRelationship {
-    match s {
-        "Father" => GuardianRelationship::Father,
-        "Mother" => GuardianRelationship::Mother,
-        _ => GuardianRelationship::Guardian,
-    }
-}
 
 #[derive(Debug, Deserialize, JsonSchema, ApiComponent)]
 pub struct SaveGuardiansRequest {
@@ -81,7 +73,7 @@ pub async fn save_guardians(
 
     let mut count = 0;
     for g in &guardians {
-        let relationship = parse_relationship(&g.relationship_type);
+        let relationship = g.relationship_type.clone();
         info!(
             "[save_guardians] inserting join guardian_id={} relationship={relationship:?} is_primary={}",
             g.id,
@@ -101,6 +93,17 @@ pub async fn save_guardians(
     }
 
     info!("[save_guardians] success count={}", count);
+
+    crate::audit::log_application_change(
+        db.as_ref(),
+        app_id,
+        AuditOperation::Update,
+        None,
+        Some(serde_json::json!({"guardian_ids": requested_ids, "count": count})),
+        &auth,
+        Some(format!("guardians saved: {} linked", count)),
+    )
+    .await;
 
     Ok(web::Json(SaveGuardiansResponse { count }))
 }

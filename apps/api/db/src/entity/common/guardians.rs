@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use super::enums::IncomeLevel;
+use super::enums::{GuardianRelationship, IncomeLevel};
 
 fn default_now() -> DateTime<Utc> {
     Utc::now()
@@ -18,7 +18,7 @@ fn default_now() -> DateTime<Utc> {
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub relationship_type: String,
+    pub relationship_type: GuardianRelationship,
     pub full_name: String,
     #[sea_orm(unique)]
     pub nic_number: String,

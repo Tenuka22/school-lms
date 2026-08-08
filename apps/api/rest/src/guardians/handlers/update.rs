@@ -2,8 +2,7 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::IncomeLevel;
-use db::entity::common::enums::StaffType;
+use db::entity::common::enums::{GuardianRelationship, IncomeLevel, StaffType, AuditOperation};
 use db::entity::common::guardians;
 use db::entity::common::past_pupil_details;
 use db::entity::common::staff_details;
@@ -18,7 +17,7 @@ use db::rbac::Permission;
 
 #[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct UpdateGuardianBody {
-    pub relationship_type: String,
+    pub relationship_type: GuardianRelationship,
     pub full_name: String,
     pub nic_number: String,
     pub contact_phone: String,
@@ -65,8 +64,6 @@ pub async fn update_guardian(
         .contact_email
         .map(|e| crate::validation::Email::new(e).map(|v| v.into_inner()))
         .transpose()?;
-    input.relationship_type =
-        crate::validation::NonEmpty::new(input.relationship_type, "relationship_type")?.into_inner();
     input.occupation = input
         .occupation
         .map(|o| crate::validation::NonEmpty::new(o, "occupation").map(|v| v.into_inner()))
@@ -84,6 +81,8 @@ pub async fn update_guardian(
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?;
+
+    let old_json = crate::audit::to_json(&existing);
 
     if input.nic_number != existing.nic_number {
         let nic_taken = guardians::Entity::find()
@@ -121,6 +120,17 @@ pub async fn update_guardian(
     };
 
     let saved = active.update(db.as_ref()).await?;
+
+    crate::audit::log_guardian_change(
+        db.as_ref(),
+        saved.id,
+        AuditOperation::Update,
+        old_json,
+        crate::audit::to_json(&saved),
+        &auth,
+        Some("guardian updated".into()),
+    )
+    .await;
 
     if input.is_school_staff {
         if let Some(school_id) = input.staff_school_id.or(input.past_pupil_school_id) {

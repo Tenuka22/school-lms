@@ -727,6 +727,7 @@ export type Student = {
     admission_date?: string | null;
     admission_number?: string | null;
     birth_certificate_number?: string | null;
+    child_id: string;
     created_at: string;
     created_by?: string | null;
     /**

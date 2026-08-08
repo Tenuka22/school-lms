@@ -6,7 +6,7 @@ use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::Utc;
 use db::domain::g1_application::{Draft, G1Application, WizardStep6, WizardStep7};
-use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
+use db::entity::common::enums::{AuditAction, BatchStatus, EnrollmentStatus};
 use db::entity::g1::applications;
 use db::entity::g1::join_guardians;
 use db::entity::enrollment_batches;
@@ -80,7 +80,7 @@ pub async fn create_application(
     let _ = create_audit_log(
         db.as_ref(),
         Some(saved.id),
-        AuditOperation::Insert,
+        AuditAction::Insert,
         None,
         serde_json::to_value(&saved).ok(),
         None,
@@ -159,8 +159,6 @@ pub async fn submit_application(
         total_marks: Set(final_model.total_marks),
         rank_number: Set(final_model.rank_number),
         list_category: Set(final_model.list_category),
-        waiting_position: Set(final_model.waiting_position),
-        promoted_at: Set(final_model.promoted_at),
         submitted_at: Set(final_model.submitted_at),
         verified_at: Set(final_model.verified_at),
         verified_by: Set(final_model.verified_by),
@@ -209,7 +207,7 @@ pub async fn submit_application(
     let _ = create_audit_log(
         db.as_ref(),
         Some(id),
-        AuditOperation::Update,
+        AuditAction::Update,
         old_json_for_status(&existing),
         new_json_for_status(&saved),
         None,
@@ -225,22 +223,23 @@ pub async fn submit_application(
 async fn create_audit_log(
     db: &DatabaseConnection,
     record_id: Option<Uuid>,
-    action: AuditOperation,
+    action: AuditAction,
     old_values: Option<serde_json::Value>,
     new_values: Option<serde_json::Value>,
     context: Option<String>,
     auth: AuthenticatedUser,
-) -> Result<db::entity::g1::audit::Model, sea_orm::DbErr> {
-    let log = db::entity::g1::audit::ActiveModel {
+) -> Result<db::entity::audit_logs::Model, sea_orm::DbErr> {
+    let log = db::entity::audit_logs::ActiveModel {
         id: Set(Uuid::new_v4()),
-        application_id: Set(record_id),
-        operation: Set(action),
-        changed_fields: Set(None),
+        table_name: Set("g1_applications".to_string()),
+        record_id: Set(record_id.unwrap_or(Uuid::nil())),
+        action: Set(action),
         old_values: Set(old_values),
         new_values: Set(new_values),
-        changed_by: Set(auth.user_id),
-        changed_at: Set(Utc::now()),
-        context: Set(context),
+        performed_by: Set(auth.user_id),
+        performed_at: Set(Utc::now()),
+        ip_address: Set(None),
+        reason: Set(context),
     };
     log.insert(db).await
 }

@@ -5,6 +5,8 @@ pub mod m20260804_000002_add_circular_fields;
 pub mod m20260805_000001_add_electoral_fields;
 pub mod m20260805_000002_split_gn_division;
 pub mod m20260806_000001_add_closer_school_exists;
+pub mod m20260808_000001_deduplicate_student_child;
+pub mod m20260808_000002_cleanup_dupes;
 
 use sea_orm_migration::prelude::*;
 
@@ -21,6 +23,8 @@ impl MigratorTrait for Migrator {
             Box::new(m20260805_000001_add_electoral_fields::Migration),
             Box::new(m20260805_000002_split_gn_division::Migration),
             Box::new(m20260806_000001_add_closer_school_exists::Migration),
+            Box::new(m20260808_000001_deduplicate_student_child::Migration),
+            Box::new(m20260808_000002_cleanup_dupes::Migration),
         ]
     }
 }

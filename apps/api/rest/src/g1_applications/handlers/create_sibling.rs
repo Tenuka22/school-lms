@@ -2,12 +2,11 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
-use db::domain::student::{Active, Student};
 use db::entity::common::enums::{
-    Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
+    Gender, MediumOfInstruction, Nationality, Religion, StudentStatus, AuditOperation,
 };
 use db::entity::common::siblings;
-use db::entity::g1::{applications, join_siblings};
+use db::entity::g1::{applications, children, join_siblings};
 use db::entity::student::student;
 use log::info;
 use schemars::JsonSchema;
@@ -40,7 +39,7 @@ pub struct CreateSiblingRequest {
 }
 
 #[derive(Debug, Serialize, JsonSchema, ApiComponent)]
-pub struct StudentDuplicate {
+pub struct SiblingDuplicate {
     pub id: Uuid,
     pub full_name: String,
     pub name_with_initials: String,
@@ -57,7 +56,7 @@ pub struct StudentDuplicate {
 pub struct CreateSiblingResponse {
     pub student_id: Option<Uuid>,
     pub created: bool,
-    pub duplicates: Vec<StudentDuplicate>,
+    pub duplicates: Vec<SiblingDuplicate>,
 }
 
 #[api_operation(tag = "g1-applications", operation_id = "create-sibling")]
@@ -110,35 +109,35 @@ pub async fn create_sibling(
 
     let now = Utc::now();
 
-    // Search for potential duplicate students by name, birth cert, or NIC
+    // Search for potential duplicate children by name, birth cert, or NIC
     let mut dup_conditions = Condition::any()
-        .add(student::Column::FullName.ilike(format!("%{}%", &body.full_name)))
-        .add(student::Column::NameWithInitials.ilike(format!("%{}%", &body.name_with_initials)));
+        .add(children::Column::FullName.ilike(format!("%{}%", &body.full_name)))
+        .add(children::Column::NameWithInitials.ilike(format!("%{}%", &body.name_with_initials)));
 
     if let Some(ref bc) = body.birth_certificate_number {
         dup_conditions =
-            dup_conditions.add(student::Column::BirthCertificateNumber.eq(bc.as_str()));
+            dup_conditions.add(children::Column::BirthCertificateNumber.eq(bc.as_str()));
     }
     if let Some(ref nic) = body.nic {
-        dup_conditions = dup_conditions.add(student::Column::Nic.eq(nic.as_str()));
+        dup_conditions = dup_conditions.add(children::Column::Nic.eq(nic.as_str()));
     }
 
-    let duplicates = student::Entity::find()
+    let duplicates = children::Entity::find()
         .filter(dup_conditions)
         .all(db.as_ref())
         .await?
         .into_iter()
-        .map(|s| StudentDuplicate {
-            id: s.id,
-            full_name: s.full_name,
-            name_with_initials: s.name_with_initials,
-            date_of_birth: s.date_of_birth,
-            gender: s.gender,
-            nationality: s.nationality,
-            medium_of_instruction: s.medium_of_instruction,
-            birth_certificate_number: s.birth_certificate_number,
-            nic: s.nic,
-            current_grade: s.current_grade,
+        .map(|c| SiblingDuplicate {
+            id: c.id,
+            full_name: c.full_name,
+            name_with_initials: c.name_with_initials,
+            date_of_birth: c.date_of_birth,
+            gender: c.gender,
+            nationality: c.nationality,
+            medium_of_instruction: c.medium_of_instruction,
+            birth_certificate_number: c.birth_certificate_number,
+            nic: c.nic,
+            current_grade: c.current_grade,
         })
         .collect::<Vec<_>>();
 
@@ -155,9 +154,10 @@ pub async fn create_sibling(
         }));
     }
 
-    let new_student = student::ActiveModel {
+    // Step 1: Create child record
+    let new_child = children::ActiveModel {
         id: Set(Uuid::new_v4()),
-        admission_number: Set(body.birth_certificate_number.clone()),
+        student_id: Set(None), // Will be set after student is created
         full_name: Set(body.full_name.clone()),
         name_with_initials: Set(body.name_with_initials.clone()),
         date_of_birth: Set(body.date_of_birth),
@@ -165,14 +165,19 @@ pub async fn create_sibling(
         birth_certificate_number: Set(body.birth_certificate_number.clone()),
         nic: Set(body.nic.clone()),
         passport_number: Set(body.passport_number.clone()),
+        name_with_initials_en: Set(None),
         nationality: Set(body.nationality),
         religion: Set(body.religion),
         medium_of_instruction: Set(body.medium_of_instruction),
+        disability_status: Set(false),
+        disability_type: Set(None),
+        photo_url: Set(None),
+        admission_number: Set(body.birth_certificate_number.clone()),
+        admission_date: Set(None),
+        current_grade: Set(body.current_grade),
         phone: Set(body.phone.clone()),
         email: Set(body.email.clone()),
         status: Set(StudentStatus::Active),
-        admission_date: Set(None),
-        current_grade: Set(body.current_grade),
         created_at: Set(now),
         updated_at: Set(now),
         created_by: Set(user_id),
@@ -181,10 +186,47 @@ pub async fn create_sibling(
     .insert(db.as_ref())
     .await?;
 
-    let _student = Student::<Active>::new(new_student.clone());
+    info!("[create_sibling] created child_id={}", new_child.id);
+
+    crate::audit::log_child_change(
+        db.as_ref(),
+        new_child.id,
+        AuditOperation::Insert,
+        None,
+        crate::audit::to_json(&new_child),
+        &auth,
+        Some(format!("sibling created for application {}", app_id)),
+    )
+    .await;
+
+    // Step 2: Create student record linked to child
+    let new_student = student::ActiveModel {
+        id: Set(Uuid::new_v4()),
+        child_id: Set(new_child.id),
+        created_at: Set(now),
+    }
+    .insert(db.as_ref())
+    .await?;
 
     info!("[create_sibling] created student_id={}", new_student.id);
 
+    crate::audit::log_student_change(
+        db.as_ref(),
+        new_student.id,
+        AuditOperation::Insert,
+        None,
+        crate::audit::to_json(&new_student),
+        &auth,
+        Some(format!("sibling student created for application {}", app_id)),
+    )
+    .await;
+
+    // Step 3: Update child record with student_id
+    let mut child_update = children::ActiveModel::from(new_child.clone());
+    child_update.student_id = Set(Some(new_student.id));
+    child_update.update(db.as_ref()).await?;
+
+    // Step 4: Create sibling record
     let new_sibling = siblings::ActiveModel {
         id: Set(Uuid::new_v4()),
         student_id: Set(new_student.id),
@@ -201,6 +243,7 @@ pub async fn create_sibling(
 
     info!("[create_sibling] created sibling_id={}", new_sibling.id);
 
+    // Step 5: Create join record
     join_siblings::ActiveModel {
         id: Set(Uuid::new_v4()),
         application_id: Set(app_id),

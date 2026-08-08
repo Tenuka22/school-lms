@@ -2,6 +2,7 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
+use db::entity::common::enums::AuditOperation;
 use db::entity::g1::{applications, join_addresses};
 use log::{info, warn};
 use schemars::JsonSchema;
@@ -86,6 +87,17 @@ pub async fn save_addresses(
     }
 
     info!("[save_addresses] success count={}", count);
+
+    crate::audit::log_application_change(
+        db.as_ref(),
+        app_id,
+        AuditOperation::Update,
+        None,
+        Some(serde_json::json!({"address_count": count})),
+        &auth,
+        Some(format!("addresses saved: {} linked", count)),
+    )
+    .await;
 
     Ok(web::Json(SaveAddressesResponse { count }))
 }

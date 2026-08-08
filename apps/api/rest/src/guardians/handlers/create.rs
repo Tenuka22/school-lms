@@ -3,8 +3,7 @@ use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::IncomeLevel;
-use db::entity::common::enums::StaffType;
+use db::entity::common::enums::{GuardianRelationship, IncomeLevel, StaffType, AuditOperation};
 use db::entity::common::past_pupil_details;
 use db::entity::common::staff_details;
 use db::entity::guardians;
@@ -19,7 +18,7 @@ use db::rbac::Permission;
 
 #[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct CreateGuardianBody {
-    pub relationship_type: String,
+    pub relationship_type: GuardianRelationship,
     pub full_name: String,
     pub nic_number: String,
     pub contact_phone: String,
@@ -63,8 +62,6 @@ pub async fn create_guardian(
         .contact_email
         .map(|e| crate::validation::Email::new(e).map(|v| v.into_inner()))
         .transpose()?;
-    input.relationship_type =
-        crate::validation::NonEmpty::new(input.relationship_type, "relationship_type")?.into_inner();
     input.occupation = input
         .occupation
         .map(|o| crate::validation::NonEmpty::new(o, "occupation").map(|v| v.into_inner()))
@@ -110,6 +107,17 @@ pub async fn create_guardian(
     let guardian_id = data.id;
     let active: guardians::ActiveModel = data.into();
     let saved = active.insert(db.as_ref()).await?;
+
+    crate::audit::log_guardian_change(
+        db.as_ref(),
+        saved.id,
+        AuditOperation::Insert,
+        None,
+        crate::audit::to_json(&saved),
+        &auth,
+        Some("guardian created".into()),
+    )
+    .await;
 
     if saved.is_school_staff {
         if let Some(school_id) = input.staff_school_id.or(input.past_pupil_school_id) {

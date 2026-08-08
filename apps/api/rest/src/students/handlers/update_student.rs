@@ -2,8 +2,8 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
-use db::domain::student::{Active, Student};
-use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion};
+use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, AuditOperation};
+use db::entity::g1::children;
 use db::entity::student::student;
 use log::info;
 use schemars::JsonSchema;
@@ -38,7 +38,7 @@ pub async fn update_student(
     auth: AuthenticatedUser,
     id: web::Path<Uuid>,
     body: web::Json<UpdateStudentRequest>,
-) -> Result<Json<student::Model>, ApiError> {
+) -> Result<Json<children::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
@@ -69,16 +69,23 @@ pub async fn update_student(
         b.full_name
     );
 
+    // Find the student record to get the child_id
     let existing = student::Entity::find_by_id(student_id)
         .one(db.as_ref())
         .await?
         .ok_or_else(|| ApiError::NotFound("Student not found".into()))?;
 
-    let _student = Student::<Active>::new(existing.clone());
+    // Find and update the child record
+    let child = children::Entity::find_by_id(existing.child_id)
+        .one(db.as_ref())
+        .await?
+        .ok_or_else(|| ApiError::NotFound("Child record not found".into()))?;
 
-    let active = student::ActiveModel {
-        id: Set(existing.id),
-        admission_number: Set(existing.admission_number),
+    let old_json = crate::audit::to_json(&child);
+
+    let child_active = children::ActiveModel {
+        id: Set(child.id),
+        student_id: Set(child.student_id),
         full_name: Set(b.full_name),
         name_with_initials: Set(b.name_with_initials),
         date_of_birth: Set(b.date_of_birth),
@@ -86,23 +93,39 @@ pub async fn update_student(
         birth_certificate_number: Set(b.birth_certificate_number),
         nic: Set(b.nic),
         passport_number: Set(b.passport_number),
+        name_with_initials_en: Set(child.name_with_initials_en),
         nationality: Set(b.nationality),
         religion: Set(b.religion),
         medium_of_instruction: Set(b.medium_of_instruction),
+        disability_status: Set(child.disability_status),
+        disability_type: Set(child.disability_type),
+        photo_url: Set(child.photo_url),
+        admission_number: Set(child.admission_number),
+        admission_date: Set(child.admission_date),
+        current_grade: Set(b.current_grade),
         phone: Set(b.phone),
         email: Set(b.email),
-        status: Set(existing.status),
-        admission_date: Set(existing.admission_date),
-        current_grade: Set(b.current_grade),
-        created_at: Set(existing.created_at),
+        status: Set(child.status),
+        created_at: Set(child.created_at),
         updated_at: Set(Utc::now()),
-        created_by: Set(existing.created_by),
+        created_by: Set(child.created_by),
         updated_by: Set(user_id),
     };
 
-    let saved = active.update(db.as_ref()).await?;
+    let saved = child_active.update(db.as_ref()).await?;
 
-    info!("[update_student] updated student_id={}", saved.id);
+    crate::audit::log_child_change(
+        db.as_ref(),
+        saved.id,
+        AuditOperation::Update,
+        old_json,
+        crate::audit::to_json(&saved),
+        &auth,
+        Some(format!("student {} updated", student_id)),
+    )
+    .await;
+
+    info!("[update_student] updated child_id={}", saved.id);
 
     Ok(Json(saved))
 }

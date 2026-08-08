@@ -2,6 +2,7 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
+use db::entity::common::enums::AuditOperation;
 use db::entity::common::siblings;
 use db::entity::g1::{applications, join_siblings};
 use db::entity::student::student;
@@ -90,12 +91,22 @@ pub async fn save_siblings(
             );
             existing_sibling.id
         } else {
+            // Need to get child name from child record
+            let child = db::entity::g1::children::Entity::find_by_id(s.child_id)
+                .one(db.as_ref())
+                .await?;
+            let child_name = child
+                .as_ref()
+                .map(|c| c.full_name.clone())
+                .unwrap_or_default();
+            let child_grade = child.as_ref().and_then(|c| c.current_grade);
+
             let new_sibling = siblings::ActiveModel {
                 id: Set(Uuid::new_v4()),
                 student_id: Set(s.id),
                 school_id: Set(school_id),
-                sibling_name: Set(s.full_name.clone()),
-                current_grade: Set(s.current_grade),
+                sibling_name: Set(child_name),
+                current_grade: Set(child_grade),
                 admission_year: Set(None),
                 verified: Set(false),
                 verification_doc: Set(None),
@@ -122,6 +133,17 @@ pub async fn save_siblings(
     }
 
     info!("[save_siblings] success count={}", count);
+
+    crate::audit::log_application_change(
+        db.as_ref(),
+        app_id,
+        AuditOperation::Update,
+        None,
+        Some(serde_json::json!({"sibling_student_ids": student_ids, "count": count})),
+        &auth,
+        Some(format!("siblings saved: {} linked", count)),
+    )
+    .await;
 
     Ok(web::Json(SaveSiblingsResponse { count }))
 }
