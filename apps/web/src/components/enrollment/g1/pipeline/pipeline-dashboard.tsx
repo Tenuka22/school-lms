@@ -31,7 +31,12 @@ import {
 } from "@/lib/api-client/sdk.gen"
 import { queryClient } from "@/router"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
-import { CreateChildForm } from "@/components/enrollment/g1/create-child-form"
+import { EntityDialog } from "@/lib/form-builder"
+import { makeChildFormConfig, childFormDefaults } from "@/components/forms/child-form"
+import type { ChildFormValues } from "@/components/forms/child-form"
+import { FormUniquenessProvider } from "@/hooks/use-child-uniqueness"
+import type { Gender, MediumOfInstruction, Nationality, Religion } from "@/lib/api-client/types.gen"
+import { createChild, updateChild } from "@/lib/api-client/sdk.gen"
 import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpers"
 import { BatchOverviewChart } from "@/components/enrollment/g1/pipeline/batch-overview-chart"
 import { Button } from "@/components/ui/button"
@@ -1023,24 +1028,77 @@ export function PipeDashboard() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={createChildDialogOpen} onOpenChange={(open) => { if (!open) setEditingChild(null); setCreateChildDialogOpen(open) }}>
-        <DialogContent className="sm:max-w-lg w-full">
-          <DialogHeader>
-            <DialogTitle>{editingChild ? "Edit Child" : "Create New Child"}</DialogTitle>
-            <DialogDescription>
-              {editingChild ? "Update the child's details." : "Enter the required details to create a new child record."}
-            </DialogDescription>
-          </DialogHeader>
-          <CreateChildForm
-            child={editingChild}
-            onSuccess={(child) => {
-              setSelectedChild(child)
-              setCreateChildDialogOpen(false)
-              setEditingChild(null)
-            }}
-          />
-        </DialogContent>
-      </Dialog>
+      <FormUniquenessProvider>
+        <EntityDialog
+          open={createChildDialogOpen}
+          onOpenChange={(open) => { if (!open) setEditingChild(null); setCreateChildDialogOpen(open) }}
+          title={editingChild ? "Edit Child" : "Create New Child"}
+          description={editingChild ? "Update the child's details." : "Enter the required details to create a new child record."}
+          config={makeChildFormConfig(editingChild?.id)}
+          defaultValues={editingChild ? {
+            full_name: editingChild.full_name,
+            name_with_initials: editingChild.name_with_initials,
+            date_of_birth: editingChild.date_of_birth,
+            gender: editingChild.gender as ChildFormValues["gender"],
+            nationality: editingChild.nationality as ChildFormValues["nationality"],
+            religion: (editingChild.religion ?? "") as ChildFormValues["religion"],
+            birth_certificate_number: editingChild.birth_certificate_number ?? "",
+            nic: editingChild.nic ?? "",
+            passport_number: editingChild.passport_number ?? "",
+            medium_of_instruction: editingChild.medium_of_instruction as ChildFormValues["medium_of_instruction"],
+          } : childFormDefaults}
+          onSubmit={async (values) => {
+            if (editingChild) {
+              const { data, error } = await updateChild({
+                path: { id: editingChild.id },
+                body: {
+                  full_name: values.full_name,
+                  name_with_initials: values.name_with_initials,
+                  date_of_birth: values.date_of_birth,
+                  gender: values.gender as Gender,
+                  nationality: values.nationality as Nationality,
+                  religion: values.religion as Religion,
+                  birth_certificate_number: values.birth_certificate_number,
+                  nic: values.nic || null,
+                  passport_number: values.passport_number || null,
+                  medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,
+                },
+                client: apiClient,
+              })
+              if (error || !data) {
+                toastApiError(error, "Failed to update child")
+                return
+              }
+              setSelectedChild(data as any)
+            } else {
+              const { data, error } = await createChild({
+                body: {
+                  full_name: values.full_name,
+                  name_with_initials: values.name_with_initials,
+                  date_of_birth: values.date_of_birth,
+                  gender: values.gender as Gender,
+                  nationality: values.nationality as Nationality,
+                  religion: values.religion as Religion,
+                  birth_certificate_number: values.birth_certificate_number,
+                  nic: values.nic || null,
+                  passport_number: values.passport_number || null,
+                  medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,
+                },
+                client: apiClient,
+              })
+              if (error || !data) {
+                toastApiError(error, "Failed to create child")
+                return
+              }
+              setSelectedChild(data as any)
+            }
+            setCreateChildDialogOpen(false)
+            setEditingChild(null)
+          }}
+          actionLabel={editingChild ? "Save Changes" : "Create Child"}
+          size="xl"
+        />
+      </FormUniquenessProvider>
 
     </div>
   )
