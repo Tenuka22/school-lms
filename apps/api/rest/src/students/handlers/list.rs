@@ -58,8 +58,7 @@ pub async fn list_students(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     // Join students with children to get full data
-    let mut q = student::Entity::find()
-        .find_with_related(children::Entity);
+    let mut q = student::Entity::find().find_with_related(children::Entity);
 
     if let Some(search) = &query.search {
         let pattern = format!("%{}%", search);

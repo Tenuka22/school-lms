@@ -1,12 +1,16 @@
 use super::super::common::default_now;
-use super::super::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, StudentStatus};
+use super::super::common::enums::{
+    Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
+};
 use apistos::ApiComponent;
 use chrono::{DateTime, NaiveDate, Utc};
 use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
+)]
 #[schemars(rename = "Child")]
 #[sea_orm(table_name = "children")]
 pub struct Model {

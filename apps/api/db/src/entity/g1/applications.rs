@@ -1,7 +1,5 @@
 use super::super::common::default_now;
-use super::super::common::enums::{
-    ApplicationListCategory, EnrollmentStatus, G1Category,
-};
+use super::super::common::enums::{ApplicationListCategory, EnrollmentStatus, G1Category};
 use apistos::ApiComponent;
 use chrono::{DateTime, NaiveDate, Utc};
 use schemars::JsonSchema;

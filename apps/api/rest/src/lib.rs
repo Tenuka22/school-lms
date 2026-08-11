@@ -1,20 +1,20 @@
-mod auth;
-pub mod audit;
-mod blacklist;
-mod counter;
-pub mod docs;
 mod addresses;
+pub mod audit;
+mod auth;
+mod blacklist;
 mod children;
+mod counter;
 mod districts;
+pub mod docs;
 mod enrollment_batches;
 pub mod error;
 mod g1_applications;
 mod gn_divisions;
 mod guardians;
-mod polling_divisions;
-mod staff_details;
 mod past_pupil_details;
+mod polling_divisions;
 mod schools;
+mod staff_details;
 pub mod storage;
 mod students;
 mod uploads;
@@ -40,9 +40,9 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .configure(districts::routes)
             .configure(g1_applications::routes)
             .configure(enrollment_batches::routes)
-.configure(gn_divisions::routes)
-.configure(polling_divisions::routes)
-.configure(guardians::routes)
+            .configure(gn_divisions::routes)
+            .configure(polling_divisions::routes)
+            .configure(guardians::routes)
             .configure(addresses::routes)
             .configure(past_pupil_details::routes)
             .configure(schools::routes)

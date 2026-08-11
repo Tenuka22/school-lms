@@ -18,7 +18,9 @@ fn default_status() -> String {
     "Active".to_string()
 }
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
+#[derive(
+    Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
+)]
 #[schemars(rename = "Blacklist")]
 #[sea_orm(table_name = "blacklist")]
 pub struct Model {

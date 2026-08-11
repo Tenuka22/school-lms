@@ -13,14 +13,27 @@ impl MigrationTrait for Migration {
                     .table(User::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(User::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(User::Username).string().not_null().unique_key())
+                    .col(
+                        ColumnDef::new(User::Username)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(User::Email).string().not_null().unique_key())
                     .col(ColumnDef::new(User::PasswordHash).string().not_null())
                     .col(ColumnDef::new(User::SchoolId).uuid())
                     .col(ColumnDef::new(User::IsActive).boolean().not_null())
                     .col(ColumnDef::new(User::LastLogin).timestamp_with_time_zone())
-                    .col(ColumnDef::new(User::CreatedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(User::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(User::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(User::UpdatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -30,7 +43,13 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Role::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Role::Id).integer().primary_key().not_null().auto_increment())
+                    .col(
+                        ColumnDef::new(Role::Id)
+                            .integer()
+                            .primary_key()
+                            .not_null()
+                            .auto_increment(),
+                    )
                     .col(ColumnDef::new(Role::Name).string().not_null().unique_key())
                     .col(ColumnDef::new(Role::Description).string())
                     .to_owned(),
@@ -42,8 +61,19 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Permission::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Permission::Id).integer().primary_key().not_null().auto_increment())
-                    .col(ColumnDef::new(Permission::Name).string().not_null().unique_key())
+                    .col(
+                        ColumnDef::new(Permission::Id)
+                            .integer()
+                            .primary_key()
+                            .not_null()
+                            .auto_increment(),
+                    )
+                    .col(
+                        ColumnDef::new(Permission::Name)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Permission::Resource).string().not_null())
                     .col(ColumnDef::new(Permission::Action).string().not_null())
                     .to_owned(),
@@ -56,7 +86,11 @@ impl MigrationTrait for Migration {
                     .table(RolePermission::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(RolePermission::RoleId).integer().not_null())
-                    .col(ColumnDef::new(RolePermission::PermissionId).integer().not_null())
+                    .col(
+                        ColumnDef::new(RolePermission::PermissionId)
+                            .integer()
+                            .not_null(),
+                    )
                     .primary_key(
                         Index::create()
                             .col(RolePermission::RoleId)
@@ -89,11 +123,7 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(ColumnDef::new(UserRole::UserId).uuid().not_null())
                     .col(ColumnDef::new(UserRole::RoleId).integer().not_null())
-                    .primary_key(
-                        Index::create()
-                            .col(UserRole::UserId)
-                            .col(UserRole::RoleId),
-                    )
+                    .primary_key(Index::create().col(UserRole::UserId).col(UserRole::RoleId))
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_user_role_user")
@@ -119,11 +149,29 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Session::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Session::Id).integer().primary_key().not_null().auto_increment())
+                    .col(
+                        ColumnDef::new(Session::Id)
+                            .integer()
+                            .primary_key()
+                            .not_null()
+                            .auto_increment(),
+                    )
                     .col(ColumnDef::new(Session::UserId).uuid().not_null())
-                    .col(ColumnDef::new(Session::RefreshTokenHash).string().not_null())
-                    .col(ColumnDef::new(Session::IssuedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(Session::ExpiresAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Session::RefreshTokenHash)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Session::IssuedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Session::ExpiresAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Session::RevokedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(Session::UserAgent).string())
                     .col(ColumnDef::new(Session::Ip).string())
@@ -145,7 +193,12 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Districts::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Districts::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(Districts::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Districts::NameSi).string().not_null())
                     .col(ColumnDef::new(Districts::NameEn).string().not_null())
                     .col(ColumnDef::new(Districts::Province).string().not_null())
@@ -169,7 +222,11 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Schools::GeoLatitude).decimal())
                     .col(ColumnDef::new(Schools::GeoLongitude).decimal())
                     .col(ColumnDef::new(Schools::Status).string().not_null())
-                    .col(ColumnDef::new(Schools::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Schools::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_schools_district")
@@ -187,7 +244,12 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Addresses::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Addresses::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(Addresses::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Addresses::AddressLine1).string().not_null())
                     .col(ColumnDef::new(Addresses::AddressLine2).string())
                     .col(ColumnDef::new(Addresses::City).string().not_null())
@@ -198,10 +260,18 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Addresses::Latitude).decimal())
                     .col(ColumnDef::new(Addresses::Longitude).decimal())
                     .col(ColumnDef::new(Addresses::DistanceToSchoolKm).decimal())
-                    .col(ColumnDef::new(Addresses::VerifiedByMap).boolean().not_null())
+                    .col(
+                        ColumnDef::new(Addresses::VerifiedByMap)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Addresses::ResidenceType).string())
                     .col(ColumnDef::new(Addresses::OwnershipProof).string())
-                    .col(ColumnDef::new(Addresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Addresses::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -211,23 +281,53 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Guardians::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Guardians::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(Guardians::RelationshipType).string().not_null())
+                    .col(
+                        ColumnDef::new(Guardians::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Guardians::RelationshipType)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Guardians::FullName).string().not_null())
-                    .col(ColumnDef::new(Guardians::NicNumber).string().not_null().unique_key())
+                    .col(
+                        ColumnDef::new(Guardians::NicNumber)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Guardians::ContactPhone).string().not_null())
                     .col(ColumnDef::new(Guardians::ContactEmail).string())
                     .col(ColumnDef::new(Guardians::Occupation).string())
                     .col(ColumnDef::new(Guardians::WorkplaceName).string())
                     .col(ColumnDef::new(Guardians::WorkplaceAddress).string())
-                    .col(ColumnDef::new(Guardians::IsGovtEmployee).boolean().not_null())
+                    .col(
+                        ColumnDef::new(Guardians::IsGovtEmployee)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Guardians::GovtServiceYears).integer())
-                    .col(ColumnDef::new(Guardians::IsSchoolStaff).boolean().not_null())
+                    .col(
+                        ColumnDef::new(Guardians::IsSchoolStaff)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Guardians::IsPastPupil).boolean().not_null())
-                    .col(ColumnDef::new(Guardians::PastPupilVerified).boolean().not_null())
+                    .col(
+                        ColumnDef::new(Guardians::PastPupilVerified)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Guardians::IncomeLevel).string())
                     .col(ColumnDef::new(Guardians::AddressId).uuid())
-                    .col(ColumnDef::new(Guardians::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Guardians::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -237,7 +337,12 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(StaffDetails::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(StaffDetails::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(StaffDetails::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(StaffDetails::GuardianId).uuid().not_null())
                     .col(ColumnDef::new(StaffDetails::SchoolId).uuid().not_null())
                     .col(ColumnDef::new(StaffDetails::StaffType).string())
@@ -249,7 +354,11 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(StaffDetails::IsCurrent).boolean().not_null())
                     .col(ColumnDef::new(StaffDetails::VerificationDoc).string())
                     .col(ColumnDef::new(StaffDetails::DistanceFromResidenceKm).decimal())
-                    .col(ColumnDef::new(StaffDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(StaffDetails::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_staff_details_guardian")
@@ -275,16 +384,33 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(PastPupilDetails::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(PastPupilDetails::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(PastPupilDetails::GuardianId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(PastPupilDetails::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(PastPupilDetails::GuardianId)
+                            .uuid()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(PastPupilDetails::SchoolId).uuid().not_null())
                     .col(ColumnDef::new(PastPupilDetails::StudentId).string())
                     .col(ColumnDef::new(PastPupilDetails::HighestGrade).string())
                     .col(ColumnDef::new(PastPupilDetails::YearLeft).small_integer())
                     .col(ColumnDef::new(PastPupilDetails::LeftReason).string())
-                    .col(ColumnDef::new(PastPupilDetails::Verified).boolean().not_null())
+                    .col(
+                        ColumnDef::new(PastPupilDetails::Verified)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(PastPupilDetails::VerificationMethod).string())
-                    .col(ColumnDef::new(PastPupilDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(PastPupilDetails::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_past_pupil_guardian")
@@ -318,7 +444,11 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Siblings::AdmissionYear).small_integer())
                     .col(ColumnDef::new(Siblings::Verified).boolean().not_null())
                     .col(ColumnDef::new(Siblings::VerificationDoc).string())
-                    .col(ColumnDef::new(Siblings::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Siblings::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -328,31 +458,123 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(EnrollmentBatches::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(EnrollmentBatches::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::Year).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::BatchCode).string().not_null().unique_key())
-                    .col(ColumnDef::new(EnrollmentBatches::BatchName).string().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::EnrollmentType).string().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::Status).string().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::OpenedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::ClosedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::ListPublishedAt).timestamp_with_time_zone())
-                    .col(ColumnDef::new(EnrollmentBatches::AppealDeadlineAt).timestamp_with_time_zone())
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::Year)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::BatchCode)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::BatchName)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::EnrollmentType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::Status)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::OpenedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::ClosedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::ListPublishedAt)
+                            .timestamp_with_time_zone(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::AppealDeadlineAt)
+                            .timestamp_with_time_zone(),
+                    )
                     .col(ColumnDef::new(EnrollmentBatches::FinalizedAt).timestamp_with_time_zone())
-                    .col(ColumnDef::new(EnrollmentBatches::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(EnrollmentBatches::CreatedBy).uuid())
-                    .col(ColumnDef::new(EnrollmentBatches::StudentAllocation).integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::ProximityWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::StaffWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::SiblingWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::AlumniWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::GovtWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::SpecialWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::BuddhismWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::CatholicismWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::IslamWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::HinduismWeight).small_integer().not_null())
-                    .col(ColumnDef::new(EnrollmentBatches::WaitingListSize).integer().not_null())
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::StudentAllocation)
+                            .integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::ProximityWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::StaffWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::SiblingWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::AlumniWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::GovtWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::SpecialWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::BuddhismWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::CatholicismWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::IslamWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::HinduismWeight)
+                            .small_integer()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(EnrollmentBatches::WaitingListSize)
+                            .integer()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -362,17 +584,38 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(WorkspaceAddresses::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(WorkspaceAddresses::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(WorkspaceAddresses::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(WorkspaceAddresses::Name).string().not_null())
                     .col(ColumnDef::new(WorkspaceAddresses::Building).string())
-                    .col(ColumnDef::new(WorkspaceAddresses::Street1).string().not_null())
+                    .col(
+                        ColumnDef::new(WorkspaceAddresses::Street1)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(WorkspaceAddresses::Street2).string())
                     .col(ColumnDef::new(WorkspaceAddresses::City).string().not_null())
                     .col(ColumnDef::new(WorkspaceAddresses::State).string())
                     .col(ColumnDef::new(WorkspaceAddresses::PostalCode).string())
-                    .col(ColumnDef::new(WorkspaceAddresses::Country).string().not_null())
-                    .col(ColumnDef::new(WorkspaceAddresses::FullAddress).string().not_null())
-                    .col(ColumnDef::new(WorkspaceAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(WorkspaceAddresses::Country)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(WorkspaceAddresses::FullAddress)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(WorkspaceAddresses::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -382,8 +625,19 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Counter::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Counter::Id).integer().primary_key().not_null().auto_increment())
-                    .col(ColumnDef::new(Counter::Name).string().not_null().unique_key())
+                    .col(
+                        ColumnDef::new(Counter::Id)
+                            .integer()
+                            .primary_key()
+                            .not_null()
+                            .auto_increment(),
+                    )
+                    .col(
+                        ColumnDef::new(Counter::Name)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Counter::Value).integer().not_null())
                     .to_owned(),
             )
@@ -394,8 +648,19 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(SecureCounter::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(SecureCounter::Id).integer().primary_key().not_null().auto_increment())
-                    .col(ColumnDef::new(SecureCounter::Name).string().not_null().unique_key())
+                    .col(
+                        ColumnDef::new(SecureCounter::Id)
+                            .integer()
+                            .primary_key()
+                            .not_null()
+                            .auto_increment(),
+                    )
+                    .col(
+                        ColumnDef::new(SecureCounter::Name)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(SecureCounter::Value).integer().not_null())
                     .to_owned(),
             )
@@ -406,13 +671,26 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Blacklist::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Blacklist::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(Blacklist::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Blacklist::GuardianId).uuid().not_null())
                     .col(ColumnDef::new(Blacklist::ApplicationId).uuid())
                     .col(ColumnDef::new(Blacklist::Reason).string().not_null())
                     .col(ColumnDef::new(Blacklist::EvidenceUrl).string())
-                    .col(ColumnDef::new(Blacklist::BlacklistedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(Blacklist::ExpiresAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Blacklist::BlacklistedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Blacklist::ExpiresAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Blacklist::BlacklistedBy).uuid())
                     .col(ColumnDef::new(Blacklist::Status).string().not_null())
                     .to_owned(),
@@ -424,14 +702,23 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(AuditLogs::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(AuditLogs::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(AuditLogs::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AuditLogs::TableName).string().not_null())
                     .col(ColumnDef::new(AuditLogs::RecordId).uuid().not_null())
                     .col(ColumnDef::new(AuditLogs::Action).string().not_null())
                     .col(ColumnDef::new(AuditLogs::OldValues).json_binary())
                     .col(ColumnDef::new(AuditLogs::NewValues).json_binary())
                     .col(ColumnDef::new(AuditLogs::PerformedBy).uuid())
-                    .col(ColumnDef::new(AuditLogs::PerformedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(AuditLogs::PerformedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AuditLogs::IpAddress).string())
                     .col(ColumnDef::new(AuditLogs::Reason).string())
                     .to_owned(),
@@ -443,14 +730,27 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(AddressesAudit::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(AddressesAudit::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(AddressesAudit::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AddressesAudit::AddressId).uuid())
-                    .col(ColumnDef::new(AddressesAudit::Operation).string().not_null())
+                    .col(
+                        ColumnDef::new(AddressesAudit::Operation)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AddressesAudit::ChangedFields).json_binary())
                     .col(ColumnDef::new(AddressesAudit::OldValues).json_binary())
                     .col(ColumnDef::new(AddressesAudit::NewValues).json_binary())
                     .col(ColumnDef::new(AddressesAudit::ChangedBy).uuid())
-                    .col(ColumnDef::new(AddressesAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(AddressesAudit::ChangedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AddressesAudit::Context).string())
                     .to_owned(),
             )
@@ -461,14 +761,27 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(GuardiansAudit::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(GuardiansAudit::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(GuardiansAudit::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(GuardiansAudit::GuardianId).uuid())
-                    .col(ColumnDef::new(GuardiansAudit::Operation).string().not_null())
+                    .col(
+                        ColumnDef::new(GuardiansAudit::Operation)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(GuardiansAudit::ChangedFields).json_binary())
                     .col(ColumnDef::new(GuardiansAudit::OldValues).json_binary())
                     .col(ColumnDef::new(GuardiansAudit::NewValues).json_binary())
                     .col(ColumnDef::new(GuardiansAudit::ChangedBy).uuid())
-                    .col(ColumnDef::new(GuardiansAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(GuardiansAudit::ChangedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(GuardiansAudit::Context).string())
                     .to_owned(),
             )
@@ -481,24 +794,52 @@ impl MigrationTrait for Migration {
                     .table(Students::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(Students::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(Students::AdmissionNumber).string().unique_key())
+                    .col(
+                        ColumnDef::new(Students::AdmissionNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Students::FullName).string().not_null())
-                    .col(ColumnDef::new(Students::NameWithInitials).string().not_null())
+                    .col(
+                        ColumnDef::new(Students::NameWithInitials)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Students::DateOfBirth).date().not_null())
                     .col(ColumnDef::new(Students::Gender).string().not_null())
-                    .col(ColumnDef::new(Students::BirthCertificateNumber).string().unique_key())
+                    .col(
+                        ColumnDef::new(Students::BirthCertificateNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Students::Nic).string().unique_key())
-                    .col(ColumnDef::new(Students::PassportNumber).string().unique_key())
+                    .col(
+                        ColumnDef::new(Students::PassportNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Students::Nationality).string().not_null())
                     .col(ColumnDef::new(Students::Religion).string())
-                    .col(ColumnDef::new(Students::MediumOfInstruction).string().not_null())
+                    .col(
+                        ColumnDef::new(Students::MediumOfInstruction)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Students::Phone).string())
                     .col(ColumnDef::new(Students::Email).string())
                     .col(ColumnDef::new(Students::Status).string().not_null())
                     .col(ColumnDef::new(Students::AdmissionDate).date())
                     .col(ColumnDef::new(Students::CurrentGrade).small_integer())
-                    .col(ColumnDef::new(Students::CreatedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(Students::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Students::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Students::UpdatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Students::CreatedBy).uuid())
                     .col(ColumnDef::new(Students::UpdatedBy).uuid())
                     .to_owned(),
@@ -510,12 +851,37 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(StudentJoinAddresses::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(StudentJoinAddresses::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(StudentJoinAddresses::StudentId).uuid().not_null())
-                    .col(ColumnDef::new(StudentJoinAddresses::AddressId).uuid().not_null())
-                    .col(ColumnDef::new(StudentJoinAddresses::AddressType).string().not_null())
-                    .col(ColumnDef::new(StudentJoinAddresses::IsPrimary).boolean().not_null())
-                    .col(ColumnDef::new(StudentJoinAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(StudentJoinAddresses::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinAddresses::StudentId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinAddresses::AddressId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinAddresses::AddressType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinAddresses::IsPrimary)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinAddresses::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_student_join_addr_student")
@@ -541,12 +907,37 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(StudentJoinGuardians::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(StudentJoinGuardians::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(StudentJoinGuardians::StudentId).uuid().not_null())
-                    .col(ColumnDef::new(StudentJoinGuardians::GuardianId).uuid().not_null())
-                    .col(ColumnDef::new(StudentJoinGuardians::Relationship).string().not_null())
-                    .col(ColumnDef::new(StudentJoinGuardians::IsPrimary).boolean().not_null())
-                    .col(ColumnDef::new(StudentJoinGuardians::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(StudentJoinGuardians::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinGuardians::StudentId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinGuardians::GuardianId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinGuardians::Relationship)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinGuardians::IsPrimary)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(StudentJoinGuardians::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_student_join_guard_student")
@@ -558,7 +949,10 @@ impl MigrationTrait for Migration {
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_student_join_guard_guardian")
-                            .from(StudentJoinGuardians::Table, StudentJoinGuardians::GuardianId)
+                            .from(
+                                StudentJoinGuardians::Table,
+                                StudentJoinGuardians::GuardianId,
+                            )
                             .to(Guardians::Table, Guardians::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
@@ -572,14 +966,23 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(StudentsAudit::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(StudentsAudit::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(StudentsAudit::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(StudentsAudit::StudentId).uuid())
                     .col(ColumnDef::new(StudentsAudit::Operation).string().not_null())
                     .col(ColumnDef::new(StudentsAudit::ChangedFields).json_binary())
                     .col(ColumnDef::new(StudentsAudit::OldValues).json_binary())
                     .col(ColumnDef::new(StudentsAudit::NewValues).json_binary())
                     .col(ColumnDef::new(StudentsAudit::ChangedBy).uuid())
-                    .col(ColumnDef::new(StudentsAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(StudentsAudit::ChangedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(StudentsAudit::Context).string())
                     .to_owned(),
             )
@@ -594,17 +997,37 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Children::Id).uuid().primary_key().not_null())
                     .col(ColumnDef::new(Children::StudentId).uuid())
                     .col(ColumnDef::new(Children::FullName).string().not_null())
-                    .col(ColumnDef::new(Children::NameWithInitials).string().not_null())
+                    .col(
+                        ColumnDef::new(Children::NameWithInitials)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Children::DateOfBirth).date().not_null())
                     .col(ColumnDef::new(Children::Gender).string().not_null())
-                    .col(ColumnDef::new(Children::BirthCertificateNumber).string().unique_key())
+                    .col(
+                        ColumnDef::new(Children::BirthCertificateNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(Children::Nationality).string().not_null())
                     .col(ColumnDef::new(Children::Religion).string())
-                    .col(ColumnDef::new(Children::MediumOfInstruction).string().not_null())
-                    .col(ColumnDef::new(Children::DisabilityStatus).boolean().not_null())
+                    .col(
+                        ColumnDef::new(Children::MediumOfInstruction)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Children::DisabilityStatus)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Children::DisabilityType).string())
                     .col(ColumnDef::new(Children::PhotoUrl).string())
-                    .col(ColumnDef::new(Children::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(Children::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_children_student")
@@ -622,8 +1045,18 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1Applications::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1Applications::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(G1Applications::ReferenceNo).string().not_null().unique_key())
+                    .col(
+                        ColumnDef::new(G1Applications::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Applications::ReferenceNo)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(ColumnDef::new(G1Applications::SchoolId).uuid())
                     .col(ColumnDef::new(G1Applications::TotalMarks).decimal())
                     .col(ColumnDef::new(G1Applications::RankNumber).integer())
@@ -636,22 +1069,58 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(G1Applications::FinalizedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(G1Applications::IpAddress).string())
                     .col(ColumnDef::new(G1Applications::UserAgent).string())
-                    .col(ColumnDef::new(G1Applications::CreatedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(G1Applications::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1Applications::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Applications::UpdatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1Applications::ChildId).uuid().not_null())
                     .col(ColumnDef::new(G1Applications::GuardianId).uuid().not_null())
                     .col(ColumnDef::new(G1Applications::BatchId).uuid().not_null())
-                    .col(ColumnDef::new(G1Applications::EnrollmentStatus).string().not_null())
+                    .col(
+                        ColumnDef::new(G1Applications::EnrollmentStatus)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1Applications::Category).string())
                     .col(ColumnDef::new(G1Applications::OverseasArrivalDate).date())
                     .col(ColumnDef::new(G1Applications::SubmissionMethod).string())
                     .col(ColumnDef::new(G1Applications::InterviewDate).date())
-                    .col(ColumnDef::new(G1Applications::InterviewCompleted).boolean().not_null())
-                    .col(ColumnDef::new(G1Applications::BirthCertificateVerified).boolean().not_null())
-                    .col(ColumnDef::new(G1Applications::AgeEligibilityVerified).boolean().not_null())
-                    .col(ColumnDef::new(G1Applications::ResidenceVerified).boolean().not_null())
-                    .col(ColumnDef::new(G1Applications::CategoryVerified).boolean().not_null())
-                    .col(ColumnDef::new(G1Applications::AlternativeAgeCertificate).boolean().not_null())
+                    .col(
+                        ColumnDef::new(G1Applications::InterviewCompleted)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Applications::BirthCertificateVerified)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Applications::AgeEligibilityVerified)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Applications::ResidenceVerified)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Applications::CategoryVerified)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Applications::AlternativeAgeCertificate)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1Applications::AlternativeAgeCertificateRef).string())
                     .col(ColumnDef::new(G1Applications::RejectionReason).string())
                     .col(ColumnDef::new(G1Applications::CreatedBy).uuid())
@@ -691,13 +1160,38 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1JoinAddresses::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1JoinAddresses::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(G1JoinAddresses::ApplicationId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinAddresses::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinAddresses::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1JoinAddresses::AddressId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinAddresses::AddressType).string().not_null())
-                    .col(ColumnDef::new(G1JoinAddresses::ResidenceType).string().not_null())
-                    .col(ColumnDef::new(G1JoinAddresses::IsPrimary).boolean().not_null())
-                    .col(ColumnDef::new(G1JoinAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinAddresses::AddressType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinAddresses::ResidenceType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinAddresses::IsPrimary)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinAddresses::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_join_addr_app")
@@ -723,12 +1217,37 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1JoinGuardians::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1JoinGuardians::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(G1JoinGuardians::ApplicationId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinGuardians::GuardianId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinGuardians::Relationship).string().not_null())
-                    .col(ColumnDef::new(G1JoinGuardians::IsPrimary).boolean().not_null())
-                    .col(ColumnDef::new(G1JoinGuardians::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinGuardians::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinGuardians::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinGuardians::GuardianId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinGuardians::Relationship)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinGuardians::IsPrimary)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinGuardians::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_join_guard_app")
@@ -754,10 +1273,27 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1JoinStaffDetails::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1JoinStaffDetails::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(G1JoinStaffDetails::ApplicationId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinStaffDetails::StaffDetailId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinStaffDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinStaffDetails::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinStaffDetails::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinStaffDetails::StaffDetailId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinStaffDetails::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_join_staff_app")
@@ -783,14 +1319,34 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1JoinPastPupilDetails::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1JoinPastPupilDetails::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(G1JoinPastPupilDetails::ApplicationId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinPastPupilDetails::PastPupilDetailId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinPastPupilDetails::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinPastPupilDetails::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinPastPupilDetails::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinPastPupilDetails::PastPupilDetailId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinPastPupilDetails::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_join_past_pupil_app")
-                            .from(G1JoinPastPupilDetails::Table, G1JoinPastPupilDetails::ApplicationId)
+                            .from(
+                                G1JoinPastPupilDetails::Table,
+                                G1JoinPastPupilDetails::ApplicationId,
+                            )
                             .to(G1Applications::Table, G1Applications::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
@@ -798,7 +1354,10 @@ impl MigrationTrait for Migration {
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_join_past_pupil_detail")
-                            .from(G1JoinPastPupilDetails::Table, G1JoinPastPupilDetails::PastPupilDetailId)
+                            .from(
+                                G1JoinPastPupilDetails::Table,
+                                G1JoinPastPupilDetails::PastPupilDetailId,
+                            )
                             .to(PastPupilDetails::Table, PastPupilDetails::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
@@ -812,10 +1371,23 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1JoinSiblings::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1JoinSiblings::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(G1JoinSiblings::ApplicationId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinSiblings::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinSiblings::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1JoinSiblings::SiblingId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinSiblings::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinSiblings::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_join_sib_app")
@@ -841,17 +1413,49 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1JoinWorkspaceAddresses::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::ApplicationId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::WorkspaceAddressId).uuid().not_null())
-                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::AddressType).string().not_null())
-                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::ResidenceType).string().not_null())
-                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::IsPrimary).boolean().not_null())
-                    .col(ColumnDef::new(G1JoinWorkspaceAddresses::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1JoinWorkspaceAddresses::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinWorkspaceAddresses::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinWorkspaceAddresses::WorkspaceAddressId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinWorkspaceAddresses::AddressType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinWorkspaceAddresses::ResidenceType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinWorkspaceAddresses::IsPrimary)
+                            .boolean()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1JoinWorkspaceAddresses::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_join_ws_app")
-                            .from(G1JoinWorkspaceAddresses::Table, G1JoinWorkspaceAddresses::ApplicationId)
+                            .from(
+                                G1JoinWorkspaceAddresses::Table,
+                                G1JoinWorkspaceAddresses::ApplicationId,
+                            )
                             .to(G1Applications::Table, G1Applications::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::Cascade),
@@ -865,22 +1469,47 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1Documents::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1Documents::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(G1Documents::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1Documents::ApplicationId).uuid().not_null())
-                    .col(ColumnDef::new(G1Documents::DocumentType).string().not_null())
+                    .col(
+                        ColumnDef::new(G1Documents::DocumentType)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1Documents::FileUrl).string().not_null())
                     .col(ColumnDef::new(G1Documents::FileKey).string().not_null())
                     .col(ColumnDef::new(G1Documents::FileHash).string())
                     .col(ColumnDef::new(G1Documents::FileSize).big_integer())
                     .col(ColumnDef::new(G1Documents::ContentType).string())
-                    .col(ColumnDef::new(G1Documents::UploadedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(G1Documents::VerificationStatus).string().not_null())
+                    .col(
+                        ColumnDef::new(G1Documents::UploadedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Documents::VerificationStatus)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1Documents::VerifiedBy).uuid())
                     .col(ColumnDef::new(G1Documents::VerifiedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(G1Documents::RejectionReason).string())
                     .col(ColumnDef::new(G1Documents::FraudFlag).boolean().not_null())
-                    .col(ColumnDef::new(G1Documents::CreatedAt).timestamp_with_time_zone().not_null())
-                    .col(ColumnDef::new(G1Documents::UpdatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1Documents::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(G1Documents::UpdatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_g1_doc_app")
@@ -898,16 +1527,33 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(MarksBreakdown::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(MarksBreakdown::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(MarksBreakdown::ApplicationId).uuid().not_null())
-                    .col(ColumnDef::new(MarksBreakdown::CategoryCode).string().not_null())
+                    .col(
+                        ColumnDef::new(MarksBreakdown::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(MarksBreakdown::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(MarksBreakdown::CategoryCode)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(MarksBreakdown::RawMarks).decimal())
                     .col(ColumnDef::new(MarksBreakdown::MaxRawMarks).decimal())
                     .col(ColumnDef::new(MarksBreakdown::WeightPercentage).decimal())
                     .col(ColumnDef::new(MarksBreakdown::WeightedScore).decimal())
                     .col(ColumnDef::new(MarksBreakdown::DistanceKm).decimal())
                     .col(ColumnDef::new(MarksBreakdown::DistanceBand).string())
-                    .col(ColumnDef::new(MarksBreakdown::CalculatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(MarksBreakdown::CalculatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(MarksBreakdown::CalculationRule).string())
                     .foreign_key(
                         ForeignKey::create()
@@ -926,14 +1572,39 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(AppealHistory::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(AppealHistory::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(AppealHistory::ApplicationId).uuid().not_null())
-                    .col(ColumnDef::new(AppealHistory::AppealReference).string().not_null())
-                    .col(ColumnDef::new(AppealHistory::AppealType).string().not_null())
-                    .col(ColumnDef::new(AppealHistory::ReasonText).string().not_null())
+                    .col(
+                        ColumnDef::new(AppealHistory::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(AppealHistory::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(AppealHistory::AppealReference)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(AppealHistory::AppealType)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(AppealHistory::ReasonText)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AppealHistory::SupportingDocs).json_binary())
                     .col(ColumnDef::new(AppealHistory::Status).string().not_null())
-                    .col(ColumnDef::new(AppealHistory::FiledAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(AppealHistory::FiledAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AppealHistory::ReviewedBy).uuid())
                     .col(ColumnDef::new(AppealHistory::ReviewedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(AppealHistory::OriginalMarks).decimal())
@@ -956,19 +1627,40 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(AdmissionLists::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(AdmissionLists::Id).uuid().primary_key().not_null())
-                    .col(ColumnDef::new(AdmissionLists::ApplicationId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(AdmissionLists::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(AdmissionLists::ApplicationId)
+                            .uuid()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AdmissionLists::SchoolId).uuid().not_null())
                     .col(ColumnDef::new(AdmissionLists::ListType).string().not_null())
                     .col(ColumnDef::new(AdmissionLists::PositionNumber).integer())
-                    .col(ColumnDef::new(AdmissionLists::QuotaCategory).string().not_null())
-                    .col(ColumnDef::new(AdmissionLists::Admitted).boolean().not_null())
+                    .col(
+                        ColumnDef::new(AdmissionLists::QuotaCategory)
+                            .string()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(AdmissionLists::Admitted)
+                            .boolean()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(AdmissionLists::AdmittedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(AdmissionLists::AdmittedBy).uuid())
                     .col(ColumnDef::new(AdmissionLists::WaitingPosition).integer())
                     .col(ColumnDef::new(AdmissionLists::PromotedAt).timestamp_with_time_zone())
                     .col(ColumnDef::new(AdmissionLists::PromotedFrom).integer())
-                    .col(ColumnDef::new(AdmissionLists::CreatedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(AdmissionLists::CreatedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_admission_app")
@@ -994,14 +1686,27 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1ApplicationsAudit::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1ApplicationsAudit::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(G1ApplicationsAudit::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1ApplicationsAudit::ApplicationId).uuid())
-                    .col(ColumnDef::new(G1ApplicationsAudit::Operation).string().not_null())
+                    .col(
+                        ColumnDef::new(G1ApplicationsAudit::Operation)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1ApplicationsAudit::ChangedFields).json_binary())
                     .col(ColumnDef::new(G1ApplicationsAudit::OldValues).json_binary())
                     .col(ColumnDef::new(G1ApplicationsAudit::NewValues).json_binary())
                     .col(ColumnDef::new(G1ApplicationsAudit::ChangedBy).uuid())
-                    .col(ColumnDef::new(G1ApplicationsAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1ApplicationsAudit::ChangedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1ApplicationsAudit::Context).string())
                     .to_owned(),
             )
@@ -1012,14 +1717,27 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(G1DocumentsAudit::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(G1DocumentsAudit::Id).uuid().primary_key().not_null())
+                    .col(
+                        ColumnDef::new(G1DocumentsAudit::Id)
+                            .uuid()
+                            .primary_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1DocumentsAudit::DocumentId).uuid())
-                    .col(ColumnDef::new(G1DocumentsAudit::Operation).string().not_null())
+                    .col(
+                        ColumnDef::new(G1DocumentsAudit::Operation)
+                            .string()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1DocumentsAudit::ChangedFields).json_binary())
                     .col(ColumnDef::new(G1DocumentsAudit::OldValues).json_binary())
                     .col(ColumnDef::new(G1DocumentsAudit::NewValues).json_binary())
                     .col(ColumnDef::new(G1DocumentsAudit::ChangedBy).uuid())
-                    .col(ColumnDef::new(G1DocumentsAudit::ChangedAt).timestamp_with_time_zone().not_null())
+                    .col(
+                        ColumnDef::new(G1DocumentsAudit::ChangedAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(G1DocumentsAudit::Context).string())
                     .to_owned(),
             )
@@ -1074,7 +1792,12 @@ impl MigrationTrait for Migration {
 
         for name in tables {
             manager
-                .drop_table(Table::drop().table(sea_orm::sea_query::Alias::new(name)).if_exists().to_owned())
+                .drop_table(
+                    Table::drop()
+                        .table(sea_orm::sea_query::Alias::new(name))
+                        .if_exists()
+                        .to_owned(),
+                )
                 .await?;
         }
 

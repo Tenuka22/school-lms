@@ -1,5 +1,5 @@
-use super::default_now;
 use super::super::common::enums::{StaffEmploymentType, StaffType};
+use super::default_now;
 use apistos::ApiComponent;
 use chrono::{DateTime, NaiveDate, Utc};
 use schemars::JsonSchema;

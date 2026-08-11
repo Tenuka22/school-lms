@@ -2,7 +2,7 @@ use actix_web::web;
 use apistos::ApiComponent;
 use apistos::api_operation;
 use db::domain::document::{Document, Uploaded};
-use db::entity::common::enums::{G1DocumentType, AuditOperation};
+use db::entity::common::enums::{AuditOperation, G1DocumentType};
 use db::entity::g1::{applications, documents};
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
@@ -88,20 +88,19 @@ pub async fn save_application_documents(
         };
 
         let _ = crate::validation::NonEmpty::new(entry.doc_type.clone(), "doc_type")?;
-        let validated_file_url =
-            crate::validation::Url::new(entry.file_url.clone())?.into_inner();
+        let validated_file_url = crate::validation::Url::new(entry.file_url.clone())?.into_inner();
         let validated_file_key =
             crate::validation::NonEmpty::new(entry.file_key.clone(), "file_key")?.into_inner();
         let validated_content_type = entry
             .content_type
             .as_ref()
             .map(|v| {
-                crate::validation::NonEmpty::new(v.clone(), "content_type")
-                    .map(|x| x.into_inner())
+                crate::validation::NonEmpty::new(v.clone(), "content_type").map(|x| x.into_inner())
             })
             .transpose()?;
 
-        let doc = Document::<Uploaded>::new(app_id, doc_type, validated_file_url, validated_file_key);
+        let doc =
+            Document::<Uploaded>::new(app_id, doc_type, validated_file_url, validated_file_key);
 
         let mut model = doc.into_inner();
         model.file_size = entry.file_size;

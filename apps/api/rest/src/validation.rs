@@ -73,7 +73,10 @@ impl Phone {
             ));
         };
 
-        let digits_after_94: usize = normalized[3..].chars().filter(|c| c.is_ascii_digit()).count();
+        let digits_after_94: usize = normalized[3..]
+            .chars()
+            .filter(|c| c.is_ascii_digit())
+            .count();
         if digits_after_94 != 9 {
             return Err(ApiError::BadRequest(
                 "Sri Lankan phone number must have 9 digits after +94".into(),
@@ -107,7 +110,9 @@ impl FullName {
 impl NameWithInitials {
     pub fn new(value: String) -> Result<Self, ApiError> {
         if value.trim().is_empty() {
-            return Err(ApiError::BadRequest("name with initials is required".into()));
+            return Err(ApiError::BadRequest(
+                "name with initials is required".into(),
+            ));
         }
         let has_initial = value
             .split_whitespace()
@@ -224,7 +229,9 @@ impl AddressLine {
 impl Latitude {
     pub fn new(value: f64) -> Result<Self, ApiError> {
         if !(-90.0..=90.0).contains(&value) {
-            return Err(ApiError::BadRequest("latitude must be between -90 and 90".into()));
+            return Err(ApiError::BadRequest(
+                "latitude must be between -90 and 90".into(),
+            ));
         }
         Ok(Self(value))
     }
@@ -233,7 +240,9 @@ impl Latitude {
 impl Longitude {
     pub fn new(value: f64) -> Result<Self, ApiError> {
         if !(-180.0..=180.0).contains(&value) {
-            return Err(ApiError::BadRequest("longitude must be between -180 and 180".into()));
+            return Err(ApiError::BadRequest(
+                "longitude must be between -180 and 180".into(),
+            ));
         }
         Ok(Self(value))
     }
@@ -251,7 +260,9 @@ impl DistanceKm {
 impl Year {
     pub fn new(value: i16) -> Result<Self, ApiError> {
         if !(1900..=2100).contains(&value) {
-            return Err(ApiError::BadRequest("year must be between 1900 and 2100".into()));
+            return Err(ApiError::BadRequest(
+                "year must be between 1900 and 2100".into(),
+            ));
         }
         Ok(Self(value))
     }
@@ -260,7 +271,9 @@ impl Year {
 impl Percentage {
     pub fn new(value: i16) -> Result<Self, ApiError> {
         if !(0..=100).contains(&value) {
-            return Err(ApiError::BadRequest("percentage must be between 0 and 100".into()));
+            return Err(ApiError::BadRequest(
+                "percentage must be between 0 and 100".into(),
+            ));
         }
         Ok(Self(value))
     }
@@ -278,7 +291,9 @@ impl Percentage {
 impl WizardStep {
     pub fn new(value: i16) -> Result<Self, ApiError> {
         if !(1..=7).contains(&value) {
-            return Err(ApiError::BadRequest("wizard step must be between 1 and 7".into()));
+            return Err(ApiError::BadRequest(
+                "wizard step must be between 1 and 7".into(),
+            ));
         }
         Ok(Self(value))
     }
@@ -287,7 +302,9 @@ impl WizardStep {
 impl CurrentGrade {
     pub fn new(value: i16) -> Result<Self, ApiError> {
         if !(1..=13).contains(&value) {
-            return Err(ApiError::BadRequest("grade must be between 1 and 13".into()));
+            return Err(ApiError::BadRequest(
+                "grade must be between 1 and 13".into(),
+            ));
         }
         Ok(Self(value))
     }

@@ -30,7 +30,11 @@ pub async fn list_children(
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
     let search = query.search.as_deref().unwrap_or("").trim();
-    let bc = query.birth_certificate_number.as_deref().unwrap_or("").trim();
+    let bc = query
+        .birth_certificate_number
+        .as_deref()
+        .unwrap_or("")
+        .trim();
     let nic = query.nic.as_deref().unwrap_or("").trim();
     let name = query.full_name.as_deref().unwrap_or("").trim();
 

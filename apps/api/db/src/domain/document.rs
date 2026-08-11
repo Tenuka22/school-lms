@@ -94,10 +94,7 @@ impl Document<UnderReview> {
         })
     }
 
-    pub fn flag(
-        self,
-        reason: String,
-    ) -> Result<Document<Flagged>, super::error::TransitionError> {
+    pub fn flag(self, reason: String) -> Result<Document<Flagged>, super::error::TransitionError> {
         let mut model = self.model;
         model.verification_status = DocumentVerificationStatus::Flagged;
         model.rejection_reason = Some(reason);

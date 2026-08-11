@@ -9,11 +9,7 @@ impl MigrationTrait for Migration {
         // children table
         let alter_children = Table::alter()
             .table(Children::Table)
-            .add_column(
-                ColumnDef::new(Children::NameWithInitialsEn)
-                    .string()
-                    .null(),
-            )
+            .add_column(ColumnDef::new(Children::NameWithInitialsEn).string().null())
             .to_owned();
         manager.alter_table(alter_children).await?;
 
@@ -35,21 +31,9 @@ impl MigrationTrait for Migration {
                     .string()
                     .null(),
             )
-            .add_column(
-                ColumnDef::new(G1Applications::GnDivision)
-                    .string()
-                    .null(),
-            )
-            .add_column(
-                ColumnDef::new(G1Applications::PollingArea)
-                    .string()
-                    .null(),
-            )
-            .add_column(
-                ColumnDef::new(G1Applications::VoterNames)
-                    .json()
-                    .null(),
-            )
+            .add_column(ColumnDef::new(G1Applications::GnDivision).string().null())
+            .add_column(ColumnDef::new(G1Applications::PollingArea).string().null())
+            .add_column(ColumnDef::new(G1Applications::VoterNames).json().null())
             .add_column(
                 ColumnDef::new(G1Applications::HouseholdHeadName)
                     .string()

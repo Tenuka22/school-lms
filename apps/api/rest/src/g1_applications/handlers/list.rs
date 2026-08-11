@@ -3,14 +3,13 @@ use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::{DateTime, NaiveDate, Utc};
 use db::entity::common::enums::{
-    ApplicationListCategory, G1Category, Gender, MediumOfInstruction, Nationality, EnrollmentStatus,
-    Religion,
+    ApplicationListCategory, EnrollmentStatus, G1Category, Gender, MediumOfInstruction,
+    Nationality, Religion,
 };
 use db::entity::g1::{applications, children};
 use schemars::JsonSchema;
 use sea_orm::{
-    ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,
-    QueryOrder,
+    ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

@@ -48,9 +48,7 @@ pub async fn create_past_pupil_detail(
         .transpose()?;
     input.verification_method = input
         .verification_method
-        .map(|v| {
-            crate::validation::NonEmpty::new(v, "verification_method").map(|x| x.into_inner())
-        })
+        .map(|v| crate::validation::NonEmpty::new(v, "verification_method").map(|x| x.into_inner()))
         .transpose()?;
 
     let data = past_pupil_details::ActiveModel {

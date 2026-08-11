@@ -1,9 +1,11 @@
 use actix_web::{web, web::Json};
+use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use apistos::ApiComponent;
 use chrono::{NaiveDate, Utc};
-use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, StudentStatus};
+use db::entity::common::enums::{
+    Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
+};
 use db::entity::g1::children;
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
@@ -12,8 +14,8 @@ use uuid::Uuid;
 
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
-use db::rbac::Permission;
 use db::entity::common::enums::AuditOperation;
+use db::rbac::Permission;
 
 #[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct CreateChildBody {
@@ -47,12 +49,14 @@ pub async fn create_child(
     let user_id = auth.user_id;
     let now = Utc::now();
 
-    data.full_name =
-        crate::validation::NonEmpty::new(data.full_name, "full_name")?.into_inner();
+    data.full_name = crate::validation::NonEmpty::new(data.full_name, "full_name")?.into_inner();
     data.name_with_initials =
         crate::validation::NameWithInitials::new(data.name_with_initials)?.into_inner();
-    data.birth_certificate_number = data.birth_certificate_number
-        .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
+    data.birth_certificate_number = data
+        .birth_certificate_number
+        .map(|e| {
+            crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner())
+        })
         .transpose()?;
 
     if let Some(ref bc) = data.birth_certificate_number {

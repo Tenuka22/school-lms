@@ -1,8 +1,8 @@
 use crate::auth::middleware::AuthenticatedUser;
 use crate::error::ApiError;
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use db::entity::common::enums::GuardianRelationship;
 use db::entity::g1::{children, join_guardians};
 use db::entity::guardians;
@@ -63,8 +63,7 @@ pub async fn list_guardians(
     let search = query.search.as_deref().unwrap_or("").trim();
     let is_past_pupil = query.is_past_pupil.as_deref().unwrap_or("").trim();
 
-    let mut filter = guardians::Entity::find()
-        .order_by_asc(guardians::Column::FullName);
+    let mut filter = guardians::Entity::find().order_by_asc(guardians::Column::FullName);
 
     if !search.is_empty() {
         filter = filter.filter(
@@ -98,10 +97,7 @@ pub async fn list_guardians(
         vec![]
     } else {
         db::entity::g1::applications::Entity::find()
-            .filter(
-                db::entity::g1::applications::Column::Id
-                    .is_in(application_ids.clone()),
-            )
+            .filter(db::entity::g1::applications::Column::Id.is_in(application_ids.clone()))
             .all(db.as_ref())
             .await?
     };

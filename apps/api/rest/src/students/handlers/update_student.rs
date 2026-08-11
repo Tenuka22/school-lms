@@ -2,7 +2,9 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
-use db::entity::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, AuditOperation};
+use db::entity::common::enums::{
+    AuditOperation, Gender, MediumOfInstruction, Nationality, Religion,
+};
 use db::entity::g1::children;
 use db::entity::student::student;
 use log::info;
@@ -57,10 +59,14 @@ pub async fn update_student(
         .phone
         .map(|p| crate::validation::Phone::new(p).map(|v| v.into_inner()))
         .transpose()?;
-    b.birth_certificate_number = b.birth_certificate_number
-        .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
+    b.birth_certificate_number = b
+        .birth_certificate_number
+        .map(|e| {
+            crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner())
+        })
         .transpose()?;
-    b.nic = b.nic
+    b.nic = b
+        .nic
         .map(|e| crate::validation::NicNumber::new(e).map(|v| v.into_inner()))
         .transpose()?;
 

@@ -66,7 +66,10 @@ impl fmt::Display for Config {
             .field("server_port", &self.server_port)
             .field("jwt_secret", &"****")
             .field("frontend_url", &self.frontend_url)
-            .field("public_url", &self.public_url.as_deref().unwrap_or("not set"))
+            .field(
+                "public_url",
+                &self.public_url.as_deref().unwrap_or("not set"),
+            )
             .field("minio_endpoint", &self.minio_endpoint)
             .field("minio_access_key", &self.minio_access_key)
             .field("minio_bucket", &self.minio_bucket)

@@ -20,11 +20,8 @@ pub async fn seed_districts(db: &DatabaseConnection) -> Result<(), DbErr> {
     ];
 
     for (i, (name_si, name_en, province)) in districts_data.iter().enumerate() {
-        let id = Uuid::parse_str(&format!(
-            "00000000-0000-0000-0000-000000000{:03}",
-            i + 1
-        ))
-        .unwrap();
+        let id =
+            Uuid::parse_str(&format!("00000000-0000-0000-0000-000000000{:03}", i + 1)).unwrap();
         districts::ActiveModel {
             id: Set(id),
             name_si: Set(name_si.to_string()),

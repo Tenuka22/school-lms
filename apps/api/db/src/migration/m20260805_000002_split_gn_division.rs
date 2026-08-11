@@ -8,16 +8,8 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         let alter_apps = Table::alter()
             .table(G1Applications::Table)
-            .add_column(
-                ColumnDef::new(G1Applications::GnName)
-                    .string()
-                    .null(),
-            )
-            .add_column(
-                ColumnDef::new(G1Applications::GnNumber)
-                    .string()
-                    .null(),
-            )
+            .add_column(ColumnDef::new(G1Applications::GnName).string().null())
+            .add_column(ColumnDef::new(G1Applications::GnNumber).string().null())
             .drop_column(G1Applications::GnDivision)
             .to_owned();
         manager.alter_table(alter_apps).await
@@ -26,11 +18,7 @@ impl MigrationTrait for Migration {
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         let alter_apps = Table::alter()
             .table(G1Applications::Table)
-            .add_column(
-                ColumnDef::new(G1Applications::GnDivision)
-                    .string()
-                    .null(),
-            )
+            .add_column(ColumnDef::new(G1Applications::GnDivision).string().null())
             .drop_column(G1Applications::GnName)
             .drop_column(G1Applications::GnNumber)
             .to_owned();

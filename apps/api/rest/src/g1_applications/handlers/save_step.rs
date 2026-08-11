@@ -3,7 +3,7 @@ use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
-use db::entity::common::enums::{EnrollmentStatus, AuditOperation};
+use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
 use db::entity::g1::applications;
 use log::info;
 use schemars::JsonSchema;

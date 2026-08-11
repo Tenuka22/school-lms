@@ -1,6 +1,6 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
 use db::entity::common::enums::{
     AuditOperation, Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
@@ -117,9 +117,9 @@ pub async fn create_student(
     }
 
     // No child_id provided — validate required fields
-    let full_name = body
-        .full_name
-        .ok_or_else(|| ApiError::BadRequest("full_name is required when child_id is not provided".into()))?;
+    let full_name = body.full_name.ok_or_else(|| {
+        ApiError::BadRequest("full_name is required when child_id is not provided".into())
+    })?;
     let name_with_initials = body
         .name_with_initials
         .ok_or_else(|| ApiError::BadRequest("name_with_initials is required".into()))?;
@@ -141,7 +141,8 @@ pub async fn create_student(
 
     if let Some(ref bc) = body.birth_certificate_number {
         if !bc.is_empty() {
-            dup_conditions = dup_conditions.add(children::Column::BirthCertificateNumber.eq(bc.as_str()));
+            dup_conditions =
+                dup_conditions.add(children::Column::BirthCertificateNumber.eq(bc.as_str()));
         }
     }
     if let Some(ref nic) = body.nic {
@@ -151,7 +152,10 @@ pub async fn create_student(
     }
 
     // Only search if we have something to match on
-    let has_search = body.birth_certificate_number.as_ref().map_or(false, |s| !s.is_empty())
+    let has_search = body
+        .birth_certificate_number
+        .as_ref()
+        .map_or(false, |s| !s.is_empty())
         || body.nic.as_ref().map_or(false, |s| !s.is_empty());
 
     if has_search {

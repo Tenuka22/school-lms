@@ -2,10 +2,10 @@ use std::collections::BTreeMap;
 use std::fmt;
 
 use actix_web::{HttpResponse, http::StatusCode};
-use apistos::{ApiComponent, ApiErrorComponent};
+use apistos::Schema;
 use apistos::paths::{MediaType, Response};
 use apistos::reference_or::ReferenceOr;
-use apistos::Schema;
+use apistos::{ApiComponent, ApiErrorComponent};
 use schemars::JsonSchema;
 use serde::Serialize;
 
@@ -98,7 +98,10 @@ fn error_response(code: u16, description: &str) -> (String, Response) {
         code.to_string(),
         Response {
             description: description.to_string(),
-            content: BTreeMap::from_iter(vec![("application/json".to_string(), error_media_type())]),
+            content: BTreeMap::from_iter(vec![(
+                "application/json".to_string(),
+                error_media_type(),
+            )]),
             ..Default::default()
         },
     )
@@ -107,12 +110,60 @@ fn error_response(code: u16, description: &str) -> (String, Response) {
 impl ApiErrorComponent for ApiError {
     fn schemas_by_status_code() -> BTreeMap<String, (String, ReferenceOr<Schema>)> {
         BTreeMap::from_iter(vec![
-            ("400".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
-            ("401".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
-            ("403".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
-            ("404".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
-            ("409".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
-            ("500".to_string(), ("ErrorResponse".to_string(), ReferenceOr::Reference { _ref: ERROR_SCHEMA_REF.to_string() })),
+            (
+                "400".to_string(),
+                (
+                    "ErrorResponse".to_string(),
+                    ReferenceOr::Reference {
+                        _ref: ERROR_SCHEMA_REF.to_string(),
+                    },
+                ),
+            ),
+            (
+                "401".to_string(),
+                (
+                    "ErrorResponse".to_string(),
+                    ReferenceOr::Reference {
+                        _ref: ERROR_SCHEMA_REF.to_string(),
+                    },
+                ),
+            ),
+            (
+                "403".to_string(),
+                (
+                    "ErrorResponse".to_string(),
+                    ReferenceOr::Reference {
+                        _ref: ERROR_SCHEMA_REF.to_string(),
+                    },
+                ),
+            ),
+            (
+                "404".to_string(),
+                (
+                    "ErrorResponse".to_string(),
+                    ReferenceOr::Reference {
+                        _ref: ERROR_SCHEMA_REF.to_string(),
+                    },
+                ),
+            ),
+            (
+                "409".to_string(),
+                (
+                    "ErrorResponse".to_string(),
+                    ReferenceOr::Reference {
+                        _ref: ERROR_SCHEMA_REF.to_string(),
+                    },
+                ),
+            ),
+            (
+                "500".to_string(),
+                (
+                    "ErrorResponse".to_string(),
+                    ReferenceOr::Reference {
+                        _ref: ERROR_SCHEMA_REF.to_string(),
+                    },
+                ),
+            ),
         ])
     }
 

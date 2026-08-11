@@ -4,7 +4,7 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
 use db::domain::batch::{AppealsPeriod, Batch, Closed, ListsPublished, Open};
-use db::entity::common::enums::{BatchStatus, AuditOperation};
+use db::entity::common::enums::{AuditOperation, BatchStatus};
 use db::entity::enrollment_batches;
 use schemars::JsonSchema;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
@@ -91,20 +91,34 @@ pub async fn update_batch(
         .ok_or_else(|| ApiError::NotFound("batch not found".into()))?;
 
     let pcts = [
-        patch.proximity_percentage.unwrap_or(existing.proximity_percentage),
+        patch
+            .proximity_percentage
+            .unwrap_or(existing.proximity_percentage),
         patch.staff_percentage.unwrap_or(existing.staff_percentage),
-        patch.sibling_percentage.unwrap_or(existing.sibling_percentage),
-        patch.alumni_percentage.unwrap_or(existing.alumni_percentage),
+        patch
+            .sibling_percentage
+            .unwrap_or(existing.sibling_percentage),
+        patch
+            .alumni_percentage
+            .unwrap_or(existing.alumni_percentage),
         patch.govt_percentage.unwrap_or(existing.govt_percentage),
-        patch.special_percentage.unwrap_or(existing.special_percentage),
+        patch
+            .special_percentage
+            .unwrap_or(existing.special_percentage),
     ];
     crate::validation::Percentage::sum(&pcts)?;
 
     let religion_pcts = [
-        patch.buddhism_percentage.unwrap_or(existing.buddhism_percentage),
-        patch.catholicism_percentage.unwrap_or(existing.catholicism_percentage),
+        patch
+            .buddhism_percentage
+            .unwrap_or(existing.buddhism_percentage),
+        patch
+            .catholicism_percentage
+            .unwrap_or(existing.catholicism_percentage),
         patch.islam_percentage.unwrap_or(existing.islam_percentage),
-        patch.hinduism_percentage.unwrap_or(existing.hinduism_percentage),
+        patch
+            .hinduism_percentage
+            .unwrap_or(existing.hinduism_percentage),
     ];
     crate::validation::Percentage::sum(&religion_pcts)?;
 
@@ -121,9 +135,7 @@ pub async fn update_batch(
                     if new_status == BatchStatus::Closed {
                         batch.close()?.into_inner()
                     } else {
-                        return Err(ApiError::BadRequest(
-                            "invalid transition from Open".into(),
-                        ));
+                        return Err(ApiError::BadRequest("invalid transition from Open".into()));
                     }
                 }
                 BatchStatus::Closed => {
@@ -193,11 +205,7 @@ pub async fn update_batch(
         finalized_at: Set(model.finalized_at),
         created_at: Set(model.created_at),
         created_by: Set(model.created_by),
-        student_allocation: Set(
-            patch
-                .student_allocation
-                .unwrap_or(model.student_allocation),
-        ),
+        student_allocation: Set(patch.student_allocation.unwrap_or(model.student_allocation)),
         proximity_percentage: Set(pcts[0]),
         staff_percentage: Set(pcts[1]),
         sibling_percentage: Set(pcts[2]),

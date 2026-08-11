@@ -3,10 +3,8 @@ use apistos::ApiComponent;
 use apistos::api_operation;
 use db::entity::common::addresses;
 use schemars::JsonSchema;
-use sea_orm::{
-    DatabaseConnection, EntityTrait, QueryFilter, QueryOrder,
-};
 use sea_orm::sea_query::{Expr, extension::postgres::PgExpr};
+use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, QueryOrder};
 use serde::Deserialize;
 
 use crate::auth::middleware::AuthenticatedUser;
@@ -18,10 +16,7 @@ pub struct ListAddressesQuery {
     pub search: Option<String>,
 }
 
-#[api_operation(
-    tag = "addresses",
-    operation_id = "list-addresses"
-)]
+#[api_operation(tag = "addresses", operation_id = "list-addresses")]
 pub async fn list_addresses(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,

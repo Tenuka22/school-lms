@@ -3,9 +3,8 @@ pub mod handlers;
 use apistos::web;
 
 use handlers::{
-    create, create_sibling, delete, get, get_addresses, get_documents, get_guardians,
-    get_siblings, list, save_addresses, save_documents, save_guardians, save_siblings,
-    save_step, update,
+    create, create_sibling, delete, get, get_addresses, get_documents, get_guardians, get_siblings,
+    list, save_addresses, save_documents, save_guardians, save_siblings, save_step, update,
 };
 
 pub fn routes(cfg: &mut web::ServiceConfig) {

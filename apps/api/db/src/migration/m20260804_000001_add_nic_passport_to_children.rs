@@ -10,7 +10,11 @@ impl MigrationTrait for Migration {
         let alter_table = Table::alter()
             .table(Children::Table)
             .add_column(ColumnDef::new(Children::Nic).string().unique_key())
-            .add_column(ColumnDef::new(Children::PassportNumber).string().unique_key())
+            .add_column(
+                ColumnDef::new(Children::PassportNumber)
+                    .string()
+                    .unique_key(),
+            )
             .to_owned();
 
         manager.alter_table(alter_table).await

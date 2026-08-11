@@ -3,7 +3,7 @@ use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::{NaiveDate, Utc};
 use db::entity::common::enums::{
-    Gender, MediumOfInstruction, Nationality, Religion, StudentStatus, AuditOperation,
+    AuditOperation, Gender, MediumOfInstruction, Nationality, Religion, StudentStatus,
 };
 use db::entity::common::siblings;
 use db::entity::g1::{applications, children, join_siblings};
@@ -73,8 +73,7 @@ pub async fn create_sibling(
     let user_id = auth.user_id;
     let mut body = body.into_inner();
 
-    body.full_name =
-        crate::validation::FullName::new(body.full_name)?.into_inner();
+    body.full_name = crate::validation::FullName::new(body.full_name)?.into_inner();
     body.name_with_initials =
         crate::validation::NameWithInitials::new(body.name_with_initials)?.into_inner();
     body.email = body
@@ -85,10 +84,14 @@ pub async fn create_sibling(
         .phone
         .map(|p| crate::validation::Phone::new(p).map(|v| v.into_inner()))
         .transpose()?;
-    body.birth_certificate_number = body.birth_certificate_number
-        .map(|e| crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner()))
+    body.birth_certificate_number = body
+        .birth_certificate_number
+        .map(|e| {
+            crate::validation::NonEmpty::new(e, "birth_certificate_number").map(|v| v.into_inner())
+        })
         .transpose()?;
-    body.nic = body.nic
+    body.nic = body
+        .nic
         .map(|e| crate::validation::NicNumber::new(e).map(|v| v.into_inner()))
         .transpose()?;
 
@@ -217,7 +220,10 @@ pub async fn create_sibling(
         None,
         crate::audit::to_json(&new_student),
         &auth,
-        Some(format!("sibling student created for application {}", app_id)),
+        Some(format!(
+            "sibling student created for application {}",
+            app_id
+        )),
     )
     .await;
 

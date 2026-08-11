@@ -6,7 +6,10 @@ use crate::entity::{user::permission, user::role, user::role_permission};
 pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
     let roles = vec![
         ("admin", "Full system access"),
-        ("office_staff", "Can create and edit records but cannot delete, verify, or approve"),
+        (
+            "office_staff",
+            "Can create and edit records but cannot delete, verify, or approve",
+        ),
         ("unknown", "Logged-in basic user"),
         ("unauthenticated", "No JWT / public user"),
     ];
@@ -44,7 +47,6 @@ pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
         ("g1:application:delete", "g1_application", "delete"),
         ("g1:application:submit", "g1_application", "submit"),
         ("g1:application:verify", "g1_application", "verify"),
-
         ("g1:document:upload", "g1_document", "upload"),
         ("g1:document:verify", "g1_document", "verify"),
         ("g1:appeal:create", "g1_appeal", "create"),

@@ -11,7 +11,11 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Children::Table)
-                    .add_column(ColumnDef::new(Children::AdmissionNumber).string().unique_key())
+                    .add_column(
+                        ColumnDef::new(Children::AdmissionNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -56,7 +60,12 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Children::Table)
-                    .add_column(ColumnDef::new(Children::Status).string().not_null().default("Active"))
+                    .add_column(
+                        ColumnDef::new(Children::Status)
+                            .string()
+                            .not_null()
+                            .default("Active"),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -317,7 +326,11 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Students::Table)
-                    .add_column(ColumnDef::new(Students::AdmissionNumber).string().unique_key())
+                    .add_column(
+                        ColumnDef::new(Students::AdmissionNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -335,7 +348,11 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Students::Table)
-                    .add_column(ColumnDef::new(Students::NameWithInitials).string().not_null())
+                    .add_column(
+                        ColumnDef::new(Students::NameWithInitials)
+                            .string()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -362,7 +379,11 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Students::Table)
-                    .add_column(ColumnDef::new(Students::BirthCertificateNumber).string().unique_key())
+                    .add_column(
+                        ColumnDef::new(Students::BirthCertificateNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -380,7 +401,11 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Students::Table)
-                    .add_column(ColumnDef::new(Students::PassportNumber).string().unique_key())
+                    .add_column(
+                        ColumnDef::new(Students::PassportNumber)
+                            .string()
+                            .unique_key(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -407,7 +432,11 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Students::Table)
-                    .add_column(ColumnDef::new(Students::MediumOfInstruction).string().not_null())
+                    .add_column(
+                        ColumnDef::new(Students::MediumOfInstruction)
+                            .string()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;

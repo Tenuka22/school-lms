@@ -1,15 +1,15 @@
 use std::marker::PhantomData;
 
 use actix_web::{web, web::Json};
+use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
-use apistos::ApiComponent;
 use chrono::Utc;
 use db::domain::g1_application::{Draft, G1Application, WizardStep6, WizardStep7};
 use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
+use db::entity::enrollment_batches;
 use db::entity::g1::applications;
 use db::entity::g1::join_guardians;
-use db::entity::enrollment_batches;
 use schemars::JsonSchema;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, PaginatorTrait, QueryFilter,

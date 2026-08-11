@@ -193,9 +193,7 @@ impl G1Application<WizardStep6> {
 }
 
 impl G1Application<WizardStep7> {
-    pub fn submit(
-        self,
-    ) -> Result<G1Application<Submitted>, super::error::TransitionError> {
+    pub fn submit(self) -> Result<G1Application<Submitted>, super::error::TransitionError> {
         if self.model.child_id == uuid::Uuid::nil() {
             return Err(super::error::TransitionError::MissingField("child_id"));
         }
@@ -231,9 +229,7 @@ impl G1Application<Submitted> {
 }
 
 impl G1Application<UnderVerification> {
-    pub fn verify(
-        self,
-    ) -> Result<G1Application<Verified>, super::error::TransitionError> {
+    pub fn verify(self) -> Result<G1Application<Verified>, super::error::TransitionError> {
         if !self.model.birth_certificate_verified {
             return Err(super::error::TransitionError::MissingField(
                 "birth_certificate_verified",
@@ -266,9 +262,7 @@ impl G1Application<UnderVerification> {
 }
 
 impl G1Application<Verified> {
-    pub fn admit(
-        self,
-    ) -> Result<G1Application<Admitted>, super::error::TransitionError> {
+    pub fn admit(self) -> Result<G1Application<Admitted>, super::error::TransitionError> {
         let mut model = self.model;
         model.finalized_at = Some(chrono::Utc::now());
         model.enrollment_status = EnrollmentStatus::Admitted;

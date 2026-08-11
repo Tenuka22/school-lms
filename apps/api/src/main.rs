@@ -3,14 +3,14 @@ mod config;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
-use apistos::{ApiComponent, ScalarConfig};
 use apistos::app::{BuildConfig, OpenApiWrapper};
 use apistos::info::Info;
 use apistos::spec::{DefaultParameters, Spec};
+use apistos::{ApiComponent, ScalarConfig};
 use dotenvy::from_filename;
-use rest::error::ErrorResponse;
 use rest::FrontendUrl;
 use rest::JwtSecret;
+use rest::error::ErrorResponse;
 use rest::storage::Storage;
 
 #[actix_web::main]
@@ -79,13 +79,20 @@ async fn main() -> std::io::Result<()> {
     let data = web::Data::new(db.clone());
     let storage_data = web::Data::new(storage);
     let frontend_url_data = web::Data::new(FrontendUrl(
-        cfg.public_url.clone().unwrap_or_else(|| cfg.frontend_url.clone()),
+        cfg.public_url
+            .clone()
+            .unwrap_or_else(|| cfg.frontend_url.clone()),
     ));
 
     let port = cfg.server_port;
     let frontend_url = cfg.frontend_url.clone();
-    let public_url = cfg.public_url.clone().unwrap_or_else(|| frontend_url.clone());
-    log::info!("Starting server on 0.0.0.0:{port} with allowed origins: {frontend_url}, {public_url}");
+    let public_url = cfg
+        .public_url
+        .clone()
+        .unwrap_or_else(|| frontend_url.clone());
+    log::info!(
+        "Starting server on 0.0.0.0:{port} with allowed origins: {frontend_url}, {public_url}"
+    );
 
     HttpServer::new(move || {
         let mut spec = Spec {

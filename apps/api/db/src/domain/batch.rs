@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use crate::entity::common::enums::BatchStatus;
 use crate::entity::common::enrollment_batches;
+use crate::entity::common::enums::BatchStatus;
 
 pub enum Open {}
 pub enum Closed {}

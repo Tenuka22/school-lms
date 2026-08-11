@@ -3,7 +3,7 @@ pub mod handlers;
 use std::sync::LazyLock;
 
 use apistos::web;
-use handlers::list::{list_polling_divisions, PollingDivisionEntry};
+use handlers::list::{PollingDivisionEntry, list_polling_divisions};
 
 static POLLING_DIVISIONS_RAW: &str = include_str!("polling_divisions.json");
 

@@ -35,10 +35,7 @@ impl MigrationTrait for Migration {
             .exec_stmt(
                 Query::update()
                     .table(Guardians::Table)
-                    .value(
-                        Guardians::RelationshipType,
-                        Expr::cust("'Guardian'"),
-                    )
+                    .value(Guardians::RelationshipType, Expr::cust("'Guardian'"))
                     .and_where(
                         Expr::col(Guardians::RelationshipType)
                             .is_not_in(["Father", "Mother", "Guardian"]),
@@ -70,9 +67,7 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(G1Applications::Table)
-                    .add_column(
-                        ColumnDef::new(G1Applications::WaitingPosition).small_integer(),
-                    )
+                    .add_column(ColumnDef::new(G1Applications::WaitingPosition).small_integer())
                     .to_owned(),
             )
             .await?;
@@ -82,8 +77,7 @@ impl MigrationTrait for Migration {
                 Table::alter()
                     .table(G1Applications::Table)
                     .add_column(
-                        ColumnDef::new(G1Applications::PromotedAt)
-                            .timestamp_with_time_zone(),
+                        ColumnDef::new(G1Applications::PromotedAt).timestamp_with_time_zone(),
                     )
                     .to_owned(),
             )

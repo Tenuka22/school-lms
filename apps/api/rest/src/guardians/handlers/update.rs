@@ -2,7 +2,7 @@ use actix_web::{web, web::Json};
 use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
-use db::entity::common::enums::{GuardianRelationship, IncomeLevel, StaffType, AuditOperation};
+use db::entity::common::enums::{AuditOperation, GuardianRelationship, IncomeLevel, StaffType};
 use db::entity::common::guardians;
 use db::entity::common::past_pupil_details;
 use db::entity::common::staff_details;
@@ -55,12 +55,9 @@ pub async fn update_guardian(
     let id = id.into_inner();
     let mut input = body.into_inner();
 
-    input.full_name =
-        crate::validation::FullName::new(input.full_name)?.into_inner();
-    input.nic_number =
-        crate::validation::NicNumber::new(input.nic_number)?.into_inner();
-    input.contact_phone =
-        crate::validation::Phone::new(input.contact_phone)?.into_inner();
+    input.full_name = crate::validation::FullName::new(input.full_name)?.into_inner();
+    input.nic_number = crate::validation::NicNumber::new(input.nic_number)?.into_inner();
+    input.contact_phone = crate::validation::Phone::new(input.contact_phone)?.into_inner();
     input.contact_email = input
         .contact_email
         .map(|e| crate::validation::Email::new(e).map(|v| v.into_inner()))

@@ -1,6 +1,6 @@
 use actix_web::{web, web::Json};
-use apistos::api_operation;
 use apistos::ApiComponent;
+use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
 use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
@@ -127,13 +127,23 @@ pub async fn update_application(
         overseas_arrival_date: Set(m.overseas_arrival_date.or(existing.overseas_arrival_date)),
         submission_method: Set(m.submission_method.or(existing.submission_method)),
         interview_date: Set(m.interview_date.or(existing.interview_date)),
-        interview_completed: Set(m.interview_completed.unwrap_or(existing.interview_completed)),
-        birth_certificate_verified: Set(m.birth_certificate_verified.unwrap_or(existing.birth_certificate_verified)),
-        age_eligibility_verified: Set(m.age_eligibility_verified.unwrap_or(existing.age_eligibility_verified)),
+        interview_completed: Set(m
+            .interview_completed
+            .unwrap_or(existing.interview_completed)),
+        birth_certificate_verified: Set(m
+            .birth_certificate_verified
+            .unwrap_or(existing.birth_certificate_verified)),
+        age_eligibility_verified: Set(m
+            .age_eligibility_verified
+            .unwrap_or(existing.age_eligibility_verified)),
         residence_verified: Set(m.residence_verified.unwrap_or(existing.residence_verified)),
         category_verified: Set(m.category_verified.unwrap_or(existing.category_verified)),
-        alternative_age_certificate: Set(m.alternative_age_certificate.unwrap_or(existing.alternative_age_certificate)),
-        alternative_age_certificate_ref: Set(m.alternative_age_certificate_ref.or(existing.alternative_age_certificate_ref)),
+        alternative_age_certificate: Set(m
+            .alternative_age_certificate
+            .unwrap_or(existing.alternative_age_certificate)),
+        alternative_age_certificate_ref: Set(m
+            .alternative_age_certificate_ref
+            .or(existing.alternative_age_certificate_ref)),
         rejection_reason: Set(m.rejection_reason.or(existing.rejection_reason)),
         created_by: Set(existing.created_by),
         updated_by: Set(auth.user_id),

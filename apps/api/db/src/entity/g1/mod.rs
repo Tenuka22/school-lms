@@ -1,8 +1,8 @@
 pub mod admission_lists;
 pub mod appeal_history;
 pub mod applications;
-pub mod children;
 pub mod audit;
+pub mod children;
 pub mod documents;
 pub mod documents_audit;
 pub mod join_addresses;

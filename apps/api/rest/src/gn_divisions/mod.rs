@@ -3,13 +3,13 @@ pub mod handlers;
 use std::sync::LazyLock;
 
 use apistos::web;
-use handlers::list::{list_gn_divisions, GnDivisionEntry};
+use handlers::list::{GnDivisionEntry, list_gn_divisions};
 
 static GN_DIVISIONS_RAW: &str = include_str!("gn_divisions.json");
 
 static GN_DIVISIONS: LazyLock<Vec<GnDivisionEntry>> = LazyLock::new(|| {
-    let raw: serde_json::Value = serde_json::from_str(GN_DIVISIONS_RAW)
-        .expect("Failed to parse gn_divisions.json");
+    let raw: serde_json::Value =
+        serde_json::from_str(GN_DIVISIONS_RAW).expect("Failed to parse gn_divisions.json");
     let entities = raw["entities"]
         .as_array()
         .expect("gn_divisions.json missing 'entities' array");

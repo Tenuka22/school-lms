@@ -24,10 +24,7 @@ pub struct GetApplicationAddressesResponse {
     pub addresses: Vec<AddressEntryResponse>,
 }
 
-#[api_operation(
-    tag = "g1-applications",
-    operation_id = "get-application-addresses"
-)]
+#[api_operation(tag = "g1-applications", operation_id = "get-application-addresses")]
 pub async fn get_application_addresses(
     db: web::Data<DatabaseConnection>,
     auth: AuthenticatedUser,

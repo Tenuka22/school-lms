@@ -17,8 +17,7 @@ pub async fn list_blacklist(
     auth.require_permission(Permission::G1ApplicationRead)
         .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
 
-    let mut filter = blacklist::Entity::find()
-        .filter(blacklist::Column::Status.eq("Active"));
+    let mut filter = blacklist::Entity::find().filter(blacklist::Column::Status.eq("Active"));
 
     if let Some(ref ids) = query.guardian_ids {
         if !ids.is_empty() {
