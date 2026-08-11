@@ -68,7 +68,7 @@ function EnumBadge({
   )
 }
 
-export function AlumniDataGrid({}: { refreshKey?: number }) {
+export function AlumniDataGrid(_props: { refreshKey?: number }) {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 300)
   const [statusFilter, setStatusFilter] = useState<string>("Graduated,Removed")
@@ -148,7 +148,7 @@ export function AlumniDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Last Grade" />
         ),
         cell: ({ row }) => {
-          const val = row.getValue("current_grade") as number | null
+          const val = row.getValue("current_grade")
           return val !== null ? (
             <span className="text-sm">Grade {val}</span>
           ) : (
@@ -163,7 +163,7 @@ export function AlumniDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Date of Birth" />
         ),
         cell: ({ row }) => {
-          const val = row.getValue("date_of_birth") as string
+          const val = row.getValue("date_of_birth")
           return val ? formatDate(new Date(val + "T00:00:00")) : "—"
         },
         meta: { label: "Date of Birth", variant: "date" },
@@ -174,7 +174,7 @@ export function AlumniDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Gender" />
         ),
         cell: ({ row }) => (
-          <EnumBadge column="gender" value={row.getValue("gender") as string} />
+          <EnumBadge column="gender" value={row.getValue("gender")} />
         ),
         meta: {
           label: "Gender",
@@ -193,7 +193,7 @@ export function AlumniDataGrid({}: { refreshKey?: number }) {
         cell: ({ row }) => (
           <EnumBadge
             column="religion"
-            value={row.getValue("religion") as string}
+            value={row.getValue("religion")}
           />
         ),
         meta: {
@@ -216,7 +216,7 @@ export function AlumniDataGrid({}: { refreshKey?: number }) {
         cell: ({ row }) => (
           <EnumBadge
             column="medium_of_instruction"
-            value={row.getValue("medium_of_instruction") as string}
+            value={row.getValue("medium_of_instruction")}
           />
         ),
         meta: {
@@ -236,7 +236,7 @@ export function AlumniDataGrid({}: { refreshKey?: number }) {
         cell: ({ row }) => (
           <EnumBadge
             column="student_status"
-            value={row.getValue("status") as string}
+            value={row.getValue("status")}
           />
         ),
         meta: {

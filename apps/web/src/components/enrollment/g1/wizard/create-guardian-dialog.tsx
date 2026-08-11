@@ -41,7 +41,8 @@ import { queryClient } from "@/router"
 import { vCreateGuardianBody } from "@/lib/api-client/valibot.gen"
 import { IconPlus } from "@tabler/icons-react"
 import professions from "professions"
-import { FormBuilder, type FormConfig } from "@/lib/form-builder"
+import { FormBuilder  } from "@/lib/form-builder"
+import type {FormConfig} from "@/lib/form-builder";
 import {
   RELATIONSHIP_OPTIONS,
   CATEGORY_INFO,
@@ -472,7 +473,7 @@ export function CreateGuardianDialog({
           const existingId = idMatch[1]
           const guardians = queryClient.getQueryData(
             listGuardiansQueryKey({ client: apiClient })
-          ) as any[] | undefined
+          )
           const existing = guardians?.find((g: any) => g.id === existingId)
           if (existing) {
             toast.info(

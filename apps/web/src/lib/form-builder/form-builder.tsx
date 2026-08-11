@@ -11,7 +11,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { FieldControl, type RenderFieldArgs } from "./field-registry"
+import { FieldControl  } from "./field-registry"
+import type {RenderFieldArgs} from "./field-registry";
 import { FormContext } from "./form-context"
 
 import type { FormBuilderProps, FieldEntry, RowConfig } from "./types"
@@ -125,7 +126,7 @@ export function FormBuilder<TData extends Record<string, unknown>>(
       return (
         <form.Field
           key={field.name}
-          name={field.name as any}
+          name={field.name}
           children={(f: any) => {
             const fieldApi = f as {
               state: { value: unknown }
@@ -145,7 +146,7 @@ export function FormBuilder<TData extends Record<string, unknown>>(
                   value: fieldApi.state.value,
                   onChange: (val) => fieldApi.handleChange(val),
                   name: field.name,
-                  formValues: formValues as Record<string, unknown>,
+                  formValues: formValues,
                   setFieldValue: (n, v) => form.setFieldValue(n as any, v),
                 })}
               </div>
@@ -158,7 +159,7 @@ export function FormBuilder<TData extends Record<string, unknown>>(
     return (
       <form.Field
         key={field.name}
-        name={field.name as any}
+        name={field.name}
         children={(f: any) => {
           const fieldApi = f as {
             state: {
@@ -202,14 +203,14 @@ export function FormBuilder<TData extends Record<string, unknown>>(
 
   function isFieldHidden(field: FieldEntry<TData>): boolean {
     if (typeof field.hidden === "function") {
-      return field.hidden(formValues as Record<string, unknown>)
+      return field.hidden(formValues)
     }
     return !!field.hidden
   }
 
   function isFieldDisabled(field: FieldEntry<TData>): boolean {
     if (typeof field.disabled === "function") {
-      return field.disabled(formValues as Record<string, unknown>)
+      return field.disabled(formValues)
     }
     return !!field.disabled
   }

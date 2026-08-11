@@ -210,7 +210,7 @@ export const registry: Registry = {
 }
 
 export function registerFieldRenderer(kind: string, renderer: FieldRenderer) {
-  registry[kind as FieldKind] = renderer
+  registry[kind] = renderer
 }
 
 export function getFieldRenderer(kind: FieldKind): FieldRenderer {
@@ -284,7 +284,7 @@ export function FieldControl(args: RenderFieldArgs): React.ReactNode {
             {renderField(args)}
             {args.isInvalid && (
               <FieldError
-                errors={args.errors as Array<{ message?: string } | undefined>}
+                errors={args.errors}
               />
             )}
           </FieldContent>

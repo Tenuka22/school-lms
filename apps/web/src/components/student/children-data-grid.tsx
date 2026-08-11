@@ -105,7 +105,7 @@ export function ChildrenDataGrid({
           has_student: hasStudent != null ? String(hasStudent) : undefined,
         },
       })
-      return (data ?? []) as Child[]
+      return (data ?? [])
     },
   })
 
@@ -172,7 +172,7 @@ export function ChildrenDataGrid({
           <DataTableColumnHeader column={column} label="Date of Birth" />
         ),
         cell: ({ row }) => {
-          const val = row.getValue("date_of_birth") as string
+          const val = row.getValue("date_of_birth")
           return val ? formatDate(new Date(val + "T00:00:00")) : "—"
         },
         meta: { label: "Date of Birth", variant: "date" },
@@ -183,7 +183,7 @@ export function ChildrenDataGrid({
           <DataTableColumnHeader column={column} label="Gender" />
         ),
         cell: ({ row }) => (
-          <EnumBadge column="gender" value={row.getValue("gender") as string} />
+          <EnumBadge column="gender" value={row.getValue("gender")} />
         ),
         meta: {
           label: "Gender",
@@ -202,7 +202,7 @@ export function ChildrenDataGrid({
         cell: ({ row }) => (
           <EnumBadge
             column="nationality"
-            value={row.getValue("nationality") as string}
+            value={row.getValue("nationality")}
           />
         ),
         meta: {
@@ -223,7 +223,7 @@ export function ChildrenDataGrid({
         cell: ({ row }) => (
           <EnumBadge
             column="religion"
-            value={row.getValue("religion") as string}
+            value={row.getValue("religion")}
           />
         ),
         meta: {
@@ -246,7 +246,7 @@ export function ChildrenDataGrid({
         cell: ({ row }) => (
           <EnumBadge
             column="medium_of_instruction"
-            value={row.getValue("medium_of_instruction") as string}
+            value={row.getValue("medium_of_instruction")}
           />
         ),
         meta: {

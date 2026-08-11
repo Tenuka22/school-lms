@@ -327,7 +327,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
                     className="text-destructive"
                   />
                 }
-                onClick={() => setDeleteTarget(row.original.id!)}
+                onClick={() => setDeleteTarget(row.original.id)}
               >
                 <IconTrash className="size-4" />
               </AlertDialogTrigger>
@@ -344,7 +344,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     disabled={deleting}
-                    onClick={() => handleDelete(row.original.id!)}
+                    onClick={() => handleDelete(row.original.id)}
                   >
                     {deleting ? (
                       <IconLoader2 className="size-4 animate-spin" />

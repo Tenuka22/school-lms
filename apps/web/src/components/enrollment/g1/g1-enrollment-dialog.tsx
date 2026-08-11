@@ -17,9 +17,8 @@ import {
   updateApplicationMutation,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
-import { optionsFromSchema, useBuildForm } from "@/lib/form-builder"
+import { optionsFromSchema, useBuildForm, FormBuilder  } from "@/lib/form-builder"
 import type { FormConfig } from "@/lib/form-builder"
-import { FormBuilder } from "@/lib/form-builder"
 import {
   GenderSchema,
   NationalitySchema,
@@ -437,7 +436,7 @@ export function G1EnrollmentDialog({
                     | "updated_at"
                   >
                   const child = await createChild.mutateAsync({
-                    body: childBody as Child,
+                    body: childBody,
                   })
                   savedChildId = child.id
                   setChildId(savedChildId)

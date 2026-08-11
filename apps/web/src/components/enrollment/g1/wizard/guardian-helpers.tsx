@@ -31,7 +31,7 @@ import {
   listStudentsOptions,
   createWorkspaceAddressMutation,
 } from "@/lib/api-client/@tanstack/react-query.gen"
-import type { SchoolSummary, Blacklist } from "@/lib/api-client/types.gen"
+import type { SchoolSummary, Blacklist, Guardian  } from "@/lib/api-client/types.gen"
 import { useDebounce } from "@/hooks/use-debounce"
 import { queryClient } from "@/router"
 import { toastApiError } from "@/lib/api-error"
@@ -46,7 +46,6 @@ import {
 import { cn } from "@/lib/utils"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { CreateWorkspaceAddressDialog } from "./create-workspace-address-dialog"
-import type { Guardian } from "@/lib/api-client/types.gen"
 
 export const RELATIONSHIP_OPTIONS = ["Father", "Mother", "Guardian", "Other"]
 

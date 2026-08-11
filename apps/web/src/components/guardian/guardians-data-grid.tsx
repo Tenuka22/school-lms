@@ -118,7 +118,7 @@ function ChildrenTree({ children }: { children: ChildInfo[] }) {
   )
 }
 
-export function GuardiansDataGrid({}: { refreshKey?: number }) {
+export function GuardiansDataGrid(_props: { refreshKey?: number }) {
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 300)
   const [isPastPupilFilter, setIsPastPupilFilter] = useState<string>("")
@@ -140,7 +140,7 @@ export function GuardiansDataGrid({}: { refreshKey?: number }) {
           is_past_pupil: isPastPupilFilter || undefined,
         },
       })
-      return (data ?? []) as GuardianWithChildren[]
+      return (data ?? [])
     },
   })
 
@@ -178,7 +178,7 @@ export function GuardiansDataGrid({}: { refreshKey?: number }) {
         cell: ({ row }) => (
           <EnumBadge
             column="guardian_relationship"
-            value={row.getValue("relationship_type") as string}
+            value={row.getValue("relationship_type")}
           />
         ),
         meta: {
@@ -221,7 +221,7 @@ export function GuardiansDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Staff" />
         ),
         cell: ({ row }) => {
-          const val = row.getValue("is_school_staff") as boolean
+          const val = row.getValue("is_school_staff")
           return val ? (
             <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
               School Staff

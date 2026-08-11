@@ -10,9 +10,8 @@ import type { InterviewMarks } from "./interview-shell"
 import type {
   Guardian,
   Address,
-  StudentResponse as Student,
+  StudentResponse as Student, G1Application 
 } from "@/lib/api-client/types.gen"
-import type { G1Application } from "@/lib/api-client/types.gen"
 import type { ChildFormData } from "../wizard/wizard-step-child"
 import type { DocumentFormData } from "../wizard/wizard-step-documents"
 import { FieldControl } from "@/lib/form-builder"

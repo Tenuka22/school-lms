@@ -179,7 +179,7 @@ export function WizardShell() {
         date_of_birth: childRecord.date_of_birth,
         gender: childRecord.gender,
         nationality: childRecord.nationality,
-        religion: (childRecord.religion ?? undefined) as Religion | undefined,
+        religion: (childRecord.religion ?? undefined),
         birth_certificate_number: childRecord.birth_certificate_number ?? "",
         medium_of_instruction: childRecord.medium_of_instruction,
       })
@@ -561,13 +561,13 @@ export function WizardShell() {
                     name_with_initials: data.name_with_initials,
                     name_with_initials_en: data.name_with_initials_en || null,
                     date_of_birth: data.date_of_birth,
-                    gender: data.gender as Gender,
-                    nationality: data.nationality as Nationality,
-                    religion: (data.religion || null) as Religion | null,
+                    gender: data.gender,
+                    nationality: data.nationality,
+                    religion: (data.religion || null),
                     birth_certificate_number:
                       data.birth_certificate_number || null,
                     medium_of_instruction:
-                      data.medium_of_instruction as MediumOfInstruction,
+                      data.medium_of_instruction,
                     status: "Active" as const,
                   } satisfies Omit<
                     Child,
@@ -584,11 +584,11 @@ export function WizardShell() {
                   if (application?.child_id) {
                     savedChild = await updateChild.mutateAsync({
                       path: { id: application.child_id },
-                      body: childPayload as any,
+                      body: childPayload,
                     })
                   } else {
                     savedChild = await createChild.mutateAsync({
-                      body: childPayload as Child,
+                      body: childPayload,
                     })
                   }
 

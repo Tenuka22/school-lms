@@ -4,7 +4,7 @@ export function getApiErrorMessage(err: unknown): string | null {
   if (!err) return null
 
   if (typeof err === "object" && "error" in err) {
-    const msg = (err as { error: unknown }).error
+    const msg = (err).error
     if (typeof msg === "string" && msg.length > 0) return msg
   }
 

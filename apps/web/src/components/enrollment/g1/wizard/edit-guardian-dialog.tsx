@@ -40,7 +40,8 @@ import { queryClient } from "@/router"
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import professions from "professions"
 import type { Guardian, GuardianWithChildren } from "@/lib/api-client/types.gen"
-import { FormBuilder, type FormConfig } from "@/lib/form-builder"
+import { FormBuilder  } from "@/lib/form-builder"
+import type {FormConfig} from "@/lib/form-builder";
 import {
   RELATIONSHIP_OPTIONS,
   CATEGORY_INFO,
@@ -498,7 +499,7 @@ export function EditGuardianDialog({
         <FormBuilder
           config={formConfig}
           defaultValues={defaultValues}
-          valibotSchema={vCreateGuardianBody as any}
+          valibotSchema={vCreateGuardianBody}
           onSubmit={handleSubmit}
           formId="edit-guardian-form"
           currentStep={step}

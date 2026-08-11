@@ -156,7 +156,7 @@ export function WizardStepSchools({
             <div className="space-y-2">
               {selectedSchools.map((school, index) => (
                 <div
-                  key={school!.id}
+                  key={school.id}
                   className="flex items-center gap-3 rounded-md border bg-muted/30 px-3 py-2"
                 >
                   <Badge
@@ -167,11 +167,11 @@ export function WizardStepSchools({
                   </Badge>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">
-                      {school!.name_si}
+                      {school.name_si}
                     </p>
-                    {school!.name_en && (
+                    {school.name_en && (
                       <p className="truncate text-xs text-muted-foreground">
-                        {school!.name_en}
+                        {school.name_en}
                       </p>
                     )}
                   </div>
@@ -198,7 +198,7 @@ export function WizardStepSchools({
                       variant="ghost"
                       size="icon"
                       className="size-7 text-destructive"
-                      onClick={() => handleRemoveSchool(school!.id)}
+                      onClick={() => handleRemoveSchool(school.id)}
                     >
                       <IconX className="size-3.5" />
                     </Button>

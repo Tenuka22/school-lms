@@ -27,11 +27,11 @@ import {
 import {
   createApplication,
   deleteApplication,
-  listChildren,
+  listChildren, createChild, updateChild 
 } from "@/lib/api-client/sdk.gen"
 import { queryClient } from "@/router"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
-import { EntityDialog } from "@/lib/form-builder"
+import { EntityDialog, FormBuilder  } from "@/lib/form-builder"
 import {
   makeChildFormConfig,
   childFormDefaults,
@@ -42,9 +42,8 @@ import type {
   Gender,
   MediumOfInstruction,
   Nationality,
-  Religion,
+  Religion, Child , ApplicationWithChild 
 } from "@/lib/api-client/types.gen"
-import { createChild, updateChild } from "@/lib/api-client/sdk.gen"
 import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpers"
 import { BatchOverviewChart } from "@/components/enrollment/g1/pipeline/batch-overview-chart"
 import { Button } from "@/components/ui/button"
@@ -82,8 +81,6 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command"
-import { FormBuilder } from "@/lib/form-builder"
-import type { Child } from "@/lib/api-client/types.gen"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -119,7 +116,6 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-col
 
 import { Route } from "@/routes/_authenticated/student-management/enrollment/g1"
 import type { DashboardSearch } from "@/routes/_authenticated/student-management/enrollment/g1"
-import type { ApplicationWithChild } from "@/lib/api-client/types.gen"
 
 const LANE_CONFIG = [
   {
@@ -501,7 +497,7 @@ export function PipeDashboard() {
                 e.stopPropagation()
                 navigate({
                   to: "/student-management/enrollment/g1/$enrollment_id",
-                  params: { enrollment_id: row.original.id! },
+                  params: { enrollment_id: row.original.id },
                 })
               }}
               title={childId}
@@ -528,7 +524,7 @@ export function PipeDashboard() {
                 e.stopPropagation()
                 navigate({
                   to: "/student-management/enrollment/g1/$enrollment_id",
-                  params: { enrollment_id: row.original.id! },
+                  params: { enrollment_id: row.original.id },
                 })
               }}
             >
@@ -723,7 +719,7 @@ export function PipeDashboard() {
                   onClick={() =>
                     navigate({
                       to: "/student-management/enrollment/g1/$enrollment_id/interview",
-                      params: { enrollment_id: row.original.id! },
+                      params: { enrollment_id: row.original.id },
                     })
                   }
                 >
@@ -735,7 +731,7 @@ export function PipeDashboard() {
                   render={
                     <Link
                       to="/student-management/enrollment/g1/$enrollment_id"
-                      params={{ enrollment_id: row.original.id! }}
+                      params={{ enrollment_id: row.original.id }}
                       className="flex items-center gap-3"
                     >
                       <IconPencil className="size-4" />
@@ -745,7 +741,7 @@ export function PipeDashboard() {
                 />
                 <DropdownMenuItem
                   className="gap-3 pl-3 text-destructive focus:text-destructive [&_svg]:size-4"
-                  onClick={() => setDeleteTarget(row.original.id!)}
+                  onClick={() => setDeleteTarget(row.original.id)}
                 >
                   <IconTrash className="size-4" />
                   Delete
@@ -771,7 +767,7 @@ export function PipeDashboard() {
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     disabled={deleting}
-                    onClick={() => handleDelete(row.original.id!)}
+                    onClick={() => handleDelete(row.original.id)}
                   >
                     {deleting ? (
                       <IconLoader2 className="size-4 animate-spin" />
@@ -1107,17 +1103,17 @@ export function PipeDashboard() {
                   full_name: editingChild.full_name,
                   name_with_initials: editingChild.name_with_initials,
                   date_of_birth: editingChild.date_of_birth,
-                  gender: editingChild.gender as ChildFormValues["gender"],
+                  gender: editingChild.gender,
                   nationality:
-                    editingChild.nationality as ChildFormValues["nationality"],
+                    editingChild.nationality,
                   religion: (editingChild.religion ??
-                    "") as ChildFormValues["religion"],
+                    ""),
                   birth_certificate_number:
                     editingChild.birth_certificate_number ?? "",
                   nic: editingChild.nic ?? "",
                   passport_number: editingChild.passport_number ?? "",
                   medium_of_instruction:
-                    editingChild.medium_of_instruction as ChildFormValues["medium_of_instruction"],
+                    editingChild.medium_of_instruction,
                 }
               : childFormDefaults
           }
@@ -1144,7 +1140,7 @@ export function PipeDashboard() {
                 toastApiError(error, "Failed to update child")
                 return
               }
-              setSelectedChild(data as any)
+              setSelectedChild(data)
             } else {
               const { data, error } = await createChild({
                 body: {
@@ -1166,7 +1162,7 @@ export function PipeDashboard() {
                 toastApiError(error, "Failed to create child")
                 return
               }
-              setSelectedChild(data as any)
+              setSelectedChild(data)
             }
             setCreateChildDialogOpen(false)
             setEditingChild(null)

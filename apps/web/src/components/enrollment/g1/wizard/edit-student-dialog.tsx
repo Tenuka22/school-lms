@@ -15,9 +15,10 @@ import {
 } from "@/lib/api-client/schemas.gen"
 import {
   EntityDialog,
-  optionsFromSchema,
-  type FormConfig,
+  optionsFromSchema
+  
 } from "@/lib/form-builder"
+import type {FormConfig} from "@/lib/form-builder";
 import type {
   StudentResponse as Student,
   UpdateStudentRequest,
