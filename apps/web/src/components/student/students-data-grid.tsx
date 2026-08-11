@@ -82,7 +82,7 @@ export function StudentsDataGrid(_props: { refreshKey?: number }) {
         client: apiClient,
         query: { search: debouncedSearch || undefined },
       })
-      return (data ?? [])
+      return data ?? []
     },
   })
 
@@ -183,10 +183,7 @@ export function StudentsDataGrid(_props: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Religion" />
         ),
         cell: ({ row }) => (
-          <EnumBadge
-            column="religion"
-            value={row.getValue("religion")}
-          />
+          <EnumBadge column="religion" value={row.getValue("religion")} />
         ),
         meta: {
           label: "Religion",
@@ -226,10 +223,7 @@ export function StudentsDataGrid(_props: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Status" />
         ),
         cell: ({ row }) => (
-          <EnumBadge
-            column="student_status"
-            value={row.getValue("status")}
-          />
+          <EnumBadge column="student_status" value={row.getValue("status")} />
         ),
         meta: {
           label: "Status",

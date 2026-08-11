@@ -13,12 +13,8 @@ import {
   ReligionSchema,
   MediumOfInstructionSchema,
 } from "@/lib/api-client/schemas.gen"
-import {
-  EntityDialog,
-  optionsFromSchema
-  
-} from "@/lib/form-builder"
-import type {FormConfig} from "@/lib/form-builder";
+import { EntityDialog, optionsFromSchema } from "@/lib/form-builder"
+import type { FormConfig } from "@/lib/form-builder"
 import type {
   StudentResponse as Student,
   UpdateStudentRequest,

@@ -68,7 +68,7 @@ export function useChildUniqueness(
         query,
         client: apiClient,
       })
-      return (data ?? [])
+      return data ?? []
     },
     enabled: enabled && (shouldCheckName || shouldCheckNic || shouldCheckBc),
     staleTime: 30_000,
@@ -82,7 +82,7 @@ export function useChildUniqueness(
           query: { search: debouncedValue },
           client: apiClient,
         })
-        return (data ?? [])
+        return data ?? []
       },
       enabled: enabled && (shouldCheckName || shouldCheckNic),
       staleTime: 30_000,

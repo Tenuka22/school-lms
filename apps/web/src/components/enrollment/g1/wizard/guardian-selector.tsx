@@ -25,7 +25,10 @@ import {
   IconUser,
   IconPencil,
 } from "@tabler/icons-react"
-import type { GuardianWithChildren, Blacklist  } from "@/lib/api-client/types.gen"
+import type {
+  GuardianWithChildren,
+  Blacklist,
+} from "@/lib/api-client/types.gen"
 import { getEnumStyle } from "@/lib/enum-badge"
 import {
   GuardianProfileCard,

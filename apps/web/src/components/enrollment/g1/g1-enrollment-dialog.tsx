@@ -17,7 +17,11 @@ import {
   updateApplicationMutation,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
-import { optionsFromSchema, useBuildForm, FormBuilder  } from "@/lib/form-builder"
+import {
+  optionsFromSchema,
+  useBuildForm,
+  FormBuilder,
+} from "@/lib/form-builder"
 import type { FormConfig } from "@/lib/form-builder"
 import {
   GenderSchema,

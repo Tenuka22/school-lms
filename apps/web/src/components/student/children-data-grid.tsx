@@ -105,7 +105,7 @@ export function ChildrenDataGrid({
           has_student: hasStudent != null ? String(hasStudent) : undefined,
         },
       })
-      return (data ?? [])
+      return data ?? []
     },
   })
 
@@ -200,10 +200,7 @@ export function ChildrenDataGrid({
           <DataTableColumnHeader column={column} label="Nationality" />
         ),
         cell: ({ row }) => (
-          <EnumBadge
-            column="nationality"
-            value={row.getValue("nationality")}
-          />
+          <EnumBadge column="nationality" value={row.getValue("nationality")} />
         ),
         meta: {
           label: "Nationality",
@@ -221,10 +218,7 @@ export function ChildrenDataGrid({
           <DataTableColumnHeader column={column} label="Religion" />
         ),
         cell: ({ row }) => (
-          <EnumBadge
-            column="religion"
-            value={row.getValue("religion")}
-          />
+          <EnumBadge column="religion" value={row.getValue("religion")} />
         ),
         meta: {
           label: "Religion",

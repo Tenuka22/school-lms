@@ -11,7 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card"
 import { IconLoader2, IconCheck } from "@tabler/icons-react"
-import { FormBuilder, optionsFromSchema  } from "@/lib/form-builder"
+import { FormBuilder, optionsFromSchema } from "@/lib/form-builder"
 import { FieldWithAlert } from "@/components/enrollment/g1/field-with-alert"
 import {
   FormUniquenessProvider,

@@ -31,11 +31,8 @@ import {
   IconFile,
 } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
-import {
-  OwnershipProofDialog
-  
-} from "./ownership-proof-dialog"
-import type {OwnershipProofEntry} from "./ownership-proof-dialog";
+import { OwnershipProofDialog } from "./ownership-proof-dialog"
+import type { OwnershipProofEntry } from "./ownership-proof-dialog"
 
 export type AddressEntryValue = {
   address_id: string

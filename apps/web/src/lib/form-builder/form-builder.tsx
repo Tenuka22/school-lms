@@ -11,8 +11,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { FieldControl  } from "./field-registry"
-import type {RenderFieldArgs} from "./field-registry";
+import { FieldControl } from "./field-registry"
+import type { RenderFieldArgs } from "./field-registry"
 import { FormContext } from "./form-context"
 
 import type { FormBuilderProps, FieldEntry, RowConfig } from "./types"

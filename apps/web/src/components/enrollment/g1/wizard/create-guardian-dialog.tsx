@@ -41,8 +41,8 @@ import { queryClient } from "@/router"
 import { vCreateGuardianBody } from "@/lib/api-client/valibot.gen"
 import { IconPlus } from "@tabler/icons-react"
 import professions from "professions"
-import { FormBuilder  } from "@/lib/form-builder"
-import type {FormConfig} from "@/lib/form-builder";
+import { FormBuilder } from "@/lib/form-builder"
+import type { FormConfig } from "@/lib/form-builder"
 import {
   RELATIONSHIP_OPTIONS,
   CATEGORY_INFO,

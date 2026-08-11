@@ -27,11 +27,13 @@ import {
 import {
   createApplication,
   deleteApplication,
-  listChildren, createChild, updateChild 
+  listChildren,
+  createChild,
+  updateChild,
 } from "@/lib/api-client/sdk.gen"
 import { queryClient } from "@/router"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
-import { EntityDialog, FormBuilder  } from "@/lib/form-builder"
+import { EntityDialog, FormBuilder } from "@/lib/form-builder"
 import {
   makeChildFormConfig,
   childFormDefaults,
@@ -42,7 +44,9 @@ import type {
   Gender,
   MediumOfInstruction,
   Nationality,
-  Religion, Child , ApplicationWithChild 
+  Religion,
+  Child,
+  ApplicationWithChild,
 } from "@/lib/api-client/types.gen"
 import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpers"
 import { BatchOverviewChart } from "@/components/enrollment/g1/pipeline/batch-overview-chart"
@@ -1104,16 +1108,13 @@ export function PipeDashboard() {
                   name_with_initials: editingChild.name_with_initials,
                   date_of_birth: editingChild.date_of_birth,
                   gender: editingChild.gender,
-                  nationality:
-                    editingChild.nationality,
-                  religion: (editingChild.religion ??
-                    ""),
+                  nationality: editingChild.nationality,
+                  religion: editingChild.religion ?? "",
                   birth_certificate_number:
                     editingChild.birth_certificate_number ?? "",
                   nic: editingChild.nic ?? "",
                   passport_number: editingChild.passport_number ?? "",
-                  medium_of_instruction:
-                    editingChild.medium_of_instruction,
+                  medium_of_instruction: editingChild.medium_of_instruction,
                 }
               : childFormDefaults
           }

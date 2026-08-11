@@ -31,7 +31,11 @@ import {
   listStudentsOptions,
   createWorkspaceAddressMutation,
 } from "@/lib/api-client/@tanstack/react-query.gen"
-import type { SchoolSummary, Blacklist, Guardian  } from "@/lib/api-client/types.gen"
+import type {
+  SchoolSummary,
+  Blacklist,
+  Guardian,
+} from "@/lib/api-client/types.gen"
 import { useDebounce } from "@/hooks/use-debounce"
 import { queryClient } from "@/router"
 import { toastApiError } from "@/lib/api-error"

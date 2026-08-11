@@ -9,7 +9,8 @@ import type { ChildFormData } from "../wizard/wizard-step-child"
 import type {
   Address,
   Guardian,
-  StudentResponse as Student, G1Application 
+  StudentResponse as Student,
+  G1Application,
 } from "@/lib/api-client/types.gen"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { getInitials } from "@/lib/utils"

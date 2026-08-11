@@ -93,7 +93,7 @@ export function schemaToFormFields<TData extends Record<string, unknown>>(
   opts: SchemaToFormOptions
 ): FieldEntry<TData>[] {
   const { schema, include, exclude, overrides } = opts
-  const entries = (schema).entries as Record<string, AnySchema>
+  const entries = schema.entries as Record<string, AnySchema>
   const keys = Object.keys(entries)
 
   const excludeSet = new Set<string>([...SYSTEM_FIELDS, ...(exclude ?? [])])
@@ -117,7 +117,7 @@ export function schemaToFormFields<TData extends Record<string, unknown>>(
 
       return {
         name: key as keyof TData & string,
-        kind: (override?.kind ?? kind),
+        kind: override?.kind ?? kind,
         label: override?.label ?? formatLabel(key),
         placeholder: override?.placeholder,
         options: override?.options ?? options,

@@ -140,7 +140,7 @@ export function GuardiansDataGrid(_props: { refreshKey?: number }) {
           is_past_pupil: isPastPupilFilter || undefined,
         },
       })
-      return (data ?? [])
+      return data ?? []
     },
   })
 

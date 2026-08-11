@@ -179,7 +179,7 @@ export function WizardShell() {
         date_of_birth: childRecord.date_of_birth,
         gender: childRecord.gender,
         nationality: childRecord.nationality,
-        religion: (childRecord.religion ?? undefined),
+        religion: childRecord.religion ?? undefined,
         birth_certificate_number: childRecord.birth_certificate_number ?? "",
         medium_of_instruction: childRecord.medium_of_instruction,
       })
@@ -563,11 +563,10 @@ export function WizardShell() {
                     date_of_birth: data.date_of_birth,
                     gender: data.gender,
                     nationality: data.nationality,
-                    religion: (data.religion || null),
+                    religion: data.religion || null,
                     birth_certificate_number:
                       data.birth_certificate_number || null,
-                    medium_of_instruction:
-                      data.medium_of_instruction,
+                    medium_of_instruction: data.medium_of_instruction,
                     status: "Active" as const,
                   } satisfies Omit<
                     Child,

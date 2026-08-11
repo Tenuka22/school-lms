@@ -282,11 +282,7 @@ export function FieldControl(args: RenderFieldArgs): React.ReactNode {
           )}
           <FieldContent>
             {renderField(args)}
-            {args.isInvalid && (
-              <FieldError
-                errors={args.errors}
-              />
-            )}
+            {args.isInvalid && <FieldError errors={args.errors} />}
           </FieldContent>
         </>
       )}

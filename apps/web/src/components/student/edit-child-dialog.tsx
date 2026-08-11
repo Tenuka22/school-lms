@@ -14,7 +14,8 @@ import type {
   Gender,
   MediumOfInstruction,
   Nationality,
-  Religion, Child 
+  Religion,
+  Child,
 } from "@/lib/api-client/types.gen"
 
 function childToFormValues(child: Child): ChildFormValues {
@@ -24,12 +25,11 @@ function childToFormValues(child: Child): ChildFormValues {
     date_of_birth: child.date_of_birth,
     gender: child.gender,
     nationality: child.nationality,
-    religion: (child.religion ?? ""),
+    religion: child.religion ?? "",
     birth_certificate_number: child.birth_certificate_number ?? "",
     nic: child.nic ?? "",
     passport_number: child.passport_number ?? "",
-    medium_of_instruction:
-      child.medium_of_instruction,
+    medium_of_instruction: child.medium_of_instruction,
   }
 }
 
