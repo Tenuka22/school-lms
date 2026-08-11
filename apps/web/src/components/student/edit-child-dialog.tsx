@@ -42,7 +42,7 @@ export function EditChildDialog({
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
 }) {
-  const formConfig = makeChildFormConfig(child?.id)
+  const formConfig = makeChildFormConfig({ excludeChildId: child?.id })
   const open = child !== null
 
   return (

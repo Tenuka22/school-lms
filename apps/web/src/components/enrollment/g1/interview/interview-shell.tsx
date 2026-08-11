@@ -301,8 +301,10 @@ export function InterviewShell() {
       date_of_birth: childRecord.date_of_birth,
       gender: childRecord.gender,
       nationality: childRecord.nationality,
-      religion: (childRecord.religion ?? undefined) as any,
+      religion: childRecord.religion ?? "",
       birth_certificate_number: childRecord.birth_certificate_number ?? "",
+      nic: childRecord.nic ?? "",
+      passport_number: childRecord.passport_number ?? "",
       medium_of_instruction: childRecord.medium_of_instruction,
     }
   }, [childRecord])

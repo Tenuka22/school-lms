@@ -1088,7 +1088,7 @@ export function PipeDashboard() {
       </Dialog>
 
       <FormUniquenessProvider>
-        <EntityDialog
+        <EntityDialog<ChildFormValues>
           open={createChildDialogOpen}
           onOpenChange={(open) => {
             if (!open) setEditingChild(null)
@@ -1100,12 +1100,13 @@ export function PipeDashboard() {
               ? "Update the child's details."
               : "Enter the required details to create a new child record."
           }
-          config={makeChildFormConfig(editingChild?.id)}
+          config={makeChildFormConfig({ excludeChildId: editingChild?.id })}
           defaultValues={
             editingChild
               ? {
                   full_name: editingChild.full_name,
                   name_with_initials: editingChild.name_with_initials,
+                  name_with_initials_en: editingChild.name_with_initials_en ?? "",
                   date_of_birth: editingChild.date_of_birth,
                   gender: editingChild.gender,
                   nationality: editingChild.nationality,

@@ -38,7 +38,6 @@ import type {
   Gender,
   Nationality,
   MediumOfInstruction,
-  Religion,
   Child,
   G1Category,
 } from "@/lib/api-client/types.gen"
@@ -150,8 +149,10 @@ export function WizardShell() {
     date_of_birth: "",
     gender: "Male" as Gender,
     nationality: "SriLankan" as Nationality,
-    religion: undefined as unknown as Religion,
+    religion: "",
     birth_certificate_number: "",
+    nic: "",
+    passport_number: "",
     medium_of_instruction: "Sinhala" as MediumOfInstruction,
   })
 
@@ -179,8 +180,10 @@ export function WizardShell() {
         date_of_birth: childRecord.date_of_birth,
         gender: childRecord.gender,
         nationality: childRecord.nationality,
-        religion: childRecord.religion ?? undefined,
+        religion: childRecord.religion ?? "",
         birth_certificate_number: childRecord.birth_certificate_number ?? "",
+        nic: childRecord.nic ?? "",
+        passport_number: childRecord.passport_number ?? "",
         medium_of_instruction: childRecord.medium_of_instruction,
       })
     }
@@ -561,12 +564,12 @@ export function WizardShell() {
                     name_with_initials: data.name_with_initials,
                     name_with_initials_en: data.name_with_initials_en || null,
                     date_of_birth: data.date_of_birth,
-                    gender: data.gender,
-                    nationality: data.nationality,
+                    gender: data.gender || "Male",
+                    nationality: data.nationality || "SriLankan",
                     religion: data.religion || null,
                     birth_certificate_number:
                       data.birth_certificate_number || null,
-                    medium_of_instruction: data.medium_of_instruction,
+                    medium_of_instruction: data.medium_of_instruction || "Sinhala",
                     status: "Active" as const,
                   } satisfies Omit<
                     Child,

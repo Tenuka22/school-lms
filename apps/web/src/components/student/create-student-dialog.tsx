@@ -1,8 +1,15 @@
 "use client"
 
 import { useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
+import { apiClient } from "@/lib/api-client"
+import { queryClient } from "@/router"
+import {
+  createStudentMutation,
+  listStudentsQueryKey,
+} from "@/lib/api-client/@tanstack/react-query.gen"
 import { EntityDialog } from "@/lib/form-builder"
 import {
   studentFormConfig,
@@ -34,77 +41,57 @@ export function CreateStudentDialog({
   const [duplicates, setDuplicates] = useState<DuplicateChild[]>([])
   const [showDuplicates, setShowDuplicates] = useState(false)
 
-  const handleSubmit = async (values: StudentFormValues) => {
-    const body: Record<string, unknown> = {
-      full_name: values.full_name,
-      name_with_initials: values.name_with_initials,
-      date_of_birth: values.date_of_birth || null,
-      gender: values.gender || null,
-      nationality: values.nationality || null,
-      religion: values.religion || null,
-      birth_certificate_number: values.birth_certificate_number || null,
-      nic: values.nic || null,
-      passport_number: values.passport_number || null,
-      medium_of_instruction: values.medium_of_instruction || null,
-    }
-
-    const response = await fetch("/api/students", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-
-    if (response.status === 409) {
-      const errorData = await response.json()
-      if (errorData.duplicates && errorData.duplicates.length > 0) {
-        setDuplicates(errorData.duplicates)
-        setShowDuplicates(true)
-        throw new Error("duplicates_found")
-      }
-      toast.error(errorData.error || "Duplicate found")
-      throw new Error(errorData.error)
-    }
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      toast.error(errorData.error || "Failed to create student")
-      throw new Error(errorData.error)
-    }
-
-    const result = await response.json()
-    toast.success(
-      result.used_existing_child
-        ? "Student linked to existing child"
-        : "Student created successfully"
-    )
-    setDuplicates([])
-    setShowDuplicates(false)
-    onSuccess()
-    onOpenChange(false)
-  }
-
-  const handleUseExistingChild = async (childId: string) => {
-    try {
-      const response = await fetch("/api/students", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ child_id: childId }),
+  const createMutation = useMutation({
+    ...createStudentMutation({ client: apiClient }),
+    onSuccess: (data) => {
+      toast.success(
+        data.used_existing_child
+          ? "Student linked to existing child"
+          : "Student created successfully"
+      )
+      queryClient.invalidateQueries({
+        queryKey: listStudentsQueryKey({ client: apiClient }),
       })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.error || "Failed to link student")
-        return
-      }
-
-      toast.success("Student linked to existing child")
       setDuplicates([])
       setShowDuplicates(false)
       onSuccess()
       onOpenChange(false)
-    } catch (err) {
-      toastApiError(err, "Failed to link student")
-    }
+    },
+    onError: (err) => {
+      const error = err as Record<string, unknown>
+      const duplicates = error.duplicates as DuplicateChild[] | undefined
+      if (duplicates && duplicates.length > 0) {
+        setDuplicates(duplicates)
+        setShowDuplicates(true)
+        return
+      }
+      toastApiError(err, "Failed to create student")
+    },
+  })
+
+  const handleSubmit = async (values: StudentFormValues) => {
+    createMutation.mutate({
+      body: {
+        full_name: values.full_name,
+        name_with_initials: values.name_with_initials,
+        date_of_birth: values.date_of_birth || null,
+        gender: values.gender || null,
+        nationality: values.nationality || null,
+        religion: values.religion || null,
+        birth_certificate_number: values.birth_certificate_number || null,
+        nic: values.nic || null,
+        passport_number: values.passport_number || null,
+        medium_of_instruction: values.medium_of_instruction || null,
+      },
+      client: apiClient,
+    })
+  }
+
+  const handleUseExistingChild = (childId: string) => {
+    createMutation.mutate({
+      body: { child_id: childId },
+      client: apiClient,
+    })
   }
 
   if (showDuplicates && duplicates.length > 0) {
@@ -146,7 +133,8 @@ export function CreateStudentDialog({
                 )}
               </div>
               <button
-                className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
+                className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                disabled={createMutation.isPending}
                 onClick={() => handleUseExistingChild(dup.id)}
               >
                 Use This Child
@@ -179,6 +167,7 @@ export function CreateStudentDialog({
       config={studentFormConfig}
       defaultValues={studentFormDefaults}
       onSubmit={handleSubmit}
+      submitting={createMutation.isPending}
       actionLabel="Create Student"
       size="xl"
     />

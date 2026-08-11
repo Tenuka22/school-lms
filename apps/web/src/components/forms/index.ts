@@ -1,5 +1,5 @@
 export { makeChildFormConfig, childFormDefaults } from "./child-form"
-export type { ChildFormValues } from "./child-form"
+export type { ChildFormValues, ChildFormOptions } from "./child-form"
 
 export { studentFormConfig, studentFormDefaults } from "./student-form"
 export type { StudentFormValues } from "./student-form"
@@ -19,5 +19,9 @@ export {
 } from "./workspace-address-form"
 export type { WorkspaceAddressFormValues } from "./workspace-address-form"
 
-export { guardianFormConfig, guardianFormDefaults } from "./guardian-form"
-export type { GuardianFormValues } from "./guardian-form"
+export {
+  makeGuardianFormConfig,
+  guardianFormDefaults,
+  INCOME_LEVEL_OPTIONS,
+} from "./guardian-form"
+export type { GuardianFormValues, GuardianFormOptions } from "./guardian-form"

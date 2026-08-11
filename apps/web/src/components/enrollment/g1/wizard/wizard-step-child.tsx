@@ -11,131 +11,21 @@ import {
   CardDescription,
 } from "@/components/ui/card"
 import { IconLoader2, IconCheck } from "@tabler/icons-react"
-import { FormBuilder, optionsFromSchema } from "@/lib/form-builder"
-import { FieldWithAlert } from "@/components/enrollment/g1/field-with-alert"
+import { FormBuilder } from "@/lib/form-builder"
 import {
   FormUniquenessProvider,
   useUniquenessBlocked,
 } from "@/hooks/use-child-uniqueness"
-import {
-  GenderSchema,
-  NationalitySchema,
-  MediumOfInstructionSchema,
-  ReligionSchema,
-} from "@/lib/api-client/schemas.gen"
-import type { FormConfig } from "@/lib/form-builder"
-import type {
-  Gender,
-  Nationality,
-  MediumOfInstruction,
-  Religion,
-} from "@/lib/api-client/types.gen"
+import { makeChildFormConfig } from "@/components/forms/child-form"
+import type { ChildFormValues } from "@/components/forms/child-form"
 
-export type ChildFormData = {
-  full_name: string
-  name_with_initials: string
-  name_with_initials_en: string
-  date_of_birth: string
-  gender: Gender
-  nationality: Nationality
-  religion: Religion | undefined
-  birth_certificate_number: string
-  medium_of_instruction: MediumOfInstruction
-}
+export type ChildFormData = ChildFormValues
 
 interface Props {
   defaultValues: ChildFormData
   onSave: (data: ChildFormData) => Promise<void>
   onNext: () => void
   excludeChildId?: string | null
-}
-
-function makeConfig(excludeChildId?: string | null): FormConfig<ChildFormData> {
-  return {
-    fields: [
-      {
-        name: "full_name",
-        kind: "custom",
-        label: "Full Name",
-        required: true,
-        customRenderer: () => (
-          <FieldWithAlert
-            fieldName="full_name"
-            placeholder="Enter full name"
-            checkType="full_name"
-            excludeChildId={excludeChildId}
-          />
-        ),
-      },
-      {
-        name: "name_with_initials",
-        kind: "text",
-        label: "Name with Initials",
-        placeholder: "e.g. J. M. Perera",
-      },
-      {
-        name: "name_with_initials_en",
-        kind: "text",
-        label: "Name with Initials (English)",
-        placeholder: "e.g. B.S.S. Peiris",
-      },
-      { name: "date_of_birth", kind: "date", label: "Date of Birth" },
-      {
-        name: "gender",
-        kind: "select",
-        label: "Gender",
-        required: true,
-        options: optionsFromSchema(GenderSchema),
-        inputProps: { placeholder: "Select gender" },
-      },
-      {
-        name: "nationality",
-        kind: "select",
-        label: "Nationality",
-        required: true,
-        options: optionsFromSchema(NationalitySchema),
-        inputProps: { placeholder: "Select nationality" },
-      },
-      {
-        name: "religion",
-        kind: "select",
-        label: "Religion",
-        required: true,
-        options: optionsFromSchema(ReligionSchema),
-        inputProps: { placeholder: "Select religion" },
-      },
-      {
-        name: "birth_certificate_number",
-        kind: "custom",
-        label: "Birth Certificate Number",
-        required: true,
-        customRenderer: () => (
-          <FieldWithAlert
-            fieldName="birth_certificate_number"
-            placeholder="Enter birth certificate number"
-            checkType="birth_certificate_number"
-            excludeChildId={excludeChildId}
-          />
-        ),
-      },
-      {
-        name: "medium_of_instruction",
-        kind: "select",
-        label: "Medium of Instruction",
-        required: true,
-        options: optionsFromSchema(MediumOfInstructionSchema),
-        inputProps: { placeholder: "Select medium" },
-      },
-    ],
-    layout: [
-      { columns: [{ fields: ["full_name", "name_with_initials"] }] },
-      { columns: [{ fields: ["name_with_initials_en"] }] },
-      { columns: [{ fields: ["date_of_birth"] }] },
-      { columns: [{ fields: ["gender", "nationality", "religion"] }] },
-      { columns: [{ fields: ["birth_certificate_number"] }] },
-      { columns: [{ fields: ["medium_of_instruction"] }] },
-    ],
-  }
 }
 
 function NextButton({ status }: { status: "idle" | "saving" | "done" }) {
@@ -178,7 +68,13 @@ export function WizardStepChild({
     }
   }, [])
 
-  const config = makeConfig(excludeChildId)
+  const config = makeChildFormConfig({
+    excludeChildId,
+    useSchemaOptions: true,
+    includeEnglishInitials: true,
+    includeNicAndPassport: false,
+    layout: "wizard",
+  })
 
   return (
     <Card>
