@@ -13,7 +13,7 @@ pub async fn list_batches(
     auth: AuthenticatedUser,
 ) -> Result<Json<Vec<enrollment_batches::Model>>, ApiError> {
     auth.require_permission(Permission::EnrollmentBatchRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let batches = enrollment_batches::Entity::find().all(db.as_ref()).await?;
     Ok(Json(batches))

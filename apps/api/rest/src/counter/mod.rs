@@ -17,7 +17,7 @@ pub async fn get_counter(
     name: actix_web::web::Path<String>,
 ) -> Result<Json<CounterResponse>, ApiError> {
     auth.require_permission(Permission::CounterRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let counter = service::get(db.as_ref(), &name, &CounterTarget::Normal).await?;
     Ok(Json(counter))
@@ -30,7 +30,7 @@ pub async fn increment_counter(
     name: actix_web::web::Path<String>,
 ) -> Result<Json<CounterResponse>, ApiError> {
     auth.require_permission(Permission::CounterIncrement)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let name = name.into_inner();
 
@@ -46,7 +46,7 @@ pub async fn get_secure_counter(
     name: actix_web::web::Path<String>,
 ) -> Result<Json<CounterResponse>, ApiError> {
     auth.require_permission(Permission::CounterSecureRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let counter = service::get(db.as_ref(), &name, &CounterTarget::Secure).await?;
     Ok(Json(counter))
@@ -59,7 +59,7 @@ pub async fn increment_secure_counter(
     name: actix_web::web::Path<String>,
 ) -> Result<Json<CounterResponse>, ApiError> {
     auth.require_permission(Permission::CounterSecureIncrement)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let name = name.into_inner();
 

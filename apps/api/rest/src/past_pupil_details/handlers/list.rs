@@ -23,7 +23,7 @@ pub async fn list_past_pupil_details(
     query: web::Query<ListPastPupilDetailsQuery>,
 ) -> Result<Json<Vec<past_pupil_details::Model>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut q = past_pupil_details::Entity::find();
 

@@ -24,7 +24,7 @@ pub async fn get_application_siblings(
     id: web::Path<Uuid>,
 ) -> Result<Json<GetApplicationSiblingsResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
 
@@ -32,7 +32,7 @@ pub async fn get_application_siblings(
         .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("application not found"))?;
 
     // Get the join rows → siblings → student IDs
     let joins = join_siblings::Entity::find()

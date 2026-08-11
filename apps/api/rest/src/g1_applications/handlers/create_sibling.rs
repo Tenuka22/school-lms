@@ -67,7 +67,7 @@ pub async fn create_sibling(
     body: web::Json<CreateSiblingRequest>,
 ) -> Result<web::Json<CreateSiblingResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
     let user_id = auth.user_id;
@@ -104,10 +104,10 @@ pub async fn create_sibling(
         .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("Application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("Application not found"))?;
 
     let school_id = body.school_id.or(app.school_id).ok_or_else(|| {
-        ApiError::BadRequest("Application has no school assigned and no school_id provided".into())
+        ApiError::bad_request("Application has no school assigned and no school_id provided")
     })?;
 
     let now = Utc::now();

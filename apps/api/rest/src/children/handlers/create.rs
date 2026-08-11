@@ -43,7 +43,7 @@ pub async fn create_child(
     body: Json<CreateChildBody>,
 ) -> Result<CreatedJson<children::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut data = body.into_inner();
     let user_id = auth.user_id;
@@ -65,7 +65,7 @@ pub async fn create_child(
             .one(db.as_ref())
             .await?;
         if existing.is_some() {
-            return Err(ApiError::Conflict(format!(
+            return Err(ApiError::conflict(format!(
                 "A child with birth certificate number '{}' already exists",
                 bc
             )));
@@ -78,7 +78,7 @@ pub async fn create_child(
             .one(db.as_ref())
             .await?;
         if existing.is_some() {
-            return Err(ApiError::Conflict(format!(
+            return Err(ApiError::conflict(format!(
                 "A child with NIC '{}' already exists",
                 nic
             )));

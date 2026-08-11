@@ -1,6 +1,16 @@
+pub mod address;
 pub mod appeal;
 pub mod batch;
+pub mod blacklist;
+pub mod child;
+pub mod counter;
 pub mod document;
 pub mod error;
 pub mod g1_application;
+pub mod guardian;
+pub mod past_pupil_detail;
+pub mod school;
+pub mod sibling;
+pub mod staff_detail;
 pub mod student;
+pub mod workspace_address;

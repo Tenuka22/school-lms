@@ -84,10 +84,10 @@ pub async fn refresh(
         Err(TransactionError::Transaction(e)) | Err(TransactionError::Connection(e)) => {
             let msg = e.to_string();
             if msg.contains("reused") || msg == "invalid refresh token" {
-                return Err(ApiError::Unauthorized(msg));
+                return Err(ApiError::unauthorized(msg));
             }
             log::error!("Refresh transaction failed: {e}");
-            Err(ApiError::Internal("internal error".into()))
+            Err(ApiError::internal("internal error"))
         }
     }
 }

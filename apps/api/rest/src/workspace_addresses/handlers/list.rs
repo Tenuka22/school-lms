@@ -27,7 +27,7 @@ pub async fn list_workspace_addresses(
     query: web::Query<ListWorkspaceAddressesQuery>,
 ) -> Result<Json<Vec<workspace_addresses::Model>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut condition = sea_orm::Condition::all();
     if let Some(q) = &query.search {

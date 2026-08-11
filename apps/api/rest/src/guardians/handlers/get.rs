@@ -14,12 +14,12 @@ pub async fn get_guardian(
     id: web::Path<Uuid>,
 ) -> Result<Json<guardians::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let guardian = guardians::Entity::find_by_id(id.into_inner())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("guardian not found"))?;
 
     Ok(Json(guardian))
 }

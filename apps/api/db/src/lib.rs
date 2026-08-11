@@ -1,7 +1,9 @@
 pub mod domain;
 pub mod entity;
+pub mod entity_state;
 pub mod migration;
 pub mod rbac;
+pub mod repository;
 pub mod seed;
 
 use sea_orm::{Database, DatabaseConnection, DbErr};

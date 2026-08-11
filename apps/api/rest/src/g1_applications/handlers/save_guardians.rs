@@ -34,7 +34,7 @@ pub async fn save_guardians(
     body: web::Json<SaveGuardiansRequest>,
 ) -> Result<web::Json<SaveGuardiansResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
     let user_id = auth.user_id;
@@ -48,7 +48,7 @@ pub async fn save_guardians(
         .await?
         .ok_or_else(|| {
             warn!("[save_guardians] application {app_id} not found");
-            ApiError::NotFound("Application not found".into())
+            ApiError::not_found("Application not found")
         })?;
 
     // Delete existing joins

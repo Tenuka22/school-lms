@@ -15,7 +15,7 @@ pub async fn list_blacklist(
     query: web::Query<ListBlacklistQuery>,
 ) -> Result<web::Json<Vec<blacklist::Model>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut filter = blacklist::Entity::find().filter(blacklist::Column::Status.eq("Active"));
 

@@ -61,7 +61,7 @@ pub async fn create_student(
     body: Json<CreateStudentBody>,
 ) -> Result<Json<CreateStudentResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let user_id = auth.user_id;
     let now = Utc::now();
@@ -72,7 +72,7 @@ pub async fn create_student(
         let child = children::Entity::find_by_id(child_id)
             .one(db.as_ref())
             .await?
-            .ok_or_else(|| ApiError::NotFound("Child not found".into()))?;
+            .ok_or_else(|| ApiError::not_found("Child not found"))?;
 
         // Check if child already has a student
         let existing_student = student::Entity::find()
@@ -80,7 +80,7 @@ pub async fn create_student(
             .one(db.as_ref())
             .await?;
         if existing_student.is_some() {
-            return Err(ApiError::Conflict(format!(
+            return Err(ApiError::conflict(format!(
                 "Child '{}' already has a student record",
                 child.full_name
             )));
@@ -118,23 +118,23 @@ pub async fn create_student(
 
     // No child_id provided — validate required fields
     let full_name = body.full_name.ok_or_else(|| {
-        ApiError::BadRequest("full_name is required when child_id is not provided".into())
+        ApiError::bad_request("full_name is required when child_id is not provided")
     })?;
     let name_with_initials = body
         .name_with_initials
-        .ok_or_else(|| ApiError::BadRequest("name_with_initials is required".into()))?;
+        .ok_or_else(|| ApiError::bad_request("name_with_initials is required"))?;
     let date_of_birth = body
         .date_of_birth
-        .ok_or_else(|| ApiError::BadRequest("date_of_birth is required".into()))?;
+        .ok_or_else(|| ApiError::bad_request("date_of_birth is required"))?;
     let gender = body
         .gender
-        .ok_or_else(|| ApiError::BadRequest("gender is required".into()))?;
+        .ok_or_else(|| ApiError::bad_request("gender is required"))?;
     let nationality = body
         .nationality
-        .ok_or_else(|| ApiError::BadRequest("nationality is required".into()))?;
+        .ok_or_else(|| ApiError::bad_request("nationality is required"))?;
     let medium_of_instruction = body
         .medium_of_instruction
-        .ok_or_else(|| ApiError::BadRequest("medium_of_instruction is required".into()))?;
+        .ok_or_else(|| ApiError::bad_request("medium_of_instruction is required"))?;
 
     // Search for duplicate children by BC number or NIC
     let mut dup_conditions = sea_orm::Condition::any();

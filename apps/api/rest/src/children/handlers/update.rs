@@ -41,7 +41,7 @@ pub async fn update_child(
     body: Json<UpdateChildBody>,
 ) -> Result<Json<children::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = id.into_inner();
     let user_id = auth.user_id;
@@ -49,7 +49,7 @@ pub async fn update_child(
     let existing = children::Entity::find_by_id(id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("child not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("child not found"))?;
 
     let mut m = body.into_inner();
 
@@ -77,7 +77,7 @@ pub async fn update_child(
             .one(db.as_ref())
             .await?;
         if duplicate.is_some() {
-            return Err(ApiError::Conflict(format!(
+            return Err(ApiError::conflict(format!(
                 "Another child with birth certificate number '{}' already exists",
                 bc
             )));
@@ -92,7 +92,7 @@ pub async fn update_child(
             .one(db.as_ref())
             .await?;
         if duplicate.is_some() {
-            return Err(ApiError::Conflict(format!(
+            return Err(ApiError::conflict(format!(
                 "Another child with NIC '{}' already exists",
                 nic
             )));

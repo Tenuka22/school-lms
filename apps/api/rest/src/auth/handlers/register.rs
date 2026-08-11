@@ -20,8 +20,8 @@ pub async fn register(
 ) -> Result<CreatedJson<AuthResponse>, ApiError> {
     crate::validation::Email::new(body.email.clone())?;
     if body.password.len() < 8 {
-        return Err(ApiError::BadRequest(
-            "password must be at least 8 characters".into(),
+        return Err(ApiError::bad_request(
+            "password must be at least 8 characters",
         ));
     }
 
@@ -31,12 +31,12 @@ pub async fn register(
         .await?;
 
     if existing.is_some() {
-        return Err(ApiError::Conflict("email already registered".into()));
+        return Err(ApiError::conflict("email already registered"));
     }
 
     let password_hash = hash_password(&body.password).map_err(|e| {
         log::error!("Password hashing error: {e}");
-        ApiError::Internal("internal error".into())
+        ApiError::internal("internal error")
     })?;
 
     let now = Utc::now();
@@ -81,7 +81,7 @@ pub async fn register(
 
     let access_token = create_access_token(user.id, &jwt_secret.0).map_err(|e| {
         log::error!("JWT creation error: {e}");
-        ApiError::Internal("internal error".into())
+        ApiError::internal("internal error")
     })?;
 
     let access_expires_at = (now + Duration::minutes(15)).timestamp();

@@ -50,7 +50,7 @@ pub async fn update_guardian(
     body: Json<UpdateGuardianBody>,
 ) -> Result<Json<guardians::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = id.into_inner();
     let mut input = body.into_inner();
@@ -78,7 +78,7 @@ pub async fn update_guardian(
     let existing = guardians::Entity::find_by_id(id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("guardian not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("guardian not found"))?;
 
     let old_json = crate::audit::to_json(&existing);
 
@@ -89,7 +89,7 @@ pub async fn update_guardian(
             .one(db.as_ref())
             .await?;
         if let Some(conflict) = nic_taken {
-            return Err(ApiError::Conflict(format!(
+            return Err(ApiError::conflict(format!(
                 "A guardian with NIC {} already exists (id: {})",
                 input.nic_number, conflict.id
             )));

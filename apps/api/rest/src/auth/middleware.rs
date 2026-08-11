@@ -50,7 +50,7 @@ impl AuthenticatedUser {
                 perm_str,
                 self.permissions
             );
-            Err(ApiError::Forbidden("insufficient permissions".into()).into())
+            Err(ApiError::forbidden("insufficient permissions").into())
         }
     }
 }
@@ -64,14 +64,14 @@ impl FromRequest for AuthenticatedUser {
         let db = req.app_data::<web::Data<DatabaseConnection>>().cloned();
 
         Box::pin(async move {
-            let db = db.ok_or_else(|| ApiError::Internal("DB not configured".into()))?;
+            let db = db.ok_or_else(|| ApiError::internal("DB not configured"))?;
             let user_id = claims.map(|c| Uuid::parse_str(&c.sub).ok()).flatten();
 
             let permissions = db::rbac::get_user_permissions(&db, user_id.clone())
                 .await
                 .map_err(|e| {
                     log::error!("Failed to load permissions: {e}");
-                    ApiError::Internal("permission lookup failed".into())
+                    ApiError::internal("permission lookup failed")
                 })?;
 
             Ok(AuthenticatedUser {

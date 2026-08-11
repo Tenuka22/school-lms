@@ -999,6 +999,7 @@ dependencies = [
  "sea-orm",
  "sea-orm-migration",
  "serde",
+ "tokio",
  "uuid 1.23.5",
 ]
 

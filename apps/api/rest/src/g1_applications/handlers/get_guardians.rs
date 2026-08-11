@@ -23,7 +23,7 @@ pub async fn get_application_guardians(
     id: web::Path<Uuid>,
 ) -> Result<Json<GetApplicationGuardiansResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
 
@@ -31,7 +31,7 @@ pub async fn get_application_guardians(
         .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("application not found"))?;
 
     let joins = join_guardians::Entity::find()
         .filter(join_guardians::Column::ApplicationId.eq(app_id))

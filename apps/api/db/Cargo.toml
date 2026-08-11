@@ -13,3 +13,6 @@ serde = "1.0.228"
 uuid = { version = "1.23.5", features = ["v4"] }
 apistos = { version = "0.6" }
 schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt"] }

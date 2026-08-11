@@ -14,7 +14,7 @@ pub async fn logout_all(
 ) -> Result<Json<MessageResponse>, ApiError> {
     let user_id = auth
         .user_id
-        .ok_or_else(|| ApiError::Unauthorized("not authenticated".into()))?;
+        .ok_or_else(|| ApiError::unauthorized("not authenticated"))?;
 
     session::Entity::delete_many()
         .filter(session::Column::UserId.eq(user_id))

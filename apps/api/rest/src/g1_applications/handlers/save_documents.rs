@@ -62,14 +62,14 @@ pub async fn save_application_documents(
     body: web::Json<SaveDocumentsRequest>,
 ) -> Result<web::Json<SaveDocumentsResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
 
     applications::Entity::find_by_id(app_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("Application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("Application not found"))?;
 
     documents::Entity::delete_many()
         .filter(documents::Column::ApplicationId.eq(app_id))

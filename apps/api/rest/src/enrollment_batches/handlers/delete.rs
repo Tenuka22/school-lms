@@ -17,7 +17,7 @@ pub async fn delete_batch(
     id: web::Path<Uuid>,
 ) -> Result<Json<MessageResponse>, ApiError> {
     auth.require_permission(Permission::EnrollmentBatchDelete)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = id.into_inner();
 
@@ -26,7 +26,7 @@ pub async fn delete_batch(
         .await?;
     let batch = match existing {
         Some(b) => b,
-        None => return Err(ApiError::NotFound("batch not found".into())),
+        None => return Err(ApiError::not_found("batch not found")),
     };
 
     let _ = db::entity::audit_logs::ActiveModel {

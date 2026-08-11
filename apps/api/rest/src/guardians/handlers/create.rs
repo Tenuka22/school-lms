@@ -49,7 +49,7 @@ pub async fn create_guardian(
     body: Json<CreateGuardianBody>,
 ) -> Result<CreatedJson<guardians::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut input = body.into_inner();
 
@@ -75,7 +75,7 @@ pub async fn create_guardian(
         .await?;
 
     if let Some(existing_guardian) = existing {
-        return Err(ApiError::Conflict(format!(
+        return Err(ApiError::conflict(format!(
             "A guardian with NIC {} already exists (id: {})",
             input.nic_number, existing_guardian.id
         )));

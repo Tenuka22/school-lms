@@ -15,13 +15,13 @@ pub async fn get_application(
     id: web::Path<Uuid>,
 ) -> Result<Json<applications::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let application = applications::Entity::find_by_id(id.into_inner())
         .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("application not found"))?;
 
     Ok(Json(application))
 }

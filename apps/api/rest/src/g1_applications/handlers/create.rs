@@ -5,7 +5,7 @@ use apistos::ApiComponent;
 use apistos::actix::CreatedJson;
 use apistos::api_operation;
 use chrono::Utc;
-use db::domain::g1_application::{Draft, G1Application, WizardStep6, WizardStep7};
+use db::domain::g1_application::{Draft, G1Application, WizardStep7};
 use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
 use db::entity::enrollment_batches;
 use db::entity::g1::applications;
@@ -37,25 +37,25 @@ pub async fn create_application(
     body: Json<CreateApplicationBody>,
 ) -> Result<CreatedJson<applications::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let data = body.into_inner();
 
     let batch = enrollment_batches::Entity::find_by_id(data.batch_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::BadRequest("batch not found".into()))?;
+        .ok_or_else(|| ApiError::bad_request("batch not found"))?;
 
     if batch.status != BatchStatus::Open {
-        return Err(ApiError::BadRequest(
-            "batch is not open for applications".into(),
+        return Err(ApiError::bad_request(
+            "batch is not open for applications",
         ));
     }
 
     let now = Utc::now();
     if batch.closed_at <= now {
-        return Err(ApiError::BadRequest(
-            "application window has closed for this batch".into(),
+        return Err(ApiError::bad_request(
+            "application window has closed for this batch",
         ));
     }
 
@@ -98,7 +98,7 @@ pub async fn submit_application(
     id: web::Path<Uuid>,
 ) -> Result<Json<applications::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationSubmit)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = id.into_inner();
 
@@ -106,17 +106,17 @@ pub async fn submit_application(
         .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("application not found"))?;
 
     let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+        .ok_or_else(|| ApiError::bad_request("enrollment batch not found"))?;
 
     let now = Utc::now();
     if batch.status != BatchStatus::Open || batch.closed_at <= now {
-        return Err(ApiError::BadRequest(
-            "cannot submit application after enrollment batch closed".into(),
+        return Err(ApiError::bad_request(
+            "cannot submit application after enrollment batch closed",
         ));
     }
 
@@ -125,8 +125,8 @@ pub async fn submit_application(
     let submitted = match existing.enrollment_status {
         EnrollmentStatus::Draft | EnrollmentStatus::Pending => {
             if existing.wizard_step != Some(8) {
-                return Err(ApiError::BadRequest(
-                    "application wizard must be completed before submitting".into(),
+                return Err(ApiError::bad_request(
+                    "application wizard must be completed before submitting",
                 ));
             }
             let guardian_count = join_guardians::Entity::find()
@@ -134,8 +134,8 @@ pub async fn submit_application(
                 .count(db.as_ref())
                 .await?;
             if guardian_count == 0 {
-                return Err(ApiError::BadRequest(
-                    "at least one guardian must be added before submitting".into(),
+                return Err(ApiError::bad_request(
+                    "at least one guardian must be added before submitting",
                 ));
             }
             let app = G1Application::<WizardStep7> {
@@ -145,8 +145,8 @@ pub async fn submit_application(
             app.submit()?
         }
         _ => {
-            return Err(ApiError::BadRequest(
-                "only draft or pending applications can be submitted".into(),
+            return Err(ApiError::bad_request(
+                "only draft or pending applications can be submitted",
             ));
         }
     };

@@ -49,7 +49,7 @@ pub async fn create_address(
     body: Json<CreateAddressBody>,
 ) -> Result<CreatedJson<addresses::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut input = body.into_inner();
 

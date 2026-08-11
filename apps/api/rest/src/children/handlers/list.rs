@@ -27,7 +27,7 @@ pub async fn list_children(
     query: web::Query<ListChildrenQuery>,
 ) -> Result<Json<Vec<children::Model>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let search = query.search.as_deref().unwrap_or("").trim();
     let bc = query

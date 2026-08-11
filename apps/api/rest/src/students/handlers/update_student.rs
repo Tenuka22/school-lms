@@ -42,7 +42,7 @@ pub async fn update_student(
     body: web::Json<UpdateStudentRequest>,
 ) -> Result<Json<children::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let student_id = id.into_inner();
     let user_id = auth.user_id;
@@ -79,13 +79,13 @@ pub async fn update_student(
     let existing = student::Entity::find_by_id(student_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("Student not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("Student not found"))?;
 
     // Find and update the child record
     let child = children::Entity::find_by_id(existing.child_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("Child record not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("Child record not found"))?;
 
     let old_json = crate::audit::to_json(&child);
 

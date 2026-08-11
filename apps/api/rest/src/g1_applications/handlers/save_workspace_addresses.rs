@@ -40,7 +40,7 @@ pub async fn save_workspace_addresses(
     body: web::Json<SaveWorkspaceAddressesRequest>,
 ) -> Result<web::Json<SaveWorkspaceAddressesResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
     let user_id = auth.user_id;
@@ -56,7 +56,7 @@ pub async fn save_workspace_addresses(
         .await?
         .ok_or_else(|| {
             warn!("[save_workspace_addresses] application {app_id} not found");
-            ApiError::NotFound("Application not found".into())
+            ApiError::not_found("Application not found")
         })?;
 
     let deleted = join_workspace_addresses::Entity::delete_many()

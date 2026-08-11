@@ -5,8 +5,6 @@ use apistos::api_operation;
 use apistos::web;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
 use crate::auth::middleware::AuthenticatedUser;
 use crate::docs::MessageResponse;
 use crate::error::ApiError;
@@ -51,15 +49,15 @@ pub async fn presigned_upload_url(
     body: Json<PresignedUploadRequest>,
 ) -> Result<Json<PresignedUploadResponse>, ApiError> {
     auth.require_permission(Permission::FileUpload)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let req = body.into_inner();
 
     if req.file_size <= 0 {
-        return Err(ApiError::BadRequest("file_size must be positive".into()));
+        return Err(ApiError::bad_request("file_size must be positive"));
     }
     if req.file_size > 25 * 1024 * 1024 {
-        return Err(ApiError::BadRequest("file exceeds 25MB limit".into()));
+        return Err(ApiError::bad_request("file exceeds 25MB limit"));
     }
 
     let key = format!(
@@ -73,7 +71,7 @@ pub async fn presigned_upload_url(
         .await
         .map_err(|e| {
             log::error!("minio presigned_put_url failed: {e}");
-            ApiError::Internal("failed to generate upload URL".into())
+            ApiError::internal("failed to generate upload URL")
         })?;
 
     let public_url = storage.public_url(&key);
@@ -95,7 +93,7 @@ pub async fn upload_file(
     MultipartForm(form): MultipartForm<UploadForm>,
 ) -> Result<Json<UploadResponse>, ApiError> {
     auth.require_permission(Permission::FileUpload)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let file = form.file;
     let file_name = file
@@ -105,15 +103,15 @@ pub async fn upload_file(
 
     let size = file.size;
     if size == 0 {
-        return Err(ApiError::BadRequest("empty file".into()));
+        return Err(ApiError::bad_request("empty file"));
     }
     if size > 25 * 1024 * 1024 {
-        return Err(ApiError::BadRequest("file exceeds 25MB limit".into()));
+        return Err(ApiError::bad_request("file exceeds 25MB limit"));
     }
 
     let data = std::fs::read(&file.file.path()).map_err(|e| {
         log::error!("failed to read uploaded temp file: {e}");
-        ApiError::Internal("failed to read upload".into())
+        ApiError::internal("failed to read upload")
     })?;
 
     let content_type = file
@@ -128,7 +126,7 @@ pub async fn upload_file(
         .await
         .map_err(|e| {
             log::error!("minio put_object failed: {e}");
-            ApiError::Internal("upload failed".into())
+            ApiError::internal("upload failed")
         })?;
 
     let url = storage.public_url(&key);
@@ -148,11 +146,11 @@ pub async fn delete_upload(
     key: actix_web::web::Path<String>,
 ) -> Result<Json<MessageResponse>, ApiError> {
     auth.require_permission(Permission::FileUpload)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
     let key = key.into_inner();
     storage.delete_object(&key).await.map_err(|e| {
         log::error!("minio delete_object failed: {e}");
-        ApiError::Internal("failed to delete file".into())
+        ApiError::internal("failed to delete file")
     })?;
     Ok(Json(MessageResponse {
         message: "file deleted".into(),

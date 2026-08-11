@@ -58,7 +58,7 @@ pub async fn list_guardians(
     query: web::Query<ListGuardiansQuery>,
 ) -> Result<Json<Vec<GuardianWithChildren>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let search = query.search.as_deref().unwrap_or("").trim();
     let is_past_pupil = query.is_past_pupil.as_deref().unwrap_or("").trim();

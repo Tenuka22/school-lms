@@ -23,7 +23,7 @@ pub async fn list_staff_details(
     query: web::Query<ListStaffDetailsQuery>,
 ) -> Result<Json<Vec<staff_details::Model>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut q = staff_details::Entity::find();
 

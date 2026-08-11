@@ -14,16 +14,16 @@ pub async fn me(
 ) -> Result<Json<UserResponse>, ApiError> {
     let user_id = auth_user
         .user_id
-        .ok_or_else(|| ApiError::Unauthorized("not authenticated".into()))?;
+        .ok_or_else(|| ApiError::unauthorized("not authenticated"))?;
 
     let user = user::Entity::find_by_id(user_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("user not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("user not found"))?;
 
     let roles = db::rbac::get_user_roles(&db, user_id).await.map_err(|e| {
         log::error!("Failed to load roles: {e}");
-        ApiError::Internal("role lookup failed".into())
+        ApiError::internal("role lookup failed")
     })?;
 
     let role = roles

@@ -4,7 +4,7 @@ use apistos::api_operation;
 use db::entity::g1::children;
 use db::entity::student::student;
 use schemars::JsonSchema;
-use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QuerySelect};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -55,7 +55,7 @@ pub async fn list_students(
     query: web::Query<ListStudentsQuery>,
 ) -> Result<Json<Vec<StudentResponse>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     // Join students with children to get full data
     let mut q = student::Entity::find().find_with_related(children::Entity);

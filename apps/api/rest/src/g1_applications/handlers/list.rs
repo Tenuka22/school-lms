@@ -90,7 +90,7 @@ pub async fn list_applications(
     params: web::Query<ListApplicationsQuery>,
 ) -> Result<Json<PaginatedApplicationsResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut query = applications::Entity::find();
 

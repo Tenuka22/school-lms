@@ -31,7 +31,7 @@ pub async fn create_past_pupil_detail(
     body: Json<CreatePastPupilDetailBody>,
 ) -> Result<CreatedJson<past_pupil_details::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut input = body.into_inner();
     input.student_id = input

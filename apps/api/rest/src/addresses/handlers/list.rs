@@ -23,7 +23,7 @@ pub async fn list_addresses(
     query: web::Query<ListAddressesQuery>,
 ) -> Result<Json<Vec<addresses::Model>>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut condition = sea_orm::Condition::all();
     if let Some(q) = &query.search {

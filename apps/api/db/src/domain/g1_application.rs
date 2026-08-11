@@ -3,20 +3,34 @@ use std::marker::PhantomData;
 use crate::entity::common::enums::EnrollmentStatus;
 use crate::entity::g1::applications;
 
+#[derive(Debug)]
 pub enum Draft {}
+#[derive(Debug)]
 pub enum WizardStep1 {}
+#[derive(Debug)]
 pub enum WizardStep2 {}
+#[derive(Debug)]
 pub enum WizardStep3 {}
+#[derive(Debug)]
 pub enum WizardStep4 {}
+#[derive(Debug)]
 pub enum WizardStep5 {}
+#[derive(Debug)]
 pub enum WizardStep6 {}
+#[derive(Debug)]
 pub enum WizardStep7 {}
+#[derive(Debug)]
 pub enum Submitted {}
+#[derive(Debug)]
 pub enum UnderVerification {}
+#[derive(Debug)]
 pub enum Verified {}
+#[derive(Debug)]
 pub enum Admitted {}
+#[derive(Debug)]
 pub enum Rejected {}
 
+#[derive(Debug)]
 pub struct G1Application<S> {
     pub model: applications::Model,
     pub _state: PhantomData<S>,

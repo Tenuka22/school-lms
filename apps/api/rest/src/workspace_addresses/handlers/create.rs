@@ -67,7 +67,7 @@ pub async fn create_workspace_address(
     body: Json<CreateWorkspaceAddressBody>,
 ) -> Result<CreatedJson<workspace_addresses::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut input = body.into_inner();
 

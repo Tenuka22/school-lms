@@ -3,12 +3,18 @@ use std::marker::PhantomData;
 use crate::entity::common::enums::AppealStatus;
 use crate::entity::g1::appeal_history;
 
+#[derive(Debug)]
 pub enum Filed {}
+#[derive(Debug)]
 pub enum UnderReview {}
+#[derive(Debug)]
 pub enum ReEvaluated {}
+#[derive(Debug)]
 pub enum Accepted {}
+#[derive(Debug)]
 pub enum RejectedAppeal {}
 
+#[derive(Debug)]
 pub struct Appeal<S> {
     pub model: appeal_history::Model,
     pub _state: PhantomData<S>,

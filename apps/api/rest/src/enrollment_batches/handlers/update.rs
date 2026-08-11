@@ -39,7 +39,7 @@ pub async fn update_batch(
     body: Json<UpdateBatchBody>,
 ) -> Result<Json<enrollment_batches::Model>, ApiError> {
     auth.require_permission(Permission::EnrollmentBatchUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = id.into_inner();
     let mut patch = body.into_inner();
@@ -88,7 +88,7 @@ pub async fn update_batch(
     let existing = enrollment_batches::Entity::find_by_id(id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("batch not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("batch not found"))?;
 
     let pcts = [
         patch
@@ -135,7 +135,7 @@ pub async fn update_batch(
                     if new_status == BatchStatus::Closed {
                         batch.close()?.into_inner()
                     } else {
-                        return Err(ApiError::BadRequest("invalid transition from Open".into()));
+                        return Err(ApiError::bad_request("invalid transition from Open"));
                     }
                 }
                 BatchStatus::Closed => {
@@ -146,8 +146,8 @@ pub async fn update_batch(
                     if new_status == BatchStatus::ListsPublished {
                         batch.publish_lists()?.into_inner()
                     } else {
-                        return Err(ApiError::BadRequest(
-                            "invalid transition from Closed".into(),
+                        return Err(ApiError::bad_request(
+                            "invalid transition from Closed",
                         ));
                     }
                 }
@@ -162,8 +162,8 @@ pub async fn update_batch(
                             .unwrap_or(chrono::Utc::now() + chrono::Duration::days(14));
                         batch.open_appeals(deadline)?.into_inner()
                     } else {
-                        return Err(ApiError::BadRequest(
-                            "invalid transition from ListsPublished".into(),
+                        return Err(ApiError::bad_request(
+                            "invalid transition from ListsPublished",
                         ));
                     }
                 }
@@ -175,14 +175,14 @@ pub async fn update_batch(
                     if new_status == BatchStatus::Archived {
                         batch.archive()?.into_inner()
                     } else {
-                        return Err(ApiError::BadRequest(
-                            "invalid transition from AppealsPeriod".into(),
+                        return Err(ApiError::bad_request(
+                            "invalid transition from AppealsPeriod",
                         ));
                     }
                 }
                 BatchStatus::Archived => {
-                    return Err(ApiError::BadRequest(
-                        "cannot transition from Archived".into(),
+                    return Err(ApiError::bad_request(
+                        "cannot transition from Archived",
                     ));
                 }
             }

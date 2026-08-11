@@ -19,20 +19,20 @@ pub async fn delete_application(
     id: web::Path<Uuid>,
 ) -> Result<Json<MessageResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationDelete)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = id.into_inner();
 
     let existing = applications::Entity::find_by_id(id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("application not found"))?;
 
     match existing.enrollment_status {
         EnrollmentStatus::Draft | EnrollmentStatus::Pending | EnrollmentStatus::Rejected => {}
         _ => {
-            return Err(ApiError::BadRequest(
-                "cannot delete application in current status".into(),
+            return Err(ApiError::bad_request(
+                "cannot delete application in current status",
             ));
         }
     }
@@ -40,12 +40,12 @@ pub async fn delete_application(
     let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+        .ok_or_else(|| ApiError::bad_request("enrollment batch not found"))?;
 
     let now = Utc::now();
     if batch.status != BatchStatus::Open || batch.closed_at <= now {
-        return Err(ApiError::BadRequest(
-            "cannot delete application after enrollment batch closed".into(),
+        return Err(ApiError::bad_request(
+            "cannot delete application after enrollment batch closed",
         ));
     }
 

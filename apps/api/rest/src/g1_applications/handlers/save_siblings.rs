@@ -34,7 +34,7 @@ pub async fn save_siblings(
     body: web::Json<SaveSiblingsRequest>,
 ) -> Result<web::Json<SaveSiblingsResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
     let user_id = auth.user_id;
@@ -48,12 +48,12 @@ pub async fn save_siblings(
         .await?
         .ok_or_else(|| {
             warn!("[save_siblings] application {app_id} not found");
-            ApiError::NotFound("Application not found".into())
+            ApiError::not_found("Application not found")
         })?;
 
     let school_id = app
         .school_id
-        .ok_or_else(|| ApiError::BadRequest("Application has no school assigned".into()))?;
+        .ok_or_else(|| ApiError::bad_request("Application has no school assigned"))?;
 
     // Delete existing joins
     let deleted = join_siblings::Entity::delete_many()

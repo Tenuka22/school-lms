@@ -15,14 +15,14 @@ pub async fn get_workspace_address(
     path: web::Path<Uuid>,
 ) -> Result<Json<workspace_addresses::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = path.into_inner();
     let address = workspace_addresses::Entity::find()
         .filter(workspace_addresses::Column::Id.eq(id))
         .one(db.as_ref())
         .await?
-        .ok_or(ApiError::NotFound("workspace address not found".into()))?;
+        .ok_or(ApiError::not_found("workspace address not found"))?;
 
     Ok(Json(address))
 }

@@ -15,14 +15,14 @@ pub async fn get_address(
     path: web::Path<Uuid>,
 ) -> Result<Json<addresses::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = path.into_inner();
     let address = addresses::Entity::find()
         .filter(addresses::Column::Id.eq(id))
         .one(db.as_ref())
         .await?
-        .ok_or(ApiError::NotFound("address not found".into()))?;
+        .ok_or(ApiError::not_found("address not found"))?;
 
     Ok(Json(address))
 }

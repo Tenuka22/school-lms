@@ -19,15 +19,15 @@ pub async fn login(
         .filter(user::Column::Email.eq(&body.email))
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::Unauthorized("invalid email or password".into()))?;
+        .ok_or_else(|| ApiError::unauthorized("invalid email or password"))?;
 
     let valid = verify_password(&body.password, &user.password_hash).map_err(|e| {
         log::error!("Password verification error: {e}");
-        ApiError::Internal("internal error".into())
+        ApiError::internal("internal error")
     })?;
 
     if !valid {
-        return Err(ApiError::Unauthorized("invalid email or password".into()));
+        return Err(ApiError::unauthorized("invalid email or password"));
     }
 
     let (raw_refresh, refresh_hash) = generate_refresh_token();
@@ -49,7 +49,7 @@ pub async fn login(
 
     let access_token = create_access_token(user.id, &jwt_secret.0).map_err(|e| {
         log::error!("JWT creation error: {e}");
-        ApiError::Internal("internal error".into())
+        ApiError::internal("internal error")
     })?;
 
     let access_expires_at = (now + Duration::minutes(15)).timestamp();

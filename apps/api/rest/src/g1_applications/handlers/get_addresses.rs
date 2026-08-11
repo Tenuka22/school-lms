@@ -31,7 +31,7 @@ pub async fn get_application_addresses(
     id: web::Path<Uuid>,
 ) -> Result<Json<GetApplicationAddressesResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationRead)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
 
@@ -39,7 +39,7 @@ pub async fn get_application_addresses(
         .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("application not found"))?;
 
     let joins = join_addresses::Entity::find()
         .filter(join_addresses::Column::ApplicationId.eq(app_id))

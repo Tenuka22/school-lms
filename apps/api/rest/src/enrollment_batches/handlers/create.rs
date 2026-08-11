@@ -50,7 +50,7 @@ pub async fn create_batch(
     body: Json<CreateBatchBody>,
 ) -> Result<CreatedJson<enrollment_batches::Model>, ApiError> {
     auth.require_permission(Permission::EnrollmentBatchCreate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let mut input = body.into_inner();
     crate::validation::Year::new(input.year)?;
@@ -121,7 +121,7 @@ pub async fn create_batch(
         .await?
         .is_some();
     if exists {
-        return Err(ApiError::Conflict(format!(
+        return Err(ApiError::conflict(format!(
             "batch code '{}' already exists",
             batch_code
         )));

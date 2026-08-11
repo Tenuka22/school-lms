@@ -3,12 +3,18 @@ use std::marker::PhantomData;
 use crate::entity::common::enums::{DocumentVerificationStatus, G1DocumentType};
 use crate::entity::g1::documents;
 
+#[derive(Debug)]
 pub enum Uploaded {}
+#[derive(Debug)]
 pub enum UnderReview {}
+#[derive(Debug)]
 pub enum VerifiedDoc {}
+#[derive(Debug)]
 pub enum RejectedDoc {}
+#[derive(Debug)]
 pub enum Flagged {}
 
+#[derive(Debug)]
 pub struct Document<S> {
     pub model: documents::Model,
     pub _state: PhantomData<S>,

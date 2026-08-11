@@ -56,7 +56,7 @@ pub async fn update_application(
     body: Json<UpdateApplicationBody>,
 ) -> Result<Json<applications::Model>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let id = id.into_inner();
     let user_id = auth.user_id;
@@ -67,13 +67,13 @@ pub async fn update_application(
         .filter(applications::Column::DeletedAt.is_null())
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+        .ok_or_else(|| ApiError::not_found("application not found"))?;
 
     match existing.enrollment_status {
         EnrollmentStatus::Draft | EnrollmentStatus::Pending | EnrollmentStatus::Completed => {}
         _ => {
-            return Err(ApiError::BadRequest(
-                "cannot update application in current status".into(),
+            return Err(ApiError::bad_request(
+                "cannot update application in current status",
             ));
         }
     }
@@ -81,12 +81,12 @@ pub async fn update_application(
     let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+        .ok_or_else(|| ApiError::bad_request("enrollment batch not found"))?;
 
     let now = Utc::now();
     if batch.status != db::entity::common::enums::BatchStatus::Open || batch.closed_at <= now {
-        return Err(ApiError::BadRequest(
-            "cannot edit application after enrollment batch closed".into(),
+        return Err(ApiError::bad_request(
+            "cannot edit application after enrollment batch closed",
         ));
     }
 

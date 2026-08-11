@@ -3,12 +3,18 @@ use std::marker::PhantomData;
 use crate::entity::common::enrollment_batches;
 use crate::entity::common::enums::BatchStatus;
 
+#[derive(Debug)]
 pub enum Open {}
+#[derive(Debug)]
 pub enum Closed {}
+#[derive(Debug)]
 pub enum ListsPublished {}
+#[derive(Debug)]
 pub enum AppealsPeriod {}
+#[derive(Debug)]
 pub enum Archived {}
 
+#[derive(Debug)]
 pub struct Batch<S> {
     pub model: enrollment_batches::Model,
     pub _state: PhantomData<S>,

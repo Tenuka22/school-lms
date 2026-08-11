@@ -33,7 +33,7 @@ pub async fn save_wizard_step(
     body: web::Json<SaveStepRequest>,
 ) -> Result<web::Json<SaveStepResponse>, ApiError> {
     auth.require_permission(Permission::G1ApplicationUpdate)
-        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+        .map_err(|_| ApiError::forbidden("insufficient permissions"))?;
 
     let app_id = id.into_inner();
     let _body = body.into_inner();
@@ -51,14 +51,14 @@ pub async fn save_wizard_step(
         .await?
         .ok_or_else(|| {
             info!("[save_wizard_step] application {app_id} not found");
-            ApiError::NotFound("Application not found".into())
+            ApiError::not_found("Application not found")
         })?;
 
     match existing.enrollment_status {
         EnrollmentStatus::Draft | EnrollmentStatus::Pending | EnrollmentStatus::Completed => {}
         _ => {
-            return Err(ApiError::BadRequest(
-                "cannot update wizard step after submission".into(),
+            return Err(ApiError::bad_request(
+                "cannot update wizard step after submission",
             ));
         }
     }
@@ -66,12 +66,12 @@ pub async fn save_wizard_step(
     let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
         .one(db.as_ref())
         .await?
-        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+        .ok_or_else(|| ApiError::bad_request("enrollment batch not found"))?;
 
     let now = Utc::now();
     if batch.status != db::entity::common::enums::BatchStatus::Open || batch.closed_at <= now {
-        return Err(ApiError::BadRequest(
-            "cannot save wizard step after enrollment batch closed".into(),
+        return Err(ApiError::bad_request(
+            "cannot save wizard step after enrollment batch closed",
         ));
     }
 
