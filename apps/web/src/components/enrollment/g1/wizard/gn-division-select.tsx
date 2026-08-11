@@ -47,7 +47,11 @@ export function GnDivisionSelect({
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
 
-  const { data: gnDivisions, isLoading, error } = useQuery({
+  const {
+    data: gnDivisions,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["gn-divisions"],
     queryFn: async () => {
       const res = await apiClient.get({ url: "/api/gn-divisions" })

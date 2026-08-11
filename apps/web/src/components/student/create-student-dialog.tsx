@@ -4,7 +4,10 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
 import { EntityDialog } from "@/lib/form-builder"
-import { studentFormConfig, studentFormDefaults } from "@/components/forms/student-form"
+import {
+  studentFormConfig,
+  studentFormDefaults,
+} from "@/components/forms/student-form"
 import type { StudentFormValues } from "@/components/forms/student-form"
 
 type DuplicateChild = {
@@ -128,13 +131,18 @@ export function CreateStudentDialog({
               <div className="flex-1">
                 <p className="font-medium">{dup.full_name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {dup.name_with_initials} | DOB: {dup.date_of_birth} | {dup.gender}
+                  {dup.name_with_initials} | DOB: {dup.date_of_birth} |{" "}
+                  {dup.gender}
                 </p>
                 {dup.birth_certificate_number && (
-                  <p className="text-xs text-muted-foreground">BC: {dup.birth_certificate_number}</p>
+                  <p className="text-xs text-muted-foreground">
+                    BC: {dup.birth_certificate_number}
+                  </p>
                 )}
                 {dup.nic && (
-                  <p className="text-xs text-muted-foreground">NIC: {dup.nic}</p>
+                  <p className="text-xs text-muted-foreground">
+                    NIC: {dup.nic}
+                  </p>
                 )}
               </div>
               <button

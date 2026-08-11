@@ -2,7 +2,12 @@
 
 import * as React from "react"
 import { useLocation } from "@tanstack/react-router"
-import { IconUsers, IconCommand, IconShield, IconAward } from "@tabler/icons-react"
+import {
+  IconUsers,
+  IconCommand,
+  IconShield,
+  IconAward,
+} from "@tabler/icons-react"
 
 import { NavSwitcher } from "@/components/nav/nav-switcher"
 import type { NavMode } from "@/components/nav/nav-switcher"
@@ -56,27 +61,21 @@ const STUDENT_MANAGEMENT_NAV = {
       url: "/student-management/students",
       icon: <IconUsers />,
       isActive: true,
-      items: [
-        { title: "All Students", url: "/student-management/students" },
-      ],
+      items: [{ title: "All Students", url: "/student-management/students" }],
     },
     {
       title: "Children",
       url: "/student-management/children",
       icon: <IconUsers />,
       isActive: true,
-      items: [
-        { title: "All Children", url: "/student-management/children" },
-      ],
+      items: [{ title: "All Children", url: "/student-management/children" }],
     },
     {
       title: "Alumni",
       url: "/student-management/alumni",
       icon: <IconAward />,
       isActive: true,
-      items: [
-        { title: "All Alumni", url: "/student-management/alumni" },
-      ],
+      items: [{ title: "All Alumni", url: "/student-management/alumni" }],
     },
   ],
   projects: [],

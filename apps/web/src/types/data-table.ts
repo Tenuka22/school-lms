@@ -8,7 +8,10 @@ export interface Option {
   count?: number
 }
 
-export interface DataTableColumnMeta<TData, TValue> extends ColumnMeta<TData, TValue> {
+export interface DataTableColumnMeta<TData, TValue> extends ColumnMeta<
+  TData,
+  TValue
+> {
   variant?:
     | "text"
     | "number"

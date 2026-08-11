@@ -6,10 +6,7 @@ interface PipelineCardProps {
   onClick?: () => void
 }
 
-export function PipelineCard({
-  enrollment,
-  onClick,
-}: PipelineCardProps) {
+export function PipelineCard({ enrollment, onClick }: PipelineCardProps) {
   return (
     <Card
       className={`p-3 transition-all ${onClick ? "cursor-pointer hover:ring-2 hover:ring-primary/30" : "cursor-default"}`}

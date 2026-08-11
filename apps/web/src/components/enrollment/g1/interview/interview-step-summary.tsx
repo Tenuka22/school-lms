@@ -133,11 +133,15 @@ export function InterviewStepSummary({
   const categoryMarks = marks[category]
   const totalMarks = categoryMarks?.totalMarks ?? 0
   const maxPossible = MAX_POSSIBLE[category] ?? 100
-  const percentage = maxPossible > 0 ? Math.round((totalMarks / maxPossible) * 100) : 0
+  const percentage =
+    maxPossible > 0 ? Math.round((totalMarks / maxPossible) * 100) : 0
   const criteriaLabels = CRITERIA_LABELS[category] ?? {}
 
   const allCategoryTotals = useMemo(() => {
-    const totals: Record<string, { scored: number; max: number; percentage: number; weighted: number }> = {}
+    const totals: Record<
+      string,
+      { scored: number; max: number; percentage: number; weighted: number }
+    > = {}
     let grandTotalScored = 0
 
     for (const [catKey, max] of Object.entries(MAX_POSSIBLE)) {
@@ -163,10 +167,13 @@ export function InterviewStepSummary({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold">Interview Summary & Completion</h2>
+        <h2 className="text-xl font-semibold">
+          Interview Summary & Completion
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Review the scoring summary before finalizing the interview. Per circular 8.0,
-          the panel chairperson must log all decisions in the record book.
+          Review the scoring summary before finalizing the interview. Per
+          circular 8.0, the panel chairperson must log all decisions in the
+          record book.
         </p>
       </div>
 
@@ -178,9 +185,9 @@ export function InterviewStepSummary({
             Interview Completion
           </p>
           <p className="mt-0.5 text-xs text-green-700 dark:text-green-300">
-            Per circular 8.0, after scoring, a summary receipt must be given to the applicant
-            for each category scored. The applicant must sign acknowledging the scores.
-            Any discrepancy must be explained.
+            Per circular 8.0, after scoring, a summary receipt must be given to
+            the applicant for each category scored. The applicant must sign
+            acknowledging the scores. Any discrepancy must be explained.
           </p>
         </div>
       </div>
@@ -196,7 +203,9 @@ export function InterviewStepSummary({
             </Avatar>
             <div className="flex-1">
               <h3 className="font-semibold">{child.full_name}</h3>
-              <p className="text-sm text-muted-foreground">{child.name_with_initials}</p>
+              <p className="text-sm text-muted-foreground">
+                {child.name_with_initials}
+              </p>
             </div>
             <div className="text-right">
               <Badge variant="outline">
@@ -233,7 +242,8 @@ export function InterviewStepSummary({
             Score Summary - Assigned Category
           </CardTitle>
           <CardDescription>
-            Final scoring breakdown for the {CATEGORY_LABELS[category] ?? category} category.
+            Final scoring breakdown for the{" "}
+            {CATEGORY_LABELS[category] ?? category} category.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -246,8 +256,13 @@ export function InterviewStepSummary({
               </p>
             </div>
             <div className="text-right">
-              <span className="text-4xl font-bold tabular-nums">{totalMarks}</span>
-              <span className="text-sm text-muted-foreground"> / {maxPossible}</span>
+              <span className="text-4xl font-bold tabular-nums">
+                {totalMarks}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {" "}
+                / {maxPossible}
+              </span>
               <p className="text-xs text-muted-foreground">{percentage}%</p>
             </div>
           </div>
@@ -256,19 +271,33 @@ export function InterviewStepSummary({
           <div className="space-y-2">
             {categoryMarks &&
               Object.entries(categoryMarks.subCriteria).map(([key, score]) => {
-                const maxForCriterion = key === "residence_duration" && category === "Sibling" ? 40
-                  : key === "electoral_registration" && category === "Sibling" ? 20
-                  : key === "residence_duration" ? 20
-                  : key === "supporting_documents" ? 5
-                  : key === "electoral_registration" ? 25
-                  : key === "proximity_to_school" && category === "CloseResident" ? 50
-                  : key === "proximity_to_school" && category === "OverseasArrival" ? 35
-                  : 25
+                const maxForCriterion =
+                  key === "residence_duration" && category === "Sibling"
+                    ? 40
+                    : key === "electoral_registration" && category === "Sibling"
+                      ? 20
+                      : key === "residence_duration"
+                        ? 20
+                        : key === "supporting_documents"
+                          ? 5
+                          : key === "electoral_registration"
+                            ? 25
+                            : key === "proximity_to_school" &&
+                                category === "CloseResident"
+                              ? 50
+                              : key === "proximity_to_school" &&
+                                  category === "OverseasArrival"
+                                ? 35
+                                : 25
 
-                const pct = maxForCriterion > 0 ? (score / maxForCriterion) * 100 : 0
+                const pct =
+                  maxForCriterion > 0 ? (score / maxForCriterion) * 100 : 0
 
                 return (
-                  <div key={key} className="flex items-center gap-3 rounded bg-muted/30 px-3 py-2">
+                  <div
+                    key={key}
+                    className="flex items-center gap-3 rounded bg-muted/30 px-3 py-2"
+                  >
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium">
                         {criteriaLabels[key] ?? key}
@@ -293,7 +322,9 @@ export function InterviewStepSummary({
           {/* Notes */}
           {categoryMarks?.notes && (
             <div className="mt-4 rounded-md bg-muted/30 p-3">
-              <p className="text-xs font-medium text-muted-foreground">Interview Notes</p>
+              <p className="text-xs font-medium text-muted-foreground">
+                Interview Notes
+              </p>
               <p className="mt-1 text-sm">{categoryMarks.notes}</p>
             </div>
           )}
@@ -308,7 +339,8 @@ export function InterviewStepSummary({
             Combined Marks Summary - All Categories
           </CardTitle>
           <CardDescription>
-            Summary of scores across all 6 categories. The grand total shows the weighted score.
+            Summary of scores across all 6 categories. The grand total shows the
+            weighted score.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -324,13 +356,26 @@ export function InterviewStepSummary({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{CATEGORY_LABELS[catKey] ?? catKey}</span>
-                      {isAssigned && <Badge variant="default" className="text-[8px]">Assigned</Badge>}
+                      <span className="text-sm font-medium">
+                        {CATEGORY_LABELS[catKey] ?? catKey}
+                      </span>
+                      {isAssigned && (
+                        <Badge variant="default" className="text-[8px]">
+                          Assigned
+                        </Badge>
+                      )}
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-bold tabular-nums">{data.scored}</span>
-                      <span className="text-xs text-muted-foreground"> / {data.max}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">({data.percentage}%)</span>
+                      <span className="text-sm font-bold tabular-nums">
+                        {data.scored}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {" "}
+                        / {data.max}
+                      </span>
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        ({data.percentage}%)
+                      </span>
                     </div>
                   </div>
                   <div className="mt-2">
@@ -360,7 +405,9 @@ export function InterviewStepSummary({
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-4xl font-bold tabular-nums">{allCategoryTotals.grandTotal}</span>
+                  <span className="text-4xl font-bold tabular-nums">
+                    {allCategoryTotals.grandTotal}
+                  </span>
                   <p className="text-xs text-muted-foreground">points</p>
                 </div>
               </div>
@@ -372,17 +419,21 @@ export function InterviewStepSummary({
       {/* Provisional List Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Provisional List & Appeal Process</CardTitle>
+          <CardTitle className="text-sm">
+            Provisional List & Appeal Process
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-xs text-muted-foreground">
-            Per circular 9.0, the panel prepares a <strong>provisional selection list</strong> and
-            a <strong>waitlist</strong> (50% of vacancies per category). Both are displayed for a
-            minimum of 2 days.
+            Per circular 9.0, the panel prepares a{" "}
+            <strong>provisional selection list</strong> and a{" "}
+            <strong>waitlist</strong> (50% of vacancies per category). Both are
+            displayed for a minimum of 2 days.
           </p>
           <p className="text-xs text-muted-foreground">
-            Per circular 10.0, only applicants who appeared for the interview can file
-            appeals/protests within 2 weeks of the provisional list being displayed.
+            Per circular 10.0, only applicants who appeared for the interview
+            can file appeals/protests within 2 weeks of the provisional list
+            being displayed.
           </p>
         </CardContent>
       </Card>
@@ -395,9 +446,10 @@ export function InterviewStepSummary({
             Important Notice
           </p>
           <p className="mt-0.5 text-xs text-red-700 dark:text-red-300">
-            Per circular 7.1.3, if any document is found to be forged, the applicant is
-            disqualified from ALL categories. Per circular 13.0, accepting or giving money/gifts
-            for admission is completely prohibited and illegal.
+            Per circular 7.1.3, if any document is found to be forged, the
+            applicant is disqualified from ALL categories. Per circular 13.0,
+            accepting or giving money/gifts for admission is completely
+            prohibited and illegal.
           </p>
         </div>
       </div>
@@ -421,15 +473,19 @@ export function InterviewStepSummary({
             <AlertDialogHeader>
               <AlertDialogTitle>Complete Interview Procedure</AlertDialogTitle>
               <AlertDialogDescription>
-                This will mark the interview as completed and save the scores. The assigned category
-                ({CATEGORY_LABELS[category] ?? category}) has a total of <strong>{totalMarks}</strong> points.
-                The grand total across all categories is <strong>{allCategoryTotals.grandTotal}</strong> weighted points.
+                This will mark the interview as completed and save the scores.
+                The assigned category ({CATEGORY_LABELS[category] ?? category})
+                has a total of <strong>{totalMarks}</strong> points. The grand
+                total across all categories is{" "}
+                <strong>{allCategoryTotals.grandTotal}</strong> weighted points.
                 This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={onComplete}>Complete</AlertDialogAction>
+              <AlertDialogAction onClick={onComplete}>
+                Complete
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

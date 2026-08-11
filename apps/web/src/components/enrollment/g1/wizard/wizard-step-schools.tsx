@@ -16,7 +16,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { IconLoader2, IconCheck, IconSearch, IconX, IconArrowUp, IconArrowDown } from "@tabler/icons-react"
+import {
+  IconLoader2,
+  IconCheck,
+  IconSearch,
+  IconX,
+  IconArrowUp,
+  IconArrowDown,
+} from "@tabler/icons-react"
 import { FormBuilder, schemaToFormFields } from "@/lib/form-builder"
 import type { FormConfig } from "@/lib/form-builder"
 import * as v from "valibot"
@@ -59,9 +66,10 @@ export function WizardStepSchools({
   )
 
   const schools = searchQuery
-    ? allSchools.filter((s) =>
-        s.name_si.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.name_en?.toLowerCase().includes(searchQuery.toLowerCase())
+    ? allSchools.filter(
+        (s) =>
+          s.name_si.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.name_en?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : allSchools
 
@@ -73,41 +81,55 @@ export function WizardStepSchools({
     (s) => !preferredSchoolIds.includes(s.id)
   )
 
-  const handleAddSchool = useCallback((schoolId: string) => {
-    onChangePreferredSchools([...preferredSchoolIds, schoolId])
-  }, [preferredSchoolIds, onChangePreferredSchools])
+  const handleAddSchool = useCallback(
+    (schoolId: string) => {
+      onChangePreferredSchools([...preferredSchoolIds, schoolId])
+    },
+    [preferredSchoolIds, onChangePreferredSchools]
+  )
 
-  const handleRemoveSchool = useCallback((schoolId: string) => {
-    onChangePreferredSchools(preferredSchoolIds.filter((id) => id !== schoolId))
-  }, [preferredSchoolIds, onChangePreferredSchools])
+  const handleRemoveSchool = useCallback(
+    (schoolId: string) => {
+      onChangePreferredSchools(
+        preferredSchoolIds.filter((id) => id !== schoolId)
+      )
+    },
+    [preferredSchoolIds, onChangePreferredSchools]
+  )
 
-  const handleMoveUp = useCallback((index: number) => {
-    if (index === 0) return
-    const newIds = [...preferredSchoolIds]
-    ;[newIds[index - 1], newIds[index]] = [newIds[index], newIds[index - 1]]
-    onChangePreferredSchools(newIds)
-  }, [preferredSchoolIds, onChangePreferredSchools])
+  const handleMoveUp = useCallback(
+    (index: number) => {
+      if (index === 0) return
+      const newIds = [...preferredSchoolIds]
+      ;[newIds[index - 1], newIds[index]] = [newIds[index], newIds[index - 1]]
+      onChangePreferredSchools(newIds)
+    },
+    [preferredSchoolIds, onChangePreferredSchools]
+  )
 
-  const handleMoveDown = useCallback((index: number) => {
-    if (index === preferredSchoolIds.length - 1) return
-    const newIds = [...preferredSchoolIds]
-    ;[newIds[index], newIds[index + 1]] = [newIds[index + 1], newIds[index]]
-    onChangePreferredSchools(newIds)
-  }, [preferredSchoolIds, onChangePreferredSchools])
+  const handleMoveDown = useCallback(
+    (index: number) => {
+      if (index === preferredSchoolIds.length - 1) return
+      const newIds = [...preferredSchoolIds]
+      ;[newIds[index], newIds[index + 1]] = [newIds[index + 1], newIds[index]]
+      onChangePreferredSchools(newIds)
+    },
+    [preferredSchoolIds, onChangePreferredSchools]
+  )
 
   const fields = schemaToFormFields<SchoolPreferencesFormData>({
     schema: SchoolPreferencesSchema as any,
     include: ["closer_school_exists"],
     overrides: {
-      closer_school_exists: { label: "Is there a school closer to your residence?" },
+      closer_school_exists: {
+        label: "Is there a school closer to your residence?",
+      },
     },
   })
 
   const config: FormConfig<SchoolPreferencesFormData> = {
     fields,
-    layout: [
-      { columns: [{ fields: ["closer_school_exists"] }] },
-    ],
+    layout: [{ columns: [{ fields: ["closer_school_exists"] }] }],
   }
 
   return (
@@ -121,7 +143,9 @@ export function WizardStepSchools({
       <CardContent className="space-y-6">
         {/* Selected Schools List */}
         <div className="space-y-3">
-          <Label className="text-sm font-medium">Preferred Schools (Priority Order)</Label>
+          <Label className="text-sm font-medium">
+            Preferred Schools (Priority Order)
+          </Label>
           {selectedSchools.length === 0 ? (
             <div className="rounded-md border border-dashed p-6 text-center">
               <p className="text-sm text-muted-foreground">
@@ -135,13 +159,20 @@ export function WizardStepSchools({
                   key={school!.id}
                   className="flex items-center gap-3 rounded-md border bg-muted/30 px-3 py-2"
                 >
-                  <Badge variant="secondary" className="size-6 shrink-0 justify-center rounded-full text-xs">
+                  <Badge
+                    variant="secondary"
+                    className="size-6 shrink-0 justify-center rounded-full text-xs"
+                  >
                     {index + 1}
                   </Badge>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{school!.name_si}</p>
+                    <p className="truncate text-sm font-medium">
+                      {school!.name_si}
+                    </p>
                     {school!.name_en && (
-                      <p className="truncate text-xs text-muted-foreground">{school!.name_en}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {school!.name_en}
+                      </p>
                     )}
                   </div>
                   <div className="flex shrink-0 gap-1">
@@ -180,9 +211,11 @@ export function WizardStepSchools({
 
         {/* Search and Add */}
         <div className="space-y-2">
-          <Label htmlFor="school-search" className="text-sm font-medium">Search Schools</Label>
+          <Label htmlFor="school-search" className="text-sm font-medium">
+            Search Schools
+          </Label>
           <div className="relative">
-            <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <IconSearch className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="school-search"
               placeholder="Search by school name..."
@@ -196,7 +229,9 @@ export function WizardStepSchools({
           {isSearchFocused && (
             <div className="max-h-48 overflow-y-auto rounded-md border">
               {availableSchools.length === 0 ? (
-                <p className="p-3 text-sm text-muted-foreground">No matching schools found.</p>
+                <p className="p-3 text-sm text-muted-foreground">
+                  No matching schools found.
+                </p>
               ) : (
                 availableSchools.slice(0, 10).map((school) => (
                   <button
@@ -209,13 +244,18 @@ export function WizardStepSchools({
                     }}
                     className="flex w-full items-center gap-2 border-b px-3 py-2 text-left text-sm last:border-b-0 hover:bg-muted"
                   >
-                    <Badge variant="outline" className="size-5 shrink-0 justify-center text-xs">
+                    <Badge
+                      variant="outline"
+                      className="size-5 shrink-0 justify-center text-xs"
+                    >
                       +
                     </Badge>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{school.name_si}</p>
                       {school.name_en && (
-                        <p className="truncate text-xs text-muted-foreground">{school.name_en}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {school.name_en}
+                        </p>
                       )}
                     </div>
                   </button>
@@ -259,19 +299,29 @@ export function WizardStepSchools({
               }}
               disabled={status === "saving"}
             >
-              {status === "saving" && <IconLoader2 className="mr-1.5 size-4 animate-spin" />}
-              {status === "done" && <IconCheck className="mr-1.5 size-4 text-green-600" />}
-              {status === "idle" ? "Save Progress" : status === "saving" ? "Saving\u2026" : "Saved"}
+              {status === "saving" && (
+                <IconLoader2 className="mr-1.5 size-4 animate-spin" />
+              )}
+              {status === "done" && (
+                <IconCheck className="mr-1.5 size-4 text-green-600" />
+              )}
+              {status === "idle"
+                ? "Save Progress"
+                : status === "saving"
+                  ? "Saving\u2026"
+                  : "Saved"}
             </Button>
           </div>
-          <Button onClick={async () => {
-            try {
-              await onSave()
-              onNext()
-            } catch (e) {
-              toastApiError(e, "Failed to save")
-            }
-          }}>
+          <Button
+            onClick={async () => {
+              try {
+                await onSave()
+                onNext()
+              } catch (e) {
+                toastApiError(e, "Failed to save")
+              }
+            }}
+          >
             Next Step
           </Button>
         </div>

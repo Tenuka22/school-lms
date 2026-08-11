@@ -322,10 +322,14 @@ export function WizardStepDocuments({
             <Button variant="outline" onClick={onBack}>
               Back
             </Button>
-            <Button onClick={async () => {
-              await onSave(documents)
-              onNext()
-            }}>Next</Button>
+            <Button
+              onClick={async () => {
+                await onSave(documents)
+                onNext()
+              }}
+            >
+              Next
+            </Button>
           </div>
         </CardContent>
       </Card>

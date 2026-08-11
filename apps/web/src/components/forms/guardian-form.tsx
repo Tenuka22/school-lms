@@ -43,9 +43,30 @@ export const guardianFormConfig: FormConfig<GuardianFormValues> = {
       section: "step1",
       inputProps: { placeholder: "Select relationship" },
     },
-    { name: "full_name", kind: "text", label: "Full Name", required: true, section: "step1", placeholder: "e.g. John Doe" },
-    { name: "nic_number", kind: "text", label: "NIC Number", required: true, section: "step1", placeholder: "e.g. 952312345V" },
-    { name: "contact_phone", kind: "text", label: "Phone Number", required: true, section: "step1", placeholder: "e.g. +94 77 123 4567" },
+    {
+      name: "full_name",
+      kind: "text",
+      label: "Full Name",
+      required: true,
+      section: "step1",
+      placeholder: "e.g. John Doe",
+    },
+    {
+      name: "nic_number",
+      kind: "text",
+      label: "NIC Number",
+      required: true,
+      section: "step1",
+      placeholder: "e.g. 952312345V",
+    },
+    {
+      name: "contact_phone",
+      kind: "text",
+      label: "Phone Number",
+      required: true,
+      section: "step1",
+      placeholder: "e.g. +94 77 123 4567",
+    },
     {
       name: "contact_email",
       kind: "text",
@@ -95,8 +116,18 @@ export const guardianFormConfig: FormConfig<GuardianFormValues> = {
   layout: [
     { columns: [{ fields: ["relationship_type"], span: 12 }] },
     { columns: [{ fields: ["full_name"], span: 12 }] },
-    { columns: [{ fields: ["nic_number"], span: 6 }, { fields: ["contact_phone"], span: 6 }] },
-    { columns: [{ fields: ["contact_email"], span: 6 }, { fields: ["occupation"], span: 6 }] },
+    {
+      columns: [
+        { fields: ["nic_number"], span: 6 },
+        { fields: ["contact_phone"], span: 6 },
+      ],
+    },
+    {
+      columns: [
+        { fields: ["contact_email"], span: 6 },
+        { fields: ["occupation"], span: 6 },
+      ],
+    },
     { columns: [{ fields: ["workplace_name"], span: 12 }] },
     { columns: [{ fields: ["is_school_staff"], span: 12 }] },
     { columns: [{ fields: ["is_past_pupil"], span: 12 }] },

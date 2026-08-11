@@ -55,9 +55,7 @@ export function EntityDialog<TData extends Record<string, unknown>>({
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description && (
-            <DialogDescription>{description}</DialogDescription>
-          )}
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <FormBuilder<TData>
           config={{

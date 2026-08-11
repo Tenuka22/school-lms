@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button"
 import { IconPlus } from "@tabler/icons-react"
 import { useState } from "react"
 
-export const Route = createFileRoute("/_authenticated/student-management/students")({
+export const Route = createFileRoute(
+  "/_authenticated/student-management/students"
+)({
   component: StudentsPage,
 })
 

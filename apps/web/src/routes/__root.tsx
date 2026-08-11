@@ -13,7 +13,9 @@ import appCss from "../styles.css?url"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { queryClient } from "@/router"
 
-export const Route = createRootRouteWithContext<{ queryClient: typeof queryClient }>()({
+export const Route = createRootRouteWithContext<{
+  queryClient: typeof queryClient
+}>()({
   head: () => ({
     meta: [
       {
@@ -52,7 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-              <ThemeProvider defaultTheme="light" storageKey="theme">
+            <ThemeProvider defaultTheme="light" storageKey="theme">
               {children}
             </ThemeProvider>
           </TooltipProvider>

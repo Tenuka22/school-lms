@@ -78,7 +78,9 @@ export function WizardStepAddress({
 }: Props) {
   const [filter, setFilter] = useState<string>("all")
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
-  const [proofDialogAddressId, setProofDialogAddressId] = useState<string | null>(null)
+  const [proofDialogAddressId, setProofDialogAddressId] = useState<
+    string | null
+  >(null)
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -107,11 +109,7 @@ export function WizardStepAddress({
 
   const updatePrimary = (id: string) => {
     for (const a of selectedAddresses) {
-      onUpdate(
-        a.address_id,
-        "is_primary",
-        a.address_id === id
-      )
+      onUpdate(a.address_id, "is_primary", a.address_id === id)
     }
   }
 
@@ -182,7 +180,8 @@ export function WizardStepAddress({
                         {addr.address_line_1}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
-                        {addr.address_line_2 || `${addr.district}, ${addr.province}`}
+                        {addr.address_line_2 ||
+                          `${addr.district}, ${addr.province}`}
                       </p>
                     </div>
                   </div>
@@ -197,16 +196,11 @@ export function WizardStepAddress({
                     </p>
                   </div>
 
-                    <div className="grid grid-cols-2 gap-2 border-t pt-1">
+                  <div className="grid grid-cols-2 gap-2 border-t pt-1">
                     <Select
                       value={entry.address_type}
                       onValueChange={(val) =>
-                        val &&
-                        onUpdate(
-                          entry.address_id,
-                          "address_type",
-                          val
-                        )
+                        val && onUpdate(entry.address_id, "address_type", val)
                       }
                     >
                       <SelectTrigger className="h-7 w-full text-xs">
@@ -223,12 +217,7 @@ export function WizardStepAddress({
                     <Select
                       value={entry.residence_type}
                       onValueChange={(val) =>
-                        val &&
-                        onUpdate(
-                          entry.address_id,
-                          "residence_type",
-                          val
-                        )
+                        val && onUpdate(entry.address_id, "residence_type", val)
                       }
                     >
                       <SelectTrigger className="h-7 w-full text-xs">
@@ -246,10 +235,11 @@ export function WizardStepAddress({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 text-xs gap-1"
+                      className="h-7 gap-1 text-xs"
                       onClick={() => setProofDialogAddressId(entry.address_id)}
                     >
-                      {entry.ownership_proofs && entry.ownership_proofs.length > 0 ? (
+                      {entry.ownership_proofs &&
+                      entry.ownership_proofs.length > 0 ? (
                         <>
                           <IconFile className="size-3" />
                           Proofs ({entry.ownership_proofs.length})
@@ -264,9 +254,7 @@ export function WizardStepAddress({
                         type="radio"
                         name={`primary-address-${entry.address_id}`}
                         checked={entry.is_primary}
-                        onChange={() =>
-                          updatePrimary(entry.address_id)
-                        }
+                        onChange={() => updatePrimary(entry.address_id)}
                         className="size-3.5 accent-primary"
                       />
                       <span className="text-xs text-muted-foreground">
@@ -282,7 +270,6 @@ export function WizardStepAddress({
                       )}
                     </div>
                   </div>
-
                 </div>
               )
             })}
@@ -333,7 +320,11 @@ export function WizardStepAddress({
               ?.ownership_proofs ?? []
           }
           onSave={(proofs) => {
-            onUpdate(proofDialogAddressId, "ownership_proofs", proofs as unknown as string | boolean)
+            onUpdate(
+              proofDialogAddressId,
+              "ownership_proofs",
+              proofs as unknown as string | boolean
+            )
             setProofDialogAddressId(null)
           }}
         />

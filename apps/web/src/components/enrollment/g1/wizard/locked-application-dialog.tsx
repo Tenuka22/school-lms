@@ -34,8 +34,9 @@ export function LockedApplicationDialog({
             Application Locked
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This application has been submitted and is now locked. Editing is restricted to prevent
-            unauthorized changes that could affect the enrollment process.
+            This application has been submitted and is now locked. Editing is
+            restricted to prevent unauthorized changes that could affect the
+            enrollment process.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">

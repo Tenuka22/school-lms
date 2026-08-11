@@ -1,6 +1,10 @@
 import type { ElectoralDistrict } from "@/lib/api-client/types.gen"
 
-export const ELECTORAL_DISTRICTS: { value: ElectoralDistrict; label: string; si: string }[] = [
+export const ELECTORAL_DISTRICTS: {
+  value: ElectoralDistrict
+  label: string
+  si: string
+}[] = [
   { value: "Colombo", label: "Colombo", si: "කොළඹ" },
   { value: "Gampaha", label: "Gampaha", si: "ගම්පහ" },
   { value: "Kalutara", label: "Kalutara", si: "කළුතර" },

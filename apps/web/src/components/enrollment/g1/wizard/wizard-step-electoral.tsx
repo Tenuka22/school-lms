@@ -50,7 +50,13 @@ export type ElectoralEntry = {
   household_head_name: string
 }
 
-function VoterNamesField({ value, onChange }: { value: string[]; onChange: (names: string[]) => void }) {
+function VoterNamesField({
+  value,
+  onChange,
+}: {
+  value: string[]
+  onChange: (names: string[]) => void
+}) {
   const [input, setInput] = useState("")
   const addVoter = () => {
     const trimmed = input.trim()
@@ -61,24 +67,37 @@ function VoterNamesField({ value, onChange }: { value: string[]; onChange: (name
   }
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium">Voter Names (ඡන්ද ගිමියන්ගේ නම්)</label>
+      <label className="text-sm font-medium">
+        Voter Names (ඡන්ද ගිමියන්ගේ නම්)
+      </label>
       <div className="flex gap-2">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addVoter() } }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              addVoter()
+            }
+          }}
           placeholder="Type a name and press Enter"
           className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
         />
-        <Button type="button" variant="outline" size="sm" onClick={addVoter}>Add</Button>
+        <Button type="button" variant="outline" size="sm" onClick={addVoter}>
+          Add
+        </Button>
       </div>
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5 pt-1">
           {value.map((name) => (
             <Badge key={name} variant="secondary" className="gap-1">
               {name}
-              <button type="button" onClick={() => onChange(value.filter((v) => v !== name))} className="ml-0.5 rounded-full p-0.5 hover:bg-muted">
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((v) => v !== name))}
+                className="ml-0.5 rounded-full p-0.5 hover:bg-muted"
+              >
                 <IconTrash className="size-3" />
               </button>
             </Badge>
@@ -113,11 +132,15 @@ function ElectoralEntryCard({
   )
 
   return (
-    <div className="rounded-lg border p-4 space-y-3">
+    <div className="space-y-3 rounded-lg border p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs">Year {index + 1}</Badge>
-          <span className="text-sm font-medium">{entry.electoral_year || "New Entry"}</span>
+          <Badge variant="outline" className="text-xs">
+            Year {index + 1}
+          </Badge>
+          <span className="text-sm font-medium">
+            {entry.electoral_year || "New Entry"}
+          </span>
         </div>
         {canRemove && (
           <Button
@@ -127,7 +150,7 @@ function ElectoralEntryCard({
             onClick={() => onRemove(entry.id)}
             className="text-destructive hover:text-destructive"
           >
-            <IconTrash className="size-4 mr-1" />
+            <IconTrash className="mr-1 size-4" />
             Remove
           </Button>
         )}
@@ -138,7 +161,7 @@ function ElectoralEntryCard({
         <div className="col-span-4 space-y-1.5">
           <label className="text-sm font-medium">
             Year (වර්ෂය)
-            <span className="text-destructive ml-0.5">*</span>
+            <span className="ml-0.5 text-destructive">*</span>
           </label>
           <Select
             value={entry.electoral_year?.toString() ?? ""}
@@ -163,7 +186,7 @@ function ElectoralEntryCard({
         <div className="col-span-4 space-y-1.5">
           <label className="text-sm font-medium">
             Polling District (ඡන්ද ප්‍රදේශය)
-            <span className="text-destructive ml-0.5">*</span>
+            <span className="ml-0.5 text-destructive">*</span>
           </label>
           <Select
             value={entry.polling_district}
@@ -191,7 +214,7 @@ function ElectoralEntryCard({
         <div className="col-span-4 space-y-1.5">
           <label className="text-sm font-medium">
             Polling Division (ඡන්ද කොට්ඨාශය)
-            <span className="text-destructive ml-0.5">*</span>
+            <span className="ml-0.5 text-destructive">*</span>
           </label>
           <Select
             value={entry.polling_division}
@@ -223,7 +246,7 @@ function ElectoralEntryCard({
         <div className="col-span-4 space-y-1.5">
           <label className="text-sm font-medium">
             Polling District No. (ඡන්ද අංකය)
-            <span className="text-destructive ml-0.5">*</span>
+            <span className="ml-0.5 text-destructive">*</span>
           </label>
           <input
             type="text"
@@ -232,7 +255,7 @@ function ElectoralEntryCard({
               onUpdate(entry.id, { polling_area: e.target.value })
             }
             placeholder="e.g. 42"
-            className="flex h-8 w-full rounded-lg border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-8 w-full rounded-lg border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
@@ -240,7 +263,7 @@ function ElectoralEntryCard({
         <div className="col-span-8 space-y-1.5">
           <label className="text-sm font-medium">
             Village/Street (ගම/වීදිය/වත්ත)
-            <span className="text-destructive ml-0.5">*</span>
+            <span className="ml-0.5 text-destructive">*</span>
           </label>
           <input
             type="text"
@@ -249,7 +272,7 @@ function ElectoralEntryCard({
               onUpdate(entry.id, { village_street: e.target.value })
             }
             placeholder="e.g. Temple Road"
-            className="flex h-8 w-full rounded-lg border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-8 w-full rounded-lg border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
 
@@ -257,7 +280,7 @@ function ElectoralEntryCard({
         <div className="col-span-12 space-y-1.5">
           <label className="text-sm font-medium">
             Household Head (ගෘහ මූලිකගේ නම)
-            <span className="text-destructive ml-0.5">*</span>
+            <span className="ml-0.5 text-destructive">*</span>
           </label>
           <input
             type="text"
@@ -266,7 +289,7 @@ function ElectoralEntryCard({
               onUpdate(entry.id, { household_head_name: e.target.value })
             }
             placeholder="Name of household head"
-            className="flex h-8 w-full rounded-lg border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-8 w-full rounded-lg border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
       </div>
@@ -275,7 +298,7 @@ function ElectoralEntryCard({
       <div className="space-y-1.5">
         <label className="text-sm font-medium">
           GN Division & No. (ග්‍රාම නිලධාරි වසම හා අංකය)
-          <span className="text-destructive ml-0.5">*</span>
+          <span className="ml-0.5 text-destructive">*</span>
         </label>
         <GnDivisionSelect
           value={entry.gn_name ? `${entry.gn_name}-${entry.gn_number}` : ""}
@@ -283,7 +306,9 @@ function ElectoralEntryCard({
             onUpdate(entry.id, {
               gn_name: name,
               gn_number: number,
-              ...(number && !entry.polling_area ? { polling_area: number } : {}),
+              ...(number && !entry.polling_area
+                ? { polling_area: number }
+                : {}),
             })
           }
           placeholder="Search GN division..."
@@ -313,7 +338,13 @@ interface Props {
   onNext: () => void
 }
 
-export function WizardStepElectoral({ entries, onChange, onBack, onSave, onNext }: Props) {
+export function WizardStepElectoral({
+  entries,
+  onChange,
+  onBack,
+  onSave,
+  onNext,
+}: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -339,9 +370,10 @@ export function WizardStepElectoral({ entries, onChange, onBack, onSave, onNext 
   const addEntry = () => {
     if (entries.length >= MAX_ELECTORAL_ENTRIES) return
     const currentYear = new Date().getFullYear()
-    const lastYear = entries.length > 0
-      ? Math.max(...entries.map((e) => e.electoral_year))
-      : currentYear
+    const lastYear =
+      entries.length > 0
+        ? Math.max(...entries.map((e) => e.electoral_year))
+        : currentYear
     onChange([
       ...entries,
       {
@@ -387,18 +419,19 @@ export function WizardStepElectoral({ entries, onChange, onBack, onSave, onNext 
       <CardHeader>
         <CardTitle>Step 3: Electoral Register</CardTitle>
         <CardDescription>
-          Enter the electoral register details for the previous years. Add up to {MAX_ELECTORAL_ENTRIES} years of entries.
+          Enter the electoral register details for the previous years. Add up to{" "}
+          {MAX_ELECTORAL_ENTRIES} years of entries.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {entries.length === 0 && (
           <div className="rounded-lg border border-dashed p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="mb-3 text-sm text-muted-foreground">
               No electoral entries yet. Click "Add Year" to begin.
             </p>
             {canAddMore && (
               <Button type="button" variant="outline" onClick={addEntry}>
-                <IconPlus className="size-4 mr-1.5" />
+                <IconPlus className="mr-1.5 size-4" />
                 Add Year
               </Button>
             )}
@@ -420,18 +453,33 @@ export function WizardStepElectoral({ entries, onChange, onBack, onSave, onNext 
         </div>
 
         {canAddMore && entries.length > 0 && (
-          <Button type="button" variant="outline" className="w-full" onClick={addEntry}>
-            <IconPlus className="size-4 mr-1.5" />
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={addEntry}
+          >
+            <IconPlus className="mr-1.5 size-4" />
             Add Year ({entries.length}/{MAX_ELECTORAL_ENTRIES})
           </Button>
         )}
 
         <div className="flex justify-between border-t pt-4">
-          <Button variant="outline" onClick={onBack}>Back</Button>
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
           <Button onClick={handleNext} disabled={status !== "idle"}>
-            {status === "saving" && <IconLoader2 className="mr-1.5 size-4 animate-spin" />}
-            {status === "done" && <IconCheck className="mr-1.5 size-4 text-green-600" />}
-            {status === "idle" ? "Next" : status === "saving" ? "Saving\u2026" : "Saved"}
+            {status === "saving" && (
+              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
+            )}
+            {status === "done" && (
+              <IconCheck className="mr-1.5 size-4 text-green-600" />
+            )}
+            {status === "idle"
+              ? "Next"
+              : status === "saving"
+                ? "Saving\u2026"
+                : "Saved"}
           </Button>
         </div>
       </CardContent>

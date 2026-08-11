@@ -41,10 +41,7 @@ import { queryClient } from "@/router"
 import { vCreateGuardianBody } from "@/lib/api-client/valibot.gen"
 import { IconPlus } from "@tabler/icons-react"
 import professions from "professions"
-import {
-  FormBuilder,
-  type FormConfig,
-} from "@/lib/form-builder"
+import { FormBuilder, type FormConfig } from "@/lib/form-builder"
 import {
   RELATIONSHIP_OPTIONS,
   CATEGORY_INFO,
@@ -52,7 +49,6 @@ import {
   StudentCombobox,
   WorkspaceAddressSelect,
 } from "./guardian-helpers"
-
 
 type FormData = Record<string, unknown>
 
@@ -104,15 +100,52 @@ export function CreateGuardianDialog({
 
   const formConfig: FormConfig<FormData> = {
     fields: [
-      { name: "relationship_type", kind: "select", label: "Relationship", required: true, options: RELATIONSHIP_OPTIONS.map((r) => ({ value: r, label: r })), section: "step1",
-        inputProps: { placeholder: "Select relationship" } },
-      { name: "full_name", kind: "text", label: "Full Name", required: true, section: "step1", placeholder: "e.g. John Doe" },
-      { name: "nic_number", kind: "text", label: "NIC Number", required: true, section: "step1", placeholder: "e.g. 952312345V" },
-      { name: "contact_phone", kind: "text", label: "Phone Number", required: true, section: "step1", placeholder: "e.g. +94 77 123 4567" },
-      { name: "contact_email", kind: "text", label: "Email Address", section: "step1", placeholder: "e.g. john@example.com",
-        inputProps: { type: "email" } },
       {
-        name: "occupation", kind: "custom", label: "Occupation", section: "step1",
+        name: "relationship_type",
+        kind: "select",
+        label: "Relationship",
+        required: true,
+        options: RELATIONSHIP_OPTIONS.map((r) => ({ value: r, label: r })),
+        section: "step1",
+        inputProps: { placeholder: "Select relationship" },
+      },
+      {
+        name: "full_name",
+        kind: "text",
+        label: "Full Name",
+        required: true,
+        section: "step1",
+        placeholder: "e.g. John Doe",
+      },
+      {
+        name: "nic_number",
+        kind: "text",
+        label: "NIC Number",
+        required: true,
+        section: "step1",
+        placeholder: "e.g. 952312345V",
+      },
+      {
+        name: "contact_phone",
+        kind: "text",
+        label: "Phone Number",
+        required: true,
+        section: "step1",
+        placeholder: "e.g. +94 77 123 4567",
+      },
+      {
+        name: "contact_email",
+        kind: "text",
+        label: "Email Address",
+        section: "step1",
+        placeholder: "e.g. john@example.com",
+        inputProps: { type: "email" },
+      },
+      {
+        name: "occupation",
+        kind: "custom",
+        label: "Occupation",
+        section: "step1",
         customRenderer: ({ value, onChange }) => (
           <Combobox
             items={professions}
@@ -137,7 +170,10 @@ export function CreateGuardianDialog({
         ),
       },
       {
-        name: "workplace_name", kind: "custom", label: "Workspace", section: "step1",
+        name: "workplace_name",
+        kind: "custom",
+        label: "Workspace",
+        section: "step1",
         customRenderer: ({ setFieldValue }) => (
           <WorkspaceAddressSelect
             onChange={(name, address) => {
@@ -149,8 +185,16 @@ export function CreateGuardianDialog({
       },
       { name: "workplace_address", kind: "text", label: "", hidden: true },
       ...CATEGORY_INFO.map((cat) => ({
-        name: cat.key, kind: "custom" as const, label: cat.label, section: "step2",
-        customRenderer: ({ value, onChange, formValues, setFieldValue }: any) => {
+        name: cat.key,
+        kind: "custom" as const,
+        label: cat.label,
+        section: "step2",
+        customRenderer: ({
+          value,
+          onChange,
+          formValues,
+          setFieldValue,
+        }: any) => {
           const checked = !!value
           return (
             <div
@@ -193,7 +237,9 @@ export function CreateGuardianDialog({
                   />
                   <Select
                     value={String(formValues.staff_type ?? "")}
-                    onValueChange={(v) => setFieldValue("staff_type", v || null)}
+                    onValueChange={(v) =>
+                      setFieldValue("staff_type", v || null)
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Staff type" />
@@ -207,12 +253,16 @@ export function CreateGuardianDialog({
                   <Input
                     placeholder="Employee ID (optional)"
                     value={String(formValues.employee_id ?? "")}
-                    onChange={(e) => setFieldValue("employee_id", e.target.value || null)}
+                    onChange={(e) =>
+                      setFieldValue("employee_id", e.target.value || null)
+                    }
                   />
                   <Input
                     placeholder="Designation (optional)"
                     value={String(formValues.occupation ?? "")}
-                    onChange={(e) => setFieldValue("occupation", e.target.value || null)}
+                    onChange={(e) =>
+                      setFieldValue("occupation", e.target.value || null)
+                    }
                   />
                 </div>
               )}
@@ -238,14 +288,20 @@ export function CreateGuardianDialog({
                     onChange={(v) => setFieldValue("past_pupil_school_id", v)}
                   />
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Past pupil record at school</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Past pupil record at school
+                    </label>
                     <StudentCombobox
                       value={formValues.past_pupil_student_id as string | null}
-                      onChange={(v) => setFieldValue("past_pupil_student_id", v)}
+                      onChange={(v) =>
+                        setFieldValue("past_pupil_student_id", v)
+                      }
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Link to student record (optional)</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Link to student record (optional)
+                    </label>
                     <StudentCombobox
                       value={formValues.student_id as string | null}
                       onChange={(v) => setFieldValue("student_id", v)}
@@ -254,7 +310,9 @@ export function CreateGuardianDialog({
                   <div className="grid grid-cols-2 gap-2">
                     <Select
                       value={String(formValues.past_pupil_highest_grade ?? "")}
-                      onValueChange={(v) => setFieldValue("past_pupil_highest_grade", v || null)}
+                      onValueChange={(v) =>
+                        setFieldValue("past_pupil_highest_grade", v || null)
+                      }
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Highest grade" />
@@ -264,12 +322,16 @@ export function CreateGuardianDialog({
                         <SelectItem value="GCE_OL">GCE O/L</SelectItem>
                         <SelectItem value="Grade_11">Grade 11</SelectItem>
                         <SelectItem value="Grade_10">Grade 10</SelectItem>
-                        <SelectItem value="Below_Grade_10">Below Grade 10</SelectItem>
+                        <SelectItem value="Below_Grade_10">
+                          Below Grade 10
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <Select
                       value={String(formValues.past_pupil_left_reason ?? "")}
-                      onValueChange={(v) => setFieldValue("past_pupil_left_reason", v || null)}
+                      onValueChange={(v) =>
+                        setFieldValue("past_pupil_left_reason", v || null)
+                      }
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Reason" />
@@ -299,7 +361,10 @@ export function CreateGuardianDialog({
         },
       })),
       {
-        name: "income_level", kind: "select", label: "Monthly Income (LKR)", section: "step2",
+        name: "income_level",
+        kind: "select",
+        label: "Monthly Income (LKR)",
+        section: "step2",
         options: [
           { value: "below_25000", label: "Below 25,000" },
           { value: "25000_50000", label: "25,000 – 50,000" },
@@ -314,8 +379,18 @@ export function CreateGuardianDialog({
     layout: [
       { columns: [{ fields: ["relationship_type"], span: 12 }] },
       { columns: [{ fields: ["full_name"], span: 12 }] },
-      { columns: [{ fields: ["nic_number"], span: 6 }, { fields: ["contact_phone"], span: 6 }] },
-      { columns: [{ fields: ["contact_email"], span: 6 }, { fields: ["occupation"], span: 6 }] },
+      {
+        columns: [
+          { fields: ["nic_number"], span: 6 },
+          { fields: ["contact_phone"], span: 6 },
+        ],
+      },
+      {
+        columns: [
+          { fields: ["contact_email"], span: 6 },
+          { fields: ["occupation"], span: 6 },
+        ],
+      },
       { columns: [{ fields: ["workplace_name"], span: 12 }] },
       { columns: [{ fields: ["is_school_staff"], span: 12 }] },
       { columns: [{ fields: ["is_past_pupil"], span: 12 }] },
@@ -400,7 +475,9 @@ export function CreateGuardianDialog({
           ) as any[] | undefined
           const existing = guardians?.find((g: any) => g.id === existingId)
           if (existing) {
-            toast.info(`Guardian with this NIC already exists. Opening edit form.`)
+            toast.info(
+              `Guardian with this NIC already exists. Opening edit form.`
+            )
             setOpen(false)
             setStep(1)
             setCreatedGuardian(null)
@@ -409,7 +486,10 @@ export function CreateGuardianDialog({
           }
         }
       }
-      toastApiError(err, step === 1 ? "Failed to create guardian" : "Failed to update guardian")
+      toastApiError(
+        err,
+        step === 1 ? "Failed to create guardian" : "Failed to update guardian"
+      )
     }
   }
 
@@ -432,7 +512,7 @@ export function CreateGuardianDialog({
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? "Guardian Details" : "Enrollment Categories"}
@@ -450,17 +530,25 @@ export function CreateGuardianDialog({
           <div className="flex justify-between gap-2 border-t pt-2">
             <div>
               {step === 2 && (
-                <Button type="button" variant="ghost" onClick={() => setStep(1)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setStep(1)}
+                >
                   &larr; Back
                 </Button>
               )}
             </div>
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={() => {
-                setOpen(false)
-                setStep(1)
-                setCreatedGuardian(null)
-              }}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setOpen(false)
+                  setStep(1)
+                  setCreatedGuardian(null)
+                }}
+              >
                 Cancel
               </Button>
               {step === 1 ? (

@@ -36,7 +36,7 @@ export type FieldEntry<
   inputProps?: Record<string, unknown>
   onChangeOverride?: (
     value: unknown,
-    handleChange: (val: unknown) => void,
+    handleChange: (val: unknown) => void
   ) => void
   /** Render arbitrary content for kind="custom" */
   customRenderer?: (args: {

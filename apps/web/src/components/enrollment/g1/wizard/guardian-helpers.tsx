@@ -314,12 +314,17 @@ export function BlacklistBadge({ entry }: { entry: Blacklist }) {
           Blacklisted
         </span>
       </HoverCardTrigger>
-      <HoverCardContent side="right" align="start" sideOffset={4} className="w-64 p-3 text-xs">
+      <HoverCardContent
+        side="right"
+        align="start"
+        sideOffset={4}
+        className="w-64 p-3 text-xs"
+      >
         <div className="space-y-1">
           <p className="font-medium text-destructive">Blacklisted</p>
           <p className="text-muted-foreground">{entry.reason}</p>
           <p className="text-muted-foreground/60">
-            Since {new Date(entry.blacklisted_at ?? '').toLocaleDateString()}
+            Since {new Date(entry.blacklisted_at ?? "").toLocaleDateString()}
           </p>
         </div>
       </HoverCardContent>
@@ -497,7 +502,10 @@ export function WorkspaceAddressSelect({
         onOpenChange={setOpenCreate}
         onSubmit={async (data) => {
           try {
-            const addr = await createMutation.mutateAsync({ body: data, client: apiClient })
+            const addr = await createMutation.mutateAsync({
+              body: data,
+              client: apiClient,
+            })
             queryClient.invalidateQueries({
               queryKey: listWorkspaceAddressesQueryKey({ client: apiClient }),
             })

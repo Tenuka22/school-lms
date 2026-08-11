@@ -18,10 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Field,
-  FieldDescription,
-} from "@/components/ui/field"
+import { Field, FieldDescription } from "@/components/ui/field"
 
 export function SignupForm({
   className,
@@ -107,7 +104,11 @@ export function SignupForm({
             </Button>
             <FieldDescription className="w-full text-center">
               Already have an account?{" "}
-              <Link to="/auth/sign-in" search={{ redirect: undefined }} className="underline underline-offset-4">
+              <Link
+                to="/auth/sign-in"
+                search={{ redirect: undefined }}
+                className="underline underline-offset-4"
+              >
                 Sign in
               </Link>
             </FieldDescription>

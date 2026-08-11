@@ -46,17 +46,24 @@ export function WizardStepSchool({
       { name: "category", kind: "display", label: "", hidden: true },
       { name: "quota", kind: "display", label: "", hidden: true },
     ],
-    layout: [
-      { columns: [{ fields: ["school_name_si"] }] },
-    ],
+    layout: [{ columns: [{ fields: ["school_name_si"] }] }],
     renderBelowFields: (formValues) =>
       formValues.school_name_si ? (
         <div className="mt-4 space-y-2 rounded-lg border p-4">
-          <h4 className="font-semibold">{formValues.school_name_si as string}</h4>
+          <h4 className="font-semibold">
+            {formValues.school_name_si as string}
+          </h4>
           <div className="flex gap-2">
-            <Badge variant="outline">{(formValues.school_type as string) || "N/A"}</Badge>
-            <Badge variant="outline">{(formValues.category as string) || "N/A"}</Badge>
-            <Badge>Quota: {formValues.quota != null ? String(formValues.quota) : "\u2014"}</Badge>
+            <Badge variant="outline">
+              {(formValues.school_type as string) || "N/A"}
+            </Badge>
+            <Badge variant="outline">
+              {(formValues.category as string) || "N/A"}
+            </Badge>
+            <Badge>
+              Quota:{" "}
+              {formValues.quota != null ? String(formValues.quota) : "\u2014"}
+            </Badge>
           </div>
         </div>
       ) : null,

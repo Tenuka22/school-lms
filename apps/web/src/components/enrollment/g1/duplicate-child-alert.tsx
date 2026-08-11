@@ -5,7 +5,11 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { IconAlertTriangle, IconUser, IconUserShield } from "@tabler/icons-react"
+import {
+  IconAlertTriangle,
+  IconUser,
+  IconUserShield,
+} from "@tabler/icons-react"
 import type { Child, Guardian } from "@/lib/api-client/types.gen"
 import type { ChildUniquenessCheckType } from "@/hooks/use-child-uniqueness"
 
@@ -30,7 +34,7 @@ export function UniquenessAlert({
 }: UniquenessAlertProps) {
   if (isChecking) {
     return (
-      <p className="text-xs text-muted-foreground animate-pulse py-1">
+      <p className="animate-pulse py-1 text-xs text-muted-foreground">
         Checking for duplicates...
       </p>
     )
@@ -45,18 +49,19 @@ export function UniquenessAlert({
 
   return (
     <div className="flex items-center gap-1.5 py-1">
-      <IconAlertTriangle className="size-3.5 text-destructive shrink-0" />
+      <IconAlertTriangle className="size-3.5 shrink-0 text-destructive" />
       <HoverCard>
         <HoverCardTrigger>
-          <span className="text-xs text-destructive underline-offset-2 hover:underline cursor-pointer">
-            {totalCount} similar {totalCount === 1 ? "record" : "records"} found for this {label.toLowerCase()}
+          <span className="cursor-pointer text-xs text-destructive underline-offset-2 hover:underline">
+            {totalCount} similar {totalCount === 1 ? "record" : "records"} found
+            for this {label.toLowerCase()}
           </span>
         </HoverCardTrigger>
         <HoverCardContent className="w-80 p-0" side="bottom">
           <div className="space-y-2 p-2.5">
             {hasChildren && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">
+                <p className="mb-1 text-xs font-medium text-muted-foreground">
                   Matching children ({childDuplicates.length}):
                 </p>
                 <div className="max-h-40 space-y-1.5 overflow-y-auto">
@@ -69,7 +74,7 @@ export function UniquenessAlert({
                         <IconUser className="size-4 text-muted-foreground" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-xs">
+                        <p className="truncate text-xs font-medium">
                           {child.full_name}
                         </p>
                         {child.name_with_initials && (
@@ -94,7 +99,7 @@ export function UniquenessAlert({
             )}
             {hasGuardians && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1">
+                <p className="mb-1 text-xs font-medium text-muted-foreground">
                   Matching guardians ({guardianDuplicates.length}):
                 </p>
                 <div className="max-h-40 space-y-1.5 overflow-y-auto">
@@ -107,7 +112,7 @@ export function UniquenessAlert({
                         <IconUserShield className="size-4 text-muted-foreground" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-xs">
+                        <p className="truncate text-xs font-medium">
                           {guardian.full_name}
                         </p>
                         <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-muted-foreground">

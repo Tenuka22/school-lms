@@ -146,10 +146,7 @@ export function WizardStepSiblings({
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button
-            onClick={handleNext}
-            disabled={status !== "idle"}
-          >
+          <Button onClick={handleNext} disabled={status !== "idle"}>
             {status === "saving" && (
               <IconLoader2 className="mr-1.5 size-4 animate-spin" />
             )}

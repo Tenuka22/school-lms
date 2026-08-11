@@ -40,10 +40,7 @@ import { queryClient } from "@/router"
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import professions from "professions"
 import type { Guardian, GuardianWithChildren } from "@/lib/api-client/types.gen"
-import {
-  FormBuilder,
-  type FormConfig,
-} from "@/lib/form-builder"
+import { FormBuilder, type FormConfig } from "@/lib/form-builder"
 import {
   RELATIONSHIP_OPTIONS,
   CATEGORY_INFO,
@@ -107,33 +104,79 @@ export function EditGuardianDialog({
     occupation: v.occupation ?? null,
     workplace_name: v.workplace_name ?? null,
     workplace_address: v.workplace_address ?? null,
-    is_govt_employee: includeCategories ? v.is_govt_employee : guardian.is_govt_employee,
-    govt_service_years: includeCategories ? v.govt_service_years : guardian.govt_service_years,
-    is_school_staff: includeCategories ? v.is_school_staff : guardian.is_school_staff,
+    is_govt_employee: includeCategories
+      ? v.is_govt_employee
+      : guardian.is_govt_employee,
+    govt_service_years: includeCategories
+      ? v.govt_service_years
+      : guardian.govt_service_years,
+    is_school_staff: includeCategories
+      ? v.is_school_staff
+      : guardian.is_school_staff,
     staff_type: includeCategories ? v.staff_type : null,
     employee_id: includeCategories ? v.employee_id : null,
     staff_school_id: includeCategories ? v.staff_school_id : null,
     is_past_pupil: includeCategories ? v.is_past_pupil : guardian.is_past_pupil,
     income_level: includeCategories ? v.income_level : guardian.income_level,
     past_pupil_student_id: includeCategories ? v.past_pupil_student_id : null,
-    past_pupil_highest_grade: includeCategories ? v.past_pupil_highest_grade : null,
+    past_pupil_highest_grade: includeCategories
+      ? v.past_pupil_highest_grade
+      : null,
     past_pupil_year_left: includeCategories ? v.past_pupil_year_left : null,
     past_pupil_left_reason: includeCategories ? v.past_pupil_left_reason : null,
     past_pupil_school_id: includeCategories ? v.past_pupil_school_id : null,
-    student_id: includeCategories ? (v.student_id ?? null) : (guardian as any).student_id ?? null,
+    student_id: includeCategories
+      ? (v.student_id ?? null)
+      : ((guardian as any).student_id ?? null),
   })
 
   const formConfig: FormConfig = {
     fields: [
-      { name: "relationship_type", kind: "select", label: "Relationship", required: true, options: RELATIONSHIP_OPTIONS.map((r) => ({ value: r, label: r })), section: "step1",
-        inputProps: { placeholder: "Select relationship" } },
-      { name: "full_name", kind: "text", label: "Full Name", required: true, section: "step1", placeholder: "e.g. John Doe" },
-      { name: "nic_number", kind: "text", label: "NIC Number", required: true, section: "step1", placeholder: "e.g. 952312345V" },
-      { name: "contact_phone", kind: "text", label: "Phone Number", section: "step1", placeholder: "e.g. +94 77 123 4567" },
-      { name: "contact_email", kind: "text", label: "Email Address", section: "step1", placeholder: "e.g. john@example.com",
-        inputProps: { type: "email" } },
       {
-        name: "occupation", kind: "custom", label: "Occupation", section: "step1",
+        name: "relationship_type",
+        kind: "select",
+        label: "Relationship",
+        required: true,
+        options: RELATIONSHIP_OPTIONS.map((r) => ({ value: r, label: r })),
+        section: "step1",
+        inputProps: { placeholder: "Select relationship" },
+      },
+      {
+        name: "full_name",
+        kind: "text",
+        label: "Full Name",
+        required: true,
+        section: "step1",
+        placeholder: "e.g. John Doe",
+      },
+      {
+        name: "nic_number",
+        kind: "text",
+        label: "NIC Number",
+        required: true,
+        section: "step1",
+        placeholder: "e.g. 952312345V",
+      },
+      {
+        name: "contact_phone",
+        kind: "text",
+        label: "Phone Number",
+        section: "step1",
+        placeholder: "e.g. +94 77 123 4567",
+      },
+      {
+        name: "contact_email",
+        kind: "text",
+        label: "Email Address",
+        section: "step1",
+        placeholder: "e.g. john@example.com",
+        inputProps: { type: "email" },
+      },
+      {
+        name: "occupation",
+        kind: "custom",
+        label: "Occupation",
+        section: "step1",
         customRenderer: ({ value, onChange }) => (
           <Combobox
             items={professions}
@@ -158,7 +201,10 @@ export function EditGuardianDialog({
         ),
       },
       {
-        name: "workplace_name", kind: "custom", label: "Workspace", section: "step1",
+        name: "workplace_name",
+        kind: "custom",
+        label: "Workspace",
+        section: "step1",
         customRenderer: ({ setFieldValue }) => (
           <WorkspaceAddressSelect
             onChange={(name, address) => {
@@ -170,8 +216,16 @@ export function EditGuardianDialog({
       },
       { name: "workplace_address", kind: "text", label: "", hidden: true },
       ...CATEGORY_INFO.map((cat) => ({
-        name: cat.key, kind: "custom" as const, label: cat.label, section: "step2",
-        customRenderer: ({ value, onChange, formValues, setFieldValue }: any) => {
+        name: cat.key,
+        kind: "custom" as const,
+        label: cat.label,
+        section: "step2",
+        customRenderer: ({
+          value,
+          onChange,
+          formValues,
+          setFieldValue,
+        }: any) => {
           const checked = !!value
           return (
             <div
@@ -214,7 +268,9 @@ export function EditGuardianDialog({
                   />
                   <Select
                     value={String(formValues.staff_type ?? "")}
-                    onValueChange={(v) => setFieldValue("staff_type", v || null)}
+                    onValueChange={(v) =>
+                      setFieldValue("staff_type", v || null)
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Staff type" />
@@ -228,12 +284,16 @@ export function EditGuardianDialog({
                   <Input
                     placeholder="Employee ID (optional)"
                     value={String(formValues.employee_id ?? "")}
-                    onChange={(e) => setFieldValue("employee_id", e.target.value || null)}
+                    onChange={(e) =>
+                      setFieldValue("employee_id", e.target.value || null)
+                    }
                   />
                   <Input
                     placeholder="Designation (optional)"
                     value={String(formValues.occupation ?? "")}
-                    onChange={(e) => setFieldValue("occupation", e.target.value || null)}
+                    onChange={(e) =>
+                      setFieldValue("occupation", e.target.value || null)
+                    }
                   />
                 </div>
               )}
@@ -259,14 +319,20 @@ export function EditGuardianDialog({
                     onChange={(v) => setFieldValue("past_pupil_school_id", v)}
                   />
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Past pupil record at school</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Past pupil record at school
+                    </label>
                     <StudentCombobox
                       value={formValues.past_pupil_student_id as string | null}
-                      onChange={(v) => setFieldValue("past_pupil_student_id", v)}
+                      onChange={(v) =>
+                        setFieldValue("past_pupil_student_id", v)
+                      }
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Link to student record (optional)</label>
+                    <label className="text-xs font-medium text-muted-foreground">
+                      Link to student record (optional)
+                    </label>
                     <StudentCombobox
                       value={formValues.student_id as string | null}
                       onChange={(v) => setFieldValue("student_id", v)}
@@ -275,7 +341,9 @@ export function EditGuardianDialog({
                   <div className="grid grid-cols-2 gap-2">
                     <Select
                       value={String(formValues.past_pupil_highest_grade ?? "")}
-                      onValueChange={(v) => setFieldValue("past_pupil_highest_grade", v || null)}
+                      onValueChange={(v) =>
+                        setFieldValue("past_pupil_highest_grade", v || null)
+                      }
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Highest grade" />
@@ -285,12 +353,16 @@ export function EditGuardianDialog({
                         <SelectItem value="GCE_OL">GCE O/L</SelectItem>
                         <SelectItem value="Grade_11">Grade 11</SelectItem>
                         <SelectItem value="Grade_10">Grade 10</SelectItem>
-                        <SelectItem value="Below_Grade_10">Below Grade 10</SelectItem>
+                        <SelectItem value="Below_Grade_10">
+                          Below Grade 10
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <Select
                       value={String(formValues.past_pupil_left_reason ?? "")}
-                      onValueChange={(v) => setFieldValue("past_pupil_left_reason", v || null)}
+                      onValueChange={(v) =>
+                        setFieldValue("past_pupil_left_reason", v || null)
+                      }
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Reason" />
@@ -320,7 +392,10 @@ export function EditGuardianDialog({
         },
       })),
       {
-        name: "income_level", kind: "select", label: "Monthly Income (LKR)", section: "step2",
+        name: "income_level",
+        kind: "select",
+        label: "Monthly Income (LKR)",
+        section: "step2",
         options: [
           { value: "below_25000", label: "Below 25,000" },
           { value: "25000_50000", label: "25,000 – 50,000" },
@@ -335,8 +410,18 @@ export function EditGuardianDialog({
     layout: [
       { columns: [{ fields: ["relationship_type"], span: 12 }] },
       { columns: [{ fields: ["full_name"], span: 12 }] },
-      { columns: [{ fields: ["nic_number"], span: 6 }, { fields: ["contact_phone"], span: 6 }] },
-      { columns: [{ fields: ["contact_email"], span: 6 }, { fields: ["occupation"], span: 6 }] },
+      {
+        columns: [
+          { fields: ["nic_number"], span: 6 },
+          { fields: ["contact_phone"], span: 6 },
+        ],
+      },
+      {
+        columns: [
+          { fields: ["contact_email"], span: 6 },
+          { fields: ["occupation"], span: 6 },
+        ],
+      },
       { columns: [{ fields: ["workplace_name"], span: 12 }] },
       { columns: [{ fields: ["is_school_staff"], span: 12 }] },
       { columns: [{ fields: ["is_past_pupil"], span: 12 }] },
@@ -387,7 +472,12 @@ export function EditGuardianDialog({
         onSaved()
       }
     } catch (err) {
-      toastApiError(err, step === 1 ? "Failed to save guardian details" : "Failed to update guardian")
+      toastApiError(
+        err,
+        step === 1
+          ? "Failed to save guardian details"
+          : "Failed to update guardian"
+      )
     }
   }
 
@@ -399,7 +489,7 @@ export function EditGuardianDialog({
         if (!v) setStep(1)
       }}
     >
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {step === 1 ? "Edit Guardian" : "Enrollment Categories"}
@@ -443,7 +533,11 @@ export function EditGuardianDialog({
                   Next <IconChevronRight className="ml-1 size-4" />
                 </Button>
               ) : (
-                <Button type="submit" form="edit-guardian-form" disabled={updateGuardian.isPending}>
+                <Button
+                  type="submit"
+                  form="edit-guardian-form"
+                  disabled={updateGuardian.isPending}
+                >
                   {updateGuardian.isPending ? "Saving..." : "Save Guardian"}
                 </Button>
               )}

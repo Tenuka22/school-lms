@@ -63,7 +63,9 @@ export function WizardStepGuardian({
     }
   }, [])
 
-  const { data: guardians = [] } = useQuery(listGuardiansOptions({ client: apiClient }))
+  const { data: guardians = [] } = useQuery(
+    listGuardiansOptions({ client: apiClient })
+  )
   const guardianMap = useMemo(() => {
     const m = new Map<string, Guardian>()
     for (const g of guardians) m.set(g.id, g)
@@ -71,7 +73,9 @@ export function WizardStepGuardian({
   }, [guardians])
 
   const selectedGuardians = useMemo(() => {
-    return selectedIds.map((id) => guardianMap.get(id)).filter(Boolean) as Guardian[]
+    return selectedIds
+      .map((id) => guardianMap.get(id))
+      .filter(Boolean) as Guardian[]
   }, [selectedIds, guardianMap])
 
   const filteredGuardians = useMemo(() => {
@@ -121,7 +125,10 @@ export function WizardStepGuardian({
         <ScrollArea className="h-[400px]">
           <div className="grid grid-cols-2 gap-3">
             {filteredGuardians.map((g) => (
-              <div key={g.id} className="relative space-y-2 rounded-lg border p-3">
+              <div
+                key={g.id}
+                className="relative space-y-2 rounded-lg border p-3"
+              >
                 <Button
                   variant="ghost"
                   size="icon-sm"
@@ -136,8 +143,12 @@ export function WizardStepGuardian({
                     <IconUser className="size-5 text-muted-foreground" />
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{g.full_name}</p>
-                    <p className="text-xs text-muted-foreground">{g.relationship_type}</p>
+                    <p className="truncate text-sm font-medium">
+                      {g.full_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {g.relationship_type}
+                    </p>
                   </div>
                 </div>
                 <div className="space-y-1 text-xs">
@@ -156,21 +167,37 @@ export function WizardStepGuardian({
                     </p>
                   )}
                   {g.workplace_name && (
-                    <p className="truncate pl-5 text-muted-foreground">{g.workplace_name}</p>
+                    <p className="truncate pl-5 text-muted-foreground">
+                      {g.workplace_name}
+                    </p>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {g.is_school_staff && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "staff") ?? ""}`}>Staff</span>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "staff") ?? ""}`}
+                    >
+                      Staff
+                    </span>
                   )}
                   {g.is_past_pupil && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "past_pupil") ?? ""}`}>Alumni</span>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "past_pupil") ?? ""}`}
+                    >
+                      Alumni
+                    </span>
                   )}
                   {g.is_govt_employee && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "govt") ?? ""}`}>Govt</span>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("guardian_flag", "govt") ?? ""}`}
+                    >
+                      Govt
+                    </span>
                   )}
                   {g.income_level && (
-                    <span className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("income_level", g.income_level) ?? ""}`}>
+                    <span
+                      className={`inline-flex items-center rounded-sm border px-1 py-0 text-[10px] font-medium ${getEnumStyle("income_level", g.income_level) ?? ""}`}
+                    >
                       {getEnumLabel("income_level", g.income_level)}
                     </span>
                   )}
@@ -190,11 +217,24 @@ export function WizardStepGuardian({
         </ScrollArea>
 
         <div className="flex justify-between border-t pt-4">
-          <Button variant="outline" onClick={onBack}>Back</Button>
-          <Button onClick={handleNext} disabled={status !== "idle" || selectedIds.length === 0}>
-            {status === "saving" && <IconLoader2 className="mr-1.5 size-4 animate-spin" />}
-            {status === "done" && <IconCheck className="mr-1.5 size-4 text-green-600" />}
-            {status === "idle" ? "Next" : status === "saving" ? "Saving\u2026" : "Saved"}
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button
+            onClick={handleNext}
+            disabled={status !== "idle" || selectedIds.length === 0}
+          >
+            {status === "saving" && (
+              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
+            )}
+            {status === "done" && (
+              <IconCheck className="mr-1.5 size-4 text-green-600" />
+            )}
+            {status === "idle"
+              ? "Next"
+              : status === "saving"
+                ? "Saving\u2026"
+                : "Saved"}
           </Button>
         </div>
       </CardContent>

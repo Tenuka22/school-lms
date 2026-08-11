@@ -77,7 +77,9 @@ export function InterviewStepDocuments({
   onBack,
   onNext,
 }: Props) {
-  const [verificationState, setVerificationState] = useState<Record<string, boolean>>({})
+  const [verificationState, setVerificationState] = useState<
+    Record<string, boolean>
+  >({})
   const [previewDoc, setPreviewDoc] = useState<DocumentFormData | null>(null)
   const [showSkipConfirm, setShowSkipConfirm] = useState(false)
   const [dragOverKey, setDragOverKey] = useState<string | null>(null)
@@ -199,9 +201,10 @@ export function InterviewStepDocuments({
         <div>
           <h2 className="text-xl font-semibold">Document Verification</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Per circular section 6.2, the panel must verify all original documents against the
-            application before scoring. The applicant must bring original birth certificate and
-            all original documents on the interview day.
+            Per circular section 6.2, the panel must verify all original
+            documents against the application before scoring. The applicant must
+            bring original birth certificate and all original documents on the
+            interview day.
           </p>
         </div>
 
@@ -213,9 +216,10 @@ export function InterviewStepDocuments({
               Document Verification Checklist
             </p>
             <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
-              Verify each document against the original. Check for authenticity, expiry dates,
-              and that the information matches the application. Per circular 7.1.3, if any
-              document is found to be forged, the applicant is disqualified from ALL categories.
+              Verify each document against the original. Check for authenticity,
+              expiry dates, and that the information matches the application.
+              Per circular 7.1.3, if any document is found to be forged, the
+              applicant is disqualified from ALL categories.
             </p>
           </div>
         </div>
@@ -236,7 +240,8 @@ export function InterviewStepDocuments({
                 const verified = verificationState[docType] === true
                 const isUploading = uploadingKey === docType
                 const isDragOver = dragOverKey === docType
-                const label = DOC_TYPES.find((d) => d.key === docType)?.label ?? docType
+                const label =
+                  DOC_TYPES.find((d) => d.key === docType)?.label ?? docType
                 const isImage = doc?.file_type?.startsWith("image/")
 
                 return (
@@ -308,11 +313,15 @@ export function InterviewStepDocuments({
                           </div>
                         ) : (
                           <div
-                            onClick={() => !isUploading && triggerUpload(docType)}
+                            onClick={() =>
+                              !isUploading && triggerUpload(docType)
+                            }
                             className="mt-2 flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-dashed p-4 hover:bg-muted/30"
                           >
                             {isUploading ? (
-                              <p className="text-xs text-muted-foreground">Uploading...</p>
+                              <p className="text-xs text-muted-foreground">
+                                Uploading...
+                              </p>
                             ) : (
                               <>
                                 <IconCloudUpload className="size-5 text-muted-foreground" />
@@ -336,7 +345,8 @@ export function InterviewStepDocuments({
         </Card>
 
         {/* Other Uploaded Documents */}
-        {documents.filter((d) => !REQUIRED_TYPES.includes(d.doc_type)).length > 0 && (
+        {documents.filter((d) => !REQUIRED_TYPES.includes(d.doc_type)).length >
+          0 && (
           <Card>
             <CardHeader>
               <CardTitle>Other Uploaded Documents</CardTitle>
@@ -367,7 +377,9 @@ export function InterviewStepDocuments({
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">{label}</p>
+                          <p className="truncate text-sm font-medium">
+                            {label}
+                          </p>
                           <p className="truncate text-xs text-muted-foreground">
                             {doc.file_name}
                           </p>
@@ -396,8 +408,9 @@ export function InterviewStepDocuments({
               Forged Document Penalty
             </p>
             <p className="mt-0.5 text-xs text-red-700 dark:text-red-300">
-              Per circular 7.1.3: If any document is found to be forged or falsified,
-              the applicant will be disqualified from ALL categories at this school.
+              Per circular 7.1.3: If any document is found to be forged or
+              falsified, the applicant will be disqualified from ALL categories
+              at this school.
             </p>
           </div>
         </div>
@@ -466,21 +479,24 @@ export function InterviewStepDocuments({
           <AlertDialogHeader>
             <AlertDialogTitle>Proceed Without All Documents?</AlertDialogTitle>
             <AlertDialogDescription>
-              Some required documents have not been uploaded or verified. Per circular
-              section 6.2, all original documents must be verified before scoring. If any
-              document is missing or unverified, the panel may not be able to fairly assess
-              the applicant's eligibility for certain categories.
+              Some required documents have not been uploaded or verified. Per
+              circular section 6.2, all original documents must be verified
+              before scoring. If any document is missing or unverified, the
+              panel may not be able to fairly assess the applicant's eligibility
+              for certain categories.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Go Back</AlertDialogCancel>
-            <AlertDialogAction onClick={onNext} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={onNext}
+              className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
+            >
               Proceed Anyway
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
     </>
   )
 }

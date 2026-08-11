@@ -1,13 +1,21 @@
 "use client"
 
 import { EntityDialog } from "@/lib/form-builder"
-import { makeChildFormConfig, childFormDefaults } from "@/components/forms/child-form"
+import {
+  makeChildFormConfig,
+  childFormDefaults,
+} from "@/components/forms/child-form"
 import type { ChildFormValues } from "@/components/forms/child-form"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import { updateChild } from "@/lib/api-client/sdk.gen"
-import type { Gender, MediumOfInstruction, Nationality, Religion } from "@/lib/api-client/types.gen"
+import type {
+  Gender,
+  MediumOfInstruction,
+  Nationality,
+  Religion,
+} from "@/lib/api-client/types.gen"
 import type { Child } from "@/lib/api-client/types.gen"
 
 function childToFormValues(child: Child): ChildFormValues {
@@ -21,7 +29,8 @@ function childToFormValues(child: Child): ChildFormValues {
     birth_certificate_number: child.birth_certificate_number ?? "",
     nic: child.nic ?? "",
     passport_number: child.passport_number ?? "",
-    medium_of_instruction: child.medium_of_instruction as ChildFormValues["medium_of_instruction"],
+    medium_of_instruction:
+      child.medium_of_instruction as ChildFormValues["medium_of_instruction"],
   }
 }
 
@@ -59,7 +68,8 @@ export function EditChildDialog({
             birth_certificate_number: values.birth_certificate_number,
             nic: values.nic || null,
             passport_number: values.passport_number || null,
-            medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,
+            medium_of_instruction:
+              values.medium_of_instruction as MediumOfInstruction,
           },
           client: apiClient,
         })

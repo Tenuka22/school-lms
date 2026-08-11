@@ -4,7 +4,10 @@ import { useStore } from "@tanstack/react-form"
 import { Input } from "@/components/ui/input"
 import { FieldContent } from "@/components/ui/field"
 import { useBuildForm } from "@/lib/form-builder"
-import { useChildUniqueness, useRegisterUniquenessField } from "@/hooks/use-child-uniqueness"
+import {
+  useChildUniqueness,
+  useRegisterUniquenessField,
+} from "@/hooks/use-child-uniqueness"
 import { UniquenessAlert } from "@/components/enrollment/g1/duplicate-child-alert"
 import type { ChildUniquenessCheckType } from "@/hooks/use-child-uniqueness"
 
@@ -24,7 +27,10 @@ export function FieldWithAlert({
   inputProps,
 }: FieldWithAlertProps) {
   const form = useBuildForm()
-  const formValues = useStore(form.store, (state: any) => state.values) as Record<string, unknown>
+  const formValues = useStore(
+    form.store,
+    (state: any) => state.values
+  ) as Record<string, unknown>
   const value = (formValues[fieldName] as string) ?? ""
 
   const uniqueness = useChildUniqueness(value, checkType, excludeChildId)

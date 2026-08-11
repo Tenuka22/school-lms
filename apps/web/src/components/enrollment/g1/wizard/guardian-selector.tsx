@@ -46,10 +46,17 @@ interface Props {
   enrollmentId?: string
 }
 
-export function GuardianSelector({ selectedIds, onSelect, onDeselect, enrollmentId }: Props) {
+export function GuardianSelector({
+  selectedIds,
+  onSelect,
+  onDeselect,
+  enrollmentId,
+}: Props) {
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(0)
-  const [editTarget, setEditTarget] = useState<GuardianWithChildren | null>(null)
+  const [editTarget, setEditTarget] = useState<GuardianWithChildren | null>(
+    null
+  )
 
   const { data: guardians } = useQuery(
     listGuardiansOptions({ client: apiClient })

@@ -110,7 +110,11 @@ function renderSelect(args: RenderFieldArgs) {
       disabled={args.disabled}
       required={args.required}
     >
-      <SelectTrigger id={args.name} className="w-full" aria-invalid={args.isInvalid}>
+      <SelectTrigger
+        id={args.name}
+        className="w-full"
+        aria-invalid={args.isInvalid}
+      >
         <SelectValue placeholder={args.placeholder} />
       </SelectTrigger>
       <SelectContent>
@@ -186,7 +190,7 @@ function renderDisplay(args: RenderFieldArgs) {
 }
 
 function resolveOptions(
-  options?: SelectOption[] | (() => SelectOption[] | Promise<SelectOption[]>),
+  options?: SelectOption[] | (() => SelectOption[] | Promise<SelectOption[]>)
 ): SelectOption[] {
   if (!options) return []
   if (Array.isArray(options)) return options
@@ -212,8 +216,20 @@ export function registerFieldRenderer(kind: string, renderer: FieldRenderer) {
 export function getFieldRenderer(kind: FieldKind): FieldRenderer {
   const renderer = registry[kind]
   if (!renderer) {
-    if (kind !== "text" && kind !== "number" && kind !== "textarea" && kind !== "select" && kind !== "checkbox" && kind !== "date" && kind !== "slider" && kind !== "display" && kind !== "custom") {
-      console.warn(`No renderer registered for field kind "${kind}". Register one via registerFieldRenderer(). Rendering as display.`)
+    if (
+      kind !== "text" &&
+      kind !== "number" &&
+      kind !== "textarea" &&
+      kind !== "select" &&
+      kind !== "checkbox" &&
+      kind !== "date" &&
+      kind !== "slider" &&
+      kind !== "display" &&
+      kind !== "custom"
+    ) {
+      console.warn(
+        `No renderer registered for field kind "${kind}". Register one via registerFieldRenderer(). Rendering as display.`
+      )
       return renderDisplay
     }
     return renderText
@@ -230,7 +246,7 @@ export function FieldControl(args: RenderFieldArgs): React.ReactNode {
   const labelNode = (
     <>
       {args.label}
-      {args.required && <span className="text-destructive ml-0.5">*</span>}
+      {args.required && <span className="ml-0.5 text-destructive">*</span>}
     </>
   )
 
@@ -244,7 +260,7 @@ export function FieldControl(args: RenderFieldArgs): React.ReactNode {
               <label
                 data-slot="field-label"
                 htmlFor={args.name}
-                className="flex w-fit gap-2 text-sm leading-none font-medium select-none leading-snug group-data-[disabled=true]/field:opacity-50"
+                className="flex w-fit gap-2 text-sm leading-none leading-snug font-medium select-none group-data-[disabled=true]/field:opacity-50"
               >
                 {labelNode}
               </label>
@@ -268,9 +284,7 @@ export function FieldControl(args: RenderFieldArgs): React.ReactNode {
             {renderField(args)}
             {args.isInvalid && (
               <FieldError
-                errors={
-                  args.errors as Array<{ message?: string } | undefined>
-                }
+                errors={args.errors as Array<{ message?: string } | undefined>}
               />
             )}
           </FieldContent>

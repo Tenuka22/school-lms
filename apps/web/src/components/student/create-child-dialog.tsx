@@ -1,12 +1,20 @@
 "use client"
 
 import { EntityDialog } from "@/lib/form-builder"
-import { makeChildFormConfig, childFormDefaults } from "@/components/forms/child-form"
+import {
+  makeChildFormConfig,
+  childFormDefaults,
+} from "@/components/forms/child-form"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
 import { createChild } from "@/lib/api-client/sdk.gen"
-import type { Gender, MediumOfInstruction, Nationality, Religion } from "@/lib/api-client/types.gen"
+import type {
+  Gender,
+  MediumOfInstruction,
+  Nationality,
+  Religion,
+} from "@/lib/api-client/types.gen"
 import { FormUniquenessProvider } from "@/hooks/use-child-uniqueness"
 
 export function CreateChildDialog({
@@ -41,7 +49,8 @@ export function CreateChildDialog({
               birth_certificate_number: values.birth_certificate_number,
               nic: values.nic || null,
               passport_number: values.passport_number || null,
-              medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,
+              medium_of_instruction:
+                values.medium_of_instruction as MediumOfInstruction,
             },
             client: apiClient,
           })

@@ -96,14 +96,8 @@ const ENUM_OPTIONS = {
   ],
 }
 
-const FILTER_KEYS = [
-  "category",
-  "enrollment_status",
-] as const
-const ENUM_KEYS = new Set([
-  "category",
-  "enrollment_status",
-])
+const FILTER_KEYS = ["category", "enrollment_status"] as const
+const ENUM_KEYS = new Set(["category", "enrollment_status"])
 
 interface G1DatagridProps {
   search: G1SearchParams
@@ -141,7 +135,8 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [editTarget, setEditTarget] = React.useState<ApplicationWithChild | null>(null)
+  const [editTarget, setEditTarget] =
+    React.useState<ApplicationWithChild | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<string | null>(null)
   const [deleting, setDeleting] = React.useState(false)
 
@@ -341,8 +336,8 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
                   <AlertDialogTitle>Delete Enrollment</AlertDialogTitle>
                   <AlertDialogDescription>
                     Are you sure you want to delete{" "}
-                    {row.original.reference_no || "this enrollment"}? This action
-                    cannot be undone.
+                    {row.original.reference_no || "this enrollment"}? This
+                    action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

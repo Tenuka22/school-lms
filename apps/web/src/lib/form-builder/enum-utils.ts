@@ -5,9 +5,7 @@ type EnumSchema = {
   enum: readonly string[]
 }
 
-export function optionsFromSchema(
-  schema: EnumSchema,
-): SelectOption[] {
+export function optionsFromSchema(schema: EnumSchema): SelectOption[] {
   return schema.enum.map((value) => ({
     value,
     label: formatLabel(value),

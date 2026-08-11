@@ -4,7 +4,11 @@ import { useState, useCallback } from "react"
 import { format, parse, isValid } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { IconCalendar } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 
@@ -35,7 +39,7 @@ export function DatePicker({
       }
       setOpen(false)
     },
-    [onChange],
+    [onChange]
   )
 
   return (
@@ -49,7 +53,7 @@ export function DatePicker({
             className={cn(
               "w-full justify-start font-normal",
               !display && "text-muted-foreground",
-              className,
+              className
             )}
           >
             <IconCalendar className="mr-2 size-4 shrink-0" />

@@ -25,7 +25,10 @@ import {
 } from "@tabler/icons-react"
 import { useDebounce } from "@/hooks/use-debounce"
 import { EntityDialog } from "@/lib/form-builder"
-import { addressFormConfig, addressFormDefaults } from "@/components/forms/address-form"
+import {
+  addressFormConfig,
+  addressFormDefaults,
+} from "@/components/forms/address-form"
 import type { AddressFormValues } from "@/components/forms/address-form"
 
 const PAGE_SIZE = 8
@@ -59,7 +62,11 @@ function CreateAddressDialog({ onCreated }: { onCreated: () => void }) {
         defaultValues={addressFormDefaults}
         onSubmit={async (values) => {
           try {
-            await createAddress({ body: values, client: apiClient, throwOnError: true })
+            await createAddress({
+              body: values,
+              client: apiClient,
+              throwOnError: true,
+            })
             queryClient.invalidateQueries({
               queryKey: listAddressesQueryKey({ client: apiClient }),
             })
@@ -169,7 +176,8 @@ export function AddressSelector({
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{addr.address_line_1}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {addr.address_line_2 || `${addr.district}, ${addr.province}`}
+                    {addr.address_line_2 ||
+                      `${addr.district}, ${addr.province}`}
                   </p>
                   <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                     <IconMapPin className="size-3 shrink-0" />

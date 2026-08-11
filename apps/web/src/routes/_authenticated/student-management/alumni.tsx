@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AlumniDataGrid } from "@/components/student/alumni-data-grid"
 
-export const Route = createFileRoute("/_authenticated/student-management/alumni")({
+export const Route = createFileRoute(
+  "/_authenticated/student-management/alumni"
+)({
   component: AlumniPage,
 })
 

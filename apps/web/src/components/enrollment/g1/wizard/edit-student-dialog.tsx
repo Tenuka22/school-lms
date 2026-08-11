@@ -13,8 +13,15 @@ import {
   ReligionSchema,
   MediumOfInstructionSchema,
 } from "@/lib/api-client/schemas.gen"
-import { EntityDialog, optionsFromSchema, type FormConfig } from "@/lib/form-builder"
-import type { StudentResponse as Student, UpdateStudentRequest } from "@/lib/api-client/types.gen"
+import {
+  EntityDialog,
+  optionsFromSchema,
+  type FormConfig,
+} from "@/lib/form-builder"
+import type {
+  StudentResponse as Student,
+  UpdateStudentRequest,
+} from "@/lib/api-client/types.gen"
 
 type EditStudentFormData = UpdateStudentRequest
 
@@ -22,10 +29,32 @@ function buildEditConfig(): FormConfig<EditStudentFormData> {
   return {
     fields: [
       { name: "full_name", kind: "text", label: "Full Name", required: true },
-      { name: "name_with_initials", kind: "text", label: "Name with Initials", required: true },
-      { name: "date_of_birth", kind: "date", label: "Date of Birth", required: true },
-      { name: "gender", kind: "select", label: "Gender", required: true, options: optionsFromSchema(GenderSchema) },
-      { name: "nationality", kind: "select", label: "Nationality", required: true, options: optionsFromSchema(NationalitySchema) },
+      {
+        name: "name_with_initials",
+        kind: "text",
+        label: "Name with Initials",
+        required: true,
+      },
+      {
+        name: "date_of_birth",
+        kind: "date",
+        label: "Date of Birth",
+        required: true,
+      },
+      {
+        name: "gender",
+        kind: "select",
+        label: "Gender",
+        required: true,
+        options: optionsFromSchema(GenderSchema),
+      },
+      {
+        name: "nationality",
+        kind: "select",
+        label: "Nationality",
+        required: true,
+        options: optionsFromSchema(NationalitySchema),
+      },
       {
         name: "religion",
         kind: "select",
@@ -33,7 +62,13 @@ function buildEditConfig(): FormConfig<EditStudentFormData> {
         required: true,
         options: optionsFromSchema(ReligionSchema),
       },
-      { name: "medium_of_instruction", kind: "select", label: "Medium", required: true, options: optionsFromSchema(MediumOfInstructionSchema) },
+      {
+        name: "medium_of_instruction",
+        kind: "select",
+        label: "Medium",
+        required: true,
+        options: optionsFromSchema(MediumOfInstructionSchema),
+      },
       {
         name: "current_grade",
         kind: "number",
@@ -190,7 +225,8 @@ export function EditStudentDialog({
         const cleaned = {
           ...data,
           religion: (data.religion as string) || null,
-          birth_certificate_number: (data.birth_certificate_number as string) || null,
+          birth_certificate_number:
+            (data.birth_certificate_number as string) || null,
           nic: (data.nic as string) || null,
           passport_number: (data.passport_number as string) || null,
           phone: (data.phone as string) || null,
@@ -209,4 +245,3 @@ export function EditStudentDialog({
     />
   )
 }
-

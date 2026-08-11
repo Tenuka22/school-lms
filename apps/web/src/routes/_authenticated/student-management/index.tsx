@@ -17,7 +17,9 @@ function StudentManagement() {
               <IconUsers className="size-8" />
               <div>
                 <CardTitle>Students</CardTitle>
-                <p className="text-sm text-muted-foreground">Enrolled students</p>
+                <p className="text-sm text-muted-foreground">
+                  Enrolled students
+                </p>
               </div>
             </CardHeader>
           </Card>
@@ -28,7 +30,9 @@ function StudentManagement() {
               <IconSchool className="size-8" />
               <div>
                 <CardTitle>Children</CardTitle>
-                <p className="text-sm text-muted-foreground">Registered children</p>
+                <p className="text-sm text-muted-foreground">
+                  Registered children
+                </p>
               </div>
             </CardHeader>
           </Card>
@@ -39,7 +43,9 @@ function StudentManagement() {
               <IconAward className="size-8" />
               <div>
                 <CardTitle>Alumni</CardTitle>
-                <p className="text-sm text-muted-foreground">Graduated &amp; past students</p>
+                <p className="text-sm text-muted-foreground">
+                  Graduated &amp; past students
+                </p>
               </div>
             </CardHeader>
           </Card>

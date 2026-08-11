@@ -32,10 +32,18 @@ import {
 import { queryClient } from "@/router"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
 import { EntityDialog } from "@/lib/form-builder"
-import { makeChildFormConfig, childFormDefaults } from "@/components/forms/child-form"
+import {
+  makeChildFormConfig,
+  childFormDefaults,
+} from "@/components/forms/child-form"
 import type { ChildFormValues } from "@/components/forms/child-form"
 import { FormUniquenessProvider } from "@/hooks/use-child-uniqueness"
-import type { Gender, MediumOfInstruction, Nationality, Religion } from "@/lib/api-client/types.gen"
+import type {
+  Gender,
+  MediumOfInstruction,
+  Nationality,
+  Religion,
+} from "@/lib/api-client/types.gen"
 import { createChild, updateChild } from "@/lib/api-client/sdk.gen"
 import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpers"
 import { BatchOverviewChart } from "@/components/enrollment/g1/pipeline/batch-overview-chart"
@@ -111,9 +119,7 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-col
 
 import { Route } from "@/routes/_authenticated/student-management/enrollment/g1"
 import type { DashboardSearch } from "@/routes/_authenticated/student-management/enrollment/g1"
-import type {
-  ApplicationWithChild,
-} from "@/lib/api-client/types.gen"
+import type { ApplicationWithChild } from "@/lib/api-client/types.gen"
 
 const LANE_CONFIG = [
   {
@@ -156,14 +162,8 @@ const LANE_CONFIG = [
 
 const CURRENT_YEAR = new Date().getFullYear()
 
-const FILTER_KEYS = [
-  "category",
-  "enrollment_status",
-] as const
-const ENUM_KEYS = new Set([
-  "category",
-  "enrollment_status",
-])
+const FILTER_KEYS = ["category", "enrollment_status"] as const
+const ENUM_KEYS = new Set(["category", "enrollment_status"])
 
 function EnumBadge({
   column,
@@ -239,7 +239,7 @@ function ChildCombobox({
           </Button>
         }
       />
-      <PopoverContent className="min-w-[--anchor-width] w-96 p-0">
+      <PopoverContent className="w-96 min-w-[--anchor-width] p-0">
         <Command shouldFilter={false}>
           <CommandInput
             placeholder="Search by child name..."
@@ -281,8 +281,11 @@ function ChildCombobox({
               ))}
               <CommandItem
                 value="__create__"
-                className="border-t border-border mt-1 pt-1 text-primary font-medium"
-                onSelect={() => { setOpen(false); onCreateNew() }}
+                className="mt-1 border-t border-border pt-1 font-medium text-primary"
+                onSelect={() => {
+                  setOpen(false)
+                  onCreateNew()
+                }}
               >
                 <IconUserPlus className="size-4" />
                 <span>Create new child</span>
@@ -294,8 +297,6 @@ function ChildCombobox({
     </Popover>
   )
 }
-
-
 
 export function PipeDashboard() {
   const navigate = useNavigate({ from: Route.fullPath })
@@ -345,8 +346,6 @@ export function PipeDashboard() {
     ).length
     return acc
   }, {})
-
-
 
   const handleDelete = useCallback(async (rowId: string) => {
     setDeleting(true)
@@ -471,7 +470,10 @@ export function PipeDashboard() {
           return (
             <Avatar size="sm">
               {app.child_photo_url ? (
-                <AvatarImage src={app.child_photo_url} alt={app.child_full_name ?? ""} />
+                <AvatarImage
+                  src={app.child_photo_url}
+                  alt={app.child_full_name ?? ""}
+                />
               ) : null}
               <AvatarFallback>
                 {app.child_full_name ? getInitials(app.child_full_name) : "?"}
@@ -647,7 +649,10 @@ export function PipeDashboard() {
           ],
         },
         cell: ({ getValue }) => (
-          <EnumBadge column="medium_of_instruction" value={getValue() as string} />
+          <EnumBadge
+            column="medium_of_instruction"
+            value={getValue() as string}
+          />
         ),
       },
       {
@@ -758,8 +763,8 @@ export function PipeDashboard() {
                   <AlertDialogTitle>Delete Enrollment</AlertDialogTitle>
                   <AlertDialogDescription>
                     Are you sure you want to delete{" "}
-                    {row.original.reference_no || "this enrollment"}? This action
-                    cannot be undone.
+                    {row.original.reference_no || "this enrollment"}? This
+                    action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -882,7 +887,9 @@ export function PipeDashboard() {
                   className="min-w-0 rounded-xl border bg-card p-4"
                 >
                   <div className="mb-1 flex items-center justify-between gap-2">
-                    <Badge variant={lane.badgeVariant} className="truncate">{lane.label}</Badge>
+                    <Badge variant={lane.badgeVariant} className="truncate">
+                      {lane.label}
+                    </Badge>
                     <span className="shrink-0 text-2xl font-bold tabular-nums">
                       {count}
                     </span>
@@ -923,10 +930,17 @@ export function PipeDashboard() {
         defaultYear={CURRENT_YEAR}
       />
 
-      <Dialog open={newEnrollmentOpen} onOpenChange={(open) => {
-        if (!open) { setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }
-      }}>
-        <DialogContent className="sm:max-w-lg w-full">
+      <Dialog
+        open={newEnrollmentOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setNewEnrollmentOpen(false)
+            setChildSearch("")
+            setSelectedChild(null)
+          }
+        }}
+      >
+        <DialogContent className="w-full sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>New Enrollment</DialogTitle>
             <DialogDescription>
@@ -938,10 +952,14 @@ export function PipeDashboard() {
               <Label>Batch</Label>
               {batchId ? (
                 <div className="flex items-center rounded-md border bg-muted px-3 py-2 text-sm">
-                  {batches?.find((b) => b.id === batchId)?.batch_name || "No batch selected"}
+                  {batches?.find((b) => b.id === batchId)?.batch_name ||
+                    "No batch selected"}
                 </div>
               ) : (
-                <Select value={batchId} onValueChange={(v) => setBatchId(v ?? "")}>
+                <Select
+                  value={batchId}
+                  onValueChange={(v) => setBatchId(v ?? "")}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a batch" />
                   </SelectTrigger>
@@ -959,16 +977,20 @@ export function PipeDashboard() {
             <div className="space-y-2">
               <Label>Child</Label>
               <ChildCombobox
-                  value={selectedChild}
-                  search={childSearch}
-                  onSearchChange={setChildSearch}
-                  onChange={setSelectedChild}
-                  onCreateNew={() => setCreateChildDialogOpen(true)}
-                  onEdit={(child) => { setEditingChild(child); setCreateChildDialogOpen(true) }}
-                />
+                value={selectedChild}
+                search={childSearch}
+                onSearchChange={setChildSearch}
+                onChange={setSelectedChild}
+                onCreateNew={() => setCreateChildDialogOpen(true)}
+                onEdit={(child) => {
+                  setEditingChild(child)
+                  setCreateChildDialogOpen(true)
+                }}
+              />
               {selectedChild && (
                 <p className="text-xs text-muted-foreground">
-                  {selectedChild.full_name} &middot; {selectedChild.date_of_birth}
+                  {selectedChild.full_name} &middot;{" "}
+                  {selectedChild.date_of_birth}
                 </p>
               )}
             </div>
@@ -1016,7 +1038,9 @@ export function PipeDashboard() {
                     toastApiError(error, "Failed to create enrollment")
                     return
                   }
-                  toast.success(`${selectedChild?.full_name ?? "Child"} enrolled. Fill in remaining details.`)
+                  toast.success(
+                    `${selectedChild?.full_name ?? "Child"} enrolled. Fill in remaining details.`
+                  )
                   setNewEnrollmentOpen(false)
                   setChildSearch("")
                   setSelectedChild(null)
@@ -1041,7 +1065,15 @@ export function PipeDashboard() {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" type="button" onClick={() => { setNewEnrollmentOpen(false); setChildSearch(""); setSelectedChild(null) }}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                setNewEnrollmentOpen(false)
+                setChildSearch("")
+                setSelectedChild(null)
+              }}
+            >
               Cancel
             </Button>
             <Button
@@ -1058,22 +1090,37 @@ export function PipeDashboard() {
       <FormUniquenessProvider>
         <EntityDialog
           open={createChildDialogOpen}
-          onOpenChange={(open) => { if (!open) setEditingChild(null); setCreateChildDialogOpen(open) }}
+          onOpenChange={(open) => {
+            if (!open) setEditingChild(null)
+            setCreateChildDialogOpen(open)
+          }}
           title={editingChild ? "Edit Child" : "Create New Child"}
-          description={editingChild ? "Update the child's details." : "Enter the required details to create a new child record."}
+          description={
+            editingChild
+              ? "Update the child's details."
+              : "Enter the required details to create a new child record."
+          }
           config={makeChildFormConfig(editingChild?.id)}
-          defaultValues={editingChild ? {
-            full_name: editingChild.full_name,
-            name_with_initials: editingChild.name_with_initials,
-            date_of_birth: editingChild.date_of_birth,
-            gender: editingChild.gender as ChildFormValues["gender"],
-            nationality: editingChild.nationality as ChildFormValues["nationality"],
-            religion: (editingChild.religion ?? "") as ChildFormValues["religion"],
-            birth_certificate_number: editingChild.birth_certificate_number ?? "",
-            nic: editingChild.nic ?? "",
-            passport_number: editingChild.passport_number ?? "",
-            medium_of_instruction: editingChild.medium_of_instruction as ChildFormValues["medium_of_instruction"],
-          } : childFormDefaults}
+          defaultValues={
+            editingChild
+              ? {
+                  full_name: editingChild.full_name,
+                  name_with_initials: editingChild.name_with_initials,
+                  date_of_birth: editingChild.date_of_birth,
+                  gender: editingChild.gender as ChildFormValues["gender"],
+                  nationality:
+                    editingChild.nationality as ChildFormValues["nationality"],
+                  religion: (editingChild.religion ??
+                    "") as ChildFormValues["religion"],
+                  birth_certificate_number:
+                    editingChild.birth_certificate_number ?? "",
+                  nic: editingChild.nic ?? "",
+                  passport_number: editingChild.passport_number ?? "",
+                  medium_of_instruction:
+                    editingChild.medium_of_instruction as ChildFormValues["medium_of_instruction"],
+                }
+              : childFormDefaults
+          }
           onSubmit={async (values) => {
             if (editingChild) {
               const { data, error } = await updateChild({
@@ -1088,7 +1135,8 @@ export function PipeDashboard() {
                   birth_certificate_number: values.birth_certificate_number,
                   nic: values.nic || null,
                   passport_number: values.passport_number || null,
-                  medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,
+                  medium_of_instruction:
+                    values.medium_of_instruction as MediumOfInstruction,
                 },
                 client: apiClient,
               })
@@ -1109,7 +1157,8 @@ export function PipeDashboard() {
                   birth_certificate_number: values.birth_certificate_number,
                   nic: values.nic || null,
                   passport_number: values.passport_number || null,
-                  medium_of_instruction: values.medium_of_instruction as MediumOfInstruction,
+                  medium_of_instruction:
+                    values.medium_of_instruction as MediumOfInstruction,
                 },
                 client: apiClient,
               })
@@ -1126,11 +1175,6 @@ export function PipeDashboard() {
           size="xl"
         />
       </FormUniquenessProvider>
-
     </div>
   )
 }
-
-
-
-

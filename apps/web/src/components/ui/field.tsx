@@ -187,7 +187,9 @@ function FieldError({
         if (typeof err === "string") return { message: err }
         return err
       })
-      .filter((err): err is { message?: string } => err !== undefined && err !== null)
+      .filter(
+        (err): err is { message?: string } => err !== undefined && err !== null
+      )
   }, [errors])
 
   const content = useMemo(() => {
@@ -200,7 +202,9 @@ function FieldError({
     }
 
     const uniqueErrors = [
-      ...new Map(normalizedErrors.map((error) => [error?.message, error])).values(),
+      ...new Map(
+        normalizedErrors.map((error) => [error?.message, error])
+      ).values(),
     ]
 
     if (uniqueErrors.length == 1) {

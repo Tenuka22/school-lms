@@ -4,14 +4,13 @@ import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ChildFormData } from "../wizard/wizard-step-child"
-import type { Address, Guardian, StudentResponse as Student } from "@/lib/api-client/types.gen"
+import type {
+  Address,
+  Guardian,
+  StudentResponse as Student,
+} from "@/lib/api-client/types.gen"
 import type { G1Application } from "@/lib/api-client/types.gen"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { getInitials } from "@/lib/utils"
@@ -35,7 +34,13 @@ const CATEGORY_LABELS: Record<string, string> = {
   LowIncome: "Low Income",
 }
 
-function ReviewBadge({ column, value }: { column: string; value: string | null | undefined }) {
+function ReviewBadge({
+  column,
+  value,
+}: {
+  column: string
+  value: string | null | undefined
+}) {
   if (!value) return null
   const label = getEnumLabel(column, value)
   const style = getEnumStyle(column, value)
@@ -60,7 +65,11 @@ interface Props {
   }>
   allAddresses: Address[]
   siblings: Student[]
-  schools: Array<{ id: string; name_si?: string | null; name_en?: string | null }>
+  schools: Array<{
+    id: string
+    name_si?: string | null
+    name_en?: string | null
+  }>
   documents: Array<{ doc_type: string }>
   onNext: () => void
 }
@@ -75,7 +84,10 @@ export function InterviewStepOverview({
   schools,
   onNext,
 }: Props) {
-  const addressMap = useMemo(() => new Map(allAddresses.map((a) => [a.id, a])), [allAddresses])
+  const addressMap = useMemo(
+    () => new Map(allAddresses.map((a) => [a.id, a])),
+    [allAddresses]
+  )
   const primaryAddress = useMemo(() => {
     const entry = addresses.find((e) => e.is_primary) ?? addresses[0]
     if (!entry) return null
@@ -83,13 +95,16 @@ export function InterviewStepOverview({
   }, [addresses, addressMap])
 
   const preferredSchools = useMemo(() => {
-    const ids = Array.isArray(application.preferred_school_ids) ? (application.preferred_school_ids as string[]) : []
+    const ids = Array.isArray(application.preferred_school_ids)
+      ? (application.preferred_school_ids as string[])
+      : []
     return ids
       .map((id) => schools.find((s) => s.id === id))
       .filter((s): s is NonNullable<typeof s> => !!s)
   }, [application.preferred_school_ids, schools])
 
-  const categoryLabel = CATEGORY_LABELS[application.category ?? ""] ?? "Not categorized"
+  const categoryLabel =
+    CATEGORY_LABELS[application.category ?? ""] ?? "Not categorized"
 
   return (
     <div className="space-y-4">
@@ -111,10 +126,13 @@ export function InterviewStepOverview({
             </span>
           </p>
           <p className="mt-0.5 text-xs text-blue-700 dark:text-blue-300">
-            Principal (Chair), Senior Teacher, Deputy/Asst Principal (Secretary), SDC Representative, Old Students&apos; Association Representative.
+            Principal (Chair), Senior Teacher, Deputy/Asst Principal
+            (Secretary), SDC Representative, Old Students&apos; Association
+            Representative.
             <br />
             <span className="text-[11px] text-blue-600 dark:text-blue-400">
-              විදුහල්පති (සභාපති), ජ්‍යේෂ්ඨ ගුරුවරයා, නියෝජ්‍ය/සහකාර විදුහල්පති (ලේකම්), පාසල් සංවර්ධන සමිති නියෝජිත, ආදි ශිෂ්‍ය සංගම් නියෝජිත
+              විදුහල්පති (සභාපති), ජ්‍යේෂ්ඨ ගුරුවරයා, නියෝජ්‍ය/සහකාර විදුහල්පති
+              (ලේකම්), පාසල් සංවර්ධන සමිති නියෝජිත, ආදි ශිෂ්‍ය සංගම් නියෝජිත
             </span>
           </p>
         </div>
@@ -137,8 +155,12 @@ export function InterviewStepOverview({
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-1">
-                <p className="font-semibold">{child.full_name || "Not provided"}</p>
-                <p className="text-xs text-muted-foreground">{child.name_with_initials}</p>
+                <p className="font-semibold">
+                  {child.full_name || "Not provided"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {child.name_with_initials}
+                </p>
                 <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                   <span>DOB: {child.date_of_birth}</span>
                   <span>{child.gender}</span>
@@ -156,11 +178,16 @@ export function InterviewStepOverview({
             <CardTitle className="text-sm">Category</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant="default" className="text-xs">{categoryLabel}</Badge>
+            <Badge variant="default" className="text-xs">
+              {categoryLabel}
+            </Badge>
             {application.list_category && (
               <div className="mt-2">
                 <span className="text-xs text-muted-foreground">List: </span>
-                <ReviewBadge column="list_category" value={application.list_category} />
+                <ReviewBadge
+                  column="list_category"
+                  value={application.list_category}
+                />
               </div>
             )}
           </CardContent>
@@ -183,12 +210,17 @@ export function InterviewStepOverview({
               {guardians.map((g) => (
                 <div key={g.id} className="flex items-center gap-3">
                   <Avatar className="size-7">
-                    <AvatarFallback className="text-[9px]">{getInitials(g.full_name)}</AvatarFallback>
+                    <AvatarFallback className="text-[9px]">
+                      {getInitials(g.full_name)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-medium">{g.full_name}</span>
-                      <ReviewBadge column="relationship_type" value={g.relationship_type} />
+                      <ReviewBadge
+                        column="relationship_type"
+                        value={g.relationship_type}
+                      />
                     </div>
                     <div className="flex flex-wrap gap-x-2 text-[11px] text-muted-foreground">
                       <span>NIC: {g.nic_number}</span>
@@ -196,9 +228,30 @@ export function InterviewStepOverview({
                       {g.occupation && <span>{g.occupation}</span>}
                     </div>
                     <div className="mt-0.5 flex flex-wrap gap-1">
-                      {g.is_school_staff && <Badge variant="outline" className="h-3 px-1 text-[8px]">Staff</Badge>}
-                      {g.is_past_pupil && <Badge variant="outline" className="h-3 px-1 text-[8px]">Alumni</Badge>}
-                      {g.is_govt_employee && <Badge variant="outline" className="h-3 px-1 text-[8px]">Govt</Badge>}
+                      {g.is_school_staff && (
+                        <Badge
+                          variant="outline"
+                          className="h-3 px-1 text-[8px]"
+                        >
+                          Staff
+                        </Badge>
+                      )}
+                      {g.is_past_pupil && (
+                        <Badge
+                          variant="outline"
+                          className="h-3 px-1 text-[8px]"
+                        >
+                          Alumni
+                        </Badge>
+                      )}
+                      {g.is_govt_employee && (
+                        <Badge
+                          variant="outline"
+                          className="h-3 px-1 text-[8px]"
+                        >
+                          Govt
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -220,12 +273,17 @@ export function InterviewStepOverview({
           <CardContent>
             {primaryAddress ? (
               <div>
-                <p className="text-xs font-medium">{primaryAddress.address_line_1}</p>
+                <p className="text-xs font-medium">
+                  {primaryAddress.address_line_1}
+                </p>
                 {primaryAddress.address_line_2 && (
-                  <p className="text-[11px] text-muted-foreground">{primaryAddress.address_line_2}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {primaryAddress.address_line_2}
+                  </p>
                 )}
                 <p className="text-[11px] text-muted-foreground">
-                  {primaryAddress.city}, {primaryAddress.district}, {primaryAddress.province}
+                  {primaryAddress.city}, {primaryAddress.district},{" "}
+                  {primaryAddress.province}
                 </p>
                 {primaryAddress.distance_to_school_km && (
                   <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -258,7 +316,11 @@ export function InterviewStepOverview({
                       {i + 1}
                     </span>
                     <span className="text-xs">{school.name_si}</span>
-                    {school.name_en && <span className="text-[10px] text-muted-foreground">({school.name_en})</span>}
+                    {school.name_en && (
+                      <span className="text-[10px] text-muted-foreground">
+                        ({school.name_en})
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -276,9 +338,14 @@ export function InterviewStepOverview({
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {siblings.map((s) => (
-                <div key={s.id} className="flex items-center gap-1.5 rounded-md bg-muted/30 px-2 py-1">
+                <div
+                  key={s.id}
+                  className="flex items-center gap-1.5 rounded-md bg-muted/30 px-2 py-1"
+                >
                   <span className="text-xs font-medium">{s.full_name}</span>
-                  <span className="text-[10px] text-muted-foreground">Gr.{s.current_grade ?? "?"}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    Gr.{s.current_grade ?? "?"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -287,9 +354,7 @@ export function InterviewStepOverview({
       )}
 
       <div className="flex justify-end border-t pt-4">
-        <Button onClick={onNext}>
-          Start Scoring
-        </Button>
+        <Button onClick={onNext}>Start Scoring</Button>
       </div>
     </div>
   )

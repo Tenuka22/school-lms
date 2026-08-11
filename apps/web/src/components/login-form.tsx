@@ -18,10 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Field,
-  FieldDescription,
-} from "@/components/ui/field"
+import { Field, FieldDescription } from "@/components/ui/field"
 
 export function LoginForm({
   className,
@@ -65,7 +62,7 @@ export function LoginForm({
             <label
               data-slot="field-label"
               htmlFor="password"
-              className="flex w-fit gap-2 text-sm leading-none font-medium select-none leading-snug group-data-[disabled=true]/field:opacity-50"
+              className="flex w-fit gap-2 text-sm leading-none leading-snug font-medium select-none group-data-[disabled=true]/field:opacity-50"
             >
               {label}
             </label>
@@ -136,8 +133,8 @@ export function LoginForm({
         </CardFooter>
       </Card>
       <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our{" "}
-        <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+        and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>
   )

@@ -3,7 +3,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { useState, useMemo } from "react"
 import { useNavigate } from "@tanstack/react-router"
-import { IconSearch, IconDots, IconLoader2, IconPencil, IconSchool } from "@tabler/icons-react"
+import {
+  IconSearch,
+  IconDots,
+  IconLoader2,
+  IconPencil,
+  IconSchool,
+} from "@tabler/icons-react"
 import { apiClient } from "@/lib/api-client"
 import { listChildrenQueryKey } from "@/lib/api-client/@tanstack/react-query.gen"
 import { listChildren } from "@/lib/api-client/sdk.gen"
@@ -86,7 +92,11 @@ export function ChildrenDataGrid({
   })
 
   const { data: children = [], isLoading } = useQuery({
-    queryKey: [...listChildrenQueryKey({ client: apiClient }), debouncedSearch, hasStudent],
+    queryKey: [
+      ...listChildrenQueryKey({ client: apiClient }),
+      debouncedSearch,
+      hasStudent,
+    ],
     queryFn: async () => {
       const { data } = await listChildren({
         client: apiClient,
@@ -190,7 +200,10 @@ export function ChildrenDataGrid({
           <DataTableColumnHeader column={column} label="Nationality" />
         ),
         cell: ({ row }) => (
-          <EnumBadge column="nationality" value={row.getValue("nationality") as string} />
+          <EnumBadge
+            column="nationality"
+            value={row.getValue("nationality") as string}
+          />
         ),
         meta: {
           label: "Nationality",
@@ -258,9 +271,7 @@ export function ChildrenDataGrid({
           <DataTableColumnHeader column={column} label="NIC" />
         ),
         cell: ({ row }) => (
-          <span className="text-sm">
-            {row.getValue("nic") || "—"}
-          </span>
+          <span className="text-sm">{row.getValue("nic") || "—"}</span>
         ),
         meta: { label: "NIC", variant: "text" },
       },
@@ -333,7 +344,7 @@ export function ChildrenDataGrid({
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <div className="relative max-w-sm flex-1">
-          <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <IconSearch className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
           <Input
             placeholder="Search children..."
             value={search}

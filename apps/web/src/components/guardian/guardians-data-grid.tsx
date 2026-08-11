@@ -26,7 +26,10 @@ import { DataTable } from "@/components/ui/data-table/data-table"
 import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import type { GuardianWithChildren, ChildInfo } from "@/lib/api-client/types.gen"
+import type {
+  GuardianWithChildren,
+  ChildInfo,
+} from "@/lib/api-client/types.gen"
 import type {
   SortingState,
   ColumnFiltersState,
@@ -94,10 +97,7 @@ function ChildrenTree({ children }: { children: ChildInfo[] }) {
       {expanded && (
         <div className="ml-5 flex flex-col gap-1 border-l-2 border-border pl-2">
           {children.map((child) => (
-            <div
-              key={child.id}
-              className="flex items-center gap-2 text-sm"
-            >
+            <div key={child.id} className="flex items-center gap-2 text-sm">
               <Avatar className="size-5">
                 <AvatarFallback className="text-[10px]">
                   {getInitials(child.full_name)}
@@ -109,10 +109,7 @@ function ChildrenTree({ children }: { children: ChildInfo[] }) {
                   Grade {child.current_grade}
                 </span>
               )}
-              <EnumBadge
-                column="student_status"
-                value={child.status}
-              />
+              <EnumBadge column="student_status" value={child.status} />
             </div>
           ))}
         </div>
@@ -214,9 +211,7 @@ export function GuardiansDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Occupation" />
         ),
         cell: ({ row }) => (
-          <span className="text-sm">
-            {row.getValue("occupation") || "—"}
-          </span>
+          <span className="text-sm">{row.getValue("occupation") || "—"}</span>
         ),
         meta: { label: "Occupation", variant: "text" },
       },
@@ -326,7 +321,7 @@ export function GuardiansDataGrid({}: { refreshKey?: number }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <div className="relative max-w-sm flex-1">
-          <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <IconSearch className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
           <Input
             placeholder="Search guardians..."
             value={search}

@@ -5,7 +5,11 @@ import { SYSTEM_FIELDS } from "./enum-utils"
 type AnySchema = v.BaseSchema<any, any, any> & Record<string, any>
 
 function unwrapNullish(schema: AnySchema): AnySchema {
-  if (schema.type === "nullish" || schema.type === "nullable" || schema.type === "optional") {
+  if (
+    schema.type === "nullish" ||
+    schema.type === "nullable" ||
+    schema.type === "optional"
+  ) {
     return unwrapNullish(schema.wrapped)
   }
   return schema
@@ -25,7 +29,10 @@ function resolveBaseType(schema: AnySchema): AnySchema {
   return unwrapPipe(unwrapNullish(schema))
 }
 
-function inferFieldKind(schema: AnySchema): { kind: string; options?: SelectOption[] } {
+function inferFieldKind(schema: AnySchema): {
+  kind: string
+  options?: SelectOption[]
+} {
   const base = resolveBaseType(schema)
 
   if (base.type === "picklist") {
@@ -34,14 +41,18 @@ function inferFieldKind(schema: AnySchema): { kind: string; options?: SelectOpti
       kind: "select",
       options: values.map((v) => ({
         value: v,
-        label: v.replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/\b\w/g, (c) => c.toUpperCase()),
+        label: v
+          .replace(/_/g, " ")
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .replace(/\b\w/g, (c) => c.toUpperCase()),
       })),
     }
   }
 
   if (base.type === "boolean") return { kind: "checkbox" }
 
-  if (base.type === "iso_date" || base.type === "iso_timestamp") return { kind: "date" }
+  if (base.type === "iso_date" || base.type === "iso_timestamp")
+    return { kind: "date" }
 
   if (base.type === "number") return { kind: "number" }
 
@@ -64,20 +75,28 @@ export type SchemaToFormOptions = {
   /** Fields to exclude */
   exclude?: string[]
   /** Override field kinds or options */
-  overrides?: Partial<Record<string, { kind?: string; label?: string; options?: SelectOption[]; placeholder?: string; required?: boolean }>>
+  overrides?: Partial<
+    Record<
+      string,
+      {
+        kind?: string
+        label?: string
+        options?: SelectOption[]
+        placeholder?: string
+        required?: boolean
+      }
+    >
+  >
 }
 
 export function schemaToFormFields<TData extends Record<string, unknown>>(
-  opts: SchemaToFormOptions,
+  opts: SchemaToFormOptions
 ): FieldEntry<TData>[] {
   const { schema, include, exclude, overrides } = opts
   const entries = (schema as AnySchema).entries as Record<string, AnySchema>
   const keys = Object.keys(entries) as string[]
 
-  const excludeSet = new Set<string>([
-    ...SYSTEM_FIELDS,
-    ...(exclude ?? []),
-  ])
+  const excludeSet = new Set<string>([...SYSTEM_FIELDS, ...(exclude ?? [])])
 
   const includeSet = include ? new Set<string>(include) : null
 
@@ -89,7 +108,10 @@ export function schemaToFormFields<TData extends Record<string, unknown>>(
     })
     .map((key) => {
       const fieldSchema = entries[key]
-      const isRequired = fieldSchema.type !== "nullish" && fieldSchema.type !== "nullable" && fieldSchema.type !== "optional"
+      const isRequired =
+        fieldSchema.type !== "nullish" &&
+        fieldSchema.type !== "nullable" &&
+        fieldSchema.type !== "optional"
       const { kind, options } = inferFieldKind(fieldSchema)
       const override = overrides?.[key]
 
@@ -106,7 +128,7 @@ export function schemaToFormFields<TData extends Record<string, unknown>>(
 
 export function schemaToFormLayout<TData extends Record<string, unknown>>(
   fields: FieldEntry<TData>[],
-  columnsPerRow: number = 2,
+  columnsPerRow: number = 2
 ): RowConfig[] {
   const rows: RowConfig[] = []
   for (let i = 0; i < fields.length; i += columnsPerRow) {
@@ -119,7 +141,7 @@ export function schemaToFormLayout<TData extends Record<string, unknown>>(
 }
 
 export function schemaToFormConfig<TData extends Record<string, unknown>>(
-  opts: SchemaToFormOptions & { columnsPerRow?: number },
+  opts: SchemaToFormOptions & { columnsPerRow?: number }
 ): FormConfig<TData> {
   const fields = schemaToFormFields(opts)
   const layout = schemaToFormLayout(fields, opts.columnsPerRow)

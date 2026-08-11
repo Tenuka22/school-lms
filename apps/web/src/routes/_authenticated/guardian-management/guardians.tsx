@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { GuardiansDataGrid } from "@/components/guardian/guardians-data-grid"
 
-export const Route = createFileRoute("/_authenticated/guardian-management/guardians")({
+export const Route = createFileRoute(
+  "/_authenticated/guardian-management/guardians"
+)({
   component: GuardiansPage,
 })
 

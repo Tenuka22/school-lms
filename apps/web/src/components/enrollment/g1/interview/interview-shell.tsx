@@ -48,15 +48,68 @@ export type InterviewMarks = {
   notes: string
 }
 
-const STEPS = ["Overview", "Document Verification", "Category Scoring", "Summary & Completion"]
+const STEPS = [
+  "Overview",
+  "Document Verification",
+  "Category Scoring",
+  "Summary & Completion",
+]
 
 const CATEGORY_CONFIGS = [
-  { key: "CloseResident", label: "Close Resident", icon: IconHome, color: "text-green-600", bg: "bg-green-500", border: "border-green-500", hoverBg: "hover:bg-green-50 dark:hover:bg-green-950/20" },
-  { key: "PastPupilChild", label: "Past Pupil", icon: IconSchool, color: "text-blue-600", bg: "bg-blue-500", border: "border-blue-500", hoverBg: "hover:bg-blue-50 dark:hover:bg-blue-950/20" },
-  { key: "Sibling", label: "Sibling", icon: IconUsers, color: "text-purple-600", bg: "bg-purple-500", border: "border-purple-500", hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-950/20" },
-  { key: "MOEOrUGCStaffChild", label: "MOE/UGC", icon: IconBuilding, color: "text-orange-600", bg: "bg-orange-500", border: "border-orange-500", hoverBg: "hover:bg-orange-50 dark:hover:bg-orange-950/20" },
-  { key: "GovernmentTransferOfficerChild", label: "Govt Transfer", icon: IconClipboard, color: "text-red-600", bg: "bg-red-500", border: "border-red-500", hoverBg: "hover:bg-red-50 dark:hover:bg-red-950/20" },
-  { key: "OverseasArrival", label: "Overseas", icon: IconPlane, color: "text-teal-600", bg: "bg-teal-500", border: "border-teal-500", hoverBg: "hover:bg-teal-50 dark:hover:bg-teal-950/20" },
+  {
+    key: "CloseResident",
+    label: "Close Resident",
+    icon: IconHome,
+    color: "text-green-600",
+    bg: "bg-green-500",
+    border: "border-green-500",
+    hoverBg: "hover:bg-green-50 dark:hover:bg-green-950/20",
+  },
+  {
+    key: "PastPupilChild",
+    label: "Past Pupil",
+    icon: IconSchool,
+    color: "text-blue-600",
+    bg: "bg-blue-500",
+    border: "border-blue-500",
+    hoverBg: "hover:bg-blue-50 dark:hover:bg-blue-950/20",
+  },
+  {
+    key: "Sibling",
+    label: "Sibling",
+    icon: IconUsers,
+    color: "text-purple-600",
+    bg: "bg-purple-500",
+    border: "border-purple-500",
+    hoverBg: "hover:bg-purple-50 dark:hover:bg-purple-950/20",
+  },
+  {
+    key: "MOEOrUGCStaffChild",
+    label: "MOE/UGC",
+    icon: IconBuilding,
+    color: "text-orange-600",
+    bg: "bg-orange-500",
+    border: "border-orange-500",
+    hoverBg: "hover:bg-orange-50 dark:hover:bg-orange-950/20",
+  },
+  {
+    key: "GovernmentTransferOfficerChild",
+    label: "Govt Transfer",
+    icon: IconClipboard,
+    color: "text-red-600",
+    bg: "bg-red-500",
+    border: "border-red-500",
+    hoverBg: "hover:bg-red-50 dark:hover:bg-red-950/20",
+  },
+  {
+    key: "OverseasArrival",
+    label: "Overseas",
+    icon: IconPlane,
+    color: "text-teal-600",
+    bg: "bg-teal-500",
+    border: "border-teal-500",
+    hoverBg: "hover:bg-teal-50 dark:hover:bg-teal-950/20",
+  },
 ]
 
 export function InterviewShell() {
@@ -115,7 +168,10 @@ export function InterviewShell() {
   )
 
   const { data: childRecord } = useQuery({
-    ...getChildOptions({ path: { id: application?.child_id ?? "" }, client: apiClient }),
+    ...getChildOptions({
+      path: { id: application?.child_id ?? "" },
+      client: apiClient,
+    }),
     enabled: !!application?.child_id,
   })
 
@@ -123,14 +179,23 @@ export function InterviewShell() {
     updateApplicationMutation({ client: apiClient })
   )
 
-  const saveWizardStep = useMutation(saveWizardStepMutation({ client: apiClient }))
+  const saveWizardStep = useMutation(
+    saveWizardStepMutation({ client: apiClient })
+  )
 
   const [step, setStep] = useState(() => {
     const saved = application?.wizard_step ?? 1
     return saved > STEPS.length ? 1 : saved
   })
   const [categoryStep, setCategoryStep] = useState(() => {
-    const catOrder = ["CloseResident", "PastPupilChild", "Sibling", "MOEOrUGCStaffChild", "GovernmentTransferOfficerChild", "OverseasArrival"]
+    const catOrder = [
+      "CloseResident",
+      "PastPupilChild",
+      "Sibling",
+      "MOEOrUGCStaffChild",
+      "GovernmentTransferOfficerChild",
+      "OverseasArrival",
+    ]
     const idx = catOrder.indexOf(application?.category ?? "")
     return idx >= 0 ? idx : 0
   })
@@ -144,12 +209,24 @@ export function InterviewShell() {
       setStep(s > STEPS.length ? 1 : s)
     }
     if (application?.category) {
-      const catOrder = ["CloseResident", "PastPupilChild", "Sibling", "MOEOrUGCStaffChild", "GovernmentTransferOfficerChild", "OverseasArrival"]
+      const catOrder = [
+        "CloseResident",
+        "PastPupilChild",
+        "Sibling",
+        "MOEOrUGCStaffChild",
+        "GovernmentTransferOfficerChild",
+        "OverseasArrival",
+      ]
       const idx = catOrder.indexOf(application.category)
       if (idx >= 0) setCategoryStep(idx)
     }
-    if (application?.interview_date) setInterviewDate(application.interview_date)
-  }, [application?.wizard_step, application?.category, application?.interview_date])
+    if (application?.interview_date)
+      setInterviewDate(application.interview_date)
+  }, [
+    application?.wizard_step,
+    application?.category,
+    application?.interview_date,
+  ])
 
   const saveStep = useCallback(
     async (newStep: number) => {
@@ -230,23 +307,44 @@ export function InterviewShell() {
     }
   }, [childRecord])
 
-  const [interviewMarks, setInterviewMarks] = useState<Record<string, InterviewMarks>>({})
+  const [interviewMarks, setInterviewMarks] = useState<
+    Record<string, InterviewMarks>
+  >({})
 
-  const handleMarkChange = useCallback((category: string, subCriterion: string, marks: number) => {
-    setInterviewMarks((prev) => {
-      const existing = prev[category] || { category, subCriteria: {}, totalMarks: 0, notes: "" }
-      const newSubCriteria = { ...existing.subCriteria, [subCriterion]: marks }
-      const totalMarks = Object.values(newSubCriteria).reduce((sum, m) => sum + m, 0)
-      return {
-        ...prev,
-        [category]: { ...existing, subCriteria: newSubCriteria, totalMarks },
-      }
-    })
-  }, [])
+  const handleMarkChange = useCallback(
+    (category: string, subCriterion: string, marks: number) => {
+      setInterviewMarks((prev) => {
+        const existing = prev[category] || {
+          category,
+          subCriteria: {},
+          totalMarks: 0,
+          notes: "",
+        }
+        const newSubCriteria = {
+          ...existing.subCriteria,
+          [subCriterion]: marks,
+        }
+        const totalMarks = Object.values(newSubCriteria).reduce(
+          (sum, m) => sum + m,
+          0
+        )
+        return {
+          ...prev,
+          [category]: { ...existing, subCriteria: newSubCriteria, totalMarks },
+        }
+      })
+    },
+    []
+  )
 
   const handleNotesChange = useCallback((category: string, notes: string) => {
     setInterviewMarks((prev) => {
-      const existing = prev[category] || { category, subCriteria: {}, totalMarks: 0, notes: "" }
+      const existing = prev[category] || {
+        category,
+        subCriteria: {},
+        totalMarks: 0,
+        notes: "",
+      }
       return { ...prev, [category]: { ...existing, notes } }
     })
   }, [])
@@ -356,7 +454,9 @@ export function InterviewShell() {
                 <CatIcon className="size-4" />
                 <span>{cat.label}</span>
                 {isAssigned && (
-                  <span className="ml-0.5 rounded bg-primary/10 px-1 text-[8px] font-bold text-primary">A</span>
+                  <span className="ml-0.5 rounded bg-primary/10 px-1 text-[8px] font-bold text-primary">
+                    A
+                  </span>
                 )}
               </button>
             )

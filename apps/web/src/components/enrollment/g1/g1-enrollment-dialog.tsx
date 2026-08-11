@@ -41,10 +41,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import {
-  Field,
-  FieldLabel,
-} from "@/components/ui/field"
+import { Field, FieldLabel } from "@/components/ui/field"
 import {
   Dialog,
   DialogContent,
@@ -53,10 +50,18 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-import type { Child, G1Application, ApplicationWithChild, EnrollmentBatch } from "@/lib/api-client/types.gen"
+import type {
+  Child,
+  G1Application,
+  ApplicationWithChild,
+  EnrollmentBatch,
+} from "@/lib/api-client/types.gen"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
 import { FieldWithAlert } from "@/components/enrollment/g1/field-with-alert"
-import { FormUniquenessProvider, useUniquenessBlocked } from "@/hooks/use-child-uniqueness"
+import {
+  FormUniquenessProvider,
+  useUniquenessBlocked,
+} from "@/hooks/use-child-uniqueness"
 
 function getBatchYears(batches?: { year: number }[]): number[] {
   if (!batches) return []
@@ -105,9 +110,7 @@ function DatePickerField() {
                     {dateValue ? (
                       formatDate(dateValue)
                     ) : (
-                      <span className="text-muted-foreground">
-                        Pick a date
-                      </span>
+                      <span className="text-muted-foreground">Pick a date</span>
                     )}
                   </Button>
                 }
@@ -163,9 +166,7 @@ function BatchSelectorField({
                   value={field.state.value}
                   onValueChange={(val: string) => {
                     if (val) field.handleChange(val)
-                    const batch = batches?.find(
-                      (b) => b.id === val
-                    )
+                    const batch = batches?.find((b) => b.id === val)
                     if (batch) {
                       onYearChange(batch.year)
                     }
@@ -176,9 +177,9 @@ function BatchSelectorField({
                   </SelectTrigger>
                   <SelectContent>
                     {getBatchYears(batches).map((year) => {
-                      const yearBatches = (
-                        batches ?? []
-                      ).filter((b) => b.year === year)
+                      const yearBatches = (batches ?? []).filter(
+                        (b) => b.year === year
+                      )
                       return (
                         <div key={year}>
                           <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
@@ -404,117 +405,135 @@ export function G1EnrollmentDialog({
               medium_of_instruction: "Sinhala",
               religion: "Buddhism",
               birth_certificate_number: "",
-            passport_number: null,
-            batch_id: enrollment?.batch_id ?? "",
-          }}
-          onSubmit={async (value) => {
-            try {
-              let savedChildId = childId
-              if (!savedChildId) {
-                const childBody = {
-                  full_name: value.full_name,
-                  name_with_initials: value.name_with_initials,
-                  date_of_birth: value.date_of_birth,
-                  gender: value.gender as Child['gender'],
-                  nationality: value.nationality as Child['nationality'],
-                  birth_certificate_number: value.birth_certificate_number || null,
-                  medium_of_instruction: value.medium_of_instruction as Child['medium_of_instruction'],
-                  religion: value.religion as Child['religion'],
-                  nic: null,
-                  passport_number: value.passport_number || null,
-                  status: 'Active' as const,
-                } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
-                const child = await createChild.mutateAsync({
-                  body: childBody as Child,
-                })
-                savedChildId = child.id
-                setChildId(savedChildId)
-              }
-              if (isEdit && savedChildId) {
-                const updateBody: Child = {
-                  id: savedChildId,
-                  full_name: value.full_name,
-                  name_with_initials: value.name_with_initials,
-                  date_of_birth: value.date_of_birth,
-                  gender: value.gender as Child['gender'],
-                  nationality: value.nationality as Child['nationality'],
-                  medium_of_instruction: value.medium_of_instruction as Child['medium_of_instruction'],
-                  religion: value.religion as Child['religion'],
-                  nic: null,
-                  passport_number: value.passport_number || null,
-                  status: 'Active',
+              passport_number: null,
+              batch_id: enrollment?.batch_id ?? "",
+            }}
+            onSubmit={async (value) => {
+              try {
+                let savedChildId = childId
+                if (!savedChildId) {
+                  const childBody = {
+                    full_name: value.full_name,
+                    name_with_initials: value.name_with_initials,
+                    date_of_birth: value.date_of_birth,
+                    gender: value.gender as Child["gender"],
+                    nationality: value.nationality as Child["nationality"],
+                    birth_certificate_number:
+                      value.birth_certificate_number || null,
+                    medium_of_instruction:
+                      value.medium_of_instruction as Child["medium_of_instruction"],
+                    religion: value.religion as Child["religion"],
+                    nic: null,
+                    passport_number: value.passport_number || null,
+                    status: "Active" as const,
+                  } satisfies Omit<
+                    Child,
+                    | "id"
+                    | "created_at"
+                    | "student_id"
+                    | "disability_status"
+                    | "disability_type"
+                    | "photo_url"
+                    | "updated_at"
+                  >
+                  const child = await createChild.mutateAsync({
+                    body: childBody as Child,
+                  })
+                  savedChildId = child.id
+                  setChildId(savedChildId)
                 }
-                await updateChild.mutateAsync({
-                  path: { id: savedChildId },
-                  body: updateBody,
-                })
-              }
+                if (isEdit && savedChildId) {
+                  const updateBody: Child = {
+                    id: savedChildId,
+                    full_name: value.full_name,
+                    name_with_initials: value.name_with_initials,
+                    date_of_birth: value.date_of_birth,
+                    gender: value.gender as Child["gender"],
+                    nationality: value.nationality as Child["nationality"],
+                    medium_of_instruction:
+                      value.medium_of_instruction as Child["medium_of_instruction"],
+                    religion: value.religion as Child["religion"],
+                    nic: null,
+                    passport_number: value.passport_number || null,
+                    status: "Active",
+                  }
+                  await updateChild.mutateAsync({
+                    path: { id: savedChildId },
+                    body: updateBody,
+                  })
+                }
 
-              if (isEdit && enrollment.id) {
-                const appBody = {
-                  child_id: savedChildId,
-                  batch_id: value.batch_id,
-                  age_eligibility_verified: false,
-                  alternative_age_certificate: false,
-                  birth_certificate_verified: false,
-                  category_verified: false,
-                  interview_completed: false,
-                  residence_verified: false,
-                  declaration_agreed: false,
-                } satisfies G1Application
-                await updateApplication.mutateAsync({
-                  body: appBody,
-                  path: { id: enrollment.id },
-                  client: apiClient,
-                })
-                queryClient.invalidateQueries({
-                  queryKey: getApplicationQueryKey({
+                if (isEdit && enrollment.id) {
+                  const appBody = {
+                    child_id: savedChildId,
+                    batch_id: value.batch_id,
+                    age_eligibility_verified: false,
+                    alternative_age_certificate: false,
+                    birth_certificate_verified: false,
+                    category_verified: false,
+                    interview_completed: false,
+                    residence_verified: false,
+                    declaration_agreed: false,
+                  } satisfies G1Application
+                  await updateApplication.mutateAsync({
+                    body: appBody,
                     path: { id: enrollment.id },
                     client: apiClient,
-                  }),
+                  })
+                  queryClient.invalidateQueries({
+                    queryKey: getApplicationQueryKey({
+                      path: { id: enrollment.id },
+                      client: apiClient,
+                    }),
+                  })
+                  toast.success(`${value.full_name}'s enrollment updated`)
+                } else {
+                  const appBody = {
+                    child_id: savedChildId,
+                    batch_id: value.batch_id,
+                    age_eligibility_verified: false,
+                    alternative_age_certificate: false,
+                    birth_certificate_verified: false,
+                    category_verified: false,
+                    interview_completed: false,
+                    residence_verified: false,
+                    declaration_agreed: false,
+                  } satisfies G1Application
+                  await createApplication({
+                    body: appBody,
+                    client: apiClient,
+                  })
+                  toast.success(`Enrollment created for ${value.full_name}`)
+                }
+                queryClient.invalidateQueries({
+                  queryKey: listApplicationsQueryKey({ client: apiClient }),
                 })
-                toast.success(`${value.full_name}'s enrollment updated`)
-              } else {
-                const appBody = {
-                  child_id: savedChildId,
-                  batch_id: value.batch_id,
-                  age_eligibility_verified: false,
-                  alternative_age_certificate: false,
-                  birth_certificate_verified: false,
-                  category_verified: false,
-                  interview_completed: false,
-                  residence_verified: false,
-                  declaration_agreed: false,
-                } satisfies G1Application
-                await createApplication({
-                  body: appBody,
-                  client: apiClient,
-                })
-                toast.success(`Enrollment created for ${value.full_name}`)
+                onOpenChange(false)
+                onSuccess()
+              } catch (err) {
+                toastApiError(err, "Operation failed")
               }
-              queryClient.invalidateQueries({
-                queryKey: listApplicationsQueryKey({ client: apiClient }),
-              })
-              onOpenChange(false)
-              onSuccess()
-            } catch (err) {
-              toastApiError(err, "Operation failed")
-            }
-          }}
-          formId="enrollment-form"
-          hideDefaultButtons
-        >
-          <DatePickerField />
-          <BatchSelectorField
-            batches={batches}
-            onYearChange={setSelectedBatchYear}
-            onCreateBatch={(year) => {
-              setCreateBatchYear(year)
-              setCreateBatchOpen(true)
             }}
+            formId="enrollment-form"
+            hideDefaultButtons
+          >
+            <DatePickerField />
+            <BatchSelectorField
+              batches={batches}
+              onYearChange={setSelectedBatchYear}
+              onCreateBatch={(year) => {
+                setCreateBatchYear(year)
+                setCreateBatchOpen(true)
+              }}
+            />
+          </FormBuilder>
+          <EnrollmentSubmitFooter
+            isEdit={isEdit}
+            needsBatch={needsBatch}
+            selectedBatchYear={selectedBatchYear}
+            setCreateBatchYear={setCreateBatchYear}
+            setCreateBatchOpen={setCreateBatchOpen}
           />
-        </FormBuilder>
-        <EnrollmentSubmitFooter isEdit={isEdit} needsBatch={needsBatch} selectedBatchYear={selectedBatchYear} setCreateBatchYear={setCreateBatchYear} setCreateBatchOpen={setCreateBatchOpen} />
         </FormUniquenessProvider>
       </DialogContent>
       <CreateBatchDialog

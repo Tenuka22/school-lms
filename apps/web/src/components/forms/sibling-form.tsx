@@ -31,13 +31,54 @@ export const siblingFormDefaults: SiblingFormValues = {
 
 export const siblingFormConfig: FormConfig<SiblingFormValues> = {
   fields: [
-    { name: "full_name", kind: "text", label: "Full Name", required: true, placeholder: "e.g. John Doe" },
-    { name: "name_with_initials", kind: "text", label: "Name with Initials", required: true, placeholder: "e.g. J. Doe" },
-    { name: "date_of_birth", kind: "date", label: "Date of Birth", required: true },
-    { name: "gender", kind: "select", label: "Gender", required: true, options: optionsFromSchema(GenderSchema) },
-    { name: "nationality", kind: "select", label: "Nationality", required: true, options: optionsFromSchema(NationalitySchema) },
-    { name: "religion", kind: "select", label: "Religion", required: true, options: optionsFromSchema(ReligionSchema) },
-    { name: "medium_of_instruction", kind: "select", label: "Medium", required: true, options: optionsFromSchema(MediumOfInstructionSchema) },
+    {
+      name: "full_name",
+      kind: "text",
+      label: "Full Name",
+      required: true,
+      placeholder: "e.g. John Doe",
+    },
+    {
+      name: "name_with_initials",
+      kind: "text",
+      label: "Name with Initials",
+      required: true,
+      placeholder: "e.g. J. Doe",
+    },
+    {
+      name: "date_of_birth",
+      kind: "date",
+      label: "Date of Birth",
+      required: true,
+    },
+    {
+      name: "gender",
+      kind: "select",
+      label: "Gender",
+      required: true,
+      options: optionsFromSchema(GenderSchema),
+    },
+    {
+      name: "nationality",
+      kind: "select",
+      label: "Nationality",
+      required: true,
+      options: optionsFromSchema(NationalitySchema),
+    },
+    {
+      name: "religion",
+      kind: "select",
+      label: "Religion",
+      required: true,
+      options: optionsFromSchema(ReligionSchema),
+    },
+    {
+      name: "medium_of_instruction",
+      kind: "select",
+      label: "Medium",
+      required: true,
+      options: optionsFromSchema(MediumOfInstructionSchema),
+    },
     {
       name: "current_grade",
       kind: "number",

@@ -13,7 +13,10 @@ import {
 import { IconLoader2, IconCheck } from "@tabler/icons-react"
 import { FormBuilder } from "@/lib/form-builder"
 import { FieldWithAlert } from "@/components/enrollment/g1/field-with-alert"
-import { FormUniquenessProvider, useUniquenessBlocked } from "@/hooks/use-child-uniqueness"
+import {
+  FormUniquenessProvider,
+  useUniquenessBlocked,
+} from "@/hooks/use-child-uniqueness"
 import { optionsFromSchema } from "@/lib/form-builder"
 import {
   GenderSchema,
@@ -22,7 +25,12 @@ import {
   ReligionSchema,
 } from "@/lib/api-client/schemas.gen"
 import type { FormConfig } from "@/lib/form-builder"
-import type { Gender, Nationality, MediumOfInstruction, Religion } from "@/lib/api-client/types.gen"
+import type {
+  Gender,
+  Nationality,
+  MediumOfInstruction,
+  Religion,
+} from "@/lib/api-client/types.gen"
 
 export type ChildFormData = {
   full_name: string
@@ -60,21 +68,40 @@ function makeConfig(excludeChildId?: string | null): FormConfig<ChildFormData> {
           />
         ),
       },
-      { name: "name_with_initials", kind: "text", label: "Name with Initials", placeholder: "e.g. J. M. Perera" },
-      { name: "name_with_initials_en", kind: "text", label: "Name with Initials (English)", placeholder: "e.g. B.S.S. Peiris" },
+      {
+        name: "name_with_initials",
+        kind: "text",
+        label: "Name with Initials",
+        placeholder: "e.g. J. M. Perera",
+      },
+      {
+        name: "name_with_initials_en",
+        kind: "text",
+        label: "Name with Initials (English)",
+        placeholder: "e.g. B.S.S. Peiris",
+      },
       { name: "date_of_birth", kind: "date", label: "Date of Birth" },
       {
-        name: "gender", kind: "select", label: "Gender", required: true,
+        name: "gender",
+        kind: "select",
+        label: "Gender",
+        required: true,
         options: optionsFromSchema(GenderSchema),
         inputProps: { placeholder: "Select gender" },
       },
       {
-        name: "nationality", kind: "select", label: "Nationality", required: true,
+        name: "nationality",
+        kind: "select",
+        label: "Nationality",
+        required: true,
         options: optionsFromSchema(NationalitySchema),
         inputProps: { placeholder: "Select nationality" },
       },
       {
-        name: "religion", kind: "select", label: "Religion", required: true,
+        name: "religion",
+        kind: "select",
+        label: "Religion",
+        required: true,
         options: optionsFromSchema(ReligionSchema),
         inputProps: { placeholder: "Select religion" },
       },
@@ -93,7 +120,10 @@ function makeConfig(excludeChildId?: string | null): FormConfig<ChildFormData> {
         ),
       },
       {
-        name: "medium_of_instruction", kind: "select", label: "Medium of Instruction", required: true,
+        name: "medium_of_instruction",
+        kind: "select",
+        label: "Medium of Instruction",
+        required: true,
         options: optionsFromSchema(MediumOfInstructionSchema),
         inputProps: { placeholder: "Select medium" },
       },
@@ -113,7 +143,11 @@ function NextButton({ status }: { status: "idle" | "saving" | "done" }) {
   const { isBlocked } = useUniquenessBlocked()
   return (
     <div className="flex justify-end pt-4">
-      <Button type="submit" form="wizard-step-child-form" disabled={status !== "idle" || isBlocked}>
+      <Button
+        type="submit"
+        form="wizard-step-child-form"
+        disabled={status !== "idle" || isBlocked}
+      >
         {status === "saving" && (
           <IconLoader2 className="mr-1.5 size-4 animate-spin" />
         )}
@@ -130,7 +164,12 @@ function NextButton({ status }: { status: "idle" | "saving" | "done" }) {
   )
 }
 
-export function WizardStepChild({ defaultValues, onSave, onNext, excludeChildId }: Props) {
+export function WizardStepChild({
+  defaultValues,
+  onSave,
+  onNext,
+  excludeChildId,
+}: Props) {
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
   const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 

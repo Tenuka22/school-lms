@@ -13,7 +13,10 @@ export type { BatchFormValues } from "./batch-form"
 export { siblingFormConfig, siblingFormDefaults } from "./sibling-form"
 export type { SiblingFormValues } from "./sibling-form"
 
-export { workspaceAddressFormConfig, workspaceAddressFormDefaults } from "./workspace-address-form"
+export {
+  workspaceAddressFormConfig,
+  workspaceAddressFormDefaults,
+} from "./workspace-address-form"
 export type { WorkspaceAddressFormValues } from "./workspace-address-form"
 
 export { guardianFormConfig, guardianFormDefaults } from "./guardian-form"

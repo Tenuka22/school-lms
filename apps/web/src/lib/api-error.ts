@@ -16,5 +16,7 @@ export function getApiErrorMessage(err: unknown): string | null {
 }
 
 export function toastApiError(err: unknown, fallback?: string): void {
-  toast.error(getApiErrorMessage(err) ?? fallback ?? "An unexpected error occurred")
+  toast.error(
+    getApiErrorMessage(err) ?? fallback ?? "An unexpected error occurred"
+  )
 }

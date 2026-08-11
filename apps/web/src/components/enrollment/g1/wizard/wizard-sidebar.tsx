@@ -2,7 +2,14 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { IconFileText, IconPhoto, IconCalendar, IconMapPin, IconUsers, IconSchool } from "@tabler/icons-react"
+import {
+  IconFileText,
+  IconPhoto,
+  IconCalendar,
+  IconMapPin,
+  IconUsers,
+  IconSchool,
+} from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
 import { listSchoolsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
@@ -100,16 +107,16 @@ function ElectoralSummary({ entries }: ElectoralSummaryProps) {
       ) : (
         <div className="flex flex-col gap-2">
           {entries.map((entry) => (
-            <div
-              key={entry.id}
-              className="rounded-lg border p-3 space-y-2"
-            >
+            <div key={entry.id} className="space-y-2 rounded-lg border p-3">
               <div className="flex items-center justify-between">
                 <Badge variant="outline" className="text-xs">
                   {entry.electoral_year || "—"}
                 </Badge>
                 {entry.voter_names.length > 0 && (
-                  <Badge variant="secondary" className="h-4 px-1.5 text-[10px] gap-0.5">
+                  <Badge
+                    variant="secondary"
+                    className="h-4 gap-0.5 px-1.5 text-[10px]"
+                  >
                     <IconUsers className="size-2.5" />
                     {entry.voter_names.length}
                   </Badge>
@@ -120,13 +127,17 @@ function ElectoralSummary({ entries }: ElectoralSummaryProps) {
                   <div className="flex items-center gap-1.5">
                     <IconMapPin className="size-3 shrink-0" />
                     <span>{entry.polling_district}</span>
-                    {entry.polling_division && <span>/ {entry.polling_division}</span>}
+                    {entry.polling_division && (
+                      <span>/ {entry.polling_division}</span>
+                    )}
                   </div>
                 )}
                 {entry.gn_name && (
                   <div className="flex items-center gap-1.5">
                     <IconMapPin className="size-3 shrink-0" />
-                    <span>{entry.gn_name}-{entry.gn_number}</span>
+                    <span>
+                      {entry.gn_name}-{entry.gn_number}
+                    </span>
                   </div>
                 )}
                 {entry.village_street && (
@@ -321,8 +332,13 @@ interface SchoolPreferencesSummaryProps {
   closerSchoolExists: boolean
 }
 
-function SchoolPreferencesSummary({ preferredSchoolIds, closerSchoolExists }: SchoolPreferencesSummaryProps) {
-  const { data: allSchools = [] } = useQuery(listSchoolsOptions({ client: apiClient }))
+function SchoolPreferencesSummary({
+  preferredSchoolIds,
+  closerSchoolExists,
+}: SchoolPreferencesSummaryProps) {
+  const { data: allSchools = [] } = useQuery(
+    listSchoolsOptions({ client: apiClient })
+  )
   const selectedSchools = preferredSchoolIds
     .map((id) => allSchools.find((s) => s.id === id))
     .filter(Boolean)
@@ -330,7 +346,9 @@ function SchoolPreferencesSummary({ preferredSchoolIds, closerSchoolExists }: Sc
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <h4 className="text-sm font-medium text-muted-foreground">Selected Schools</h4>
+        <h4 className="text-sm font-medium text-muted-foreground">
+          Selected Schools
+        </h4>
         <p className="text-xs text-muted-foreground">
           {preferredSchoolIds.length} of 6 maximum
         </p>
@@ -338,7 +356,9 @@ function SchoolPreferencesSummary({ preferredSchoolIds, closerSchoolExists }: Sc
       {selectedSchools.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <IconSchool className="mb-2 size-8 text-muted-foreground/40" />
-          <p className="text-xs text-muted-foreground">No schools selected yet</p>
+          <p className="text-xs text-muted-foreground">
+            No schools selected yet
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
@@ -347,13 +367,20 @@ function SchoolPreferencesSummary({ preferredSchoolIds, closerSchoolExists }: Sc
               key={school!.id}
               className="flex items-center gap-2 rounded-md border bg-muted/30 px-2.5 py-2"
             >
-              <Badge variant="secondary" className="size-5 shrink-0 justify-center rounded-full text-[10px]">
+              <Badge
+                variant="secondary"
+                className="size-5 shrink-0 justify-center rounded-full text-[10px]"
+              >
                 {index + 1}
               </Badge>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium">{school!.name_si}</p>
+                <p className="truncate text-xs font-medium">
+                  {school!.name_si}
+                </p>
                 {school!.name_en && (
-                  <p className="truncate text-[10px] text-muted-foreground">{school!.name_en}</p>
+                  <p className="truncate text-[10px] text-muted-foreground">
+                    {school!.name_en}
+                  </p>
                 )}
               </div>
             </div>

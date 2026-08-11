@@ -2,11 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useState, useMemo } from "react"
-import {
-  IconSearch,
-  IconDots,
-  IconLoader2,
-} from "@tabler/icons-react"
+import { IconSearch, IconDots, IconLoader2 } from "@tabler/icons-react"
 import { apiClient } from "@/lib/api-client"
 import { listStudents } from "@/lib/api-client/sdk.gen"
 import { formatDate } from "@/lib/format"
@@ -252,9 +248,7 @@ export function StudentsDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Phone" />
         ),
         cell: ({ row }) => (
-          <span className="text-sm">
-            {row.getValue("phone") || "—"}
-          </span>
+          <span className="text-sm">{row.getValue("phone") || "—"}</span>
         ),
         meta: { label: "Phone", variant: "text" },
       },
@@ -264,9 +258,7 @@ export function StudentsDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Email" />
         ),
         cell: ({ row }) => (
-          <span className="text-sm">
-            {row.getValue("email") || "—"}
-          </span>
+          <span className="text-sm">{row.getValue("email") || "—"}</span>
         ),
         meta: { label: "Email", variant: "text" },
       },
@@ -325,7 +317,7 @@ export function StudentsDataGrid({}: { refreshKey?: number }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <div className="relative max-w-sm flex-1">
-          <IconSearch className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+          <IconSearch className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
           <Input
             placeholder="Search students..."
             value={search}

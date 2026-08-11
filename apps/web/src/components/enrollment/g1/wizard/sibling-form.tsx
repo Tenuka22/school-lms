@@ -18,11 +18,11 @@ import { queryClient } from "@/router"
 import { toast } from "sonner"
 import { toastApiError } from "@/lib/api-error"
 import { FormBuilder } from "@/lib/form-builder"
-import { siblingFormConfig, siblingFormDefaults } from "@/components/forms/sibling-form"
 import {
-  IconPlus,
-  IconSchool,
-} from "@tabler/icons-react"
+  siblingFormConfig,
+  siblingFormDefaults,
+} from "@/components/forms/sibling-form"
+import { IconPlus, IconSchool } from "@tabler/icons-react"
 import type {
   CreateSiblingRequest,
   CreateSiblingResponse,
@@ -152,7 +152,11 @@ export function CreateSiblingDialog({
                 hideDefaultButtons
               />
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" form="form-builder-form">

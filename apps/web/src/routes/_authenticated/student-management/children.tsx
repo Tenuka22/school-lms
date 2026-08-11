@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button"
 import { IconPlus } from "@tabler/icons-react"
 import type { Child } from "@/lib/api-client/types.gen"
 
-export const Route = createFileRoute("/_authenticated/student-management/children")({
+export const Route = createFileRoute(
+  "/_authenticated/student-management/children"
+)({
   component: ChildrenPage,
 })
 

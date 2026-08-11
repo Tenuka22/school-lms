@@ -6,12 +6,7 @@ import { scaleBand } from "@tanstack/charts/scales/band"
 import { scaleLinear } from "@tanstack/charts/scales/linear"
 import { tooltip } from "@tanstack/charts/tooltip"
 import { Chart } from "@tanstack/charts/react"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { EnrollmentBatch } from "@/lib/api-client/types.gen"
 
 interface BatchOverviewChartProps {
@@ -42,19 +37,59 @@ interface SegmentRow {
 export function BatchOverviewChart({ batch }: BatchOverviewChartProps) {
   const data = useMemo<SegmentRow[]>(() => {
     const religion: SegmentRow[] = [
-      { group: "Religion", segment: "Buddhism", value: batch?.buddhism_percentage ?? 74 },
-      { group: "Religion", segment: "Catholicism", value: batch?.catholicism_percentage ?? 12 },
-      { group: "Religion", segment: "Islam", value: batch?.islam_percentage ?? 14 },
-      { group: "Religion", segment: "Hinduism", value: batch?.hinduism_percentage ?? 0 },
+      {
+        group: "Religion",
+        segment: "Buddhism",
+        value: batch?.buddhism_percentage ?? 74,
+      },
+      {
+        group: "Religion",
+        segment: "Catholicism",
+        value: batch?.catholicism_percentage ?? 12,
+      },
+      {
+        group: "Religion",
+        segment: "Islam",
+        value: batch?.islam_percentage ?? 14,
+      },
+      {
+        group: "Religion",
+        segment: "Hinduism",
+        value: batch?.hinduism_percentage ?? 0,
+      },
     ]
 
     const category: SegmentRow[] = [
-      { group: "Category", segment: "Proximity", value: batch?.proximity_percentage ?? 50 },
-      { group: "Category", segment: "Staff", value: batch?.staff_percentage ?? 25 },
-      { group: "Category", segment: "Sibling", value: batch?.sibling_percentage ?? 14 },
-      { group: "Category", segment: "Alumni", value: batch?.alumni_percentage ?? 6 },
-      { group: "Category", segment: "Govt", value: batch?.govt_percentage ?? 4 },
-      { group: "Category", segment: "Special", value: batch?.special_percentage ?? 1 },
+      {
+        group: "Category",
+        segment: "Proximity",
+        value: batch?.proximity_percentage ?? 50,
+      },
+      {
+        group: "Category",
+        segment: "Staff",
+        value: batch?.staff_percentage ?? 25,
+      },
+      {
+        group: "Category",
+        segment: "Sibling",
+        value: batch?.sibling_percentage ?? 14,
+      },
+      {
+        group: "Category",
+        segment: "Alumni",
+        value: batch?.alumni_percentage ?? 6,
+      },
+      {
+        group: "Category",
+        segment: "Govt",
+        value: batch?.govt_percentage ?? 4,
+      },
+      {
+        group: "Category",
+        segment: "Special",
+        value: batch?.special_percentage ?? 1,
+      },
     ]
 
     return [...religion, ...category].filter((d) => d.value > 0)

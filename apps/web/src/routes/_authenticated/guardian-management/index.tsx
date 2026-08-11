@@ -24,7 +24,10 @@ function GuardianManagement() {
             </CardHeader>
           </Card>
         </Link>
-        <Link to="/guardian-management/guardians" search={{ is_past_pupil: "true" }}>
+        <Link
+          to="/guardian-management/guardians"
+          search={{ is_past_pupil: "true" }}
+        >
           <Card className="transition-colors hover:bg-muted">
             <CardHeader className="flex flex-row items-center gap-4">
               <IconSchool className="size-8" />
