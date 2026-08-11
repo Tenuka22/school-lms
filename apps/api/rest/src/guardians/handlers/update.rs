@@ -39,6 +39,7 @@ pub struct UpdateGuardianBody {
     pub past_pupil_highest_grade: Option<String>,
     pub past_pupil_year_left: Option<i16>,
     pub past_pupil_left_reason: Option<String>,
+    pub student_id: Option<Uuid>,
 }
 
 #[api_operation(tag = "guardians", operation_id = "update-guardian")]
@@ -116,6 +117,7 @@ pub async fn update_guardian(
         income_level: Set(input.income_level),
         address_id: Set(input.address_id),
         is_sri_lankan_citizen: Set(existing.is_sri_lankan_citizen),
+        student_id: Set(input.student_id),
         created_at: Set(existing.created_at),
     };
 

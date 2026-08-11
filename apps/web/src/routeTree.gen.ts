@@ -14,8 +14,11 @@ import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthenticatedStudentManagementIndexRouteImport } from './routes/_authenticated/student-management/index'
+import { Route as AuthenticatedGuardianManagementIndexRouteImport } from './routes/_authenticated/guardian-management/index'
 import { Route as AuthenticatedStudentManagementStudentsRouteImport } from './routes/_authenticated/student-management/students'
 import { Route as AuthenticatedStudentManagementChildrenRouteImport } from './routes/_authenticated/student-management/children'
+import { Route as AuthenticatedStudentManagementAlumniRouteImport } from './routes/_authenticated/student-management/alumni'
+import { Route as AuthenticatedGuardianManagementGuardiansRouteImport } from './routes/_authenticated/guardian-management/guardians'
 import { Route as AuthenticatedStudentManagementEnrollmentG1IndexRouteImport } from './routes/_authenticated/student-management/enrollment/g1/index'
 import { Route as AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRouteImport } from './routes/_authenticated/student-management/enrollment/g1/$enrollment_id/index'
 import { Route as AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRouteImport } from './routes/_authenticated/student-management/enrollment/g1/$enrollment_id/interview'
@@ -45,6 +48,12 @@ const AuthenticatedStudentManagementIndexRoute =
     path: '/student-management/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedGuardianManagementIndexRoute =
+  AuthenticatedGuardianManagementIndexRouteImport.update({
+    id: '/guardian-management/',
+    path: '/guardian-management/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedStudentManagementStudentsRoute =
   AuthenticatedStudentManagementStudentsRouteImport.update({
     id: '/student-management/students',
@@ -55,6 +64,18 @@ const AuthenticatedStudentManagementChildrenRoute =
   AuthenticatedStudentManagementChildrenRouteImport.update({
     id: '/student-management/children',
     path: '/student-management/children',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementAlumniRoute =
+  AuthenticatedStudentManagementAlumniRouteImport.update({
+    id: '/student-management/alumni',
+    path: '/student-management/alumni',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedGuardianManagementGuardiansRoute =
+  AuthenticatedGuardianManagementGuardiansRouteImport.update({
+    id: '/guardian-management/guardians',
+    path: '/guardian-management/guardians',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedStudentManagementEnrollmentG1IndexRoute =
@@ -84,8 +105,11 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/guardian-management/guardians': typeof AuthenticatedGuardianManagementGuardiansRoute
+  '/student-management/alumni': typeof AuthenticatedStudentManagementAlumniRoute
   '/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
   '/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
+  '/guardian-management/': typeof AuthenticatedGuardianManagementIndexRoute
   '/student-management/': typeof AuthenticatedStudentManagementIndexRoute
   '/student-management/enrollment/g1/': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   '/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -95,8 +119,11 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/': typeof AuthenticatedIndexRoute
+  '/guardian-management/guardians': typeof AuthenticatedGuardianManagementGuardiansRoute
+  '/student-management/alumni': typeof AuthenticatedStudentManagementAlumniRoute
   '/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
   '/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
+  '/guardian-management': typeof AuthenticatedGuardianManagementIndexRoute
   '/student-management': typeof AuthenticatedStudentManagementIndexRoute
   '/student-management/enrollment/g1': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   '/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -108,8 +135,11 @@ export interface FileRoutesById {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/guardian-management/guardians': typeof AuthenticatedGuardianManagementGuardiansRoute
+  '/_authenticated/student-management/alumni': typeof AuthenticatedStudentManagementAlumniRoute
   '/_authenticated/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
   '/_authenticated/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
+  '/_authenticated/guardian-management/': typeof AuthenticatedGuardianManagementIndexRoute
   '/_authenticated/student-management/': typeof AuthenticatedStudentManagementIndexRoute
   '/_authenticated/student-management/enrollment/g1/': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -121,8 +151,11 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/guardian-management/guardians'
+    | '/student-management/alumni'
     | '/student-management/children'
     | '/student-management/students'
+    | '/guardian-management/'
     | '/student-management/'
     | '/student-management/enrollment/g1/'
     | '/student-management/enrollment/g1/$enrollment_id/interview'
@@ -132,8 +165,11 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/'
+    | '/guardian-management/guardians'
+    | '/student-management/alumni'
     | '/student-management/children'
     | '/student-management/students'
+    | '/guardian-management'
     | '/student-management'
     | '/student-management/enrollment/g1'
     | '/student-management/enrollment/g1/$enrollment_id/interview'
@@ -144,8 +180,11 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/_authenticated/'
+    | '/_authenticated/guardian-management/guardians'
+    | '/_authenticated/student-management/alumni'
     | '/_authenticated/student-management/children'
     | '/_authenticated/student-management/students'
+    | '/_authenticated/guardian-management/'
     | '/_authenticated/student-management/'
     | '/_authenticated/student-management/enrollment/g1/'
     | '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview'
@@ -195,6 +234,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStudentManagementIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/guardian-management/': {
+      id: '/_authenticated/guardian-management/'
+      path: '/guardian-management'
+      fullPath: '/guardian-management/'
+      preLoaderRoute: typeof AuthenticatedGuardianManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/student-management/students': {
       id: '/_authenticated/student-management/students'
       path: '/student-management/students'
@@ -207,6 +253,20 @@ declare module '@tanstack/react-router' {
       path: '/student-management/children'
       fullPath: '/student-management/children'
       preLoaderRoute: typeof AuthenticatedStudentManagementChildrenRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/alumni': {
+      id: '/_authenticated/student-management/alumni'
+      path: '/student-management/alumni'
+      fullPath: '/student-management/alumni'
+      preLoaderRoute: typeof AuthenticatedStudentManagementAlumniRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/guardian-management/guardians': {
+      id: '/_authenticated/guardian-management/guardians'
+      path: '/guardian-management/guardians'
+      fullPath: '/guardian-management/guardians'
+      preLoaderRoute: typeof AuthenticatedGuardianManagementGuardiansRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/student-management/enrollment/g1/': {
@@ -235,8 +295,11 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedGuardianManagementGuardiansRoute: typeof AuthenticatedGuardianManagementGuardiansRoute
+  AuthenticatedStudentManagementAlumniRoute: typeof AuthenticatedStudentManagementAlumniRoute
   AuthenticatedStudentManagementChildrenRoute: typeof AuthenticatedStudentManagementChildrenRoute
   AuthenticatedStudentManagementStudentsRoute: typeof AuthenticatedStudentManagementStudentsRoute
+  AuthenticatedGuardianManagementIndexRoute: typeof AuthenticatedGuardianManagementIndexRoute
   AuthenticatedStudentManagementIndexRoute: typeof AuthenticatedStudentManagementIndexRoute
   AuthenticatedStudentManagementEnrollmentG1IndexRoute: typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
   AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute: typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
@@ -245,10 +308,16 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedGuardianManagementGuardiansRoute:
+    AuthenticatedGuardianManagementGuardiansRoute,
+  AuthenticatedStudentManagementAlumniRoute:
+    AuthenticatedStudentManagementAlumniRoute,
   AuthenticatedStudentManagementChildrenRoute:
     AuthenticatedStudentManagementChildrenRoute,
   AuthenticatedStudentManagementStudentsRoute:
     AuthenticatedStudentManagementStudentsRoute,
+  AuthenticatedGuardianManagementIndexRoute:
+    AuthenticatedGuardianManagementIndexRoute,
   AuthenticatedStudentManagementIndexRoute:
     AuthenticatedStudentManagementIndexRoute,
   AuthenticatedStudentManagementEnrollmentG1IndexRoute:

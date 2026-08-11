@@ -15,6 +15,7 @@ use db::rbac::Permission;
 #[derive(Deserialize, JsonSchema, ApiComponent)]
 pub struct ListStudentsQuery {
     pub search: Option<String>,
+    pub status: Option<String>,
 }
 
 /// Response type that combines student record with child data
@@ -58,8 +59,7 @@ pub async fn list_students(
 
     // Join students with children to get full data
     let mut q = student::Entity::find()
-        .find_with_related(children::Entity)
-        .limit(20);
+        .find_with_related(children::Entity);
 
     if let Some(search) = &query.search {
         let pattern = format!("%{}%", search);
@@ -68,6 +68,21 @@ pub async fn list_students(
                 .add(children::Column::FullName.ilike(&pattern))
                 .add(children::Column::AdmissionNumber.ilike(&pattern)),
         );
+    }
+
+    if let Some(status) = &query.status {
+        let statuses: Vec<db::entity::common::enums::StudentStatus> = status
+            .split(',')
+            .filter_map(|s| match s.trim() {
+                "Active" => Some(db::entity::common::enums::StudentStatus::Active),
+                "Graduated" => Some(db::entity::common::enums::StudentStatus::Graduated),
+                "Removed" => Some(db::entity::common::enums::StudentStatus::Removed),
+                _ => None,
+            })
+            .collect();
+        if !statuses.is_empty() {
+            q = q.filter(children::Column::Status.is_in(statuses));
+        }
     }
 
     let results = q.all(db.as_ref()).await?;

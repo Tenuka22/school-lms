@@ -154,6 +154,17 @@ export type Child = {
     updated_by?: string | null;
 };
 
+export type ChildInfo = {
+    current_grade?: number | null;
+    date_of_birth: string;
+    full_name: string;
+    gender: Gender;
+    id: string;
+    name_with_initials: string;
+    status: StudentStatus;
+    student_id?: string | null;
+};
+
 /**
  * CounterResponse
  */
@@ -258,6 +269,7 @@ export type CreateGuardianBody = {
     relationship_type: GuardianRelationship;
     staff_school_id?: string | null;
     staff_type?: StaffType | null;
+    student_id?: string | null;
     workplace_address?: string | null;
     workplace_name?: string | null;
 };
@@ -551,11 +563,36 @@ export type Guardian = {
     occupation?: string | null;
     past_pupil_verified: boolean;
     relationship_type: GuardianRelationship;
+    student_id?: string | null;
     workplace_address?: string | null;
     workplace_name?: string | null;
 };
 
 export type GuardianRelationship = 'Father' | 'Mother' | 'Guardian';
+
+/**
+ * GuardianWithChildren
+ */
+export type GuardianWithChildren = {
+    children: Array<ChildInfo>;
+    contact_email?: string | null;
+    contact_phone: string;
+    created_at: string;
+    full_name: string;
+    govt_service_years?: number | null;
+    id: string;
+    income_level?: IncomeLevel | null;
+    is_govt_employee: boolean;
+    is_past_pupil: boolean;
+    is_school_staff: boolean;
+    nic_number: string;
+    occupation?: string | null;
+    past_pupil_verified: boolean;
+    relationship_type: GuardianRelationship;
+    student_id?: string | null;
+    workplace_address?: string | null;
+    workplace_name?: string | null;
+};
 
 export type IncomeLevel = 'below_25000' | '25000_50000' | '50000_100000' | '100000_200000' | '200000_500000' | 'above_500000';
 
@@ -911,6 +948,7 @@ export type UpdateGuardianBody = {
     relationship_type: GuardianRelationship;
     staff_school_id?: string | null;
     staff_type?: StaffType | null;
+    student_id?: string | null;
     workplace_address?: string | null;
     workplace_name?: string | null;
 };
@@ -2568,6 +2606,7 @@ export type ListGuardiansData = {
     body?: never;
     path?: never;
     query?: {
+        is_past_pupil?: string | null;
         search?: string | null;
     };
     url: '/api/guardians';
@@ -2603,7 +2642,7 @@ export type ListGuardiansErrors = {
 export type ListGuardiansError = ListGuardiansErrors[keyof ListGuardiansErrors];
 
 export type ListGuardiansResponses = {
-    200: Array<Guardian>;
+    200: Array<GuardianWithChildren>;
 };
 
 export type ListGuardiansResponse = ListGuardiansResponses[keyof ListGuardiansResponses];
@@ -2665,6 +2704,7 @@ export type CreateGuardianResponses = {
         occupation?: string | null;
         past_pupil_verified: boolean;
         relationship_type: GuardianRelationship;
+        student_id?: string | null;
         workplace_address?: string | null;
         workplace_name?: string | null;
     };

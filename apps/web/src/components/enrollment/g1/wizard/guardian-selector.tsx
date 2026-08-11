@@ -25,7 +25,7 @@ import {
   IconUser,
   IconPencil,
 } from "@tabler/icons-react"
-import type { Guardian } from "@/lib/api-client/types.gen"
+import type { GuardianWithChildren } from "@/lib/api-client/types.gen"
 import { getEnumStyle } from "@/lib/enum-badge"
 import type { Blacklist } from "@/lib/api-client/types.gen"
 import {
@@ -49,7 +49,7 @@ interface Props {
 export function GuardianSelector({ selectedIds, onSelect, onDeselect, enrollmentId }: Props) {
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(0)
-  const [editTarget, setEditTarget] = useState<Guardian | null>(null)
+  const [editTarget, setEditTarget] = useState<GuardianWithChildren | null>(null)
 
   const { data: guardians } = useQuery(
     listGuardiansOptions({ client: apiClient })

@@ -33,6 +33,7 @@ pub struct Model {
     #[serde(default)]
     pub address_id: Option<Uuid>,
     pub is_sri_lankan_citizen: Option<bool>,
+    pub student_id: Option<Uuid>,
     #[serde(default = "default_now")]
     pub created_at: DateTime<Utc>,
 }

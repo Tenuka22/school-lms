@@ -24,7 +24,7 @@ export const AddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-08-11T03:19:46.534617900Z',
+            default: '2026-08-11T08:36:36.098944Z',
             type: 'string',
             format: 'date-time'
         },
@@ -407,7 +407,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         blacklisted_at: {
-            default: '2026-08-11T03:19:46.507183900Z',
+            default: '2026-08-11T08:36:36.056090300Z',
             type: 'string',
             format: 'date-time'
         },
@@ -421,7 +421,7 @@ export const BlacklistSchema = {
             nullable: true
         },
         expires_at: {
-            default: '2029-08-10T03:19:46.507206700Z',
+            default: '2029-08-10T08:36:36.056106700Z',
             type: 'string',
             format: 'date-time'
         },
@@ -430,7 +430,7 @@ export const BlacklistSchema = {
             format: 'uuid'
         },
         id: {
-            default: 'f5cac398-134a-4227-b17a-97555def4aaf',
+            default: 'c13aedd9-e32e-4aaa-b489-2d3642096855',
             type: 'string',
             format: 'uuid'
         },
@@ -472,7 +472,7 @@ export const ChildSchema = {
             nullable: true
         },
         created_at: {
-            default: '2026-08-11T03:19:46.536999900Z',
+            default: '2026-08-11T08:36:36.108415600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -564,11 +564,55 @@ export const ChildSchema = {
             nullable: true
         },
         updated_at: {
-            default: '2026-08-11T03:19:46.537006500Z',
+            default: '2026-08-11T08:36:36.108425200Z',
             type: 'string',
             format: 'date-time'
         },
         updated_by: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        }
+    }
+} as const;
+
+export const ChildInfoSchema = {
+    type: 'object',
+    required: [
+        'date_of_birth',
+        'full_name',
+        'gender',
+        'id',
+        'name_with_initials',
+        'status'
+    ],
+    properties: {
+        current_grade: {
+            type: 'integer',
+            format: 'int16',
+            nullable: true
+        },
+        date_of_birth: {
+            type: 'string',
+            format: 'date'
+        },
+        full_name: {
+            type: 'string'
+        },
+        gender: {
+            $ref: '#/components/schemas/Gender'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid'
+        },
+        name_with_initials: {
+            type: 'string'
+        },
+        status: {
+            $ref: '#/components/schemas/StudentStatus'
+        },
+        student_id: {
             type: 'string',
             format: 'uuid',
             nullable: true
@@ -923,6 +967,11 @@ export const CreateGuardianBodySchema = {
                     $ref: '#/components/schemas/StaffType'
                 }
             ],
+            nullable: true
+        },
+        student_id: {
+            type: 'string',
+            format: 'uuid',
             nullable: true
         },
         workplace_address: {
@@ -1370,12 +1419,12 @@ export const EnrollmentBatchSchema = {
             format: 'int16'
         },
         closed_at: {
-            default: '2027-08-11T03:19:46.530007900Z',
+            default: '2027-08-11T08:36:36.088152300Z',
             type: 'string',
             format: 'date-time'
         },
         created_at: {
-            default: '2026-08-11T03:19:46.530025400Z',
+            default: '2026-08-11T08:36:36.088175600Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1405,7 +1454,7 @@ export const EnrollmentBatchSchema = {
             format: 'int16'
         },
         id: {
-            default: '4f191f4d-4bbf-4556-ad70-6b470e5b1d91',
+            default: 'c02beb3d-d6d3-4ff5-bacb-71176b39634c',
             type: 'string',
             format: 'uuid'
         },
@@ -1421,7 +1470,7 @@ export const EnrollmentBatchSchema = {
             nullable: true
         },
         opened_at: {
-            default: '2026-08-11T03:19:46.530002100Z',
+            default: '2026-08-11T08:36:36.088142800Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1556,7 +1605,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         created_at: {
-            default: '2026-08-11T03:19:46.523935Z',
+            default: '2026-08-11T08:36:36.076940500Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1614,7 +1663,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         id: {
-            default: '0aabb134-2f66-425d-a873-429fcde78e70',
+            default: '280399da-410a-40ba-a9ab-7541659373f4',
             type: 'string',
             format: 'uuid'
         },
@@ -1668,7 +1717,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         reference_no: {
-            default: 'DRAFT-a363b25b-e161-4b46-849e-53e2cba35f72',
+            default: 'DRAFT-71ae652b-6d12-4203-8e3f-ac7f618a6026',
             type: 'string'
         },
         rejection_reason: {
@@ -1699,7 +1748,7 @@ export const G1ApplicationSchema = {
             nullable: true
         },
         updated_at: {
-            default: '2026-08-11T03:19:46.523939500Z',
+            default: '2026-08-11T08:36:36.076948900Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1906,7 +1955,7 @@ export const GuardianSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-08-11T03:19:46.533504700Z',
+            default: '2026-08-11T08:36:36.095024200Z',
             type: 'string',
             format: 'date-time'
         },
@@ -1956,6 +2005,11 @@ export const GuardianSchema = {
         relationship_type: {
             $ref: '#/components/schemas/GuardianRelationship'
         },
+        student_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        },
         workplace_address: {
             type: 'string',
             nullable: true
@@ -1974,6 +2028,98 @@ export const GuardianRelationshipSchema = {
         'Mother',
         'Guardian'
     ]
+} as const;
+
+export const GuardianWithChildrenSchema = {
+    title: 'GuardianWithChildren',
+    type: 'object',
+    required: [
+        'children',
+        'contact_phone',
+        'created_at',
+        'full_name',
+        'id',
+        'is_govt_employee',
+        'is_past_pupil',
+        'is_school_staff',
+        'nic_number',
+        'past_pupil_verified',
+        'relationship_type'
+    ],
+    properties: {
+        children: {
+            type: 'array',
+            items: {
+                $ref: '#/components/schemas/ChildInfo'
+            }
+        },
+        contact_email: {
+            type: 'string',
+            nullable: true
+        },
+        contact_phone: {
+            type: 'string'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time'
+        },
+        full_name: {
+            type: 'string'
+        },
+        govt_service_years: {
+            type: 'integer',
+            format: 'int32',
+            nullable: true
+        },
+        id: {
+            type: 'string',
+            format: 'uuid'
+        },
+        income_level: {
+            allOf: [
+                {
+                    $ref: '#/components/schemas/IncomeLevel'
+                }
+            ],
+            nullable: true
+        },
+        is_govt_employee: {
+            type: 'boolean'
+        },
+        is_past_pupil: {
+            type: 'boolean'
+        },
+        is_school_staff: {
+            type: 'boolean'
+        },
+        nic_number: {
+            type: 'string'
+        },
+        occupation: {
+            type: 'string',
+            nullable: true
+        },
+        past_pupil_verified: {
+            type: 'boolean'
+        },
+        relationship_type: {
+            $ref: '#/components/schemas/GuardianRelationship'
+        },
+        student_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        },
+        workplace_address: {
+            type: 'string',
+            nullable: true
+        },
+        workplace_name: {
+            type: 'string',
+            nullable: true
+        }
+    }
 } as const;
 
 export const IncomeLevelSchema = {
@@ -2037,7 +2183,7 @@ export const ModelSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-08-11T03:19:46.535220500Z',
+            default: '2026-08-11T08:36:36.100979Z',
             type: 'string',
             format: 'date-time'
         },
@@ -2515,7 +2661,7 @@ export const StaffDetailSchema = {
     ],
     properties: {
         created_at: {
-            default: '2026-08-11T03:19:46.535800500Z',
+            default: '2026-08-11T08:36:36.104101800Z',
             type: 'string',
             format: 'date-time'
         },
@@ -3105,6 +3251,11 @@ export const UpdateGuardianBodySchema = {
             ],
             nullable: true
         },
+        student_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true
+        },
         workplace_address: {
             type: 'string',
             nullable: true
@@ -3259,7 +3410,7 @@ export const WorkspaceAddressSchema = {
             type: 'string'
         },
         created_at: {
-            default: '2026-08-11T03:19:46.539030600Z',
+            default: '2026-08-11T08:36:36.110193300Z',
             type: 'string',
             format: 'date-time'
         },

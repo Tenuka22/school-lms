@@ -78,6 +78,7 @@ const defaultValues: FormData = {
   past_pupil_year_left: null,
   past_pupil_left_reason: null,
   past_pupil_school_id: null,
+  student_id: null,
 }
 
 export function CreateGuardianDialog({
@@ -236,10 +237,20 @@ export function CreateGuardianDialog({
                     value={formValues.past_pupil_school_id as string | null}
                     onChange={(v) => setFieldValue("past_pupil_school_id", v)}
                   />
-                  <StudentCombobox
-                    value={formValues.past_pupil_student_id as string | null}
-                    onChange={(v) => setFieldValue("past_pupil_student_id", v)}
-                  />
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Past pupil record at school</label>
+                    <StudentCombobox
+                      value={formValues.past_pupil_student_id as string | null}
+                      onChange={(v) => setFieldValue("past_pupil_student_id", v)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Link to student record (optional)</label>
+                    <StudentCombobox
+                      value={formValues.student_id as string | null}
+                      onChange={(v) => setFieldValue("student_id", v)}
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Select
                       value={String(formValues.past_pupil_highest_grade ?? "")}
@@ -358,6 +369,7 @@ export function CreateGuardianDialog({
             past_pupil_year_left: v.past_pupil_year_left,
             past_pupil_left_reason: v.past_pupil_left_reason,
             past_pupil_school_id: v.past_pupil_school_id,
+            student_id: v.student_id ?? null,
           },
         })
         queryClient.invalidateQueries({

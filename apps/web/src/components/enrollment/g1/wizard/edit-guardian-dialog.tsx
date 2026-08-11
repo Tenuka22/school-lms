@@ -39,7 +39,7 @@ import { vCreateGuardianBody } from "@/lib/api-client/valibot.gen"
 import { queryClient } from "@/router"
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 import professions from "professions"
-import type { Guardian } from "@/lib/api-client/types.gen"
+import type { Guardian, GuardianWithChildren } from "@/lib/api-client/types.gen"
 import {
   FormBuilder,
   type FormConfig,
@@ -59,7 +59,7 @@ export function EditGuardianDialog({
   onSaved,
   enrollmentId,
 }: {
-  guardian: Guardian
+  guardian: Guardian | GuardianWithChildren
   open: boolean
   onOpenChange: (v: boolean) => void
   onSaved: () => void
@@ -95,6 +95,7 @@ export function EditGuardianDialog({
     past_pupil_year_left: null as number | null,
     past_pupil_left_reason: null as string | null,
     past_pupil_school_id: null as string | null,
+    student_id: (guardian as any).student_id ?? null,
   }
 
   const buildUpdateBody = (v: any, includeCategories: boolean) => ({
@@ -119,6 +120,7 @@ export function EditGuardianDialog({
     past_pupil_year_left: includeCategories ? v.past_pupil_year_left : null,
     past_pupil_left_reason: includeCategories ? v.past_pupil_left_reason : null,
     past_pupil_school_id: includeCategories ? v.past_pupil_school_id : null,
+    student_id: includeCategories ? (v.student_id ?? null) : (guardian as any).student_id ?? null,
   })
 
   const formConfig: FormConfig = {
@@ -256,10 +258,20 @@ export function EditGuardianDialog({
                     value={formValues.past_pupil_school_id as string | null}
                     onChange={(v) => setFieldValue("past_pupil_school_id", v)}
                   />
-                  <StudentCombobox
-                    value={formValues.past_pupil_student_id as string | null}
-                    onChange={(v) => setFieldValue("past_pupil_student_id", v)}
-                  />
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Past pupil record at school</label>
+                    <StudentCombobox
+                      value={formValues.past_pupil_student_id as string | null}
+                      onChange={(v) => setFieldValue("past_pupil_student_id", v)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Link to student record (optional)</label>
+                    <StudentCombobox
+                      value={formValues.student_id as string | null}
+                      onChange={(v) => setFieldValue("student_id", v)}
+                    />
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Select
                       value={String(formValues.past_pupil_highest_grade ?? "")}

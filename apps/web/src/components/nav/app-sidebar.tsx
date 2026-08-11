@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useLocation } from "@tanstack/react-router"
-import { IconUsers, IconCommand } from "@tabler/icons-react"
+import { IconUsers, IconCommand, IconShield, IconAward } from "@tabler/icons-react"
 
 import { NavSwitcher } from "@/components/nav/nav-switcher"
 import type { NavMode } from "@/components/nav/nav-switcher"
@@ -30,6 +30,13 @@ const MODES: NavMode[] = [
     logo: IconUsers,
     description: "Enrollments & Records",
     url: "/student-management",
+  },
+  {
+    id: "guardian-management",
+    name: "Guardian Management",
+    logo: IconShield,
+    description: "Guardians & Families",
+    url: "/guardian-management",
   },
 ]
 
@@ -62,17 +69,43 @@ const STUDENT_MANAGEMENT_NAV = {
         { title: "All Children", url: "/student-management/children" },
       ],
     },
+    {
+      title: "Alumni",
+      url: "/student-management/alumni",
+      icon: <IconAward />,
+      isActive: true,
+      items: [
+        { title: "All Alumni", url: "/student-management/alumni" },
+      ],
+    },
+  ],
+  projects: [],
+}
+
+const GUARDIAN_MANAGEMENT_NAV = {
+  navMain: [
+    {
+      title: "Guardians",
+      url: "/guardian-management",
+      icon: <IconShield />,
+      isActive: true,
+      items: [
+        { title: "All Guardians", url: "/guardian-management/guardians" },
+      ],
+    },
   ],
   projects: [],
 }
 
 function getModeData(modeId: string) {
   if (modeId === "students-management") return STUDENT_MANAGEMENT_NAV
+  if (modeId === "guardian-management") return GUARDIAN_MANAGEMENT_NAV
   return { navMain: [], projects: [] }
 }
 
 function getActiveMode(pathname: string): NavMode {
   if (pathname.startsWith("/student-management")) return MODES[1]
+  if (pathname.startsWith("/guardian-management")) return MODES[2]
   return MODES[0]
 }
 

@@ -39,6 +39,7 @@ pub struct CreateGuardianBody {
     pub past_pupil_highest_grade: Option<String>,
     pub past_pupil_year_left: Option<i16>,
     pub past_pupil_left_reason: Option<String>,
+    pub student_id: Option<Uuid>,
 }
 
 #[api_operation(tag = "guardians", operation_id = "create-guardian")]
@@ -101,6 +102,7 @@ pub async fn create_guardian(
         income_level: input.income_level,
         address_id: None,
         is_sri_lankan_citizen: None,
+        student_id: input.student_id,
         created_at: Utc::now(),
     };
 
