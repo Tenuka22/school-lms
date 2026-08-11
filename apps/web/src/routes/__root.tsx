@@ -1,16 +1,21 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import {
+  HeadContent,
+  Scripts,
+  createRootRouteWithContext,
+} from "@tanstack/react-router"
+import { ThemeProvider } from "@/components/theme-provider"
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import { Toaster } from "sonner"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { QueryClientProvider } from "@tanstack/react-query"
 
 import appCss from "../styles.css?url"
-import { AuthProvider } from "@/lib/auth"
-import "@/lib/api"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { queryClient } from "@/router"
 
-const queryClient = new QueryClient()
-
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: typeof queryClient
+}>()({
   head: () => ({
     meta: [
       {
@@ -42,13 +47,17 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>{children}</AuthProvider>
+          <TooltipProvider>
+            <ThemeProvider defaultTheme="light" storageKey="theme">
+              {children}
+            </ThemeProvider>
+          </TooltipProvider>
         </QueryClientProvider>
         <Toaster position="top-center" richColors />
         <TanStackDevtools

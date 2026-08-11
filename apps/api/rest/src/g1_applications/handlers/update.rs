@@ -1,0 +1,190 @@
+use actix_web::{web, web::Json};
+use apistos::ApiComponent;
+use apistos::api_operation;
+use chrono::Utc;
+use db::entity::common::enrollment_batches;
+use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
+use db::entity::g1::applications;
+use log::info;
+use schemars::JsonSchema;
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use serde::Deserialize;
+use uuid::Uuid;
+
+use crate::auth::middleware::AuthenticatedUser;
+use crate::error::ApiError;
+use db::rbac::Permission;
+
+#[derive(Deserialize, JsonSchema, ApiComponent)]
+pub struct UpdateApplicationBody {
+    pub school_id: Option<Uuid>,
+    pub child_id: Option<Uuid>,
+    pub guardian_id: Option<Uuid>,
+    pub wizard_step: Option<i16>,
+    pub category: Option<db::entity::common::enums::G1Category>,
+    pub overseas_arrival_date: Option<chrono::NaiveDate>,
+    pub submission_method: Option<String>,
+    pub interview_date: Option<chrono::NaiveDate>,
+    pub interview_completed: Option<bool>,
+    pub alternative_age_certificate: Option<bool>,
+    pub alternative_age_certificate_ref: Option<String>,
+    pub birth_certificate_verified: Option<bool>,
+    pub age_eligibility_verified: Option<bool>,
+    pub residence_verified: Option<bool>,
+    pub category_verified: Option<bool>,
+    pub rejection_reason: Option<String>,
+    // Electoral fields
+    pub electoral_year: Option<i16>,
+    pub polling_district: Option<db::entity::common::enums::ElectoralDistrict>,
+    pub polling_division: Option<String>,
+    pub gn_name: Option<String>,
+    pub gn_number: Option<String>,
+    pub polling_area: Option<String>,
+    pub village_street: Option<String>,
+    pub voter_names: Option<serde_json::Value>,
+    pub household_head_name: Option<String>,
+    pub declaration_agreed: Option<bool>,
+    pub preferred_school_ids: Option<serde_json::Value>,
+    pub closer_school_exists: Option<bool>,
+}
+
+#[api_operation(tag = "g1-applications", operation_id = "update-application")]
+pub async fn update_application(
+    db: web::Data<DatabaseConnection>,
+    auth: AuthenticatedUser,
+    id: web::Path<Uuid>,
+    body: Json<UpdateApplicationBody>,
+) -> Result<Json<applications::Model>, ApiError> {
+    auth.require_permission(Permission::G1ApplicationUpdate)
+        .map_err(|_| ApiError::Forbidden("insufficient permissions".into()))?;
+
+    let id = id.into_inner();
+    let user_id = auth.user_id;
+
+    info!("[update_application] user={user_id:?} app={id}");
+
+    let existing = applications::Entity::find_by_id(id)
+        .filter(applications::Column::DeletedAt.is_null())
+        .one(db.as_ref())
+        .await?
+        .ok_or_else(|| ApiError::NotFound("application not found".into()))?;
+
+    match existing.enrollment_status {
+        EnrollmentStatus::Draft | EnrollmentStatus::Pending | EnrollmentStatus::Completed => {}
+        _ => {
+            return Err(ApiError::BadRequest(
+                "cannot update application in current status".into(),
+            ));
+        }
+    }
+
+    let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
+        .one(db.as_ref())
+        .await?
+        .ok_or_else(|| ApiError::BadRequest("enrollment batch not found".into()))?;
+
+    let now = Utc::now();
+    if batch.status != db::entity::common::enums::BatchStatus::Open || batch.closed_at <= now {
+        return Err(ApiError::BadRequest(
+            "cannot edit application after enrollment batch closed".into(),
+        ));
+    }
+
+    info!(
+        "[update_application] found existing app status={:?} wizard_step={:?}",
+        existing.enrollment_status, existing.wizard_step
+    );
+
+    let old_json = serde_json::to_value(&existing).ok();
+
+    let m = body.into_inner();
+
+    info!(
+        "[update_application] incoming school_id={:?} wizard_step={:?}",
+        m.school_id, m.wizard_step
+    );
+
+    let active = applications::ActiveModel {
+        id: Set(existing.id),
+        reference_no: Set(existing.reference_no),
+        school_id: Set(m.school_id.or(existing.school_id)),
+        total_marks: Set(existing.total_marks),
+        rank_number: Set(existing.rank_number),
+        list_category: Set(existing.list_category),
+        submitted_at: Set(existing.submitted_at),
+        verified_at: Set(existing.verified_at),
+        verified_by: Set(existing.verified_by),
+        finalized_at: Set(existing.finalized_at),
+        ip_address: Set(existing.ip_address),
+        user_agent: Set(existing.user_agent),
+        created_at: Set(existing.created_at),
+        updated_at: Set(Utc::now()),
+        child_id: Set(m.child_id.unwrap_or(existing.child_id)),
+        guardian_id: Set(m.guardian_id.unwrap_or(existing.guardian_id)),
+        batch_id: Set(existing.batch_id),
+        enrollment_status: Set(existing.enrollment_status),
+        category: Set(m.category.or(existing.category)),
+        overseas_arrival_date: Set(m.overseas_arrival_date.or(existing.overseas_arrival_date)),
+        submission_method: Set(m.submission_method.or(existing.submission_method)),
+        interview_date: Set(m.interview_date.or(existing.interview_date)),
+        interview_completed: Set(m
+            .interview_completed
+            .unwrap_or(existing.interview_completed)),
+        birth_certificate_verified: Set(m
+            .birth_certificate_verified
+            .unwrap_or(existing.birth_certificate_verified)),
+        age_eligibility_verified: Set(m
+            .age_eligibility_verified
+            .unwrap_or(existing.age_eligibility_verified)),
+        residence_verified: Set(m.residence_verified.unwrap_or(existing.residence_verified)),
+        category_verified: Set(m.category_verified.unwrap_or(existing.category_verified)),
+        alternative_age_certificate: Set(m
+            .alternative_age_certificate
+            .unwrap_or(existing.alternative_age_certificate)),
+        alternative_age_certificate_ref: Set(m
+            .alternative_age_certificate_ref
+            .or(existing.alternative_age_certificate_ref)),
+        rejection_reason: Set(m.rejection_reason.or(existing.rejection_reason)),
+        created_by: Set(existing.created_by),
+        updated_by: Set(auth.user_id),
+        wizard_step: Set(m.wizard_step.or(existing.wizard_step)),
+        deleted_at: Set(existing.deleted_at),
+        preferred_school_ids: Set(m.preferred_school_ids.or(existing.preferred_school_ids)),
+        electoral_year: Set(m.electoral_year.or(existing.electoral_year)),
+        polling_district: Set(m.polling_district.or(existing.polling_district)),
+        polling_division: Set(m.polling_division.or(existing.polling_division)),
+        gn_name: Set(m.gn_name.or(existing.gn_name)),
+        gn_number: Set(m.gn_number.or(existing.gn_number)),
+        polling_area: Set(m.polling_area.or(existing.polling_area)),
+        village_street: Set(m.village_street.or(existing.village_street)),
+        voter_names: Set(m.voter_names.or(existing.voter_names)),
+        household_head_name: Set(m.household_head_name.or(existing.household_head_name)),
+        declaration_agreed: Set(m.declaration_agreed.unwrap_or(existing.declaration_agreed)),
+        declaration_signed_at: Set(existing.declaration_signed_at),
+        closer_school_exists: Set(m.closer_school_exists.or(existing.closer_school_exists)),
+    };
+
+    let saved = active.update(db.as_ref()).await?;
+    info!(
+        "[update_application] updated successfully wizard_step={:?}",
+        saved.wizard_step
+    );
+    let new_json = serde_json::to_value(&saved).ok();
+
+    db::entity::audit_logs::ActiveModel {
+        id: Set(Uuid::new_v4()),
+        table_name: Set("g1_applications".to_string()),
+        record_id: Set(id),
+        action: Set(AuditOperation::Update),
+        old_values: Set(old_json),
+        new_values: Set(new_json),
+        performed_by: Set(auth.user_id),
+        performed_at: Set(Utc::now()),
+        ip_address: Set(None),
+        reason: Set(None),
+    }
+    .insert(db.as_ref())
+    .await?;
+
+    Ok(Json(saved))
+}

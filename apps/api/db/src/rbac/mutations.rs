@@ -1,10 +1,11 @@
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
+use uuid::Uuid;
 
-use crate::entity::{role, user_role};
+use crate::entity::{user::role, user::user_role};
 
 pub async fn assign_user_role(
     db: &DatabaseConnection,
-    user_id: i32,
+    user_id: Uuid,
     role_name: &str,
 ) -> Result<(), DbErr> {
     let role = role::Entity::find()
@@ -31,6 +32,6 @@ pub async fn assign_user_role(
     Ok(())
 }
 
-pub async fn ensure_admin_role(db: &DatabaseConnection, user_id: i32) -> Result<(), DbErr> {
+pub async fn ensure_admin_role(db: &DatabaseConnection, user_id: Uuid) -> Result<(), DbErr> {
     assign_user_role(db, user_id, "admin").await
 }

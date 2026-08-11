@@ -1,0 +1,13 @@
+**/.git
+**/.github
+**/*.md
+**/docs
+infra/podman
+packages
+.containerignore
+justfile
+README.md
+CONTRIBUTING.md
+LICENSE
+SECURITY.md
+CODE_OF_CONDUCT.md

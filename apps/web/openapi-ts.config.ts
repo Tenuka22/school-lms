@@ -6,11 +6,14 @@ dotenv.config({ path: ".env.local" })
 const { env } = await import("./src/lib/env")
 
 export default defineConfig({
-  input: `${env.VITE_PUBLIC_API_URL}/api/openapi.json`,
+  input: `${env.VITE_PUBLIC_API_URL}/openapi.json`,
   output: "src/lib/api-client",
   plugins: [
     "@hey-api/typescript",
-    "@hey-api/transformers",
+    {
+      name: "@hey-api/transformers",
+      dates: false,
+    },
     {
       name: "@hey-api/schemas",
       type: "json",

@@ -1,11 +1,15 @@
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
 use std::collections::HashMap;
 
-use crate::entity::{permission, role, role_permission};
+use crate::entity::{user::permission, user::role, user::role_permission};
 
 pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
     let roles = vec![
         ("admin", "Full system access"),
+        (
+            "office_staff",
+            "Can create and edit records but cannot delete, verify, or approve",
+        ),
         ("unknown", "Logged-in basic user"),
         ("unauthenticated", "No JWT / public user"),
     ];
@@ -36,6 +40,18 @@ pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
         ("counter:secure:increment", "counter", "secure:increment"),
         ("course:list", "course", "list"),
         ("announcement:read", "announcement", "read"),
+        ("file:upload", "file", "upload"),
+        ("g1:application:create", "g1_application", "create"),
+        ("g1:application:read", "g1_application", "read"),
+        ("g1:application:update", "g1_application", "update"),
+        ("g1:application:delete", "g1_application", "delete"),
+        ("g1:application:submit", "g1_application", "submit"),
+        ("g1:application:verify", "g1_application", "verify"),
+        ("g1:document:upload", "g1_document", "upload"),
+        ("g1:document:verify", "g1_document", "verify"),
+        ("g1:appeal:create", "g1_appeal", "create"),
+        ("g1:appeal:review", "g1_appeal", "review"),
+        ("g1:report:read", "g1_report", "read"),
         ("*:*", "*", "*"),
     ];
 
@@ -72,11 +88,30 @@ pub async fn seed_defaults(db: &DatabaseConnection) -> Result<(), DbErr> {
     let perm_map: HashMap<String, i32> = perm_ids.into_iter().collect();
 
     let admin_role_id = role_map.get("admin").unwrap();
+    let office_staff_role_id = role_map.get("office_staff").unwrap();
     let unknown_role_id = role_map.get("unknown").unwrap();
     let unauth_role_id = role_map.get("unauthenticated").unwrap();
 
     let role_perms: Vec<(&i32, Vec<&str>)> = vec![
         (admin_role_id, vec!["*:*"]),
+        (
+            office_staff_role_id,
+            vec![
+                "profile:read",
+                "profile:update",
+                "counter:read",
+                "counter:increment",
+                "file:upload",
+                "g1:application:create",
+                "g1:application:read",
+                "g1:application:update",
+                "g1:application:submit",
+                "g1:document:upload",
+                "g1:document:verify",
+                "enrollment-batch:read",
+                "g1:report:read",
+            ],
+        ),
         (
             unknown_role_id,
             vec![

@@ -9,14 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as AuthenticatedStudentManagementIndexRouteImport } from './routes/_authenticated/student-management/index'
+import { Route as AuthenticatedGuardianManagementIndexRouteImport } from './routes/_authenticated/guardian-management/index'
+import { Route as AuthenticatedStudentManagementStudentsRouteImport } from './routes/_authenticated/student-management/students'
+import { Route as AuthenticatedStudentManagementChildrenRouteImport } from './routes/_authenticated/student-management/children'
+import { Route as AuthenticatedStudentManagementAlumniRouteImport } from './routes/_authenticated/student-management/alumni'
+import { Route as AuthenticatedGuardianManagementGuardiansRouteImport } from './routes/_authenticated/guardian-management/guardians'
+import { Route as AuthenticatedStudentManagementEnrollmentG1IndexRouteImport } from './routes/_authenticated/student-management/enrollment/g1/index'
+import { Route as AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRouteImport } from './routes/_authenticated/student-management/enrollment/g1/$enrollment_id/index'
+import { Route as AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRouteImport } from './routes/_authenticated/student-management/enrollment/g1/$enrollment_id/interview'
 
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
   id: '/auth/sign-up',
@@ -28,45 +42,176 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/auth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedStudentManagementIndexRoute =
+  AuthenticatedStudentManagementIndexRouteImport.update({
+    id: '/student-management/',
+    path: '/student-management/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedGuardianManagementIndexRoute =
+  AuthenticatedGuardianManagementIndexRouteImport.update({
+    id: '/guardian-management/',
+    path: '/guardian-management/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementStudentsRoute =
+  AuthenticatedStudentManagementStudentsRouteImport.update({
+    id: '/student-management/students',
+    path: '/student-management/students',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementChildrenRoute =
+  AuthenticatedStudentManagementChildrenRouteImport.update({
+    id: '/student-management/children',
+    path: '/student-management/children',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementAlumniRoute =
+  AuthenticatedStudentManagementAlumniRouteImport.update({
+    id: '/student-management/alumni',
+    path: '/student-management/alumni',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedGuardianManagementGuardiansRoute =
+  AuthenticatedGuardianManagementGuardiansRouteImport.update({
+    id: '/guardian-management/guardians',
+    path: '/guardian-management/guardians',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementEnrollmentG1IndexRoute =
+  AuthenticatedStudentManagementEnrollmentG1IndexRouteImport.update({
+    id: '/student-management/enrollment/g1/',
+    path: '/student-management/enrollment/g1/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute =
+  AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRouteImport.update(
+    {
+      id: '/student-management/enrollment/g1/$enrollment_id/',
+      path: '/student-management/enrollment/g1/$enrollment_id/',
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
+const AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute =
+  AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRouteImport.update(
+    {
+      id: '/student-management/enrollment/g1/$enrollment_id/interview',
+      path: '/student-management/enrollment/g1/$enrollment_id/interview',
+      getParentRoute: () => AuthenticatedRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/guardian-management/guardians': typeof AuthenticatedGuardianManagementGuardiansRoute
+  '/student-management/alumni': typeof AuthenticatedStudentManagementAlumniRoute
+  '/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
+  '/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
+  '/guardian-management/': typeof AuthenticatedGuardianManagementIndexRoute
+  '/student-management/': typeof AuthenticatedStudentManagementIndexRoute
+  '/student-management/enrollment/g1/': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
+  '/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
+  '/student-management/enrollment/g1/$enrollment_id/': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/guardian-management/guardians': typeof AuthenticatedGuardianManagementGuardiansRoute
+  '/student-management/alumni': typeof AuthenticatedStudentManagementAlumniRoute
+  '/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
+  '/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
+  '/guardian-management': typeof AuthenticatedGuardianManagementIndexRoute
+  '/student-management': typeof AuthenticatedStudentManagementIndexRoute
+  '/student-management/enrollment/g1': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
+  '/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
+  '/student-management/enrollment/g1/$enrollment_id': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/guardian-management/guardians': typeof AuthenticatedGuardianManagementGuardiansRoute
+  '/_authenticated/student-management/alumni': typeof AuthenticatedStudentManagementAlumniRoute
+  '/_authenticated/student-management/children': typeof AuthenticatedStudentManagementChildrenRoute
+  '/_authenticated/student-management/students': typeof AuthenticatedStudentManagementStudentsRoute
+  '/_authenticated/guardian-management/': typeof AuthenticatedGuardianManagementIndexRoute
+  '/_authenticated/student-management/': typeof AuthenticatedStudentManagementIndexRoute
+  '/_authenticated/student-management/enrollment/g1/': typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
+  '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
+  '/_authenticated/student-management/enrollment/g1/$enrollment_id/': typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth/sign-in' | '/auth/sign-up'
+  fullPaths:
+    | '/'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
+    | '/guardian-management/guardians'
+    | '/student-management/alumni'
+    | '/student-management/children'
+    | '/student-management/students'
+    | '/guardian-management/'
+    | '/student-management/'
+    | '/student-management/enrollment/g1/'
+    | '/student-management/enrollment/g1/$enrollment_id/interview'
+    | '/student-management/enrollment/g1/$enrollment_id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/sign-in' | '/auth/sign-up'
-  id: '__root__' | '/' | '/auth/sign-in' | '/auth/sign-up'
+  to:
+    | '/auth/sign-in'
+    | '/auth/sign-up'
+    | '/'
+    | '/guardian-management/guardians'
+    | '/student-management/alumni'
+    | '/student-management/children'
+    | '/student-management/students'
+    | '/guardian-management'
+    | '/student-management'
+    | '/student-management/enrollment/g1'
+    | '/student-management/enrollment/g1/$enrollment_id/interview'
+    | '/student-management/enrollment/g1/$enrollment_id'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
+    | '/_authenticated/'
+    | '/_authenticated/guardian-management/guardians'
+    | '/_authenticated/student-management/alumni'
+    | '/_authenticated/student-management/children'
+    | '/_authenticated/student-management/students'
+    | '/_authenticated/guardian-management/'
+    | '/_authenticated/student-management/'
+    | '/_authenticated/student-management/enrollment/g1/'
+    | '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview'
+    | '/_authenticated/student-management/enrollment/g1/$enrollment_id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/auth/sign-up': {
       id: '/auth/sign-up'
@@ -82,11 +227,113 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/student-management/': {
+      id: '/_authenticated/student-management/'
+      path: '/student-management'
+      fullPath: '/student-management/'
+      preLoaderRoute: typeof AuthenticatedStudentManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/guardian-management/': {
+      id: '/_authenticated/guardian-management/'
+      path: '/guardian-management'
+      fullPath: '/guardian-management/'
+      preLoaderRoute: typeof AuthenticatedGuardianManagementIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/students': {
+      id: '/_authenticated/student-management/students'
+      path: '/student-management/students'
+      fullPath: '/student-management/students'
+      preLoaderRoute: typeof AuthenticatedStudentManagementStudentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/children': {
+      id: '/_authenticated/student-management/children'
+      path: '/student-management/children'
+      fullPath: '/student-management/children'
+      preLoaderRoute: typeof AuthenticatedStudentManagementChildrenRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/alumni': {
+      id: '/_authenticated/student-management/alumni'
+      path: '/student-management/alumni'
+      fullPath: '/student-management/alumni'
+      preLoaderRoute: typeof AuthenticatedStudentManagementAlumniRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/guardian-management/guardians': {
+      id: '/_authenticated/guardian-management/guardians'
+      path: '/guardian-management/guardians'
+      fullPath: '/guardian-management/guardians'
+      preLoaderRoute: typeof AuthenticatedGuardianManagementGuardiansRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/enrollment/g1/': {
+      id: '/_authenticated/student-management/enrollment/g1/'
+      path: '/student-management/enrollment/g1'
+      fullPath: '/student-management/enrollment/g1/'
+      preLoaderRoute: typeof AuthenticatedStudentManagementEnrollmentG1IndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/enrollment/g1/$enrollment_id/': {
+      id: '/_authenticated/student-management/enrollment/g1/$enrollment_id/'
+      path: '/student-management/enrollment/g1/$enrollment_id'
+      fullPath: '/student-management/enrollment/g1/$enrollment_id/'
+      preLoaderRoute: typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview': {
+      id: '/_authenticated/student-management/enrollment/g1/$enrollment_id/interview'
+      path: '/student-management/enrollment/g1/$enrollment_id/interview'
+      fullPath: '/student-management/enrollment/g1/$enrollment_id/interview'
+      preLoaderRoute: typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedGuardianManagementGuardiansRoute: typeof AuthenticatedGuardianManagementGuardiansRoute
+  AuthenticatedStudentManagementAlumniRoute: typeof AuthenticatedStudentManagementAlumniRoute
+  AuthenticatedStudentManagementChildrenRoute: typeof AuthenticatedStudentManagementChildrenRoute
+  AuthenticatedStudentManagementStudentsRoute: typeof AuthenticatedStudentManagementStudentsRoute
+  AuthenticatedGuardianManagementIndexRoute: typeof AuthenticatedGuardianManagementIndexRoute
+  AuthenticatedStudentManagementIndexRoute: typeof AuthenticatedStudentManagementIndexRoute
+  AuthenticatedStudentManagementEnrollmentG1IndexRoute: typeof AuthenticatedStudentManagementEnrollmentG1IndexRoute
+  AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute: typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute
+  AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute: typeof AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedGuardianManagementGuardiansRoute:
+    AuthenticatedGuardianManagementGuardiansRoute,
+  AuthenticatedStudentManagementAlumniRoute:
+    AuthenticatedStudentManagementAlumniRoute,
+  AuthenticatedStudentManagementChildrenRoute:
+    AuthenticatedStudentManagementChildrenRoute,
+  AuthenticatedStudentManagementStudentsRoute:
+    AuthenticatedStudentManagementStudentsRoute,
+  AuthenticatedGuardianManagementIndexRoute:
+    AuthenticatedGuardianManagementIndexRoute,
+  AuthenticatedStudentManagementIndexRoute:
+    AuthenticatedStudentManagementIndexRoute,
+  AuthenticatedStudentManagementEnrollmentG1IndexRoute:
+    AuthenticatedStudentManagementEnrollmentG1IndexRoute,
+  AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute:
+    AuthenticatedStudentManagementEnrollmentG1Enrollment_idInterviewRoute,
+  AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute:
+    AuthenticatedStudentManagementEnrollmentG1Enrollment_idIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignUpRoute: AuthSignUpRoute,
 }

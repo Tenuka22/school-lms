@@ -3,8 +3,15 @@ mod config;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer, web};
+use apistos::app::{BuildConfig, OpenApiWrapper};
+use apistos::info::Info;
+use apistos::spec::{DefaultParameters, Spec};
+use apistos::{ApiComponent, ScalarConfig};
 use dotenvy::from_filename;
+use rest::FrontendUrl;
 use rest::JwtSecret;
+use rest::error::ErrorResponse;
+use rest::storage::Storage;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -44,27 +51,71 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    db.get_schema_registry("db::entity::*")
-        .sync(&db)
-        .await
-        .expect("Schema sync failed");
+    db::migrate(&db).await.expect("Schema migration failed");
 
     if let Err(e) = db::rbac::seed_defaults(&db).await {
         log::warn!("RBAC seeding failed: {e}");
     }
 
+    if let Err(e) = db::seed::seed_districts(&db).await {
+        log::warn!("District seeding failed (continuing): {e}");
+    }
+
+    if let Err(e) = db::seed::seed_schools(&db).await {
+        log::warn!("School seeding failed (continuing): {e}");
+    }
+
+    if let Err(e) = db::seed::seed_workspace_addresses(&db).await {
+        log::warn!("Workspace address seeding failed (continuing): {e}");
+    }
+
+    let storage = Storage::from_env().await;
+    if let Err(e) = storage.ensure_bucket().await {
+        log::warn!("MinIO bucket setup failed (continuing): {e}");
+    }
+
     let jwt_secret = cfg.jwt_secret.clone();
     let jwt_data = web::Data::new(JwtSecret(jwt_secret.clone()));
     let data = web::Data::new(db.clone());
+    let storage_data = web::Data::new(storage);
+    let frontend_url_data = web::Data::new(FrontendUrl(
+        cfg.public_url
+            .clone()
+            .unwrap_or_else(|| cfg.frontend_url.clone()),
+    ));
 
     let port = cfg.server_port;
     let frontend_url = cfg.frontend_url.clone();
-    log::info!("Starting server on 0.0.0.0:{port} with allowed origin: {frontend_url}");
+    let public_url = cfg
+        .public_url
+        .clone()
+        .unwrap_or_else(|| frontend_url.clone());
+    log::info!(
+        "Starting server on 0.0.0.0:{port} with allowed origins: {frontend_url}, {public_url}"
+    );
 
     HttpServer::new(move || {
+        let mut spec = Spec {
+            info: Info {
+                title: "School LMS API".to_string(),
+                version: "0.1.0".to_string(),
+                description: Some("School Learning Management System API".to_string()),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        if let Some(error_schema) = <ErrorResponse as ApiComponent>::schema() {
+            spec.default_parameters.push(DefaultParameters {
+                components: vec![error_schema],
+                ..Default::default()
+            });
+        }
+
         let cors = Cors::default()
             .allowed_origin(&frontend_url)
-            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+            .allowed_origin(&public_url)
+            .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
             .allowed_headers(vec![
                 actix_web::http::header::AUTHORIZATION,
                 actix_web::http::header::CONTENT_TYPE,
@@ -73,11 +124,18 @@ async fn main() -> std::io::Result<()> {
             .max_age(3600);
 
         App::new()
+            .document(spec)
             .wrap(Logger::default())
             .wrap(cors)
             .app_data(data.clone())
             .app_data(jwt_data.clone())
+            .app_data(storage_data.clone())
+            .app_data(frontend_url_data.clone())
             .configure(rest::configure)
+            .build_with(
+                "/openapi.json",
+                BuildConfig::default().with(ScalarConfig::new(&"/docs")),
+            )
     })
     .bind(("0.0.0.0", port))?
     .run()

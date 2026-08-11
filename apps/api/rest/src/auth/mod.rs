@@ -5,7 +5,7 @@ pub mod types;
 
 pub use middleware::{AuthMiddleware, Claims, JwtSecret};
 
-use actix_web::web;
+use apistos::web;
 
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.route("/register", web::post().to(handlers::register::register))
@@ -15,5 +15,6 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
         .route(
             "/logout-all",
             web::post().to(handlers::logout_all::logout_all),
-        );
+        )
+        .route("/me", web::get().to(handlers::me::me));
 }

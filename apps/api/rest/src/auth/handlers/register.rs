@@ -1,34 +1,24 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::actix::CreatedJson;
+use apistos::api_operation;
 use chrono::{Duration, Utc};
 use db::entity::{session, user};
 use db::rbac::{ADMIN_EMAIL, assign_user_role};
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use uuid::Uuid;
 
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, hash_password};
 use crate::auth::types::{AuthResponse, RegisterRequest};
-use crate::error::{ApiError, ErrorResponse};
+use crate::error::ApiError;
 
-#[utoipa::path(
-    post,
-    path = "/api/auth/register",
-    request_body = RegisterRequest,
-    responses(
-        (status = 201, description = "User registered successfully", body = AuthResponse),
-        (status = 400, description = "Validation error", body = ErrorResponse),
-        (status = 409, description = "Email already registered", body = ErrorResponse),
-        (status = 500, description = "Internal server error", body = ErrorResponse),
-    ),
-)]
+#[api_operation(tag = "auth", operation_id = "register")]
 pub async fn register(
     db: web::Data<DatabaseConnection>,
-    body: web::Json<RegisterRequest>,
+    body: Json<RegisterRequest>,
     jwt_secret: web::Data<JwtSecret>,
-) -> Result<HttpResponse, ApiError> {
-    if body.email.is_empty() {
-        return Err(ApiError::BadRequest("email is required".into()));
-    }
-
+) -> Result<CreatedJson<AuthResponse>, ApiError> {
+    crate::validation::Email::new(body.email.clone())?;
     if body.password.len() < 8 {
         return Err(ApiError::BadRequest(
             "password must be at least 8 characters".into(),
@@ -51,8 +41,11 @@ pub async fn register(
 
     let now = Utc::now();
     let new_user = user::ActiveModel {
+        id: Set(Uuid::new_v4()),
+        username: Set(body.email.clone()),
         email: Set(body.email.clone()),
         password_hash: Set(password_hash),
+        is_active: Set(true),
         created_at: Set(now),
         updated_at: Set(now),
         ..Default::default()
@@ -91,9 +84,11 @@ pub async fn register(
         ApiError::Internal("internal error".into())
     })?;
 
-    Ok(HttpResponse::Created().json(AuthResponse {
+    let access_expires_at = (now + Duration::minutes(15)).timestamp();
+
+    Ok(CreatedJson(AuthResponse {
         access_token,
         refresh_token: raw_refresh,
-        expires_at: session_expires.timestamp(),
+        expires_at: access_expires_at,
     }))
 }

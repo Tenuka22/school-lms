@@ -1,9 +1,0 @@
-target/
-.git/
-*.lock
-**/node_modules/
-**/target/
-Dockerfile*
-docker-compose*
-.gitignore
-README.md

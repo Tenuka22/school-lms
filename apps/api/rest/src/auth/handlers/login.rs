@@ -1,4 +1,5 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use chrono::{Duration, Utc};
 use db::entity::{session, user};
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
@@ -6,23 +7,14 @@ use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, Qu
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, verify_password};
 use crate::auth::types::{AuthResponse, LoginRequest};
-use crate::error::{ApiError, ErrorResponse};
+use crate::error::ApiError;
 
-#[utoipa::path(
-    post,
-    path = "/api/auth/login",
-    request_body = LoginRequest,
-    responses(
-        (status = 200, description = "Login successful", body = AuthResponse),
-        (status = 401, description = "Invalid credentials", body = ErrorResponse),
-        (status = 500, description = "Internal server error", body = ErrorResponse),
-    ),
-)]
+#[api_operation(tag = "auth", operation_id = "login")]
 pub async fn login(
     db: web::Data<DatabaseConnection>,
-    body: web::Json<LoginRequest>,
+    body: Json<LoginRequest>,
     jwt_secret: web::Data<JwtSecret>,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<AuthResponse>, ApiError> {
     let user = user::Entity::find()
         .filter(user::Column::Email.eq(&body.email))
         .one(db.as_ref())
@@ -60,9 +52,11 @@ pub async fn login(
         ApiError::Internal("internal error".into())
     })?;
 
-    Ok(HttpResponse::Ok().json(AuthResponse {
+    let access_expires_at = (now + Duration::minutes(15)).timestamp();
+
+    Ok(Json(AuthResponse {
         access_token,
         refresh_token: raw_refresh,
-        expires_at: session_expires.timestamp(),
+        expires_at: access_expires_at,
     }))
 }

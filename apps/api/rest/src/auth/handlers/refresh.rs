@@ -1,31 +1,24 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use chrono::{Duration, Utc};
 use db::entity::session;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction, DbErr, EntityTrait,
     QueryFilter, QuerySelect, Set, TransactionError, TransactionTrait, sea_query::LockType,
 };
+use uuid::Uuid;
 
 use crate::auth::middleware::JwtSecret;
 use crate::auth::service::{create_access_token, generate_refresh_token, hash_refresh_token};
 use crate::auth::types::{AuthResponse, RefreshRequest};
-use crate::error::{ApiError, ErrorResponse};
+use crate::error::ApiError;
 
-#[utoipa::path(
-    post,
-    path = "/api/auth/refresh",
-    request_body = RefreshRequest,
-    responses(
-        (status = 200, description = "Token refreshed successfully", body = AuthResponse),
-        (status = 401, description = "Invalid or reused refresh token", body = ErrorResponse),
-        (status = 500, description = "Internal server error", body = ErrorResponse),
-    ),
-)]
+#[api_operation(tag = "auth", operation_id = "refresh")]
 pub async fn refresh(
     db: web::Data<DatabaseConnection>,
-    body: web::Json<RefreshRequest>,
+    body: Json<RefreshRequest>,
     jwt_secret: web::Data<JwtSecret>,
-) -> Result<HttpResponse, ApiError> {
+) -> Result<Json<AuthResponse>, ApiError> {
     let token_hash = hash_refresh_token(&body.refresh_token);
     let secret = jwt_secret.0.clone();
 
@@ -73,16 +66,17 @@ pub async fn refresh(
 
                 new_session.insert(txn).await?;
 
+                let access_expires_at = (now + Duration::minutes(15)).timestamp();
                 let access_token =
                     create_access_token(user_id, &secret).map_err(|e| DbErr::Custom(e))?;
 
-                Ok((access_token, raw_refresh, session_expires.timestamp()))
+                Ok((access_token, raw_refresh, access_expires_at))
             })
         })
         .await;
 
     match result {
-        Ok((access_token, raw_refresh, expires_at)) => Ok(HttpResponse::Ok().json(AuthResponse {
+        Ok((access_token, raw_refresh, expires_at)) => Ok(Json(AuthResponse {
             access_token,
             refresh_token: raw_refresh,
             expires_at,
@@ -98,7 +92,7 @@ pub async fn refresh(
     }
 }
 
-async fn revoke_all_user_sessions(txn: &DatabaseTransaction, user_id: i32) -> Result<(), DbErr> {
+async fn revoke_all_user_sessions(txn: &DatabaseTransaction, user_id: Uuid) -> Result<(), DbErr> {
     use sea_orm::sea_query::Expr;
 
     session::Entity::update_many()

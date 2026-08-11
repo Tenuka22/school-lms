@@ -6,6 +6,10 @@ edition = "2024"
 [dependencies]
 chrono = "0.4.45"
 log = "0.4"
-sea-orm = { version = "2.0.0-rc", features = [ "sqlx-postgres", "runtime-tokio-native-tls", "macros","schema-sync","with-json","with-chrono","with-uuid" ,"entity-registry"] }
+async-trait = "0.1"
+sea-orm = { version = "2.0.0-rc", features = ["sqlx-postgres", "runtime-tokio-native-tls", "macros", "with-json", "with-chrono", "with-uuid"] }
+sea-orm-migration = { version = "2.0.0-rc", default-features = false, features = ["sqlx-postgres", "runtime-tokio-native-tls"] }
 serde = "1.0.228"
-uuid = "1.23.5"
+uuid = { version = "1.23.5", features = ["v4"] }
+apistos = { version = "0.6" }
+schemars = { package = "apistos-schemars", version = "0.8", features = ["chrono", "uuid"] }

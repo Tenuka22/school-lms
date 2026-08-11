@@ -1,11 +1,31 @@
+mod addresses;
+pub mod audit;
 mod auth;
+mod blacklist;
+mod children;
 mod counter;
+mod districts;
 pub mod docs;
+mod enrollment_batches;
 pub mod error;
+mod g1_applications;
+mod gn_divisions;
+mod guardians;
+mod past_pupil_details;
+mod polling_divisions;
+mod schools;
+mod staff_details;
+pub mod storage;
+mod students;
+mod uploads;
+pub mod validation;
+mod workspace_addresses;
 
-use actix_web::web;
+use apistos::web;
 
 pub use auth::{AuthMiddleware, Claims, JwtSecret};
+
+pub struct FrontendUrl(pub String);
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -14,8 +34,22 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
                 actix_web::middleware::TrailingSlash::Trim,
             ))
             .wrap(auth::AuthMiddleware)
+            .configure(blacklist::routes)
+            .configure(children::routes)
             .configure(counter::routes)
-            .service(web::scope("/auth").configure(auth::routes))
-            .configure(docs::routes),
+            .configure(districts::routes)
+            .configure(g1_applications::routes)
+            .configure(enrollment_batches::routes)
+            .configure(gn_divisions::routes)
+            .configure(polling_divisions::routes)
+            .configure(guardians::routes)
+            .configure(addresses::routes)
+            .configure(past_pupil_details::routes)
+            .configure(schools::routes)
+            .configure(staff_details::routes)
+            .configure(students::routes)
+            .configure(workspace_addresses::routes)
+            .configure(uploads::routes)
+            .service(web::scope("/auth").configure(auth::routes)),
     );
 }

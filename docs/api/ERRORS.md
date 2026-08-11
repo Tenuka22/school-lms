@@ -19,6 +19,22 @@ pub enum ApiError {
 Each variant maps to the correct HTTP status code and serialises a JSON body
 of the form `{ "error": "<message>" }`.
 
+Error status codes are documented in the OpenAPI spec via the `ApiErrorComponent`
+derive macro:
+
+```rust
+#[derive(Debug, ApiErrorComponent)]
+#[openapi_error(
+    status(code = 400),
+    status(code = 401),
+    status(code = 403),
+    status(code = 404),
+    status(code = 409),
+    status(code = 500),
+)]
+pub enum ApiError { ... }
+```
+
 ## Propagation with `?`
 
 `ApiError` implements `From<sea_orm::DbErr>` so database errors propagate
@@ -49,12 +65,13 @@ let token = create_jwt(id).map_err(|e| {
 
 ## Handler return type
 
-Every handler returns `Result<HttpResponse, ApiError>`:
+Every handler returns `Result<Json<T>, ApiError>` (or `Result<CreatedJson<T>, ApiError>`
+for 201 responses):
 
 ```rust
-pub async fn login(...) -> Result<HttpResponse, ApiError> {
+pub async fn login(...) -> Result<Json<AuthResponse>, ApiError> {
     // ... use ? throughout ...
-    Ok(HttpResponse::Ok().json(AuthResponse { ... }))
+    Ok(Json(AuthResponse { ... }))
 }
 ```
 
@@ -67,4 +84,3 @@ actix-web automatically calls `ResponseError::error_response()` when an
 |------|----------|
 | Refresh token reuse | Manually matched in `refresh.rs` (returns `ApiError::Unauthorized`) |
 | Role assignment failure | Logged and swallowed (non-critical) |
-| `SecurityAddon::modify` | Uses `get_or_insert_with` instead of unwrap |

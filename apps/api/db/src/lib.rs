@@ -1,7 +1,11 @@
+pub mod domain;
 pub mod entity;
+pub mod migration;
 pub mod rbac;
+pub mod seed;
 
 use sea_orm::{Database, DatabaseConnection, DbErr};
+use sea_orm_migration::MigratorTrait;
 
 #[derive(Clone)]
 pub struct DatabaseConfig {
@@ -24,4 +28,8 @@ impl DatabaseConfig {
 pub async fn get_connection(config: DatabaseConfig) -> Result<DatabaseConnection, DbErr> {
     let database_url = config.url();
     Database::connect(database_url).await
+}
+
+pub async fn migrate(db: &DatabaseConnection) -> Result<(), DbErr> {
+    migration::Migrator::up(db, None).await
 }

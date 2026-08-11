@@ -2,27 +2,137 @@
 
 import * as v from "valibot"
 
-import type {
-  Client,
-  ClientMeta,
-  Options as Options2,
-  RequestResult,
-  TDataShape,
+import {
+  type Client,
+  type ClientMeta,
+  formDataBodySerializer,
+  type Options as Options2,
+  type RequestResult,
+  type TDataShape,
 } from "./client"
 import { client } from "./client.gen"
 import type {
+  CreateAddressData,
+  CreateAddressErrors,
+  CreateAddressResponses,
+  CreateApplicationData,
+  CreateApplicationErrors,
+  CreateApplicationResponses,
+  CreateBatchData,
+  CreateBatchErrors,
+  CreateBatchResponses,
+  CreateChildData,
+  CreateChildErrors,
+  CreateChildResponses,
+  CreateGuardianData,
+  CreateGuardianErrors,
+  CreateGuardianResponses,
+  CreatePastPupilDetailData,
+  CreatePastPupilDetailErrors,
+  CreatePastPupilDetailResponses,
+  CreateSiblingData,
+  CreateSiblingErrors,
+  CreateSiblingResponses,
+  CreateStaffDetailData,
+  CreateStaffDetailErrors,
+  CreateStaffDetailResponses,
+  CreateStudentData,
+  CreateStudentErrors,
+  CreateStudentResponses,
+  CreateWorkspaceAddressData,
+  CreateWorkspaceAddressErrors,
+  CreateWorkspaceAddressResponses,
+  DeleteApplicationData,
+  DeleteApplicationErrors,
+  DeleteApplicationResponses,
+  DeleteBatchData,
+  DeleteBatchErrors,
+  DeleteBatchResponses,
+  DeleteUploadData,
+  DeleteUploadErrors,
+  DeleteUploadResponses,
+  GetAddressData,
+  GetAddressErrors,
+  GetAddressResponses,
+  GetApplicationAddressesData,
+  GetApplicationAddressesErrors,
+  GetApplicationAddressesResponses,
+  GetApplicationData,
+  GetApplicationDocumentsData,
+  GetApplicationDocumentsErrors,
+  GetApplicationDocumentsResponses,
+  GetApplicationErrors,
+  GetApplicationGuardiansData,
+  GetApplicationGuardiansErrors,
+  GetApplicationGuardiansResponses,
+  GetApplicationResponses,
+  GetApplicationSiblingsData,
+  GetApplicationSiblingsErrors,
+  GetApplicationSiblingsResponses,
+  GetBatchData,
+  GetBatchErrors,
+  GetBatchResponses,
+  GetChildData,
+  GetChildErrors,
+  GetChildResponses,
   GetCounterData,
   GetCounterErrors,
   GetCounterResponses,
+  GetGuardianData,
+  GetGuardianErrors,
+  GetGuardianResponses,
   GetSecureCounterData,
   GetSecureCounterErrors,
   GetSecureCounterResponses,
+  GetWorkspaceAddressData,
+  GetWorkspaceAddressErrors,
+  GetWorkspaceAddressResponses,
   IncrementCounterData,
   IncrementCounterErrors,
   IncrementCounterResponses,
   IncrementSecureCounterData,
   IncrementSecureCounterErrors,
   IncrementSecureCounterResponses,
+  ListAddressesData,
+  ListAddressesErrors,
+  ListAddressesResponses,
+  ListApplicationsData,
+  ListApplicationsErrors,
+  ListApplicationsResponses,
+  ListBatchesData,
+  ListBatchesErrors,
+  ListBatchesResponses,
+  ListBlacklistData,
+  ListBlacklistErrors,
+  ListBlacklistResponses,
+  ListChildrenData,
+  ListChildrenErrors,
+  ListChildrenResponses,
+  ListDistrictsData,
+  ListDistrictsErrors,
+  ListDistrictsResponses,
+  ListGnDivisionsData,
+  ListGnDivisionsResponses,
+  ListGuardiansData,
+  ListGuardiansErrors,
+  ListGuardiansResponses,
+  ListPastPupilDetailsData,
+  ListPastPupilDetailsErrors,
+  ListPastPupilDetailsResponses,
+  ListPollingDivisionsData,
+  ListPollingDivisionsResponses,
+  ListSchoolsData,
+  ListSchoolsErrors,
+  ListSchoolsResponses,
+  ListStaffDetailsData,
+  ListStaffDetailsErrors,
+  ListStaffDetailsResponses,
+  ListStudentsData,
+  ListStudentsErrors,
+  ListStudentsResponses,
+  ListWorkspaceAddressesData,
+  ListWorkspaceAddressesErrors,
+  ListWorkspaceAddressesResponses,
   LoginData,
   LoginErrors,
   LoginResponses,
@@ -32,31 +142,181 @@ import type {
   LogoutData,
   LogoutErrors,
   LogoutResponses,
+  MeData,
+  MeErrors,
+  MeResponses,
+  PresignedUploadUrlData,
+  PresignedUploadUrlErrors,
+  PresignedUploadUrlResponses,
   RefreshData,
   RefreshErrors,
   RefreshResponses,
   RegisterData,
   RegisterErrors,
   RegisterResponses,
+  SaveAddressesData,
+  SaveAddressesErrors,
+  SaveAddressesResponses,
+  SaveApplicationDocumentsData,
+  SaveApplicationDocumentsErrors,
+  SaveApplicationDocumentsResponses,
+  SaveGuardiansData,
+  SaveGuardiansErrors,
+  SaveGuardiansResponses,
+  SaveSiblingsData,
+  SaveSiblingsErrors,
+  SaveSiblingsResponses,
+  SaveWizardStepData,
+  SaveWizardStepErrors,
+  SaveWizardStepResponses,
+  SubmitApplicationData,
+  SubmitApplicationErrors,
+  SubmitApplicationResponses,
+  UpdateApplicationData,
+  UpdateApplicationErrors,
+  UpdateApplicationResponses,
+  UpdateBatchData,
+  UpdateBatchErrors,
+  UpdateBatchResponses,
+  UpdateChildData,
+  UpdateChildErrors,
+  UpdateChildResponses,
+  UpdateGuardianData,
+  UpdateGuardianErrors,
+  UpdateGuardianResponses,
+  UpdateStudentData,
+  UpdateStudentErrors,
+  UpdateStudentResponses,
+  UploadFileData,
+  UploadFileErrors,
+  UploadFileResponses,
 } from "./types.gen"
 import {
+  vCreateAddressBody2,
+  vCreateAddressResponse,
+  vCreateApplicationBody2,
+  vCreateApplicationResponse,
+  vCreateBatchBody2,
+  vCreateBatchResponse,
+  vCreateChildBody2,
+  vCreateChildResponse,
+  vCreateGuardianBody2,
+  vCreateGuardianResponse,
+  vCreatePastPupilDetailBody2,
+  vCreatePastPupilDetailResponse,
+  vCreateSiblingBody,
+  vCreateSiblingPath,
+  vCreateSiblingResponse2,
+  vCreateStaffDetailBody2,
+  vCreateStaffDetailResponse,
+  vCreateStudentBody2,
+  vCreateStudentResponse2,
+  vCreateWorkspaceAddressBody2,
+  vCreateWorkspaceAddressResponse,
+  vDeleteApplicationPath,
+  vDeleteApplicationResponse,
+  vDeleteBatchPath,
+  vDeleteBatchResponse,
+  vDeleteUploadPath,
+  vDeleteUploadResponse,
+  vGetAddressPath,
+  vGetAddressResponse,
+  vGetApplicationAddressesPath,
+  vGetApplicationAddressesResponse2,
+  vGetApplicationDocumentsPath,
+  vGetApplicationDocumentsResponse,
+  vGetApplicationGuardiansPath,
+  vGetApplicationGuardiansResponse2,
+  vGetApplicationPath,
+  vGetApplicationResponse,
+  vGetApplicationSiblingsPath,
+  vGetApplicationSiblingsResponse2,
+  vGetBatchPath,
+  vGetBatchResponse,
+  vGetChildPath,
+  vGetChildResponse,
   vGetCounterPath,
   vGetCounterResponse,
+  vGetGuardianPath,
+  vGetGuardianResponse,
   vGetSecureCounterPath,
   vGetSecureCounterResponse,
+  vGetWorkspaceAddressPath,
+  vGetWorkspaceAddressResponse,
   vIncrementCounterPath,
   vIncrementCounterResponse,
   vIncrementSecureCounterPath,
   vIncrementSecureCounterResponse,
+  vListAddressesQuery,
+  vListAddressesResponse,
+  vListApplicationsQuery,
+  vListApplicationsResponse,
+  vListBatchesResponse,
+  vListBlacklistQuery,
+  vListBlacklistResponse,
+  vListChildrenQuery,
+  vListChildrenResponse,
+  vListDistrictsResponse,
+  vListGnDivisionsResponse,
+  vListGuardiansQuery,
+  vListGuardiansResponse,
+  vListPastPupilDetailsQuery,
+  vListPastPupilDetailsResponse,
+  vListPollingDivisionsResponse,
+  vListSchoolsQuery,
+  vListSchoolsResponse,
+  vListStaffDetailsQuery,
+  vListStaffDetailsResponse,
+  vListStudentsQuery,
+  vListStudentsResponse,
+  vListWorkspaceAddressesQuery,
+  vListWorkspaceAddressesResponse,
   vLoginBody,
   vLoginResponse,
   vLogoutAllResponse,
   vLogoutBody,
   vLogoutResponse,
+  vMeResponse,
+  vPresignedUploadUrlBody,
+  vPresignedUploadUrlResponse,
   vRefreshBody,
   vRefreshResponse,
   vRegisterBody,
   vRegisterResponse,
+  vSaveAddressesBody,
+  vSaveAddressesPath,
+  vSaveAddressesResponse2,
+  vSaveApplicationDocumentsBody,
+  vSaveApplicationDocumentsPath,
+  vSaveApplicationDocumentsResponse,
+  vSaveGuardiansBody,
+  vSaveGuardiansPath,
+  vSaveGuardiansResponse2,
+  vSaveSiblingsBody,
+  vSaveSiblingsPath,
+  vSaveSiblingsResponse2,
+  vSaveWizardStepBody,
+  vSaveWizardStepPath,
+  vSaveWizardStepResponse,
+  vSubmitApplicationPath,
+  vSubmitApplicationResponse,
+  vUpdateApplicationBody2,
+  vUpdateApplicationPath,
+  vUpdateApplicationResponse,
+  vUpdateBatchBody2,
+  vUpdateBatchPath,
+  vUpdateBatchResponse,
+  vUpdateChildBody2,
+  vUpdateChildPath,
+  vUpdateChildResponse,
+  vUpdateGuardianBody2,
+  vUpdateGuardianPath,
+  vUpdateGuardianResponse,
+  vUpdateStudentBody,
+  vUpdateStudentPath,
+  vUpdateStudentResponse,
+  vUploadFileBody,
+  vUploadFileResponse,
 } from "./valibot.gen"
 
 export type Options<
@@ -77,57 +337,12 @@ export type Options<
   meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta
 }
 
-export const login = <ThrowOnError extends boolean = false>(
-  options: Options<LoginData, ThrowOnError>
-): RequestResult<LoginResponses, LoginErrors, ThrowOnError> =>
-  (options.client ?? client).post<LoginResponses, LoginErrors, ThrowOnError>({
-    requestValidator: async (data) =>
-      await v.parseAsync(
-        v.object({
-          body: vLoginBody,
-          path: v.optional(v.never()),
-          query: v.optional(v.never()),
-        }),
-        data
-      ),
-    responseValidator: async (data) => await v.parseAsync(vLoginResponse, data),
-    url: "/api/auth/login",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  })
-
-export const logout = <ThrowOnError extends boolean = false>(
-  options: Options<LogoutData, ThrowOnError>
-): RequestResult<LogoutResponses, LogoutErrors, ThrowOnError> =>
-  (options.client ?? client).post<LogoutResponses, LogoutErrors, ThrowOnError>({
-    requestValidator: async (data) =>
-      await v.parseAsync(
-        v.object({
-          body: vLogoutBody,
-          path: v.optional(v.never()),
-          query: v.optional(v.never()),
-        }),
-        data
-      ),
-    responseValidator: async (data) =>
-      await v.parseAsync(vLogoutResponse, data),
-    url: "/api/auth/logout",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  })
-
-export const logoutAll = <ThrowOnError extends boolean = false>(
-  options?: Options<LogoutAllData, ThrowOnError>
-): RequestResult<LogoutAllResponses, LogoutAllErrors, ThrowOnError> =>
-  (options?.client ?? client).post<
-    LogoutAllResponses,
-    LogoutAllErrors,
+export const listBlacklist = <ThrowOnError extends boolean = false>(
+  options?: Options<ListBlacklistData, ThrowOnError>
+): RequestResult<ListBlacklistResponses, ListBlacklistErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListBlacklistResponses,
+    ListBlacklistErrors,
     ThrowOnError
   >({
     requestValidator: async (data) =>
@@ -135,37 +350,62 @@ export const logoutAll = <ThrowOnError extends boolean = false>(
         v.object({
           body: v.optional(v.never()),
           path: v.optional(v.never()),
-          query: v.optional(v.never()),
+          query: v.optional(vListBlacklistQuery),
         }),
         data
       ),
     responseValidator: async (data) =>
-      await v.parseAsync(vLogoutAllResponse, data),
+      await v.parseAsync(vListBlacklistResponse, data),
     security: [{ scheme: "bearer", type: "http" }],
-    url: "/api/auth/logout-all",
+    url: "/api/blacklist",
     ...options,
   })
 
-export const refresh = <ThrowOnError extends boolean = false>(
-  options: Options<RefreshData, ThrowOnError>
-): RequestResult<RefreshResponses, RefreshErrors, ThrowOnError> =>
-  (options.client ?? client).post<
-    RefreshResponses,
-    RefreshErrors,
+export const listChildren = <ThrowOnError extends boolean = false>(
+  options?: Options<ListChildrenData, ThrowOnError>
+): RequestResult<ListChildrenResponses, ListChildrenErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListChildrenResponses,
+    ListChildrenErrors,
     ThrowOnError
   >({
     requestValidator: async (data) =>
       await v.parseAsync(
         v.object({
-          body: vRefreshBody,
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListChildrenQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListChildrenResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/children",
+    ...options,
+  })
+
+export const createChild = <ThrowOnError extends boolean = false>(
+  options: Options<CreateChildData, ThrowOnError>
+): RequestResult<CreateChildResponses, CreateChildErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    CreateChildResponses,
+    CreateChildErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateChildBody2,
           path: v.optional(v.never()),
           query: v.optional(v.never()),
         }),
         data
       ),
     responseValidator: async (data) =>
-      await v.parseAsync(vRefreshResponse, data),
-    url: "/api/auth/refresh",
+      await v.parseAsync(vCreateChildResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/children",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -173,31 +413,108 @@ export const refresh = <ThrowOnError extends boolean = false>(
     },
   })
 
-export const register = <ThrowOnError extends boolean = false>(
-  options: Options<RegisterData, ThrowOnError>
-): RequestResult<RegisterResponses, RegisterErrors, ThrowOnError> =>
-  (options.client ?? client).post<
-    RegisterResponses,
-    RegisterErrors,
+export const getChild = <ThrowOnError extends boolean = false>(
+  options: Options<GetChildData, ThrowOnError>
+): RequestResult<GetChildResponses, GetChildErrors, ThrowOnError> =>
+  (options.client ?? client).get<
+    GetChildResponses,
+    GetChildErrors,
     ThrowOnError
   >({
     requestValidator: async (data) =>
       await v.parseAsync(
         v.object({
-          body: vRegisterBody,
-          path: v.optional(v.never()),
+          body: v.optional(v.never()),
+          path: vGetChildPath,
           query: v.optional(v.never()),
         }),
         data
       ),
     responseValidator: async (data) =>
-      await v.parseAsync(vRegisterResponse, data),
-    url: "/api/auth/register",
+      await v.parseAsync(vGetChildResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/children/{id}",
+    ...options,
+  })
+
+export const updateChild = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateChildData, ThrowOnError>
+): RequestResult<UpdateChildResponses, UpdateChildErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    UpdateChildResponses,
+    UpdateChildErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vUpdateChildBody2,
+          path: vUpdateChildPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vUpdateChildResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/children/{id}",
     ...options,
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
+  })
+
+export const getCounter = <ThrowOnError extends boolean = false>(
+  options: Options<GetCounterData, ThrowOnError>
+): RequestResult<GetCounterResponses, GetCounterErrors, ThrowOnError> =>
+  (options.client ?? client).get<
+    GetCounterResponses,
+    GetCounterErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetCounterPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetCounterResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/counter/{name}",
+    ...options,
+  })
+
+export const incrementCounter = <ThrowOnError extends boolean = false>(
+  options: Options<IncrementCounterData, ThrowOnError>
+): RequestResult<
+  IncrementCounterResponses,
+  IncrementCounterErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    IncrementCounterResponses,
+    IncrementCounterErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vIncrementCounterPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vIncrementCounterResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/counter/{name}/increment",
+    ...options,
   })
 
 export const getSecureCounter = <ThrowOnError extends boolean = false>(
@@ -256,54 +573,1373 @@ export const incrementSecureCounter = <ThrowOnError extends boolean = false>(
     ...options,
   })
 
-export const getCounter = <ThrowOnError extends boolean = false>(
-  options: Options<GetCounterData, ThrowOnError>
-): RequestResult<GetCounterResponses, GetCounterErrors, ThrowOnError> =>
-  (options.client ?? client).get<
-    GetCounterResponses,
-    GetCounterErrors,
+export const listDistricts = <ThrowOnError extends boolean = false>(
+  options?: Options<ListDistrictsData, ThrowOnError>
+): RequestResult<ListDistrictsResponses, ListDistrictsErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListDistrictsResponses,
+    ListDistrictsErrors,
     ThrowOnError
   >({
     requestValidator: async (data) =>
       await v.parseAsync(
         v.object({
           body: v.optional(v.never()),
-          path: vGetCounterPath,
+          path: v.optional(v.never()),
           query: v.optional(v.never()),
         }),
         data
       ),
     responseValidator: async (data) =>
-      await v.parseAsync(vGetCounterResponse, data),
-    security: [{ scheme: "bearer", type: "http" }],
-    url: "/api/counter/{name}",
+      await v.parseAsync(vListDistrictsResponse, data),
+    url: "/api/districts",
     ...options,
   })
 
-export const incrementCounter = <ThrowOnError extends boolean = false>(
-  options: Options<IncrementCounterData, ThrowOnError>
+export const listApplications = <ThrowOnError extends boolean = false>(
+  options?: Options<ListApplicationsData, ThrowOnError>
 ): RequestResult<
-  IncrementCounterResponses,
-  IncrementCounterErrors,
+  ListApplicationsResponses,
+  ListApplicationsErrors,
   ThrowOnError
 > =>
-  (options.client ?? client).post<
-    IncrementCounterResponses,
-    IncrementCounterErrors,
+  (options?.client ?? client).get<
+    ListApplicationsResponses,
+    ListApplicationsErrors,
     ThrowOnError
   >({
     requestValidator: async (data) =>
       await v.parseAsync(
         v.object({
           body: v.optional(v.never()),
-          path: vIncrementCounterPath,
+          path: v.optional(v.never()),
+          query: v.optional(vListApplicationsQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListApplicationsResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications",
+    ...options,
+  })
+
+export const createApplication = <ThrowOnError extends boolean = false>(
+  options: Options<CreateApplicationData, ThrowOnError>
+): RequestResult<
+  CreateApplicationResponses,
+  CreateApplicationErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    CreateApplicationResponses,
+    CreateApplicationErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateApplicationBody2,
+          path: v.optional(v.never()),
           query: v.optional(v.never()),
         }),
         data
       ),
     responseValidator: async (data) =>
-      await v.parseAsync(vIncrementCounterResponse, data),
+      await v.parseAsync(vCreateApplicationResponse, data),
     security: [{ scheme: "bearer", type: "http" }],
-    url: "/api/counter/{name}/increment",
+    url: "/api/g1-applications",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const deleteApplication = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteApplicationData, ThrowOnError>
+): RequestResult<
+  DeleteApplicationResponses,
+  DeleteApplicationErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).delete<
+    DeleteApplicationResponses,
+    DeleteApplicationErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vDeleteApplicationPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vDeleteApplicationResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}",
+    ...options,
+  })
+
+export const getApplication = <ThrowOnError extends boolean = false>(
+  options: Options<GetApplicationData, ThrowOnError>
+): RequestResult<GetApplicationResponses, GetApplicationErrors, ThrowOnError> =>
+  (options.client ?? client).get<
+    GetApplicationResponses,
+    GetApplicationErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetApplicationPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetApplicationResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}",
+    ...options,
+  })
+
+export const updateApplication = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateApplicationData, ThrowOnError>
+): RequestResult<
+  UpdateApplicationResponses,
+  UpdateApplicationErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).put<
+    UpdateApplicationResponses,
+    UpdateApplicationErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vUpdateApplicationBody2,
+          path: vUpdateApplicationPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vUpdateApplicationResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const submitApplication = <ThrowOnError extends boolean = false>(
+  options: Options<SubmitApplicationData, ThrowOnError>
+): RequestResult<
+  SubmitApplicationResponses,
+  SubmitApplicationErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    SubmitApplicationResponses,
+    SubmitApplicationErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vSubmitApplicationPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vSubmitApplicationResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/submit",
+    ...options,
+  })
+
+export const saveWizardStep = <ThrowOnError extends boolean = false>(
+  options: Options<SaveWizardStepData, ThrowOnError>
+): RequestResult<SaveWizardStepResponses, SaveWizardStepErrors, ThrowOnError> =>
+  (options.client ?? client).patch<
+    SaveWizardStepResponses,
+    SaveWizardStepErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vSaveWizardStepBody,
+          path: vSaveWizardStepPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vSaveWizardStepResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/wizard-step",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const getApplicationGuardians = <ThrowOnError extends boolean = false>(
+  options: Options<GetApplicationGuardiansData, ThrowOnError>
+): RequestResult<
+  GetApplicationGuardiansResponses,
+  GetApplicationGuardiansErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    GetApplicationGuardiansResponses,
+    GetApplicationGuardiansErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetApplicationGuardiansPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetApplicationGuardiansResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/guardians",
+    ...options,
+  })
+
+export const saveGuardians = <ThrowOnError extends boolean = false>(
+  options: Options<SaveGuardiansData, ThrowOnError>
+): RequestResult<SaveGuardiansResponses, SaveGuardiansErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    SaveGuardiansResponses,
+    SaveGuardiansErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vSaveGuardiansBody,
+          path: vSaveGuardiansPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vSaveGuardiansResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/guardians",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const getApplicationAddresses = <ThrowOnError extends boolean = false>(
+  options: Options<GetApplicationAddressesData, ThrowOnError>
+): RequestResult<
+  GetApplicationAddressesResponses,
+  GetApplicationAddressesErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    GetApplicationAddressesResponses,
+    GetApplicationAddressesErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetApplicationAddressesPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetApplicationAddressesResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/addresses",
+    ...options,
+  })
+
+export const saveAddresses = <ThrowOnError extends boolean = false>(
+  options: Options<SaveAddressesData, ThrowOnError>
+): RequestResult<SaveAddressesResponses, SaveAddressesErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    SaveAddressesResponses,
+    SaveAddressesErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vSaveAddressesBody,
+          path: vSaveAddressesPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vSaveAddressesResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/addresses",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const getApplicationSiblings = <ThrowOnError extends boolean = false>(
+  options: Options<GetApplicationSiblingsData, ThrowOnError>
+): RequestResult<
+  GetApplicationSiblingsResponses,
+  GetApplicationSiblingsErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    GetApplicationSiblingsResponses,
+    GetApplicationSiblingsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetApplicationSiblingsPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetApplicationSiblingsResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/siblings",
+    ...options,
+  })
+
+export const saveSiblings = <ThrowOnError extends boolean = false>(
+  options: Options<SaveSiblingsData, ThrowOnError>
+): RequestResult<SaveSiblingsResponses, SaveSiblingsErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    SaveSiblingsResponses,
+    SaveSiblingsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vSaveSiblingsBody,
+          path: vSaveSiblingsPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vSaveSiblingsResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/siblings",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const createSibling = <ThrowOnError extends boolean = false>(
+  options: Options<CreateSiblingData, ThrowOnError>
+): RequestResult<CreateSiblingResponses, CreateSiblingErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    CreateSiblingResponses,
+    CreateSiblingErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateSiblingBody,
+          path: vCreateSiblingPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreateSiblingResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/create-sibling",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const getApplicationDocuments = <ThrowOnError extends boolean = false>(
+  options: Options<GetApplicationDocumentsData, ThrowOnError>
+): RequestResult<
+  GetApplicationDocumentsResponses,
+  GetApplicationDocumentsErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    GetApplicationDocumentsResponses,
+    GetApplicationDocumentsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetApplicationDocumentsPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetApplicationDocumentsResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/documents",
+    ...options,
+  })
+
+export const saveApplicationDocuments = <ThrowOnError extends boolean = false>(
+  options: Options<SaveApplicationDocumentsData, ThrowOnError>
+): RequestResult<
+  SaveApplicationDocumentsResponses,
+  SaveApplicationDocumentsErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).put<
+    SaveApplicationDocumentsResponses,
+    SaveApplicationDocumentsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vSaveApplicationDocumentsBody,
+          path: vSaveApplicationDocumentsPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vSaveApplicationDocumentsResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/g1-applications/{id}/documents",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const listBatches = <ThrowOnError extends boolean = false>(
+  options?: Options<ListBatchesData, ThrowOnError>
+): RequestResult<ListBatchesResponses, ListBatchesErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListBatchesResponses,
+    ListBatchesErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListBatchesResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/enrollment-batches",
+    ...options,
+  })
+
+export const createBatch = <ThrowOnError extends boolean = false>(
+  options: Options<CreateBatchData, ThrowOnError>
+): RequestResult<CreateBatchResponses, CreateBatchErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    CreateBatchResponses,
+    CreateBatchErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateBatchBody2,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreateBatchResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/enrollment-batches",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const deleteBatch = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteBatchData, ThrowOnError>
+): RequestResult<DeleteBatchResponses, DeleteBatchErrors, ThrowOnError> =>
+  (options.client ?? client).delete<
+    DeleteBatchResponses,
+    DeleteBatchErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vDeleteBatchPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vDeleteBatchResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/enrollment-batches/{id}",
+    ...options,
+  })
+
+export const getBatch = <ThrowOnError extends boolean = false>(
+  options: Options<GetBatchData, ThrowOnError>
+): RequestResult<GetBatchResponses, GetBatchErrors, ThrowOnError> =>
+  (options.client ?? client).get<
+    GetBatchResponses,
+    GetBatchErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetBatchPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetBatchResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/enrollment-batches/{id}",
+    ...options,
+  })
+
+export const updateBatch = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateBatchData, ThrowOnError>
+): RequestResult<UpdateBatchResponses, UpdateBatchErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    UpdateBatchResponses,
+    UpdateBatchErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vUpdateBatchBody2,
+          path: vUpdateBatchPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vUpdateBatchResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/enrollment-batches/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const listGnDivisions = <ThrowOnError extends boolean = false>(
+  options?: Options<ListGnDivisionsData, ThrowOnError>
+): RequestResult<ListGnDivisionsResponses, unknown, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListGnDivisionsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListGnDivisionsResponse, data),
+    url: "/api/gn-divisions",
+    ...options,
+  })
+
+export const listPollingDivisions = <ThrowOnError extends boolean = false>(
+  options?: Options<ListPollingDivisionsData, ThrowOnError>
+): RequestResult<ListPollingDivisionsResponses, unknown, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListPollingDivisionsResponses,
+    unknown,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListPollingDivisionsResponse, data),
+    url: "/api/polling-divisions",
+    ...options,
+  })
+
+export const listGuardians = <ThrowOnError extends boolean = false>(
+  options?: Options<ListGuardiansData, ThrowOnError>
+): RequestResult<ListGuardiansResponses, ListGuardiansErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListGuardiansResponses,
+    ListGuardiansErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListGuardiansQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListGuardiansResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/guardians",
+    ...options,
+  })
+
+export const createGuardian = <ThrowOnError extends boolean = false>(
+  options: Options<CreateGuardianData, ThrowOnError>
+): RequestResult<CreateGuardianResponses, CreateGuardianErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    CreateGuardianResponses,
+    CreateGuardianErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateGuardianBody2,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreateGuardianResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/guardians",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const getGuardian = <ThrowOnError extends boolean = false>(
+  options: Options<GetGuardianData, ThrowOnError>
+): RequestResult<GetGuardianResponses, GetGuardianErrors, ThrowOnError> =>
+  (options.client ?? client).get<
+    GetGuardianResponses,
+    GetGuardianErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetGuardianPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetGuardianResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/guardians/{id}",
+    ...options,
+  })
+
+export const updateGuardian = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateGuardianData, ThrowOnError>
+): RequestResult<UpdateGuardianResponses, UpdateGuardianErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    UpdateGuardianResponses,
+    UpdateGuardianErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vUpdateGuardianBody2,
+          path: vUpdateGuardianPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vUpdateGuardianResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/guardians/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const listAddresses = <ThrowOnError extends boolean = false>(
+  options?: Options<ListAddressesData, ThrowOnError>
+): RequestResult<ListAddressesResponses, ListAddressesErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListAddressesResponses,
+    ListAddressesErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListAddressesQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListAddressesResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/addresses",
+    ...options,
+  })
+
+export const createAddress = <ThrowOnError extends boolean = false>(
+  options: Options<CreateAddressData, ThrowOnError>
+): RequestResult<CreateAddressResponses, CreateAddressErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    CreateAddressResponses,
+    CreateAddressErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateAddressBody2,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreateAddressResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/addresses",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const getAddress = <ThrowOnError extends boolean = false>(
+  options: Options<GetAddressData, ThrowOnError>
+): RequestResult<GetAddressResponses, GetAddressErrors, ThrowOnError> =>
+  (options.client ?? client).get<
+    GetAddressResponses,
+    GetAddressErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetAddressPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetAddressResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/addresses/{id}",
+    ...options,
+  })
+
+export const listPastPupilDetails = <ThrowOnError extends boolean = false>(
+  options?: Options<ListPastPupilDetailsData, ThrowOnError>
+): RequestResult<
+  ListPastPupilDetailsResponses,
+  ListPastPupilDetailsErrors,
+  ThrowOnError
+> =>
+  (options?.client ?? client).get<
+    ListPastPupilDetailsResponses,
+    ListPastPupilDetailsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListPastPupilDetailsQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListPastPupilDetailsResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/past-pupil-details",
+    ...options,
+  })
+
+export const createPastPupilDetail = <ThrowOnError extends boolean = false>(
+  options: Options<CreatePastPupilDetailData, ThrowOnError>
+): RequestResult<
+  CreatePastPupilDetailResponses,
+  CreatePastPupilDetailErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    CreatePastPupilDetailResponses,
+    CreatePastPupilDetailErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreatePastPupilDetailBody2,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreatePastPupilDetailResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/past-pupil-details",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const listSchools = <ThrowOnError extends boolean = false>(
+  options?: Options<ListSchoolsData, ThrowOnError>
+): RequestResult<ListSchoolsResponses, ListSchoolsErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListSchoolsResponses,
+    ListSchoolsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListSchoolsQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListSchoolsResponse, data),
+    url: "/api/schools",
+    ...options,
+  })
+
+export const listStaffDetails = <ThrowOnError extends boolean = false>(
+  options?: Options<ListStaffDetailsData, ThrowOnError>
+): RequestResult<
+  ListStaffDetailsResponses,
+  ListStaffDetailsErrors,
+  ThrowOnError
+> =>
+  (options?.client ?? client).get<
+    ListStaffDetailsResponses,
+    ListStaffDetailsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListStaffDetailsQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListStaffDetailsResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/staff-details",
+    ...options,
+  })
+
+export const createStaffDetail = <ThrowOnError extends boolean = false>(
+  options: Options<CreateStaffDetailData, ThrowOnError>
+): RequestResult<
+  CreateStaffDetailResponses,
+  CreateStaffDetailErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    CreateStaffDetailResponses,
+    CreateStaffDetailErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateStaffDetailBody2,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreateStaffDetailResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/staff-details",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const listStudents = <ThrowOnError extends boolean = false>(
+  options?: Options<ListStudentsData, ThrowOnError>
+): RequestResult<ListStudentsResponses, ListStudentsErrors, ThrowOnError> =>
+  (options?.client ?? client).get<
+    ListStudentsResponses,
+    ListStudentsErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListStudentsQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListStudentsResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/students",
+    ...options,
+  })
+
+export const createStudent = <ThrowOnError extends boolean = false>(
+  options: Options<CreateStudentData, ThrowOnError>
+): RequestResult<CreateStudentResponses, CreateStudentErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    CreateStudentResponses,
+    CreateStudentErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateStudentBody2,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreateStudentResponse2, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/students",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const updateStudent = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateStudentData, ThrowOnError>
+): RequestResult<UpdateStudentResponses, UpdateStudentErrors, ThrowOnError> =>
+  (options.client ?? client).put<
+    UpdateStudentResponses,
+    UpdateStudentErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vUpdateStudentBody,
+          path: vUpdateStudentPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vUpdateStudentResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/students/{id}",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const listWorkspaceAddresses = <ThrowOnError extends boolean = false>(
+  options?: Options<ListWorkspaceAddressesData, ThrowOnError>
+): RequestResult<
+  ListWorkspaceAddressesResponses,
+  ListWorkspaceAddressesErrors,
+  ThrowOnError
+> =>
+  (options?.client ?? client).get<
+    ListWorkspaceAddressesResponses,
+    ListWorkspaceAddressesErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(vListWorkspaceAddressesQuery),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vListWorkspaceAddressesResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/workspace-addresses",
+    ...options,
+  })
+
+export const createWorkspaceAddress = <ThrowOnError extends boolean = false>(
+  options: Options<CreateWorkspaceAddressData, ThrowOnError>
+): RequestResult<
+  CreateWorkspaceAddressResponses,
+  CreateWorkspaceAddressErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    CreateWorkspaceAddressResponses,
+    CreateWorkspaceAddressErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vCreateWorkspaceAddressBody2,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vCreateWorkspaceAddressResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/workspace-addresses",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const getWorkspaceAddress = <ThrowOnError extends boolean = false>(
+  options: Options<GetWorkspaceAddressData, ThrowOnError>
+): RequestResult<
+  GetWorkspaceAddressResponses,
+  GetWorkspaceAddressErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    GetWorkspaceAddressResponses,
+    GetWorkspaceAddressErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vGetWorkspaceAddressPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vGetWorkspaceAddressResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/workspace-addresses/{id}",
+    ...options,
+  })
+
+export const presignedUploadUrl = <ThrowOnError extends boolean = false>(
+  options: Options<PresignedUploadUrlData, ThrowOnError>
+): RequestResult<
+  PresignedUploadUrlResponses,
+  PresignedUploadUrlErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).post<
+    PresignedUploadUrlResponses,
+    PresignedUploadUrlErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vPresignedUploadUrlBody,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vPresignedUploadUrlResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads/presigned",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const uploadFile = <ThrowOnError extends boolean = false>(
+  options: Options<UploadFileData, ThrowOnError>
+): RequestResult<UploadFileResponses, UploadFileErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    UploadFileResponses,
+    UploadFileErrors,
+    ThrowOnError
+  >({
+    ...formDataBodySerializer,
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vUploadFileBody,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vUploadFileResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads",
+    ...options,
+    headers: {
+      "Content-Type": null,
+      ...options.headers,
+    },
+  })
+
+export const deleteUpload = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteUploadData, ThrowOnError>
+): RequestResult<DeleteUploadResponses, DeleteUploadErrors, ThrowOnError> =>
+  (options.client ?? client).delete<
+    DeleteUploadResponses,
+    DeleteUploadErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: vDeleteUploadPath,
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vDeleteUploadResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/uploads/{key}",
+    ...options,
+  })
+
+export const register = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterData, ThrowOnError>
+): RequestResult<RegisterResponses, RegisterErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    RegisterResponses,
+    RegisterErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vRegisterBody,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vRegisterResponse, data),
+    url: "/api/auth/register",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const login = <ThrowOnError extends boolean = false>(
+  options: Options<LoginData, ThrowOnError>
+): RequestResult<LoginResponses, LoginErrors, ThrowOnError> =>
+  (options.client ?? client).post<LoginResponses, LoginErrors, ThrowOnError>({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vLoginBody,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) => await v.parseAsync(vLoginResponse, data),
+    url: "/api/auth/login",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const refresh = <ThrowOnError extends boolean = false>(
+  options: Options<RefreshData, ThrowOnError>
+): RequestResult<RefreshResponses, RefreshErrors, ThrowOnError> =>
+  (options.client ?? client).post<
+    RefreshResponses,
+    RefreshErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vRefreshBody,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vRefreshResponse, data),
+    url: "/api/auth/refresh",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const logout = <ThrowOnError extends boolean = false>(
+  options: Options<LogoutData, ThrowOnError>
+): RequestResult<LogoutResponses, LogoutErrors, ThrowOnError> =>
+  (options.client ?? client).post<LogoutResponses, LogoutErrors, ThrowOnError>({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: vLogoutBody,
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vLogoutResponse, data),
+    url: "/api/auth/logout",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+
+export const logoutAll = <ThrowOnError extends boolean = false>(
+  options?: Options<LogoutAllData, ThrowOnError>
+): RequestResult<LogoutAllResponses, LogoutAllErrors, ThrowOnError> =>
+  (options?.client ?? client).post<
+    LogoutAllResponses,
+    LogoutAllErrors,
+    ThrowOnError
+  >({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) =>
+      await v.parseAsync(vLogoutAllResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/auth/logout-all",
+    ...options,
+  })
+
+export const me = <ThrowOnError extends boolean = false>(
+  options?: Options<MeData, ThrowOnError>
+): RequestResult<MeResponses, MeErrors, ThrowOnError> =>
+  (options?.client ?? client).get<MeResponses, MeErrors, ThrowOnError>({
+    requestValidator: async (data) =>
+      await v.parseAsync(
+        v.object({
+          body: v.optional(v.never()),
+          path: v.optional(v.never()),
+          query: v.optional(v.never()),
+        }),
+        data
+      ),
+    responseValidator: async (data) => await v.parseAsync(vMeResponse, data),
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/auth/me",
     ...options,
   })

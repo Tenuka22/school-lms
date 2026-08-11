@@ -1,0 +1,10 @@
+target/
+.git/
+*.lock
+**/node_modules/
+**/target/
+Dockerfile*
+Containerfile*
+compose*
+.gitignore
+README.md

@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-actix-web = "4.14.0"
+actix-web = { version = "4.14.0", default-features = false, features = [
+    "macros"
+] }
 dotenvy = "0.15.7"
 env_logger = "0.11"
 log = "0.4"
@@ -18,7 +20,16 @@ hex = "0.4"
 uuid = { version = "1.23.5", features = ["v4"] }
 chrono = "0.4.45"
 sea-orm = "2.0.0-rc"
-utoipa = { version = "5", features = ["chrono", "uuid"] }
+num-traits = "0.2"
+
+apistos = { version = "0.6", features = ["scalar"] }
 actix-cors = "0.7.0"
 rest = { path = "rest" }
 db = { path = "db" }
+
+[profile.dev]
+opt-level = 0
+debug = 0
+incremental = true
+codegen-units = 256
+

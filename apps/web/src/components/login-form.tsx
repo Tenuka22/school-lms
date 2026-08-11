@@ -1,13 +1,13 @@
 "use client"
 
-import { useForm } from "@tanstack/react-form"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate, Link } from "@tanstack/react-router"
 import { toast } from "sonner"
-import { loginMutation } from "@/lib/api-client/@tanstack/react-query.gen"
-import type { LoginError } from "@/lib/api-client/types.gen"
-import { useAuth } from "@/lib/auth"
+import { toastApiError } from "@/lib/api-error"
+import { loginAction } from "@/lib/server/auth"
 import { vLoginRequest } from "@/lib/api-client/valibot.gen"
+import { FormBuilder } from "@/lib/form-builder"
+import type { FormConfig } from "@/lib/form-builder"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,44 +18,75 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+import { Field, FieldDescription } from "@/components/ui/field"
 
-export function LoginForm({ className }: { className?: string }) {
+export function LoginForm({
+  className,
+  redirect: redirectTo,
+}: {
+  className?: string
+  redirect?: string
+}) {
   const navigate = useNavigate()
-  const { login } = useAuth()
   const mutation = useMutation({
-    ...loginMutation(),
-    onSuccess: (data) => {
-      login(data.access_token, data.refresh_token, Number(data.expires_at))
-      toast.success("Welcome back! Logging you in...")
-      navigate({ to: "/" })
+    mutationFn: async (values: { email: string; password: string }) => {
+      await loginAction({ data: values })
     },
-    onError: (error: LoginError) => {
-      toast.error(error.error)
+    onSuccess: (_data, variables) => {
+      toast.success(`Welcome back, ${variables.email}!`)
+      navigate({ to: redirectTo ?? "/" })
+    },
+    onError: (error: Error) => {
+      toastApiError(error, "Login failed")
     },
   })
 
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    validators: {
-      onSubmit: vLoginRequest,
-    },
-    onSubmit: async ({ value }) => {
-      mutation.mutate({
-        body: { email: value.email, password: value.password },
-      })
-    },
-  })
+  const config: FormConfig<{ email: string; password: string }> = {
+    fields: [
+      {
+        name: "email",
+        kind: "text",
+        label: "Email",
+        placeholder: "m@example.com",
+        required: true,
+        inputProps: { type: "email" },
+      },
+      {
+        name: "password",
+        kind: "text",
+        label: "Password",
+        required: true,
+        inputProps: { type: "password" },
+        renderLabel: (label) => (
+          <div className="flex items-center">
+            <label
+              data-slot="field-label"
+              htmlFor="password"
+              className="flex w-fit gap-2 text-sm leading-none leading-snug font-medium select-none group-data-[disabled=true]/field:opacity-50"
+            >
+              {label}
+            </label>
+            <a
+              href="#"
+              className="ms-auto text-sm underline-offset-4 hover:underline"
+            >
+              Forgot your password?
+            </a>
+          </div>
+        ),
+      },
+    ],
+    layout: [
+      { columns: [{ fields: ["email"] }] },
+      { columns: [{ fields: ["password"] }] },
+    ],
+    renderAboveFields: () =>
+      mutation.error ? (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          {mutation.error.message}
+        </div>
+      ) : null,
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
@@ -67,81 +98,16 @@ export function LoginForm({ className }: { className?: string }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            id="login-form"
-            onSubmit={(e) => {
-              console.log("Form onSubmit triggered")
-              e.preventDefault()
-              form.handleSubmit()
+          <FormBuilder
+            config={config}
+            defaultValues={{ email: "", password: "" }}
+            valibotSchema={vLoginRequest}
+            onSubmit={async (values) => {
+              mutation.mutate(values)
             }}
-          >
-            <FieldGroup>
-              {mutation.error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
-                  {mutation.error.error}
-                </div>
-              )}
-              <form.Field
-                name="email"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="email"
-                        placeholder="m@example.com"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        required
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-              <form.Field
-                name="password"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <div className="flex items-center">
-                        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                        <a
-                          href="#"
-                          className="ms-auto text-sm underline-offset-4 hover:underline"
-                        >
-                          Forgot your password?
-                        </a>
-                      </div>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="password"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        required
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-            </FieldGroup>
-          </form>
+            formId="login-form"
+            hideDefaultButtons
+          />
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Field className="w-full">
@@ -150,16 +116,16 @@ export function LoginForm({ className }: { className?: string }) {
               form="login-form"
               className="w-full"
               disabled={mutation.isPending}
-              onClick={(e) => {
-                e.preventDefault()
-                form.handleSubmit()
-              }}
             >
               {mutation.isPending ? "Logging in..." : "Login"}
             </Button>
             <FieldDescription className="w-full text-center">
               Don&apos;t have an account?{" "}
-              <Link to="/auth/sign-up" className="underline underline-offset-4">
+              <Link
+                to="/auth/sign-up"
+                search={{ redirect: redirectTo }}
+                className="underline underline-offset-4"
+              >
                 Sign up
               </Link>
             </FieldDescription>

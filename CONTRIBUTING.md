@@ -26,7 +26,7 @@ To run the dev environment from scratch:
 just dev
 ```
 
-The web app is available at `http://localhost:3000` and the API at `http://localhost:3001`.
+The web app is available at `http://localhost:8000` and the API at `http://localhost:8001`.
 
 ## Production Environment
 

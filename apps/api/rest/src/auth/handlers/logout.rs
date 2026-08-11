@@ -1,25 +1,18 @@
-use actix_web::{HttpResponse, web};
+use actix_web::{web, web::Json};
+use apistos::api_operation;
 use db::entity::session;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 
 use crate::auth::service::hash_refresh_token;
 use crate::auth::types::RefreshRequest;
 use crate::docs::MessageResponse;
-use crate::error::{ApiError, ErrorResponse};
+use crate::error::ApiError;
 
-#[utoipa::path(
-    post,
-    path = "/api/auth/logout",
-    request_body = RefreshRequest,
-    responses(
-        (status = 200, description = "Logged out successfully", body = MessageResponse),
-        (status = 500, description = "Internal server error", body = ErrorResponse),
-    ),
-)]
+#[api_operation(tag = "auth", operation_id = "logout")]
 pub async fn logout(
     db: web::Data<DatabaseConnection>,
-    body: web::Json<RefreshRequest>,
-) -> Result<HttpResponse, ApiError> {
+    body: Json<RefreshRequest>,
+) -> Result<Json<MessageResponse>, ApiError> {
     let token_hash = hash_refresh_token(&body.refresh_token);
 
     session::Entity::delete_many()
@@ -27,7 +20,7 @@ pub async fn logout(
         .exec(db.as_ref())
         .await?;
 
-    Ok(HttpResponse::Ok().json(MessageResponse {
+    Ok(Json(MessageResponse {
         message: "logged out".into(),
     }))
 }
