@@ -1,3 +1,4 @@
+use super::default_now;
 use super::enums::{BatchStatus, EnrollmentType};
 use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
@@ -11,10 +12,6 @@ fn default_id() -> Uuid {
 
 fn default_batch_status() -> BatchStatus {
     BatchStatus::Open
-}
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
 }
 
 fn default_closed_at() -> DateTime<Utc> {

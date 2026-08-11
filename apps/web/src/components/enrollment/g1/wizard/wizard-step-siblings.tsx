@@ -15,7 +15,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { apiClient } from "@/lib/api-client"
 import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
-import type { Student } from "@/lib/api-client/types.gen"
+import type { StudentResponse as Student } from "@/lib/api-client/types.gen"
 import {
   IconLoader2,
   IconCheck,

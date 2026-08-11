@@ -4,11 +4,8 @@ use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use super::default_now;
 use super::enums::{GuardianRelationship, IncomeLevel};
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
-}
 
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
@@ -42,20 +39,12 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::super::student::join_guardians::Entity")]
-    StudentJoinGuardian,
     #[sea_orm(has_many = "super::super::g1::join_guardians::Entity")]
     EnrollmentJoinGuardian,
     #[sea_orm(has_many = "super::staff_details::Entity")]
     StaffDetails,
     #[sea_orm(has_many = "super::past_pupil_details::Entity")]
     PastPupilDetails,
-}
-
-impl Related<super::super::student::join_guardians::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::StudentJoinGuardian.def()
-    }
 }
 
 impl Related<super::super::g1::join_guardians::Entity> for Entity {

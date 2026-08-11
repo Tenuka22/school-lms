@@ -41,6 +41,7 @@ import { SchoolCombobox } from "@/components/enrollment/g1/wizard/guardian-helpe
 import { BatchOverviewChart } from "@/components/enrollment/g1/pipeline/batch-overview-chart"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -181,6 +182,15 @@ function EnumBadge({
       {label}
     </span>
   )
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 function ChildCombobox({
@@ -453,18 +463,38 @@ export function PipeDashboard() {
   const columns = useMemo<ColumnDef<ApplicationWithChild>[]>(
     () => [
       {
-        accessorKey: "reference_no",
+        id: "avatar",
+        enableHiding: false,
+        header: () => <span className="sr-only">Photo</span>,
+        cell: ({ row }) => {
+          const app = row.original
+          return (
+            <Avatar size="sm">
+              {app.child_photo_url ? (
+                <AvatarImage src={app.child_photo_url} alt={app.child_full_name ?? ""} />
+              ) : null}
+              <AvatarFallback>
+                {app.child_full_name ? getInitials(app.child_full_name) : "?"}
+              </AvatarFallback>
+            </Avatar>
+          )
+        },
+        meta: { label: "Photo", variant: "text" },
+      },
+      {
+        accessorKey: "child_id",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Reference" />
+          <DataTableColumnHeader column={column} label="Child ID" />
         ),
         enableColumnFilter: false,
-        meta: { label: "Reference No", variant: "text" },
+        meta: { label: "Child ID", variant: "text" },
         cell: ({ getValue, row }) => {
-          const ref = getValue() as string | null | undefined
+          const childId = getValue() as string
+          const shortId = childId ? childId.slice(0, 8) : "—"
           return (
             <button
               type="button"
-              className="text-left font-medium transition-colors hover:text-primary hover:underline"
+              className="font-mono text-xs text-muted-foreground transition-colors hover:text-primary hover:underline"
               onClick={(e) => {
                 e.stopPropagation()
                 navigate({
@@ -472,12 +502,9 @@ export function PipeDashboard() {
                   params: { enrollment_id: row.original.id! },
                 })
               }}
+              title={childId}
             >
-              {ref || (
-                <span className="text-sm text-muted-foreground italic">
-                  No Reference
-                </span>
-              )}
+              {shortId}
             </button>
           )
         },
@@ -914,7 +941,7 @@ export function PipeDashboard() {
                   {batches?.find((b) => b.id === batchId)?.batch_name || "No batch selected"}
                 </div>
               ) : (
-                <Select value={batchId} onValueChange={setBatchId}>
+                <Select value={batchId} onValueChange={(v) => setBatchId(v ?? "")}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a batch" />
                   </SelectTrigger>

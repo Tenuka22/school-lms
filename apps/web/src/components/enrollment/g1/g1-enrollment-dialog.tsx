@@ -53,7 +53,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
-import type { Child, G1Application, EnrollmentBatch } from "@/lib/api-client/types.gen"
+import type { Child, G1Application, ApplicationWithChild, EnrollmentBatch } from "@/lib/api-client/types.gen"
 import { CreateBatchDialog } from "@/components/enrollment/g1/create-batch-dialog"
 import { FieldWithAlert } from "@/components/enrollment/g1/field-with-alert"
 import { FormUniquenessProvider, useUniquenessBlocked } from "@/hooks/use-child-uniqueness"
@@ -255,7 +255,7 @@ function EnrollmentSubmitFooter({
 interface G1EnrollmentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  enrollment?: G1Application | null
+  enrollment?: G1Application | ApplicationWithChild | null
   onSuccess: () => void
 }
 
@@ -422,6 +422,7 @@ export function G1EnrollmentDialog({
                   religion: value.religion as Child['religion'],
                   nic: null,
                   passport_number: value.passport_number || null,
+                  status: 'Active' as const,
                 } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
                 const child = await createChild.mutateAsync({
                   body: childBody as Child,
@@ -441,6 +442,7 @@ export function G1EnrollmentDialog({
                   religion: value.religion as Child['religion'],
                   nic: null,
                   passport_number: value.passport_number || null,
+                  status: 'Active',
                 }
                 await updateChild.mutateAsync({
                   path: { id: savedChildId },
@@ -458,6 +460,7 @@ export function G1EnrollmentDialog({
                   category_verified: false,
                   interview_completed: false,
                   residence_verified: false,
+                  declaration_agreed: false,
                 } satisfies G1Application
                 await updateApplication.mutateAsync({
                   body: appBody,
@@ -481,6 +484,7 @@ export function G1EnrollmentDialog({
                   category_verified: false,
                   interview_completed: false,
                   residence_verified: false,
+                  declaration_agreed: false,
                 } satisfies G1Application
                 await createApplication({
                   body: appBody,

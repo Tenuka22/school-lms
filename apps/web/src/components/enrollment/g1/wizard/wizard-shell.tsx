@@ -532,6 +532,7 @@ export function WizardShell() {
                       religion: (data.religion || null) as Religion | null,
                       birth_certificate_number: data.birth_certificate_number || null,
                       medium_of_instruction: data.medium_of_instruction as MediumOfInstruction,
+                      status: 'Active' as const,
                     } satisfies Omit<Child, 'id' | 'created_at' | 'student_id' | 'disability_status' | 'disability_type' | 'photo_url' | 'updated_at'>
 
                     let savedChild: Child
@@ -755,8 +756,6 @@ export function WizardShell() {
                   onBack={() => setStep(6)}
                   onNext={() => setStep(8)}
                   onDocumentsChange={setDocumentData}
-                  enrollmentId={enrollmentId}
-                  isAdmin={isAdmin}
                 />
               )}
               {step === 8 && (

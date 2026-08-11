@@ -2,7 +2,7 @@ use actix_web::{web, web::Json};
 use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
-use db::entity::common::enums::{AuditAction, BatchStatus, EnrollmentStatus};
+use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
 use db::entity::g1::applications;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use uuid::Uuid;
@@ -107,7 +107,7 @@ pub async fn delete_application(
         id: Set(Uuid::new_v4()),
         table_name: Set("g1_applications".to_string()),
         record_id: Set(id),
-        action: Set(AuditAction::Delete),
+        action: Set(AuditOperation::Delete),
         old_values: Set(old_json),
         new_values: Set(None),
         performed_by: Set(auth.user_id),

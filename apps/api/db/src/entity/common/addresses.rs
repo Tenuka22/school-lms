@@ -3,11 +3,8 @@ use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
+use super::default_now;
 use super::enums::ResidenceType;
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
-}
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
 #[schemars(rename = "Address")]
@@ -36,16 +33,8 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::super::student::join_addresses::Entity")]
-    StudentAddresses,
     #[sea_orm(has_many = "super::super::g1::join_addresses::Entity")]
     EnrollmentAddresses,
-}
-
-impl Related<super::super::student::join_addresses::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::StudentAddresses.def()
-    }
 }
 
 impl Related<super::super::g1::join_addresses::Entity> for Entity {

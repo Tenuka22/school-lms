@@ -1,10 +1,7 @@
+use super::super::common::default_now;
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
-}
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "g1_join_siblings")]

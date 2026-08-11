@@ -1,6 +1,6 @@
 use actix_web::{web, web::Json};
 use apistos::api_operation;
-use db::entity::common::enums::AuditAction;
+use db::entity::common::enums::AuditOperation;
 use db::entity::enrollment_batches;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 use uuid::Uuid;
@@ -33,7 +33,7 @@ pub async fn delete_batch(
         id: Set(Uuid::new_v4()),
         table_name: Set("enrollment_batches".to_string()),
         record_id: Set(id),
-        action: Set(AuditAction::Delete),
+        action: Set(AuditOperation::Delete),
         old_values: Set(Some(serde_json::to_value(&batch).unwrap_or_default())),
         new_values: Set(None),
         performed_by: Set(auth.user_id),

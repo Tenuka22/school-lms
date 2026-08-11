@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import type { InterviewMarks } from "./interview-shell"
-import type { Guardian, Address, Student } from "@/lib/api-client/types.gen"
+import type { Guardian, Address, StudentResponse as Student } from "@/lib/api-client/types.gen"
 import type { G1Application } from "@/lib/api-client/types.gen"
 import type { ChildFormData } from "../wizard/wizard-step-child"
 import type { DocumentFormData } from "../wizard/wizard-step-documents"

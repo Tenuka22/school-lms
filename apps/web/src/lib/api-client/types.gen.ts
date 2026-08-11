@@ -57,6 +57,7 @@ export type ApplicationWithChild = {
     child_medium_of_instruction?: MediumOfInstruction | null;
     child_name_with_initials?: string | null;
     child_nationality?: Nationality | null;
+    child_photo_url?: string | null;
     child_religion?: Religion | null;
     created_at: string;
     created_by?: string | null;
@@ -70,7 +71,6 @@ export type ApplicationWithChild = {
     ip_address?: string | null;
     list_category?: ApplicationListCategory | null;
     overseas_arrival_date?: string | null;
-    promoted_at?: string | null;
     rank_number?: number | null;
     reference_no: string;
     rejection_reason?: string | null;
@@ -84,7 +84,6 @@ export type ApplicationWithChild = {
     user_agent?: string | null;
     verified_at?: string | null;
     verified_by?: string | null;
-    waiting_position?: number | null;
     wizard_step?: number | null;
 };
 
@@ -118,11 +117,16 @@ export type Blacklist = {
  * Child
  */
 export type Child = {
+    admission_date?: string | null;
+    admission_number?: string | null;
     birth_certificate_number?: string | null;
     created_at?: string;
+    created_by?: string | null;
+    current_grade?: number | null;
     date_of_birth: string;
     disability_status?: boolean;
     disability_type?: string | null;
+    email?: string | null;
     full_name: string;
     gender: Gender;
     id: string;
@@ -138,9 +142,16 @@ export type Child = {
      * Passport number (for overseas arrivals)
      */
     passport_number?: string | null;
+    phone?: string | null;
     photo_url?: string | null;
     religion?: Religion | null;
+    status: StudentStatus;
+    /**
+     * Link to student record (populated on admission)
+     */
     student_id?: string | null;
+    updated_at?: string;
+    updated_by?: string | null;
 };
 
 /**
@@ -244,7 +255,7 @@ export type CreateGuardianBody = {
     past_pupil_school_id?: string | null;
     past_pupil_student_id?: string | null;
     past_pupil_year_left?: number | null;
-    relationship_type: string;
+    relationship_type: GuardianRelationship;
     staff_school_id?: string | null;
     staff_type?: StaffType | null;
     workplace_address?: string | null;
@@ -289,7 +300,7 @@ export type CreateSiblingRequest = {
  */
 export type CreateSiblingResponse = {
     created: boolean;
-    duplicates: Array<StudentDuplicate>;
+    duplicates: Array<SiblingDuplicate>;
     student_id?: string | null;
 };
 
@@ -302,6 +313,38 @@ export type CreateStaffDetailBody = {
     guardian_id: string;
     school_id: string;
     staff_type?: StaffType | null;
+};
+
+/**
+ * CreateStudentBody
+ */
+export type CreateStudentBody = {
+    birth_certificate_number?: string | null;
+    /**
+     * If provided, link to existing child. Otherwise create new child from the fields below.
+     */
+    child_id?: string | null;
+    date_of_birth?: string | null;
+    full_name?: string | null;
+    gender?: Gender | null;
+    medium_of_instruction?: MediumOfInstruction | null;
+    name_with_initials?: string | null;
+    nationality?: Nationality | null;
+    nic?: string | null;
+    passport_number?: string | null;
+    religion?: Religion | null;
+};
+
+/**
+ * CreateStudentResponse
+ */
+export type CreateStudentResponse = {
+    child_id: string;
+    student_id: string;
+    /**
+     * If duplicates were found and user chose to use existing child
+     */
+    used_existing_child: boolean;
 };
 
 /**
@@ -422,7 +465,6 @@ export type G1Application = {
     polling_district?: ElectoralDistrict | null;
     polling_division?: string | null;
     preferred_school_ids?: unknown;
-    promoted_at?: string | null;
     rank_number?: number | null;
     reference_no?: string;
     rejection_reason?: string | null;
@@ -438,7 +480,6 @@ export type G1Application = {
     verified_by?: string | null;
     village_street?: string | null;
     voter_names?: unknown;
-    waiting_position?: number | null;
     wizard_step?: number | null;
 };
 
@@ -509,10 +550,12 @@ export type Guardian = {
     nic_number: string;
     occupation?: string | null;
     past_pupil_verified: boolean;
-    relationship_type: string;
+    relationship_type: GuardianRelationship;
     workplace_address?: string | null;
     workplace_name?: string | null;
 };
+
+export type GuardianRelationship = 'Father' | 'Mother' | 'Guardian';
 
 export type IncomeLevel = 'below_25000' | '25000_50000' | '50000_100000' | '100000_200000' | '200000_500000' | 'above_500000';
 
@@ -697,6 +740,19 @@ export type SchoolSummary = {
     name_si: string;
 };
 
+export type SiblingDuplicate = {
+    birth_certificate_number?: string | null;
+    current_grade?: number | null;
+    date_of_birth: string;
+    full_name: string;
+    gender: Gender;
+    id: string;
+    medium_of_instruction: MediumOfInstruction;
+    name_with_initials: string;
+    nationality: Nationality;
+    nic?: string | null;
+};
+
 /**
  * StaffDetail
  */
@@ -721,23 +777,20 @@ export type StaffEmploymentType = 'Permanent' | 'Temporary' | 'Contract';
 export type StaffType = 'Teacher' | 'Admin' | 'Worker';
 
 /**
- * Student
+ * StudentResponse
+ *
+ * Response type that combines student record with child data
  */
-export type Student = {
+export type StudentResponse = {
     admission_date?: string | null;
     admission_number?: string | null;
     birth_certificate_number?: string | null;
     child_id: string;
     created_at: string;
     created_by?: string | null;
-    /**
-     * Integer representing the grade (e.g., 1 for Grade 1)
-     */
     current_grade?: number | null;
-    /**
-     * Format: YYYY-MM-DD
-     */
     date_of_birth: string;
+    disability_status: boolean;
     email?: string | null;
     full_name: string;
     gender: Gender;
@@ -747,27 +800,12 @@ export type Student = {
     nationality: Nationality;
     nic?: string | null;
     passport_number?: string | null;
-    /**
-     * E.164 format recommended
-     */
     phone?: string | null;
+    photo_url?: string | null;
     religion?: Religion | null;
     status: StudentStatus;
     updated_at: string;
     updated_by?: string | null;
-};
-
-export type StudentDuplicate = {
-    birth_certificate_number?: string | null;
-    current_grade?: number | null;
-    date_of_birth: string;
-    full_name: string;
-    gender: Gender;
-    id: string;
-    medium_of_instruction: MediumOfInstruction;
-    name_with_initials: string;
-    nationality: Nationality;
-    nic?: string | null;
 };
 
 export type StudentStatus = 'Active' | 'Graduated' | 'Removed';
@@ -870,7 +908,7 @@ export type UpdateGuardianBody = {
     past_pupil_school_id?: string | null;
     past_pupil_student_id?: string | null;
     past_pupil_year_left?: number | null;
-    relationship_type: string;
+    relationship_type: GuardianRelationship;
     staff_school_id?: string | null;
     staff_type?: StaffType | null;
     workplace_address?: string | null;
@@ -989,7 +1027,10 @@ export type ListChildrenData = {
     query?: {
         birth_certificate_number?: string | null;
         full_name?: string | null;
-        has_student?: boolean | null;
+        /**
+         * Filter by student status: "true" = has student record, "false" = no student record
+         */
+        has_student?: string | null;
         nic?: string | null;
         search?: string | null;
     };
@@ -1072,11 +1113,16 @@ export type CreateChildResponses = {
      * Child
      */
     201: {
+        admission_date?: string | null;
+        admission_number?: string | null;
         birth_certificate_number?: string | null;
         created_at?: string;
+        created_by?: string | null;
+        current_grade?: number | null;
         date_of_birth: string;
         disability_status?: boolean;
         disability_type?: string | null;
+        email?: string | null;
         full_name: string;
         gender: Gender;
         id: string;
@@ -1092,9 +1138,16 @@ export type CreateChildResponses = {
          * Passport number (for overseas arrivals)
          */
         passport_number?: string | null;
+        phone?: string | null;
         photo_url?: string | null;
         religion?: Religion | null;
+        status: StudentStatus;
+        /**
+         * Link to student record (populated on admission)
+         */
         student_id?: string | null;
+        updated_at?: string;
+        updated_by?: string | null;
     };
 };
 
@@ -1546,7 +1599,6 @@ export type CreateApplicationResponses = {
         polling_district?: ElectoralDistrict | null;
         polling_division?: string | null;
         preferred_school_ids?: unknown;
-        promoted_at?: string | null;
         rank_number?: number | null;
         reference_no?: string;
         rejection_reason?: string | null;
@@ -1562,7 +1614,6 @@ export type CreateApplicationResponses = {
         verified_by?: string | null;
         village_street?: string | null;
         voter_names?: unknown;
-        waiting_position?: number | null;
         wizard_step?: number | null;
     };
 };
@@ -2613,7 +2664,7 @@ export type CreateGuardianResponses = {
         nic_number: string;
         occupation?: string | null;
         past_pupil_verified: boolean;
-        relationship_type: string;
+        relationship_type: GuardianRelationship;
         workplace_address?: string | null;
         workplace_name?: string | null;
     };
@@ -3153,10 +3204,52 @@ export type ListStudentsErrors = {
 export type ListStudentsError = ListStudentsErrors[keyof ListStudentsErrors];
 
 export type ListStudentsResponses = {
-    200: Array<Student>;
+    200: Array<StudentResponse>;
 };
 
 export type ListStudentsResponse = ListStudentsResponses[keyof ListStudentsResponses];
+
+export type CreateStudentData = {
+    body: CreateStudentBody;
+    path?: never;
+    query?: never;
+    url: '/api/students';
+};
+
+export type CreateStudentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ErrorResponse;
+    /**
+     * Conflict
+     */
+    409: ErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ErrorResponse;
+};
+
+export type CreateStudentError = CreateStudentErrors[keyof CreateStudentErrors];
+
+export type CreateStudentResponses = {
+    200: CreateStudentResponse;
+};
+
+export type CreateStudentResponse2 = CreateStudentResponses[keyof CreateStudentResponses];
 
 export type UpdateStudentData = {
     body: UpdateStudentRequest;
@@ -3200,7 +3293,7 @@ export type UpdateStudentErrors = {
 export type UpdateStudentError = UpdateStudentErrors[keyof UpdateStudentErrors];
 
 export type UpdateStudentResponses = {
-    200: Student;
+    200: Child;
 };
 
 export type UpdateStudentResponse = UpdateStudentResponses[keyof UpdateStudentResponses];

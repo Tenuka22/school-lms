@@ -1,3 +1,4 @@
+use super::super::common::default_now;
 use super::super::common::enums::{
     ApplicationListCategory, EnrollmentStatus, G1Category,
 };
@@ -21,10 +22,6 @@ fn default_reference_no() -> String {
 
 fn default_guardian_id() -> Uuid {
     Uuid::nil()
-}
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
 }
 
 fn default_child_id() -> Uuid {
@@ -148,10 +145,6 @@ pub enum Relation {
     AppealHistory,
     #[sea_orm(has_many = "super::admission_lists::Entity")]
     AdmissionLists,
-    #[sea_orm(has_many = "super::join_staff_details::Entity")]
-    JoinStaffDetails,
-    #[sea_orm(has_many = "super::join_past_pupil_details::Entity")]
-    JoinPastPupilDetails,
     #[sea_orm(has_many = "super::join_siblings::Entity")]
     JoinSiblings,
 }
@@ -207,18 +200,6 @@ impl Related<super::appeal_history::Entity> for Entity {
 impl Related<super::admission_lists::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::AdmissionLists.def()
-    }
-}
-
-impl Related<super::join_staff_details::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::JoinStaffDetails.def()
-    }
-}
-
-impl Related<super::join_past_pupil_details::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::JoinPastPupilDetails.def()
     }
 }
 

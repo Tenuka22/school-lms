@@ -14,7 +14,7 @@ import {
   MediumOfInstructionSchema,
 } from "@/lib/api-client/schemas.gen"
 import { EntityDialog, optionsFromSchema, type FormConfig } from "@/lib/form-builder"
-import type { Student, UpdateStudentRequest } from "@/lib/api-client/types.gen"
+import type { StudentResponse as Student, UpdateStudentRequest } from "@/lib/api-client/types.gen"
 
 type EditStudentFormData = UpdateStudentRequest
 

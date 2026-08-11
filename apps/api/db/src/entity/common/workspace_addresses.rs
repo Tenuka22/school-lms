@@ -1,12 +1,9 @@
+use super::default_now;
 use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
-}
 
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,

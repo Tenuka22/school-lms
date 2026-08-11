@@ -26,7 +26,7 @@ import {
   listApplicationsQueryKey,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { deleteApplication } from "@/lib/api-client/sdk.gen"
-import type { G1Application } from "@/lib/api-client/types.gen"
+import type { ApplicationWithChild } from "@/lib/api-client/types.gen"
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
@@ -141,7 +141,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [dialogOpen, setDialogOpen] = React.useState(false)
-  const [editTarget, setEditTarget] = React.useState<G1Application | null>(null)
+  const [editTarget, setEditTarget] = React.useState<ApplicationWithChild | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<string | null>(null)
   const [deleting, setDeleting] = React.useState(false)
 
@@ -172,7 +172,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
     setDialogOpen(true)
   }, [])
 
-  const handleEdit = React.useCallback((enrollment: G1Application) => {
+  const handleEdit = React.useCallback((enrollment: ApplicationWithChild) => {
     setEditTarget(enrollment)
     setDialogOpen(true)
   }, [])
@@ -264,7 +264,7 @@ const G1Datagrid = ({ search, navigate }: G1DatagridProps) => {
     [pagination, navigate, search]
   )
 
-  const columns = React.useMemo<ColumnDef<G1Application>[]>(
+  const columns = React.useMemo<ColumnDef<ApplicationWithChild>[]>(
     () => [
       {
         accessorKey: "reference_no",

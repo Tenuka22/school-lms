@@ -56,12 +56,7 @@ pub async fn log_child_change(
         id: Set(Uuid::new_v4()),
         table_name: Set("children".to_string()),
         record_id: Set(child_id),
-        action: Set(match operation {
-            AuditOperation::Insert => db::entity::common::enums::AuditAction::Insert,
-            AuditOperation::Update => db::entity::common::enums::AuditAction::Update,
-            AuditOperation::Delete => db::entity::common::enums::AuditAction::Delete,
-            _ => db::entity::common::enums::AuditAction::Update,
-        }),
+        action: Set(operation),
         old_values: Set(old),
         new_values: Set(new),
         performed_by: Set(auth.user_id),

@@ -26,7 +26,7 @@ import {
 import type {
   CreateSiblingRequest,
   CreateSiblingResponse,
-  StudentDuplicate,
+  SiblingDuplicate,
 } from "@/lib/api-client/types.gen"
 
 interface CreateSiblingDialogProps {
@@ -41,7 +41,7 @@ export function CreateSiblingDialog({
   onCreated,
 }: CreateSiblingDialogProps) {
   const [open, setOpen] = useState(false)
-  const [duplicates, setDuplicates] = useState<StudentDuplicate[]>([])
+  const [duplicates, setDuplicates] = useState<SiblingDuplicate[]>([])
 
   const createMutation = useMutation({
     ...createSiblingMutation({ client: apiClient }),

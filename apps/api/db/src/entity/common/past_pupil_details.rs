@@ -1,12 +1,9 @@
+use super::default_now;
 use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
-}
 
 #[derive(
     Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent,
@@ -43,8 +40,6 @@ pub enum Relation {
         to = "super::schools::Column::Id"
     )]
     School,
-    #[sea_orm(has_many = "super::super::g1::join_past_pupil_details::Entity")]
-    G1JoinPastPupilDetails,
 }
 
 impl Related<super::super::common::guardians::Entity> for Entity {
@@ -56,12 +51,6 @@ impl Related<super::super::common::guardians::Entity> for Entity {
 impl Related<super::schools::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::School.def()
-    }
-}
-
-impl Related<super::super::g1::join_past_pupil_details::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::G1JoinPastPupilDetails.def()
     }
 }
 

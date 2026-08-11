@@ -75,7 +75,7 @@ interface DataTableToolbarFilterProps<TData> {
 function DataTableToolbarFilter<TData>({
   column,
 }: DataTableToolbarFilterProps<TData>) {
-  const columnMeta = column.columnDef.meta
+  const columnMeta = column.columnDef.meta as DataTableColumnMeta<TData, unknown> | undefined
 
   if (!columnMeta?.variant) return null
 

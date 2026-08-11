@@ -1,11 +1,8 @@
+use super::super::common::default_now;
 use super::super::common::enums::{DocumentVerificationStatus, G1DocumentType};
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
-}
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "g1_documents")]

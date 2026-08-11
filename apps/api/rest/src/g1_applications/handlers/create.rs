@@ -6,7 +6,7 @@ use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::Utc;
 use db::domain::g1_application::{Draft, G1Application, WizardStep6, WizardStep7};
-use db::entity::common::enums::{AuditAction, BatchStatus, EnrollmentStatus};
+use db::entity::common::enums::{AuditOperation, BatchStatus, EnrollmentStatus};
 use db::entity::g1::applications;
 use db::entity::g1::join_guardians;
 use db::entity::enrollment_batches;
@@ -80,7 +80,7 @@ pub async fn create_application(
     let _ = create_audit_log(
         db.as_ref(),
         Some(saved.id),
-        AuditAction::Insert,
+        AuditOperation::Insert,
         None,
         serde_json::to_value(&saved).ok(),
         None,
@@ -207,7 +207,7 @@ pub async fn submit_application(
     let _ = create_audit_log(
         db.as_ref(),
         Some(id),
-        AuditAction::Update,
+        AuditOperation::Update,
         old_json_for_status(&existing),
         new_json_for_status(&saved),
         None,
@@ -223,7 +223,7 @@ pub async fn submit_application(
 async fn create_audit_log(
     db: &DatabaseConnection,
     record_id: Option<Uuid>,
-    action: AuditAction,
+    action: AuditOperation,
     old_values: Option<serde_json::Value>,
     new_values: Option<serde_json::Value>,
     context: Option<String>,

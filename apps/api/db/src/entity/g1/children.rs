@@ -1,13 +1,10 @@
+use super::super::common::default_now;
 use super::super::common::enums::{Gender, MediumOfInstruction, Nationality, Religion, StudentStatus};
 use apistos::ApiComponent;
 use chrono::{DateTime, NaiveDate, Utc};
 use schemars::JsonSchema;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
-}
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize, JsonSchema, ApiComponent)]
 #[schemars(rename = "Child")]

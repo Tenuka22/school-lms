@@ -23,7 +23,7 @@ import {
   listApplicationsQueryKey,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
-import type { Student } from "@/lib/api-client/types.gen"
+import type { StudentResponse as Student } from "@/lib/api-client/types.gen"
 import type { ChildFormData } from "../wizard/wizard-step-child"
 import type { DocumentFormData } from "../wizard/wizard-step-documents"
 import { Button } from "@/components/ui/button"

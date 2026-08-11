@@ -1,4 +1,5 @@
 import type React from "react"
+import type { ColumnMeta } from "@tanstack/react-table"
 
 export interface Option {
   value: string
@@ -7,7 +8,7 @@ export interface Option {
   count?: number
 }
 
-export interface DataTableColumnMeta {
+export interface DataTableColumnMeta<TData, TValue> extends ColumnMeta<TData, TValue> {
   variant?:
     | "text"
     | "number"

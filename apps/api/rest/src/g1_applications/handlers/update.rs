@@ -3,7 +3,7 @@ use apistos::api_operation;
 use apistos::ApiComponent;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
-use db::entity::common::enums::{AuditAction, EnrollmentStatus};
+use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
 use db::entity::g1::applications;
 use log::info;
 use schemars::JsonSchema;
@@ -165,7 +165,7 @@ pub async fn update_application(
         id: Set(Uuid::new_v4()),
         table_name: Set("g1_applications".to_string()),
         record_id: Set(id),
-        action: Set(AuditAction::Update),
+        action: Set(AuditOperation::Update),
         old_values: Set(old_json),
         new_values: Set(new_json),
         performed_by: Set(auth.user_id),

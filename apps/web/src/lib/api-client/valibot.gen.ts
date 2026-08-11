@@ -48,12 +48,12 @@ export const vBatchStatus = v.picklist([
  */
 export const vBlacklist = v.object({
     application_id: v.nullish(v.pipe(v.string(), v.uuid())),
-    blacklisted_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.352669900Z'),
+    blacklisted_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.507183900Z'),
     blacklisted_by: v.nullish(v.pipe(v.string(), v.uuid())),
     evidence_url: v.nullish(v.string()),
-    expires_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2029-08-04T18:50:43.352679600Z'),
+    expires_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2029-08-10T03:19:46.507206700Z'),
     guardian_id: v.pipe(v.string(), v.uuid()),
-    id: v.optional(v.pipe(v.string(), v.uuid()), '4c04fa14-b286-4c56-baa1-ec31d4600d5b'),
+    id: v.optional(v.pipe(v.string(), v.uuid()), 'f5cac398-134a-4227-b17a-97555def4aaf'),
     reason: v.string(),
     status: v.optional(v.string(), 'Active')
 });
@@ -106,6 +106,15 @@ export const vCreatePastPupilDetailBody = v.object({
     student_id: v.nullish(v.string()),
     verification_method: v.nullish(v.string()),
     year_left: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')))
+});
+
+/**
+ * CreateStudentResponse
+ */
+export const vCreateStudentResponse = v.object({
+    child_id: v.pipe(v.string(), v.uuid()),
+    student_id: v.pipe(v.string(), v.uuid()),
+    used_existing_child: v.boolean()
 });
 
 /**
@@ -212,17 +221,17 @@ export const vEnrollmentBatch = v.object({
     batch_name: v.string(),
     buddhism_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 74),
     catholicism_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 12),
-    closed_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2027-08-05T18:50:43.386985100Z'),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.387020900Z'),
+    closed_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2027-08-11T03:19:46.530007900Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.530025400Z'),
     created_by: v.nullish(v.pipe(v.string(), v.uuid()), null),
     enrollment_type: vEnrollmentType,
     finalized_at: v.nullish(v.pipe(v.string(), v.isoTimestamp()), null),
     govt_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 4),
     hinduism_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 0),
-    id: v.optional(v.pipe(v.string(), v.uuid()), '73f4e8b5-ffbb-4545-913a-3e07d02515be'),
+    id: v.optional(v.pipe(v.string(), v.uuid()), '4f191f4d-4bbf-4556-ad70-6b470e5b1d91'),
     islam_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 14),
     list_published_at: v.nullish(v.pipe(v.string(), v.isoTimestamp()), null),
-    opened_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.386966800Z'),
+    opened_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.530002100Z'),
     proximity_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 50),
     sibling_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 14),
     special_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 1),
@@ -265,7 +274,7 @@ export const vG1Application = v.object({
     category_verified: v.boolean(),
     child_id: v.optional(v.pipe(v.string(), v.uuid()), '00000000-0000-0000-0000-000000000000'),
     closer_school_exists: v.nullish(v.boolean()),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.373725500Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.523935Z'),
     created_by: v.nullish(v.pipe(v.string(), v.uuid())),
     declaration_agreed: v.boolean(),
     declaration_signed_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
@@ -277,7 +286,7 @@ export const vG1Application = v.object({
     gn_number: v.nullish(v.string()),
     guardian_id: v.optional(v.pipe(v.string(), v.uuid()), '00000000-0000-0000-0000-000000000000'),
     household_head_name: v.nullish(v.string()),
-    id: v.optional(v.pipe(v.string(), v.uuid()), '1d59ea60-7b71-479e-ad48-78c90e598fc0'),
+    id: v.optional(v.pipe(v.string(), v.uuid()), '0aabb134-2f66-425d-a873-429fcde78e70'),
     interview_completed: v.boolean(),
     interview_date: v.nullish(v.pipe(v.string(), v.isoDate())),
     ip_address: v.nullish(v.string()),
@@ -287,23 +296,21 @@ export const vG1Application = v.object({
     polling_district: v.nullish(vElectoralDistrict),
     polling_division: v.nullish(v.string()),
     preferred_school_ids: v.optional(v.unknown()),
-    promoted_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     rank_number: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
-    reference_no: v.optional(v.string(), 'DRAFT-ad3bc512-fb2b-408c-8a10-cea9a03c53c3'),
+    reference_no: v.optional(v.string(), 'DRAFT-a363b25b-e161-4b46-849e-53e2cba35f72'),
     rejection_reason: v.nullish(v.string()),
     residence_verified: v.boolean(),
     school_id: v.nullish(v.pipe(v.string(), v.uuid()), null),
     submission_method: v.nullish(v.string()),
     submitted_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     total_marks: v.nullish(v.pipe(v.string(), v.regex(/^-?[0-9]+(\.[0-9]+)?$/))),
-    updated_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.373732900Z'),
+    updated_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.523939500Z'),
     updated_by: v.nullish(v.pipe(v.string(), v.uuid())),
     user_agent: v.nullish(v.string()),
     verified_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     verified_by: v.nullish(v.pipe(v.string(), v.uuid())),
     village_street: v.nullish(v.string()),
     voter_names: v.optional(v.unknown()),
-    waiting_position: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
     wizard_step: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')))
 });
 
@@ -353,6 +360,12 @@ export const vGnDivisionEntry = v.object({
     slug: v.string()
 });
 
+export const vGuardianRelationship = v.picklist([
+    'Father',
+    'Mother',
+    'Guardian'
+]);
+
 export const vIncomeLevel = v.picklist([
     'below_25000',
     '25000_50000',
@@ -369,7 +382,7 @@ export const vGuardian = v.object({
     address_id: v.nullish(v.pipe(v.string(), v.uuid()), null),
     contact_email: v.nullish(v.string()),
     contact_phone: v.string(),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.392888Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.533504700Z'),
     full_name: v.string(),
     govt_service_years: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
     id: v.pipe(v.string(), v.uuid()),
@@ -381,7 +394,7 @@ export const vGuardian = v.object({
     nic_number: v.string(),
     occupation: v.nullish(v.string()),
     past_pupil_verified: v.boolean(),
-    relationship_type: v.string(),
+    relationship_type: vGuardianRelationship,
     workplace_address: v.nullish(v.string()),
     workplace_name: v.nullish(v.string())
 });
@@ -407,7 +420,7 @@ export const vMessageResponse = v.object({
  * Model
  */
 export const vModel = v.object({
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.397071400Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.535220500Z'),
     guardian_id: v.pipe(v.string(), v.uuid()),
     highest_grade: v.nullish(v.string()),
     id: v.pipe(v.string(), v.uuid()),
@@ -504,6 +517,7 @@ export const vApplicationWithChild = v.object({
     child_medium_of_instruction: v.nullish(vMediumOfInstruction),
     child_name_with_initials: v.nullish(v.string()),
     child_nationality: v.nullish(vNationality),
+    child_photo_url: v.nullish(v.string()),
     child_religion: v.nullish(vReligion),
     created_at: v.pipe(v.string(), v.isoTimestamp()),
     created_by: v.nullish(v.pipe(v.string(), v.uuid())),
@@ -517,7 +531,6 @@ export const vApplicationWithChild = v.object({
     ip_address: v.nullish(v.string()),
     list_category: v.nullish(vApplicationListCategory),
     overseas_arrival_date: v.nullish(v.pipe(v.string(), v.isoDate())),
-    promoted_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     rank_number: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
     reference_no: v.string(),
     rejection_reason: v.nullish(v.string()),
@@ -531,31 +544,7 @@ export const vApplicationWithChild = v.object({
     user_agent: v.nullish(v.string()),
     verified_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     verified_by: v.nullish(v.pipe(v.string(), v.uuid())),
-    waiting_position: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
     wizard_step: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')))
-});
-
-/**
- * Child
- */
-export const vChild = v.object({
-    birth_certificate_number: v.nullish(v.string()),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.361413700Z'),
-    date_of_birth: v.pipe(v.string(), v.isoDate()),
-    disability_status: v.optional(v.boolean(), false),
-    disability_type: v.nullish(v.string(), null),
-    full_name: v.string(),
-    gender: vGender,
-    id: v.pipe(v.string(), v.uuid()),
-    medium_of_instruction: vMediumOfInstruction,
-    name_with_initials: v.string(),
-    name_with_initials_en: v.nullish(v.string()),
-    nationality: vNationality,
-    nic: v.nullish(v.string()),
-    passport_number: v.nullish(v.string()),
-    photo_url: v.nullish(v.string(), null),
-    religion: v.nullish(vReligion),
-    student_id: v.nullish(v.pipe(v.string(), v.uuid()), null)
 });
 
 /**
@@ -598,6 +587,23 @@ export const vCreateSiblingRequest = v.object({
 });
 
 /**
+ * CreateStudentBody
+ */
+export const vCreateStudentBody = v.object({
+    birth_certificate_number: v.nullish(v.string()),
+    child_id: v.nullish(v.pipe(v.string(), v.uuid())),
+    date_of_birth: v.nullish(v.pipe(v.string(), v.isoDate())),
+    full_name: v.nullish(v.string()),
+    gender: v.nullish(vGender),
+    medium_of_instruction: v.nullish(vMediumOfInstruction),
+    name_with_initials: v.nullish(v.string()),
+    nationality: v.nullish(vNationality),
+    nic: v.nullish(v.string()),
+    passport_number: v.nullish(v.string()),
+    religion: v.nullish(vReligion)
+});
+
+/**
  * PaginatedApplicationsResponse
  */
 export const vPaginatedApplicationsResponse = v.object({
@@ -619,7 +625,7 @@ export const vAddress = v.object({
     address_line_1: v.string(),
     address_line_2: v.nullish(v.string()),
     city: v.string(),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.395454500Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.534617900Z'),
     distance_to_school_km: v.nullish(v.pipe(v.string(), v.regex(/^-?[0-9]+(\.[0-9]+)?$/))),
     district: v.string(),
     gs_division: v.string(),
@@ -725,6 +731,28 @@ export const vSchoolSummary = v.object({
     name_si: v.string()
 });
 
+export const vSiblingDuplicate = v.object({
+    birth_certificate_number: v.nullish(v.string()),
+    current_grade: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767'))),
+    date_of_birth: v.pipe(v.string(), v.isoDate()),
+    full_name: v.string(),
+    gender: vGender,
+    id: v.pipe(v.string(), v.uuid()),
+    medium_of_instruction: vMediumOfInstruction,
+    name_with_initials: v.string(),
+    nationality: vNationality,
+    nic: v.nullish(v.string())
+});
+
+/**
+ * CreateSiblingResponse
+ */
+export const vCreateSiblingResponse = v.object({
+    created: v.boolean(),
+    duplicates: v.array(vSiblingDuplicate),
+    student_id: v.nullish(v.pipe(v.string(), v.uuid()))
+});
+
 export const vStaffEmploymentType = v.picklist([
     'Permanent',
     'Temporary',
@@ -757,7 +785,7 @@ export const vCreateGuardianBody = v.object({
     past_pupil_school_id: v.nullish(v.pipe(v.string(), v.uuid())),
     past_pupil_student_id: v.nullish(v.string()),
     past_pupil_year_left: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767'))),
-    relationship_type: v.string(),
+    relationship_type: vGuardianRelationship,
     staff_school_id: v.nullish(v.pipe(v.string(), v.uuid())),
     staff_type: v.nullish(vStaffType),
     workplace_address: v.nullish(v.string()),
@@ -779,7 +807,7 @@ export const vCreateStaffDetailBody = v.object({
  * StaffDetail
  */
 export const vStaffDetail = v.object({
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.399474200Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.535800500Z'),
     designation: v.nullish(v.string()),
     distance_from_residence_km: v.nullish(v.pipe(v.string(), v.regex(/^-?[0-9]+(\.[0-9]+)?$/))),
     employee_id: v.nullish(v.string()),
@@ -794,28 +822,6 @@ export const vStaffDetail = v.object({
     verification_doc: v.nullish(v.string())
 });
 
-export const vStudentDuplicate = v.object({
-    birth_certificate_number: v.nullish(v.string()),
-    current_grade: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767'))),
-    date_of_birth: v.pipe(v.string(), v.isoDate()),
-    full_name: v.string(),
-    gender: vGender,
-    id: v.pipe(v.string(), v.uuid()),
-    medium_of_instruction: vMediumOfInstruction,
-    name_with_initials: v.string(),
-    nationality: vNationality,
-    nic: v.nullish(v.string())
-});
-
-/**
- * CreateSiblingResponse
- */
-export const vCreateSiblingResponse = v.object({
-    created: v.boolean(),
-    duplicates: v.array(vStudentDuplicate),
-    student_id: v.nullish(v.pipe(v.string(), v.uuid()))
-});
-
 export const vStudentStatus = v.picklist([
     'Active',
     'Graduated',
@@ -823,16 +829,52 @@ export const vStudentStatus = v.picklist([
 ]);
 
 /**
- * Student
+ * Child
  */
-export const vStudent = v.object({
+export const vChild = v.object({
     admission_date: v.nullish(v.pipe(v.string(), v.isoDate())),
     admission_number: v.nullish(v.string()),
     birth_certificate_number: v.nullish(v.string()),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.536999900Z'),
+    created_by: v.nullish(v.pipe(v.string(), v.uuid())),
+    current_grade: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767'))),
+    date_of_birth: v.pipe(v.string(), v.isoDate()),
+    disability_status: v.optional(v.boolean(), false),
+    disability_type: v.nullish(v.string(), null),
+    email: v.nullish(v.string()),
+    full_name: v.string(),
+    gender: vGender,
+    id: v.pipe(v.string(), v.uuid()),
+    medium_of_instruction: vMediumOfInstruction,
+    name_with_initials: v.string(),
+    name_with_initials_en: v.nullish(v.string()),
+    nationality: vNationality,
+    nic: v.nullish(v.string()),
+    passport_number: v.nullish(v.string()),
+    phone: v.nullish(v.string()),
+    photo_url: v.nullish(v.string(), null),
+    religion: v.nullish(vReligion),
+    status: vStudentStatus,
+    student_id: v.nullish(v.pipe(v.string(), v.uuid()), null),
+    updated_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.537006500Z'),
+    updated_by: v.nullish(v.pipe(v.string(), v.uuid()))
+});
+
+/**
+ * StudentResponse
+ *
+ * Response type that combines student record with child data
+ */
+export const vStudentResponse = v.object({
+    admission_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    admission_number: v.nullish(v.string()),
+    birth_certificate_number: v.nullish(v.string()),
+    child_id: v.pipe(v.string(), v.uuid()),
     created_at: v.pipe(v.string(), v.isoTimestamp()),
     created_by: v.nullish(v.pipe(v.string(), v.uuid())),
     current_grade: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767'))),
     date_of_birth: v.pipe(v.string(), v.isoDate()),
+    disability_status: v.boolean(),
     email: v.nullish(v.string()),
     full_name: v.string(),
     gender: vGender,
@@ -843,6 +885,7 @@ export const vStudent = v.object({
     nic: v.nullish(v.string()),
     passport_number: v.nullish(v.string()),
     phone: v.nullish(v.string()),
+    photo_url: v.nullish(v.string()),
     religion: v.nullish(vReligion),
     status: vStudentStatus,
     updated_at: v.pipe(v.string(), v.isoTimestamp()),
@@ -941,7 +984,7 @@ export const vUpdateGuardianBody = v.object({
     past_pupil_school_id: v.nullish(v.pipe(v.string(), v.uuid())),
     past_pupil_student_id: v.nullish(v.string()),
     past_pupil_year_left: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767'))),
-    relationship_type: v.string(),
+    relationship_type: vGuardianRelationship,
     staff_school_id: v.nullish(v.pipe(v.string(), v.uuid())),
     staff_type: v.nullish(vStaffType),
     workplace_address: v.nullish(v.string()),
@@ -987,7 +1030,8 @@ export const vUploadResponse = v.object({
  */
 export const vUserResponse = v.object({
     email: v.string(),
-    id: v.string()
+    id: v.string(),
+    role: v.string()
 });
 
 /**
@@ -997,7 +1041,7 @@ export const vWorkspaceAddress = v.object({
     building: v.nullish(v.string()),
     city: v.string(),
     country: v.string(),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.404224400Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.539030600Z'),
     full_address: v.string(),
     id: v.pipe(v.string(), v.uuid()),
     name: v.string(),
@@ -1016,7 +1060,7 @@ export const vListBlacklistResponse = v.array(vBlacklist);
 export const vListChildrenQuery = v.object({
     birth_certificate_number: v.nullish(v.string()),
     full_name: v.nullish(v.string()),
-    has_student: v.nullish(v.boolean()),
+    has_student: v.nullish(v.string()),
     nic: v.nullish(v.string()),
     search: v.nullish(v.string())
 });
@@ -1029,11 +1073,16 @@ export const vCreateChildBody2 = vCreateChildBody;
  * Child
  */
 export const vCreateChildResponse = v.object({
+    admission_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    admission_number: v.nullish(v.string()),
     birth_certificate_number: v.nullish(v.string()),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.359511600Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.513608300Z'),
+    created_by: v.nullish(v.pipe(v.string(), v.uuid())),
+    current_grade: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767'))),
     date_of_birth: v.pipe(v.string(), v.isoDate()),
     disability_status: v.optional(v.boolean(), false),
     disability_type: v.nullish(v.string(), null),
+    email: v.nullish(v.string()),
     full_name: v.string(),
     gender: vGender,
     id: v.pipe(v.string(), v.uuid()),
@@ -1043,9 +1092,13 @@ export const vCreateChildResponse = v.object({
     nationality: vNationality,
     nic: v.nullish(v.string()),
     passport_number: v.nullish(v.string()),
+    phone: v.nullish(v.string()),
     photo_url: v.nullish(v.string(), null),
     religion: v.nullish(vReligion),
-    student_id: v.nullish(v.pipe(v.string(), v.uuid()), null)
+    status: vStudentStatus,
+    student_id: v.nullish(v.pipe(v.string(), v.uuid()), null),
+    updated_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.513644500Z'),
+    updated_by: v.nullish(v.pipe(v.string(), v.uuid()))
 });
 
 export const vGetChildPath = v.object({
@@ -1115,7 +1168,7 @@ export const vCreateApplicationResponse = v.object({
     category_verified: v.boolean(),
     child_id: v.optional(v.pipe(v.string(), v.uuid()), '00000000-0000-0000-0000-000000000000'),
     closer_school_exists: v.nullish(v.boolean()),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.368242200Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.521793800Z'),
     created_by: v.nullish(v.pipe(v.string(), v.uuid())),
     declaration_agreed: v.boolean(),
     declaration_signed_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
@@ -1127,7 +1180,7 @@ export const vCreateApplicationResponse = v.object({
     gn_number: v.nullish(v.string()),
     guardian_id: v.optional(v.pipe(v.string(), v.uuid()), '00000000-0000-0000-0000-000000000000'),
     household_head_name: v.nullish(v.string()),
-    id: v.optional(v.pipe(v.string(), v.uuid()), '65dd53fc-f711-42b8-9746-bdac6834adba'),
+    id: v.optional(v.pipe(v.string(), v.uuid()), '7c760a14-54b1-4b8c-b1b8-96ae8061c5e0'),
     interview_completed: v.boolean(),
     interview_date: v.nullish(v.pipe(v.string(), v.isoDate())),
     ip_address: v.nullish(v.string()),
@@ -1137,23 +1190,21 @@ export const vCreateApplicationResponse = v.object({
     polling_district: v.nullish(vElectoralDistrict),
     polling_division: v.nullish(v.string()),
     preferred_school_ids: v.optional(v.unknown()),
-    promoted_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     rank_number: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
-    reference_no: v.optional(v.string(), 'DRAFT-5683728f-d13a-4415-b1d8-fe599a2b2a7b'),
+    reference_no: v.optional(v.string(), 'DRAFT-8ba6ebe9-f6e5-419c-885b-2749ef830f00'),
     rejection_reason: v.nullish(v.string()),
     residence_verified: v.boolean(),
     school_id: v.nullish(v.pipe(v.string(), v.uuid()), null),
     submission_method: v.nullish(v.string()),
     submitted_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     total_marks: v.nullish(v.pipe(v.string(), v.regex(/^-?[0-9]+(\.[0-9]+)?$/))),
-    updated_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.368261400Z'),
+    updated_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.521799800Z'),
     updated_by: v.nullish(v.pipe(v.string(), v.uuid())),
     user_agent: v.nullish(v.string()),
     verified_at: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
     verified_by: v.nullish(v.pipe(v.string(), v.uuid())),
     village_street: v.nullish(v.string()),
     voter_names: v.optional(v.unknown()),
-    waiting_position: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
     wizard_step: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')))
 });
 
@@ -1269,17 +1320,17 @@ export const vCreateBatchResponse = v.object({
     batch_name: v.string(),
     buddhism_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 74),
     catholicism_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 12),
-    closed_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2027-08-05T18:50:43.384521200Z'),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.384557400Z'),
+    closed_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2027-08-11T03:19:46.528535300Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.528552900Z'),
     created_by: v.nullish(v.pipe(v.string(), v.uuid()), null),
     enrollment_type: vEnrollmentType,
     finalized_at: v.nullish(v.pipe(v.string(), v.isoTimestamp()), null),
     govt_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 4),
     hinduism_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 0),
-    id: v.optional(v.pipe(v.string(), v.uuid()), 'f28907ec-9734-4b04-addb-6243fe6ff889'),
+    id: v.optional(v.pipe(v.string(), v.uuid()), '721a0b58-82c6-4cc8-a3ae-0208a7e2d78b'),
     islam_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 14),
     list_published_at: v.nullish(v.pipe(v.string(), v.isoTimestamp()), null),
-    opened_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.384505800Z'),
+    opened_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.528527400Z'),
     proximity_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 50),
     sibling_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 14),
     special_percentage: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-32768, 'Invalid value: Expected int16 to be >= -32768'), v.maxValue(32767, 'Invalid value: Expected int16 to be <= 32767')), 1),
@@ -1329,7 +1380,7 @@ export const vCreateGuardianResponse = v.object({
     address_id: v.nullish(v.pipe(v.string(), v.uuid()), null),
     contact_email: v.nullish(v.string()),
     contact_phone: v.string(),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.391048300Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.532767100Z'),
     full_name: v.string(),
     govt_service_years: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648, 'Invalid value: Expected int32 to be >= -2147483648'), v.maxValue(2147483647, 'Invalid value: Expected int32 to be <= 2147483647'))),
     id: v.pipe(v.string(), v.uuid()),
@@ -1341,7 +1392,7 @@ export const vCreateGuardianResponse = v.object({
     nic_number: v.string(),
     occupation: v.nullish(v.string()),
     past_pupil_verified: v.boolean(),
-    relationship_type: v.string(),
+    relationship_type: vGuardianRelationship,
     workplace_address: v.nullish(v.string()),
     workplace_name: v.nullish(v.string())
 });
@@ -1375,7 +1426,7 @@ export const vCreateAddressResponse = v.object({
     address_line_1: v.string(),
     address_line_2: v.nullish(v.string()),
     city: v.string(),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.395184600Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.534478800Z'),
     distance_to_school_km: v.nullish(v.pipe(v.string(), v.regex(/^-?[0-9]+(\.[0-9]+)?$/))),
     district: v.string(),
     gs_division: v.string(),
@@ -1407,7 +1458,7 @@ export const vCreatePastPupilDetailBody2 = vCreatePastPupilDetailBody;
  * Model
  */
 export const vCreatePastPupilDetailResponse = v.object({
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.396857Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.535150900Z'),
     guardian_id: v.pipe(v.string(), v.uuid()),
     highest_grade: v.nullish(v.string()),
     id: v.pipe(v.string(), v.uuid()),
@@ -1437,7 +1488,7 @@ export const vCreateStaffDetailBody2 = vCreateStaffDetailBody;
  * StaffDetail
  */
 export const vCreateStaffDetailResponse = v.object({
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.399282100Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.535727400Z'),
     designation: v.nullish(v.string()),
     distance_from_residence_km: v.nullish(v.pipe(v.string(), v.regex(/^-?[0-9]+(\.[0-9]+)?$/))),
     employee_id: v.nullish(v.string()),
@@ -1456,7 +1507,11 @@ export const vListStudentsQuery = v.object({
     search: v.nullish(v.string())
 });
 
-export const vListStudentsResponse = v.array(vStudent);
+export const vListStudentsResponse = v.array(vStudentResponse);
+
+export const vCreateStudentBody2 = vCreateStudentBody;
+
+export const vCreateStudentResponse2 = vCreateStudentResponse;
 
 export const vUpdateStudentBody = vUpdateStudentRequest;
 
@@ -1464,7 +1519,7 @@ export const vUpdateStudentPath = v.object({
     id: v.pipe(v.string(), v.uuid())
 });
 
-export const vUpdateStudentResponse = vStudent;
+export const vUpdateStudentResponse = vChild;
 
 export const vListWorkspaceAddressesQuery = v.object({
     search: v.nullish(v.string())
@@ -1481,7 +1536,7 @@ export const vCreateWorkspaceAddressResponse = v.object({
     building: v.nullish(v.string()),
     city: v.string(),
     country: v.string(),
-    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-05T18:50:43.403971700Z'),
+    created_at: v.optional(v.pipe(v.string(), v.isoTimestamp()), '2026-08-11T03:19:46.538147500Z'),
     full_address: v.string(),
     id: v.pipe(v.string(), v.uuid()),
     name: v.string(),

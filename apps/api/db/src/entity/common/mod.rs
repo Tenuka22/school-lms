@@ -14,3 +14,9 @@ pub mod secure_counter;
 pub mod siblings;
 pub mod staff_details;
 pub mod workspace_addresses;
+
+use chrono::{DateTime, Utc};
+
+pub fn default_now() -> DateTime<Utc> {
+    Utc::now()
+}

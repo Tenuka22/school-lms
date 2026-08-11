@@ -149,7 +149,7 @@ pub async fn create_batch(
         id: Set(Uuid::new_v4()),
         table_name: Set("enrollment_batches".to_string()),
         record_id: Set(saved.id),
-        action: Set(db::entity::common::enums::AuditAction::Insert),
+        action: Set(db::entity::common::enums::AuditOperation::Insert),
         old_values: Set(None),
         new_values: Set(Some(serde_json::to_value(&saved).unwrap_or_default())),
         performed_by: Set(auth.user_id),

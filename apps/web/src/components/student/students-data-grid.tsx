@@ -23,6 +23,8 @@ import {
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import type { StudentResponse as Student } from "@/lib/api-client/types.gen"
 import type {
   SortingState,
   ColumnFiltersState,
@@ -38,23 +40,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 
-type StudentRow = {
-  id: string
-  child_id: string
-  created_at: string
-  full_name: string
-  name_with_initials: string
-  date_of_birth: string
-  gender: string
-  birth_certificate_number: string | null
-  nic: string | null
-  nationality: string
-  medium_of_instruction: string
-  admission_number: string | null
-  current_grade: number | null
-  phone: string | null
-  email: string | null
-  status: string
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
 }
 
 function EnumBadge({
@@ -94,12 +86,29 @@ export function StudentsDataGrid({}: { refreshKey?: number }) {
         client: apiClient,
         query: { search: debouncedSearch || undefined },
       })
-      return (data ?? []) as StudentRow[]
+      return (data ?? []) as Student[]
     },
   })
 
-  const columns = useMemo<ColumnDef<StudentRow>[]>(
+  const columns = useMemo<ColumnDef<Student>[]>(
     () => [
+      {
+        id: "avatar",
+        enableHiding: false,
+        header: () => <span className="sr-only">Photo</span>,
+        cell: ({ row }) => {
+          const s = row.original
+          return (
+            <Avatar size="sm">
+              {s.photo_url ? (
+                <AvatarImage src={s.photo_url} alt={s.full_name} />
+              ) : null}
+              <AvatarFallback>{getInitials(s.full_name)}</AvatarFallback>
+            </Avatar>
+          )
+        },
+        meta: { label: "Photo", variant: "text" },
+      },
       {
         accessorKey: "full_name",
         header: ({ column }) => (
@@ -116,6 +125,33 @@ export function StudentsDataGrid({}: { refreshKey?: number }) {
           <DataTableColumnHeader column={column} label="Initials" />
         ),
         meta: { label: "Name with Initials", variant: "text" },
+      },
+      {
+        accessorKey: "admission_number",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Admission No" />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs">
+            {row.getValue("admission_number") || "—"}
+          </span>
+        ),
+        meta: { label: "Admission Number", variant: "text" },
+      },
+      {
+        accessorKey: "current_grade",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Grade" />
+        ),
+        cell: ({ row }) => {
+          const val = row.getValue("current_grade") as number | null
+          return val !== null ? (
+            <span className="text-sm">Grade {val}</span>
+          ) : (
+            <span className="text-sm text-muted-foreground">—</span>
+          )
+        },
+        meta: { label: "Current Grade", variant: "text" },
       },
       {
         accessorKey: "date_of_birth",
@@ -146,31 +182,47 @@ export function StudentsDataGrid({}: { refreshKey?: number }) {
         },
       },
       {
-        accessorKey: "admission_number",
+        accessorKey: "religion",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Admission No" />
+          <DataTableColumnHeader column={column} label="Religion" />
         ),
         cell: ({ row }) => (
-          <span className="font-mono text-xs">
-            {row.getValue("admission_number") || "—"}
-          </span>
+          <EnumBadge
+            column="religion"
+            value={row.getValue("religion") as string}
+          />
         ),
-        meta: { label: "Admission Number", variant: "text" },
+        meta: {
+          label: "Religion",
+          variant: "select",
+          options: [
+            { value: "Buddhism", label: "Buddhism" },
+            { value: "Hinduism", label: "Hinduism" },
+            { value: "Islam", label: "Islam" },
+            { value: "Christianity", label: "Christianity" },
+            { value: "Catholicism", label: "Catholicism" },
+          ],
+        },
       },
       {
-        accessorKey: "current_grade",
+        accessorKey: "medium_of_instruction",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="Grade" />
+          <DataTableColumnHeader column={column} label="Medium" />
         ),
-        cell: ({ row }) => {
-          const val = row.getValue("current_grade") as number | null
-          return val !== null ? (
-            <span className="text-sm">Grade {val}</span>
-          ) : (
-            <span className="text-sm text-muted-foreground">—</span>
-          )
+        cell: ({ row }) => (
+          <EnumBadge
+            column="medium_of_instruction"
+            value={row.getValue("medium_of_instruction") as string}
+          />
+        ),
+        meta: {
+          label: "Medium",
+          variant: "select",
+          options: [
+            { value: "Sinhala", label: "Sinhala" },
+            { value: "Tamil", label: "Tamil" },
+          ],
         },
-        meta: { label: "Current Grade", variant: "text" },
       },
       {
         accessorKey: "status",
@@ -205,6 +257,18 @@ export function StudentsDataGrid({}: { refreshKey?: number }) {
           </span>
         ),
         meta: { label: "Phone", variant: "text" },
+      },
+      {
+        accessorKey: "email",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Email" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm">
+            {row.getValue("email") || "—"}
+          </span>
+        ),
+        meta: { label: "Email", variant: "text" },
       },
       {
         id: "actions",

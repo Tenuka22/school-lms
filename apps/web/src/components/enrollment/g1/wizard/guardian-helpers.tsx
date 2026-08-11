@@ -319,7 +319,7 @@ export function BlacklistBadge({ entry }: { entry: Blacklist }) {
           <p className="font-medium text-destructive">Blacklisted</p>
           <p className="text-muted-foreground">{entry.reason}</p>
           <p className="text-muted-foreground/60">
-            Since {new Date(entry.blacklisted_at).toLocaleDateString()}
+            Since {new Date(entry.blacklisted_at ?? '').toLocaleDateString()}
           </p>
         </div>
       </HoverCardContent>

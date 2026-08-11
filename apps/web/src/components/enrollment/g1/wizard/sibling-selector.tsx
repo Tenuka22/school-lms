@@ -16,7 +16,7 @@ import {
   IconGripVertical,
   IconPencil,
 } from "@tabler/icons-react"
-import type { Student } from "@/lib/api-client/types.gen"
+import type { StudentResponse as Student } from "@/lib/api-client/types.gen"
 import { useDebounce } from "@/hooks/use-debounce"
 import { CreateSiblingDialog } from "./sibling-form"
 import { EditStudentDialog } from "./edit-student-dialog"

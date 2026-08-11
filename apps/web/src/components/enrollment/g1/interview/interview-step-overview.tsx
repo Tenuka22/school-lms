@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import type { ChildFormData } from "../wizard/wizard-step-child"
-import type { Address, Guardian, Student } from "@/lib/api-client/types.gen"
+import type { Address, Guardian, StudentResponse as Student } from "@/lib/api-client/types.gen"
 import type { G1Application } from "@/lib/api-client/types.gen"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { getInitials } from "@/lib/utils"

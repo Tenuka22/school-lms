@@ -1,4 +1,4 @@
-use super::enums::AuditAction;
+use super::enums::AuditOperation;
 use chrono::{DateTime, Utc};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -10,7 +10,7 @@ pub struct Model {
     pub id: Uuid,
     pub table_name: String,
     pub record_id: Uuid,
-    pub action: AuditAction,
+    pub action: AuditOperation,
     pub old_values: Option<Json>,
     pub new_values: Option<Json>,
     pub performed_by: Option<Uuid>,

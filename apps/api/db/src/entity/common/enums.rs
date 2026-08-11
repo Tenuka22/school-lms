@@ -248,56 +248,6 @@ pub enum G1Category {
     ApiComponent,
 )]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
-pub enum DocumentType {
-    #[sea_orm(string_value = "BirthCertificate")]
-    BirthCertificate,
-    #[sea_orm(string_value = "TransferLetter")]
-    TransferLetter,
-    #[sea_orm(string_value = "ResidenceProof")]
-    ResidenceProof,
-    #[sea_orm(string_value = "GuardianNIC")]
-    GuardianNIC,
-    #[sea_orm(string_value = "Other")]
-    Other,
-}
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    EnumIter,
-    DeriveActiveEnum,
-    Serialize,
-    Deserialize,
-    JsonSchema,
-    ApiComponent,
-)]
-#[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
-pub enum VerificationStatus {
-    #[sea_orm(string_value = "Pending")]
-    Pending,
-    #[sea_orm(string_value = "Verified")]
-    Verified,
-    #[sea_orm(string_value = "Rejected")]
-    Rejected,
-}
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    EnumIter,
-    DeriveActiveEnum,
-    Serialize,
-    Deserialize,
-    JsonSchema,
-    ApiComponent,
-)]
-#[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum GuardianRelationship {
     #[sea_orm(string_value = "Father")]
     Father,
@@ -322,21 +272,21 @@ pub enum GuardianRelationship {
 )]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
 pub enum AuditOperation {
-    #[sea_orm(string_value = "Insert")]
+    #[sea_orm(string_value = "INSERT")]
     Insert,
-    #[sea_orm(string_value = "Update")]
+    #[sea_orm(string_value = "UPDATE")]
     Update,
-    #[sea_orm(string_value = "Delete")]
+    #[sea_orm(string_value = "DELETE")]
     Delete,
-    #[sea_orm(string_value = "Verify")]
+    #[sea_orm(string_value = "VERIFY")]
     Verify,
-    #[sea_orm(string_value = "Mark")]
+    #[sea_orm(string_value = "MARK")]
     Mark,
-    #[sea_orm(string_value = "AppealDecide")]
+    #[sea_orm(string_value = "APPEAL_DECIDE")]
     AppealDecide,
-    #[sea_orm(string_value = "ListGenerate")]
+    #[sea_orm(string_value = "LIST_GENERATE")]
     ListGenerate,
-    #[sea_orm(string_value = "Promote")]
+    #[sea_orm(string_value = "PROMOTE")]
     Promote,
 }
 
@@ -747,39 +697,6 @@ pub enum QuotaCategory {
     Distance,
     #[sea_orm(string_value = "SpecialNeeds")]
     SpecialNeeds,
-}
-
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    EnumIter,
-    DeriveActiveEnum,
-    Serialize,
-    Deserialize,
-    JsonSchema,
-    ApiComponent,
-)]
-#[sea_orm(rs_type = "String", db_type = "String(StringLen::None)")]
-pub enum AuditAction {
-    #[sea_orm(string_value = "INSERT")]
-    Insert,
-    #[sea_orm(string_value = "UPDATE")]
-    Update,
-    #[sea_orm(string_value = "DELETE")]
-    Delete,
-    #[sea_orm(string_value = "VERIFY")]
-    Verify,
-    #[sea_orm(string_value = "MARK")]
-    Mark,
-    #[sea_orm(string_value = "APPEAL_DECIDE")]
-    AppealDecide,
-    #[sea_orm(string_value = "LIST_GENERATE")]
-    ListGenerate,
-    #[sea_orm(string_value = "PROMOTE")]
-    Promote,
 }
 
 #[derive(

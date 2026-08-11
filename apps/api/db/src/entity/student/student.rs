@@ -25,27 +25,11 @@ pub enum Relation {
         to = "super::super::g1::children::Column::Id"
     )]
     Child,
-    #[sea_orm(has_many = "super::join_addresses::Entity")]
-    StudentJoinAddress,
-    #[sea_orm(has_many = "super::join_guardians::Entity")]
-    StudentJoinGuardian,
 }
 
 impl Related<super::super::g1::children::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Child.def()
-    }
-}
-
-impl Related<super::join_addresses::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::StudentJoinAddress.def()
-    }
-}
-
-impl Related<super::join_guardians::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::StudentJoinGuardian.def()
     }
 }
 

@@ -6,7 +6,7 @@ export const ELECTORAL_DISTRICTS: { value: ElectoralDistrict; label: string; si:
   { value: "Kalutara", label: "Kalutara", si: "කළුතර" },
   { value: "Kandy", label: "Kandy", si: "මහනුවර" },
   { value: "Matale", label: "Matale", si: "මාතලේ" },
-  { value: "Nuwara_Eliya", label: "Nuwara Eliya", si: "නුවරඑලිය" },
+  { value: "NuwaraEliya", label: "Nuwara Eliya", si: "නුවරඑලිය" },
   { value: "Galle", label: "Galle", si: "ගාල්ල" },
   { value: "Matara", label: "Matara", si: "මාතර" },
   { value: "Hambantota", label: "Hambantota", si: "හම්බන්තොට" },

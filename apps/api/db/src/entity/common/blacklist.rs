@@ -1,3 +1,4 @@
+use super::default_now;
 use apistos::ApiComponent;
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
@@ -6,10 +7,6 @@ use serde::{Deserialize, Serialize};
 
 fn default_id() -> Uuid {
     uuid::Uuid::new_v4()
-}
-
-fn default_now() -> DateTime<Utc> {
-    Utc::now()
 }
 
 fn default_expires_at() -> DateTime<Utc> {

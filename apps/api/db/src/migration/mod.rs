@@ -7,6 +7,7 @@ pub mod m20260805_000002_split_gn_division;
 pub mod m20260806_000001_add_closer_school_exists;
 pub mod m20260808_000001_deduplicate_student_child;
 pub mod m20260808_000002_cleanup_dupes;
+pub mod m20260810_000001_add_child_id_to_students;
 
 use sea_orm_migration::prelude::*;
 
@@ -25,6 +26,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260806_000001_add_closer_school_exists::Migration),
             Box::new(m20260808_000001_deduplicate_student_child::Migration),
             Box::new(m20260808_000002_cleanup_dupes::Migration),
+            Box::new(m20260810_000001_add_child_id_to_students::Migration),
         ]
     }
 }

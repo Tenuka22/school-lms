@@ -38,8 +38,6 @@ pub use g1::documents;
 pub use g1::documents_audit;
 pub use g1::join_addresses;
 pub use g1::join_guardians;
-pub use g1::join_past_pupil_details;
 pub use g1::join_siblings;
-pub use g1::join_staff_details;
 pub use g1::join_workspace_addresses;
 pub use g1::marks_breakdown;

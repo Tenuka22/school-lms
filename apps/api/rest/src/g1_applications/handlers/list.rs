@@ -75,6 +75,7 @@ pub struct ApplicationWithChild {
     pub child_religion: Option<Religion>,
     pub child_medium_of_instruction: Option<MediumOfInstruction>,
     pub child_birth_certificate_number: Option<String>,
+    pub child_photo_url: Option<String>,
 }
 
 #[derive(Serialize, JsonSchema, ApiComponent)]
@@ -207,6 +208,7 @@ pub async fn list_applications(
                 child_medium_of_instruction: child.map(|c| c.medium_of_instruction),
                 child_birth_certificate_number: child
                     .and_then(|c| c.birth_certificate_number.clone()),
+                child_photo_url: child.and_then(|c| c.photo_url.clone()),
             }
         })
         .collect();

@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { useState, useMemo } from "react"
-import { IconSearch, IconDots, IconLoader2, IconPencil } from "@tabler/icons-react"
+import { useNavigate } from "@tanstack/react-router"
+import { IconSearch, IconDots, IconLoader2, IconPencil, IconSchool } from "@tabler/icons-react"
 import { apiClient } from "@/lib/api-client"
 import { listChildrenQueryKey } from "@/lib/api-client/@tanstack/react-query.gen"
 import { listChildren } from "@/lib/api-client/sdk.gen"
@@ -21,6 +22,7 @@ import {
 import { DataTable } from "@/components/ui/data-table/data-table"
 import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import type { Child } from "@/lib/api-client/types.gen"
 import type {
   SortingState,
@@ -36,6 +38,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
+}
 
 function EnumBadge({
   column,
@@ -63,6 +74,7 @@ export function ChildrenDataGrid({
   hasStudent?: boolean
   onEdit?: (child: Child) => void
 }) {
+  const navigate = useNavigate()
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search, 300)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -80,7 +92,7 @@ export function ChildrenDataGrid({
         client: apiClient,
         query: {
           search: debouncedSearch || undefined,
-          has_student: hasStudent ?? undefined,
+          has_student: hasStudent != null ? String(hasStudent) : undefined,
         },
       })
       return (data ?? []) as Child[]
@@ -90,13 +102,51 @@ export function ChildrenDataGrid({
   const columns = useMemo<ColumnDef<Child>[]>(
     () => [
       {
+        id: "avatar",
+        enableHiding: false,
+        header: () => <span className="sr-only">Photo</span>,
+        cell: ({ row }) => {
+          const c = row.original
+          return (
+            <Avatar size="sm">
+              {c.photo_url ? (
+                <AvatarImage src={c.photo_url} alt={c.full_name} />
+              ) : null}
+              <AvatarFallback>{getInitials(c.full_name)}</AvatarFallback>
+            </Avatar>
+          )
+        },
+        meta: { label: "Photo", variant: "text" },
+      },
+      {
         accessorKey: "full_name",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Full Name" />
         ),
-        cell: ({ row }) => (
-          <div className="font-medium">{row.getValue("full_name")}</div>
-        ),
+        cell: ({ row }) => {
+          const child = row.original
+          return (
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{child.full_name}</span>
+              {child.student_id && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    navigate({
+                      to: "/student-management/students",
+                    })
+                  }}
+                  className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary transition-colors hover:bg-primary/20"
+                  title="View student record"
+                >
+                  <IconSchool className="size-3" />
+                  Student
+                </button>
+              )}
+            </div>
+          )
+        },
         meta: { label: "Full Name", variant: "text" },
       },
       {
@@ -135,25 +185,6 @@ export function ChildrenDataGrid({
         },
       },
       {
-        accessorKey: "birth_certificate_number",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="BC Number" />
-        ),
-        meta: { label: "Birth Certificate Number", variant: "text" },
-      },
-      {
-        accessorKey: "nic",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} label="NIC" />
-        ),
-        cell: ({ row }) => (
-          <span className="text-sm">
-            {row.getValue("nic") || "—"}
-          </span>
-        ),
-        meta: { label: "NIC", variant: "text" },
-      },
-      {
         accessorKey: "nationality",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} label="Nationality" />
@@ -165,8 +196,32 @@ export function ChildrenDataGrid({
           label: "Nationality",
           variant: "select",
           options: [
-            { value: "Sri Lankan", label: "Sri Lankan" },
-            { value: "Indian", label: "Indian" },
+            { value: "SriLankan", label: "Sri Lankan" },
+            { value: "DualCitizen", label: "Dual Citizen" },
+            { value: "Other", label: "Other" },
+          ],
+        },
+      },
+      {
+        accessorKey: "religion",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="Religion" />
+        ),
+        cell: ({ row }) => (
+          <EnumBadge
+            column="religion"
+            value={row.getValue("religion") as string}
+          />
+        ),
+        meta: {
+          label: "Religion",
+          variant: "select",
+          options: [
+            { value: "Buddhism", label: "Buddhism" },
+            { value: "Hinduism", label: "Hinduism" },
+            { value: "Islam", label: "Islam" },
+            { value: "Christianity", label: "Christianity" },
+            { value: "Catholicism", label: "Catholicism" },
           ],
         },
       },
@@ -190,37 +245,67 @@ export function ChildrenDataGrid({
           ],
         },
       },
-      ...(onEdit
-        ? [
-            {
-              id: "actions" as const,
-              enableHiding: false,
-              header: () => <span className="sr-only">Actions</span>,
-              cell: ({ row }: { row: import("@tanstack/react-table").Row<Child> }) => (
-                <div className="flex justify-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button variant="ghost" size="icon" className="size-8">
-                          <IconDots className="size-4" />
-                          <span className="sr-only">Open menu</span>
-                        </Button>
+      {
+        accessorKey: "birth_certificate_number",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="BC Number" />
+        ),
+        meta: { label: "Birth Certificate Number", variant: "text" },
+      },
+      {
+        accessorKey: "nic",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} label="NIC" />
+        ),
+        cell: ({ row }) => (
+          <span className="text-sm">
+            {row.getValue("nic") || "—"}
+          </span>
+        ),
+        meta: { label: "NIC", variant: "text" },
+      },
+      {
+        id: "actions",
+        enableHiding: false,
+        header: () => <span className="sr-only">Actions</span>,
+        cell: ({ row }) => {
+          const child = row.original
+          return (
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <IconDots className="size-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(child)}>
+                      <IconPencil className="mr-2 size-4" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {child.student_id && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        navigate({ to: "/student-management/students" })
                       }
-                    />
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                        <IconPencil className="mr-2 size-4" />
-                        Edit
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              ),
-            },
-          ]
-        : []),
+                    >
+                      <IconSchool className="mr-2 size-4" />
+                      View Student Record
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )
+        },
+      },
     ],
-    [onEdit]
+    [onEdit, navigate]
   )
 
   const table = useReactTable({
