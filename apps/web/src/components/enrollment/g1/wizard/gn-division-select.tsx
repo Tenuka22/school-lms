@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
+import { listGnDivisionsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -52,15 +53,7 @@ export function GnDivisionSelect({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["gn-divisions"],
-    queryFn: async () => {
-      const res = await apiClient.get({ url: "/api/gn-divisions" })
-      if (res.error) {
-        console.error("GN divisions error:", res.error)
-        return []
-      }
-      return (res.data ?? []) as GnDivision[]
-    },
+    ...listGnDivisionsOptions({ client: apiClient }),
     staleTime: 24 * 60 * 60 * 1000,
     enabled: open,
   })

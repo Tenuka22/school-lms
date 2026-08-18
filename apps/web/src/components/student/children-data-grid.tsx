@@ -11,12 +11,10 @@ import {
   IconSchool,
 } from "@tabler/icons-react"
 import { apiClient } from "@/lib/api-client"
-import { listChildrenQueryKey } from "@/lib/api-client/@tanstack/react-query.gen"
-import { listChildren } from "@/lib/api-client/sdk.gen"
-
 import { formatDate } from "@/lib/format"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { useDebounce } from "@/hooks/use-debounce"
+import { listChildrenOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -91,23 +89,15 @@ export function ChildrenDataGrid({
     pageSize: 20,
   })
 
-  const { data: children = [], isLoading } = useQuery({
-    queryKey: [
-      ...listChildrenQueryKey({ client: apiClient }),
-      debouncedSearch,
-      hasStudent,
-    ],
-    queryFn: async () => {
-      const { data } = await listChildren({
-        client: apiClient,
-        query: {
-          search: debouncedSearch || undefined,
-          has_student: hasStudent != null ? String(hasStudent) : undefined,
-        },
-      })
-      return data ?? []
-    },
-  })
+  const { data: children = [], isLoading } = useQuery(
+    listChildrenOptions({
+      client: apiClient,
+      query: {
+        search: debouncedSearch || undefined,
+        has_student: hasStudent != null ? String(hasStudent) : undefined,
+      },
+    })
+  )
 
   const columns = useMemo<ColumnDef<Child>[]>(
     () => [

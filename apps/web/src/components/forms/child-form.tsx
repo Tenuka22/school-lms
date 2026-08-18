@@ -120,11 +120,11 @@ export function makeChildFormConfig(
 
   if (includeEnglishInitials) {
     fields.push({
-      name: "name_with_initials_en" as any,
+      name: "name_with_initials_en",
       kind: "text",
       label: "Name with Initials (English)",
       placeholder: "e.g. B.S.S. Peiris",
-    } as any)
+    })
   }
 
   fields.push(

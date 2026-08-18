@@ -11,7 +11,6 @@ import { DataTableViewOptions } from "@/components/ui/data-table/data-table-view
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { DataTableColumnMeta } from "@/types/data-table"
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
   table: Table<TData>
@@ -75,15 +74,24 @@ interface DataTableToolbarFilterProps<TData> {
 function DataTableToolbarFilter<TData>({
   column,
 }: DataTableToolbarFilterProps<TData>) {
-  const columnMeta = column.columnDef.meta
+  const columnMeta = column.columnDef.meta as
+    | Record<string, unknown>
+    | undefined
 
   if (!columnMeta?.variant) return null
+
+  const label = columnMeta.label as string | undefined
+  const placeholder = columnMeta.placeholder as string | undefined
+  const unit = columnMeta.unit as string | undefined
+  const options = columnMeta.options as
+    | { value: string; label: string }[]
+    | undefined
 
   switch (columnMeta.variant) {
     case "text":
       return (
         <Input
-          placeholder={columnMeta.placeholder ?? columnMeta.label}
+          placeholder={placeholder ?? label}
           value={column.getFilterValue() as string}
           onChange={(event) => column.setFilterValue(event.target.value)}
           className="h-8 w-40 lg:w-56"
@@ -96,14 +104,14 @@ function DataTableToolbarFilter<TData>({
           <Input
             type="number"
             inputMode="numeric"
-            placeholder={columnMeta.placeholder ?? columnMeta.label}
+            placeholder={placeholder ?? label}
             value={column.getFilterValue() as string}
             onChange={(event) => column.setFilterValue(event.target.value)}
-            className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
+            className={cn("h-8 w-[120px]", unit && "pr-8")}
           />
-          {columnMeta.unit && (
+          {unit && (
             <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-sm text-muted-foreground">
-              {columnMeta.unit}
+              {unit}
             </span>
           )}
         </div>
@@ -113,7 +121,7 @@ function DataTableToolbarFilter<TData>({
       return (
         <DataTableSliderFilter
           column={column}
-          title={columnMeta.label ?? column.id}
+          title={label ?? column.id}
         />
       )
 
@@ -122,7 +130,7 @@ function DataTableToolbarFilter<TData>({
       return (
         <DataTableDateFilter
           column={column}
-          title={columnMeta.label ?? column.id}
+          title={label ?? column.id}
           multiple={columnMeta.variant === "dateRange"}
         />
       )
@@ -132,8 +140,8 @@ function DataTableToolbarFilter<TData>({
       return (
         <DataTableFacetedFilter
           column={column}
-          title={columnMeta.label ?? column.id}
-          options={columnMeta.options ?? []}
+          title={label ?? column.id}
+          options={options ?? []}
           multiple={columnMeta.variant === "multiSelect"}
         />
       )

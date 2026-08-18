@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { toastApiError } from "@/lib/api-error"
+import { useWizardSaveStatus } from "./use-wizard-save-status"
+import { WizardNextButton } from "./wizard-next-button"
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
 import { listSchoolsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
@@ -17,8 +18,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import {
-  IconLoader2,
-  IconCheck,
   IconSearch,
   IconX,
   IconArrowUp,
@@ -57,7 +56,7 @@ export function WizardStepSchools({
 }: Props) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isSearchFocused, setIsSearchFocused] = useState(false)
-  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
+  const { status, executeSave } = useWizardSaveStatus(onNext)
 
   const { data: allSchools = [] } = useQuery(
     listSchoolsOptions({
@@ -284,46 +283,24 @@ export function WizardStepSchools({
             <Button variant="outline" onClick={onBack}>
               Back
             </Button>
-            <Button
+            <WizardNextButton
+              status={status}
               variant="outline"
-              onClick={async () => {
-                setStatus("saving")
-                try {
-                  await onSave()
-                  setStatus("done")
-                  setTimeout(() => setStatus("idle"), 1500)
-                } catch (e) {
-                  toastApiError(e, "Failed to save")
-                  setStatus("idle")
-                }
-              }}
-              disabled={status === "saving"}
-            >
-              {status === "saving" && (
-                <IconLoader2 className="mr-1.5 size-4 animate-spin" />
-              )}
-              {status === "done" && (
-                <IconCheck className="mr-1.5 size-4 text-green-600" />
-              )}
-              {status === "idle"
-                ? "Save Progress"
-                : status === "saving"
-                  ? "Saving\u2026"
-                  : "Saved"}
-            </Button>
-          </div>
-          <Button
-            onClick={async () => {
-              try {
-                await onSave()
-                onNext()
-              } catch (e) {
-                toastApiError(e, "Failed to save")
+              onClick={() =>
+                executeSave(
+                  () => onSave(),
+                  "Failed to save"
+                )
               }
-            }}
-          >
-            Next Step
-          </Button>
+              disabled={status === "saving"}
+              label="Save Progress"
+            />
+          </div>
+          <WizardNextButton
+            status={status}
+            onClick={() => executeSave(() => onSave())}
+            label="Next Step"
+          />
         </div>
       </CardContent>
     </Card>

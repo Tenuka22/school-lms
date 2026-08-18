@@ -9,10 +9,9 @@ import {
 } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useDebounce } from "@/hooks/use-debounce"
-import { listChildren, listGuardians } from "@/lib/api-client/sdk.gen"
 import {
-  listChildrenQueryKey,
-  listGuardiansQueryKey,
+  listChildrenOptions,
+  listGuardiansOptions,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { apiClient } from "@/lib/api-client"
 import type { Child, Guardian } from "@/lib/api-client/types.gen"
@@ -36,54 +35,39 @@ export function useChildUniqueness(
 ): ChildUniquenessResult {
   const debouncedValue = useDebounce(value, 500)
 
-  const childQueryKey = [
-    ...listChildrenQueryKey({ client: apiClient }),
-    checkType,
-    debouncedValue,
-  ]
-  const guardianQueryKey = [
-    ...listGuardiansQueryKey({ client: apiClient }),
-    checkType,
-    debouncedValue,
-  ]
-
   const shouldCheckName =
     checkType === "full_name" && debouncedValue.length >= 2
   const shouldCheckNic = checkType === "nic" && debouncedValue.length >= 3
   const shouldCheckBc =
     checkType === "birth_certificate_number" && debouncedValue.length > 0
 
-  const { data: childDuplicates = [], isLoading: childLoading } = useQuery({
-    queryKey: childQueryKey,
-    queryFn: async () => {
-      const query: Record<string, string> = {}
-      if (checkType === "birth_certificate_number") {
-        query.birth_certificate_number = debouncedValue
-      } else if (checkType === "nic") {
-        query.nic = debouncedValue
-      } else if (checkType === "full_name") {
-        query.search = debouncedValue
-      }
-      const { data } = await listChildren({
-        query,
+  const buildChildQuery = () => {
+    if (checkType === "birth_certificate_number") {
+      return { birth_certificate_number: debouncedValue }
+    } else if (checkType === "nic") {
+      return { nic: debouncedValue }
+    } else if (checkType === "full_name") {
+      return { search: debouncedValue }
+    }
+    return {}
+  }
+
+  const { data: childDuplicates = [], isLoading: childLoading } =
+    useQuery({
+      ...listChildrenOptions({
         client: apiClient,
-      })
-      return data ?? []
-    },
-    enabled: enabled && (shouldCheckName || shouldCheckNic || shouldCheckBc),
-    staleTime: 30_000,
-  })
+        query: buildChildQuery(),
+      }),
+      enabled: enabled && (shouldCheckName || shouldCheckNic || shouldCheckBc),
+      staleTime: 30_000,
+    })
 
   const { data: guardianDuplicates = [], isLoading: guardianLoading } =
     useQuery({
-      queryKey: guardianQueryKey,
-      queryFn: async () => {
-        const { data } = await listGuardians({
-          query: { search: debouncedValue },
-          client: apiClient,
-        })
-        return data ?? []
-      },
+      ...listGuardiansOptions({
+        client: apiClient,
+        query: { search: debouncedValue },
+      }),
       enabled: enabled && (shouldCheckName || shouldCheckNic),
       staleTime: 30_000,
     })

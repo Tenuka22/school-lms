@@ -33,13 +33,6 @@ import type { AddressFormValues } from "@/components/forms/address-form"
 
 const PAGE_SIZE = 8
 
-export type AddressEntryValue = {
-  address_id: string
-  address_type: string
-  residence_type: string
-  is_primary: boolean
-}
-
 function CreateAddressDialog({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false)
 

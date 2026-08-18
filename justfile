@@ -3,12 +3,11 @@ set shell := ["powershell", "-c"]
 COMPOSE_DEV  := "infra/podman/compose/compose.dev.yml"
 COMPOSE_PROD := "infra/podman/compose/compose.prod.yml"
 
-# Development — run infrastructure, API and Web concurrently
-[parallel]
+# Development — open each service in a new terminal window
 dev: dev-infra dev-api dev-web
 
 dev-infra:
-	podman compose -f {{COMPOSE_DEV}} up
+	Start-Process powershell -ArgumentList "-NoExit", "-Command", "podman compose -f {{COMPOSE_DEV}} up"
 
 dev-down:
 	podman compose -f {{COMPOSE_DEV}} down -v
@@ -17,10 +16,10 @@ dev-build:
 	podman compose -f {{COMPOSE_DEV}} build
 
 dev-api:
-	cd apps/api; cargo watch -x run
+	Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd apps/api; bacon"
 
 dev-web:
-	cd apps/web; bun run dev
+	Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd apps/web; bun run dev"
 
 # Production — run infrastructure (Podman) and API server in parallel
 [parallel]

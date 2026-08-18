@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useMemo, useRef, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { toastApiError } from "@/lib/api-error"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -17,8 +16,6 @@ import { apiClient } from "@/lib/api-client"
 import { listGuardiansOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { Guardian } from "@/lib/api-client/types.gen"
 import {
-  IconLoader2,
-  IconCheck,
   IconUser,
   IconX,
   IconPhone,
@@ -26,6 +23,8 @@ import {
   IconBriefcase,
 } from "@tabler/icons-react"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
+import { useWizardSaveStatus } from "./use-wizard-save-status"
+import { WizardNextButton } from "./wizard-next-button"
 
 export type GuardianFormData = string[]
 
@@ -54,14 +53,7 @@ export function WizardStepGuardian({
   onNext,
 }: Props) {
   const [filter, setFilter] = useState<FilterCategory>("all")
-  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
-  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (navigateTimer.current) clearTimeout(navigateTimer.current)
-    }
-  }, [])
+  const { status, executeSave } = useWizardSaveStatus(onNext)
 
   const { data: guardians = [] } = useQuery(
     listGuardiansOptions({ client: apiClient })
@@ -86,19 +78,6 @@ export function WizardStepGuardian({
       return g.is_govt_employee
     })
   }, [selectedGuardians, filter])
-
-  const handleNext = async () => {
-    setStatus("saving")
-    try {
-      await onSave(selectedIds)
-      setStatus("done")
-      navigateTimer.current = setTimeout(() => onNext(), 400)
-    } catch (e) {
-      console.error("onSave failed:", e)
-      setStatus("idle")
-      toastApiError(e, "Failed to save. Please try again.")
-    }
-  }
 
   return (
     <Card>
@@ -220,22 +199,11 @@ export function WizardStepGuardian({
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button
-            onClick={handleNext}
+          <WizardNextButton
+            status={status}
+            onClick={() => executeSave(() => onSave(selectedIds))}
             disabled={status !== "idle" || selectedIds.length === 0}
-          >
-            {status === "saving" && (
-              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
-            )}
-            {status === "done" && (
-              <IconCheck className="mr-1.5 size-4 text-green-600" />
-            )}
-            {status === "idle"
-              ? "Next"
-              : status === "saving"
-                ? "Saving\u2026"
-                : "Saved"}
-          </Button>
+          />
         </div>
       </CardContent>
     </Card>

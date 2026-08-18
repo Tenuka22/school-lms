@@ -1,9 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { GuardiansDataGrid } from "@/components/guardian/guardians-data-grid"
+import { queryClient } from "@/router"
+import { listGuardiansOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+import { apiClient } from "@/lib/api-client"
 
 export const Route = createFileRoute(
   "/_authenticated/guardian-management/guardians"
 )({
+  loader: async () => {
+    await queryClient.ensureQueryData(
+      listGuardiansOptions({ client: apiClient })
+    )
+  },
   component: GuardiansPage,
 })
 

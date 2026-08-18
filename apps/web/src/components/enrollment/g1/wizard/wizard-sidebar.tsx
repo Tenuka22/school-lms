@@ -15,6 +15,7 @@ import { apiClient } from "@/lib/api-client"
 import { listSchoolsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { ChildFormData } from "./wizard-step-child"
 import type { DocumentFormData } from "./wizard-step-documents"
+import { DOC_TYPES } from "./wizard-step-documents"
 import type { ElectoralEntry } from "./wizard-step-electoral"
 import { GuardianSelector } from "./guardian-selector"
 import { AddressSelector } from "./address-selector"
@@ -254,16 +255,9 @@ function SiblingDirectory({
   )
 }
 
-const REQUIRED_DOC_LABELS: Record<string, string> = {
-  BirthCertificate: "Birth Certificate",
-  GuardianNIC: "Guardian NIC",
-  ResidenceProof: "Residence Proof",
-  StaffAppointmentLetter: "Staff Appointment Letter",
-  StaffServiceCertificate: "Staff Service Certificate",
-  AlumniCertificate: "Alumni Certificate",
-  GovtEmployeeCertificate: "Govt Employee Certificate",
-  IncomeCertificate: "Income Certificate",
-}
+const REQUIRED_DOC_LABELS = Object.fromEntries(
+  DOC_TYPES.map((dt) => [dt.key, dt.label])
+) as Record<string, string>
 
 interface DocumentsPreviewProps {
   documents: DocumentFormData[]

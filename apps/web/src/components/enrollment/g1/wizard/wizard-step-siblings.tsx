@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useMemo, useRef, useEffect } from "react"
+import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { toastApiError } from "@/lib/api-error"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -17,12 +16,12 @@ import { apiClient } from "@/lib/api-client"
 import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { StudentResponse as Student } from "@/lib/api-client/types.gen"
 import {
-  IconLoader2,
-  IconCheck,
   IconSchool,
   IconX,
   IconGripVertical,
 } from "@tabler/icons-react"
+import { useWizardSaveStatus } from "./use-wizard-save-status"
+import { WizardNextButton } from "./wizard-next-button"
 
 interface Props {
   selectedStudentIds: string[]
@@ -39,14 +38,7 @@ export function WizardStepSiblings({
   onBack,
   onNext,
 }: Props) {
-  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
-  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (navigateTimer.current) clearTimeout(navigateTimer.current)
-    }
-  }, [])
+  const { status, executeSave } = useWizardSaveStatus(onNext)
 
   const { data: students = [] } = useQuery(
     listStudentsOptions({ client: apiClient })
@@ -62,19 +54,6 @@ export function WizardStepSiblings({
       .map((id) => studentMap.get(id))
       .filter(Boolean) as Student[]
   }, [selectedStudentIds, studentMap])
-
-  const handleNext = async () => {
-    setStatus("saving")
-    try {
-      await onSave(selectedStudentIds)
-      setStatus("done")
-      navigateTimer.current = setTimeout(() => onNext(), 400)
-    } catch (e) {
-      console.error("onSave failed:", e)
-      setStatus("idle")
-      toastApiError(e, "Failed to save. Please try again.")
-    }
-  }
 
   return (
     <Card>
@@ -146,19 +125,11 @@ export function WizardStepSiblings({
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button onClick={handleNext} disabled={status !== "idle"}>
-            {status === "saving" && (
-              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
-            )}
-            {status === "done" && (
-              <IconCheck className="mr-1.5 size-4 text-green-600" />
-            )}
-            {status === "idle"
-              ? "Next"
-              : status === "saving"
-                ? "Saving\u2026"
-                : "Saved"}
-          </Button>
+          <WizardNextButton
+            status={status}
+            onClick={() => executeSave(() => onSave(selectedStudentIds))}
+            disabled={status !== "idle"}
+          />
         </div>
       </CardContent>
     </Card>

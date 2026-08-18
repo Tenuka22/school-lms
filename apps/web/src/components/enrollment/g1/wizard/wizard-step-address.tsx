@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useRef, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,12 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { apiClient } from "@/lib/api-client"
-import { toastApiError } from "@/lib/api-error"
 import { listAddressesOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { Address } from "@/lib/api-client/types.gen"
 import {
-  IconLoader2,
-  IconCheck,
   IconMapPin,
   IconX,
   IconFile,
@@ -33,6 +30,8 @@ import {
 import { cn } from "@/lib/utils"
 import { OwnershipProofDialog } from "./ownership-proof-dialog"
 import type { OwnershipProofEntry } from "./ownership-proof-dialog"
+import { useWizardSaveStatus } from "./use-wizard-save-status"
+import { WizardNextButton } from "./wizard-next-button"
 
 export type AddressEntryValue = {
   address_id: string
@@ -49,7 +48,7 @@ interface Props {
   onUpdate: (
     id: string,
     field: keyof AddressEntryValue,
-    value: string | boolean
+    value: string | boolean | OwnershipProofEntry[]
   ) => void
   onDeselect: (id: string) => void
   onSave: (addresses: AddressEntryValue[]) => Promise<void>
@@ -75,17 +74,10 @@ export function WizardStepAddress({
   onNext,
 }: Props) {
   const [filter, setFilter] = useState<string>("all")
-  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
   const [proofDialogAddressId, setProofDialogAddressId] = useState<
     string | null
   >(null)
-  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (navigateTimer.current) clearTimeout(navigateTimer.current)
-    }
-  }, [])
+  const { status, executeSave } = useWizardSaveStatus(onNext)
 
   const { data: addresses = [] } = useQuery(
     listAddressesOptions({ client: apiClient })
@@ -108,19 +100,6 @@ export function WizardStepAddress({
   const updatePrimary = (id: string) => {
     for (const a of selectedAddresses) {
       onUpdate(a.address_id, "is_primary", a.address_id === id)
-    }
-  }
-
-  const handleNext = async () => {
-    setStatus("saving")
-    try {
-      await onSave(selectedAddresses)
-      setStatus("done")
-      navigateTimer.current = setTimeout(() => onNext(), 400)
-    } catch (e) {
-      console.error("onSave failed:", e)
-      setStatus("idle")
-      toastApiError(e, "Failed to save. Please try again.")
     }
   }
 
@@ -287,22 +266,11 @@ export function WizardStepAddress({
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button
-            onClick={handleNext}
+          <WizardNextButton
+            status={status}
+            onClick={() => executeSave(() => onSave(selectedAddresses))}
             disabled={status !== "idle" || selectedAddresses.length === 0}
-          >
-            {status === "saving" && (
-              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
-            )}
-            {status === "done" && (
-              <IconCheck className="mr-1.5 size-4 text-green-600" />
-            )}
-            {status === "idle"
-              ? "Next"
-              : status === "saving"
-                ? "Saving\u2026"
-                : "Saved"}
-          </Button>
+          />
         </div>
       </CardContent>
 
@@ -321,7 +289,7 @@ export function WizardStepAddress({
             onUpdate(
               proofDialogAddressId,
               "ownership_proofs",
-              proofs as unknown as string | boolean
+              proofs
             )
             setProofDialogAddressId(null)
           }}

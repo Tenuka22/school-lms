@@ -4,10 +4,10 @@ import { useQuery } from "@tanstack/react-query"
 import { useState, useMemo } from "react"
 import { IconSearch, IconDots, IconLoader2 } from "@tabler/icons-react"
 import { apiClient } from "@/lib/api-client"
-import { listStudents } from "@/lib/api-client/sdk.gen"
 import { formatDate } from "@/lib/format"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { useDebounce } from "@/hooks/use-debounce"
+import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -75,16 +75,12 @@ export function StudentsDataGrid(_props: { refreshKey?: number }) {
     pageSize: 20,
   })
 
-  const { data: students = [], isLoading } = useQuery({
-    queryKey: ["listStudents", debouncedSearch],
-    queryFn: async () => {
-      const { data } = await listStudents({
-        client: apiClient,
-        query: { search: debouncedSearch || undefined },
-      })
-      return data ?? []
-    },
-  })
+  const { data: students = [], isLoading } = useQuery(
+    listStudentsOptions({
+      client: apiClient,
+      query: { search: debouncedSearch || undefined },
+    })
+  )
 
   const columns = useMemo<ColumnDef<Student>[]>(
     () => [
@@ -141,8 +137,8 @@ export function StudentsDataGrid(_props: { refreshKey?: number }) {
         ),
         cell: ({ row }) => {
           const val = row.getValue("current_grade")
-          return val !== null ? (
-            <span className="text-sm">Grade {val}</span>
+          return val != null ? (
+            <span className="text-sm">Grade {val as number}</span>
           ) : (
             <span className="text-sm text-muted-foreground">—</span>
           )

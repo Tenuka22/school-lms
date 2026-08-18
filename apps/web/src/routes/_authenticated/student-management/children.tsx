@@ -6,10 +6,18 @@ import { EditChildDialog } from "@/components/student/edit-child-dialog"
 import { Button } from "@/components/ui/button"
 import { IconPlus } from "@tabler/icons-react"
 import type { Child } from "@/lib/api-client/types.gen"
+import { queryClient } from "@/router"
+import { listChildrenOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+import { apiClient } from "@/lib/api-client"
 
 export const Route = createFileRoute(
   "/_authenticated/student-management/children"
 )({
+  loader: async () => {
+    await queryClient.ensureQueryData(
+      listChildrenOptions({ client: apiClient })
+    )
+  },
   component: ChildrenPage,
 })
 

@@ -1,7 +1,5 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
-import { toastApiError } from "@/lib/api-error"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -18,6 +16,7 @@ import {
 } from "@/hooks/use-child-uniqueness"
 import { makeChildFormConfig } from "@/components/forms/child-form"
 import type { ChildFormValues } from "@/components/forms/child-form"
+import { useWizardSaveStatus } from "./use-wizard-save-status"
 
 export type ChildFormData = ChildFormValues
 
@@ -59,14 +58,7 @@ export function WizardStepChild({
   onNext,
   excludeChildId,
 }: Props) {
-  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
-  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (navigateTimer.current) clearTimeout(navigateTimer.current)
-    }
-  }, [])
+  const { status, executeSave } = useWizardSaveStatus(onNext)
 
   const config = makeChildFormConfig({
     excludeChildId,
@@ -89,18 +81,7 @@ export function WizardStepChild({
           <FormBuilder<ChildFormData>
             config={config}
             defaultValues={defaultValues}
-            onSubmit={async (values) => {
-              setStatus("saving")
-              try {
-                await onSave(values)
-                setStatus("done")
-                navigateTimer.current = setTimeout(() => onNext(), 400)
-              } catch (e) {
-                console.error("onSave failed:", e)
-                setStatus("idle")
-                toastApiError(e, "Failed to save. Please try again.")
-              }
-            }}
+            onSubmit={(values) => executeSave(() => onSave(values))}
             formId="wizard-step-child-form"
             hideDefaultButtons
           />

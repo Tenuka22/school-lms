@@ -36,6 +36,7 @@ import type {
   Address,
   StudentResponse as Student,
   Guardian,
+  G1Category,
 } from "@/lib/api-client/types.gen"
 import type { DocumentFormData } from "./wizard-step-documents"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
@@ -118,14 +119,14 @@ interface Props {
   siblingIds: string[]
   documents: DocumentFormData[]
   preferredSchoolIds: string[]
-  category: string
+  category: G1Category | ""
   overseasArrivalDate: string
   declarationAgreed: boolean
-  onCategoryChange?: (category: string) => void
+  onCategoryChange?: (category: G1Category) => void
   onDeclarationChange?: (agreed: boolean) => void
   onBack: () => void
   onComplete: (data: {
-    category: string
+    category: G1Category
     overseas_arrival_date: string
     declaration_agreed: boolean
   }) => void
@@ -164,7 +165,9 @@ export function WizardStepReview({
     .map((id) => schools.find((s) => s.id === id))
     .filter(Boolean)
 
-  const [localCategory, setLocalCategory] = useState<string>(category || "")
+  const [localCategory, setLocalCategory] = useState<G1Category | "">(
+    category || ""
+  )
   const [localOverseasDate, setLocalOverseasDate] = useState<string>(
     overseasArrivalDate || ""
   )
@@ -176,8 +179,8 @@ export function WizardStepReview({
   const handleCategoryChange = useCallback(
     (value: string | null) => {
       if (!value) return
-      setLocalCategory(value)
-      onCategoryChange?.(value)
+      setLocalCategory(value as G1Category)
+      onCategoryChange?.(value as G1Category)
     },
     [onCategoryChange]
   )

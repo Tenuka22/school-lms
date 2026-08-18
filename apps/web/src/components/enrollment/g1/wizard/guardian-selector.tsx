@@ -14,6 +14,7 @@ import { apiClient } from "@/lib/api-client"
 import {
   listGuardiansOptions,
   listGuardiansQueryKey,
+  listBlacklistOptions,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import { queryClient } from "@/router"
 import { cn } from "@/lib/utils"
@@ -36,8 +37,7 @@ import {
   PastPupilBadge,
   BlacklistBadge,
 } from "./guardian-helpers"
-import { CreateGuardianDialog } from "./create-guardian-dialog"
-import { EditGuardianDialog } from "./edit-guardian-dialog"
+import { GuardianDialog } from "./guardian-dialog"
 
 const PAGE_SIZE = 8
 
@@ -79,24 +79,21 @@ export function GuardianSelector({
   const paged = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE)
   const pagedIds = useMemo(() => paged.map((g) => g.id), [paged])
 
-  const { data: blacklistedMap } = useQuery({
-    queryKey: ["blacklist", "active", pagedIds],
-    queryFn: async () => {
-      if (pagedIds.length === 0) return {}
-      const res = await apiClient.get({
-        url: "/api/blacklist",
-        query: { guardian_ids: pagedIds },
-      })
-      if (res.error) return {}
-      const entries = (res.data ?? []) as Blacklist[]
-      const map: Record<string, Blacklist> = {}
-      for (const e of entries) {
-        map[e.guardian_id] = e
-      }
-      return map
-    },
+  const { data: blacklistEntries = [] } = useQuery({
+    ...listBlacklistOptions({
+      client: apiClient,
+      query: { guardian_ids: pagedIds },
+    }),
     enabled: pagedIds.length > 0,
   })
+
+  const blacklistedMap = useMemo(() => {
+    const map: Record<string, Blacklist> = {}
+    for (const b of blacklistEntries) {
+      map[b.guardian_id] = b
+    }
+    return map
+  }, [blacklistEntries])
 
   const handlePageChange = (p: number) => {
     setPage(Math.max(0, Math.min(p, totalPages - 1)))
@@ -121,9 +118,10 @@ export function GuardianSelector({
         />
       </div>
 
-      <CreateGuardianDialog
+      <GuardianDialog
+        mode="create"
         enrollmentId={enrollmentId}
-        onCreated={handleCreated}
+        onSaved={handleCreated}
         onEditExisting={(g) => setEditTarget(g)}
       />
 
@@ -244,7 +242,8 @@ export function GuardianSelector({
         </div>
       )}
       {editTarget && (
-        <EditGuardianDialog
+        <GuardianDialog
+          mode="edit"
           guardian={editTarget}
           open={!!editTarget}
           onOpenChange={(v) => {

@@ -12,6 +12,7 @@ import { apiClient } from "@/lib/api-client"
 import { formatDate } from "@/lib/format"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { useDebounce } from "@/hooks/use-debounce"
+import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -80,19 +81,15 @@ export function AlumniDataGrid(_props: { refreshKey?: number }) {
     pageSize: 20,
   })
 
-  const { data: students = [], isLoading } = useQuery({
-    queryKey: ["listStudents", debouncedSearch, statusFilter],
-    queryFn: async () => {
-      const res = await apiClient.get({
-        url: "/api/students",
-        query: {
-          search: debouncedSearch || undefined,
-          status: statusFilter || undefined,
-        },
-      })
-      return (res.data ?? []) as Student[]
-    },
-  })
+  const { data: students = [], isLoading } = useQuery(
+    listStudentsOptions({
+      client: apiClient,
+      query: {
+        search: debouncedSearch || undefined,
+        status: statusFilter || undefined,
+      } as any,
+    })
+  )
 
   const columns = useMemo<ColumnDef<Student>[]>(
     () => [
@@ -149,8 +146,8 @@ export function AlumniDataGrid(_props: { refreshKey?: number }) {
         ),
         cell: ({ row }) => {
           const val = row.getValue("current_grade")
-          return val !== null ? (
-            <span className="text-sm">Grade {val}</span>
+          return val != null ? (
+            <span className="text-sm">Grade {val as number}</span>
           ) : (
             <span className="text-sm text-muted-foreground">—</span>
           )

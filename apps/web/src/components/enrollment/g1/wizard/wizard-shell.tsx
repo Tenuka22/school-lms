@@ -201,7 +201,7 @@ export function WizardShell() {
   const initialDocLoad = useRef(false)
   const [electoralEntries, setElectoralEntries] = useState<ElectoralEntry[]>([])
   const initialElectoralLoad = useRef(false)
-  const [category, setCategory] = useState<string>("")
+  const [category, setCategory] = useState<G1Category | "">("")
   const [overseasArrivalDate, setOverseasArrivalDate] = useState<string>("")
   const [preferredSchoolIds, setPreferredSchoolIds] = useState<string[]>([])
   const initialSchoolLoad = useRef(false)
@@ -353,7 +353,7 @@ export function WizardShell() {
 
   const handleComplete = useCallback(
     async (reviewData: {
-      category: string
+      category: G1Category
       overseas_arrival_date: string
       declaration_agreed: boolean
     }) => {
@@ -369,8 +369,7 @@ export function WizardShell() {
           path: { id: enrollmentId },
           body: {
             wizard_step: 8,
-            category: (reviewData.category || undefined) as
-              G1Category | undefined,
+            category: reviewData.category || undefined,
             overseas_arrival_date: reviewData.overseas_arrival_date || null,
             declaration_agreed: reviewData.declaration_agreed,
             preferred_school_ids:
@@ -825,7 +824,7 @@ export function WizardShell() {
                   setCategory(cat)
                   updateApplication.mutateAsync({
                     path: { id: enrollmentId },
-                    body: { category: cat as any },
+                    body: { category: cat },
                   })
                 }}
                 onDeclarationChange={(agreed) => {

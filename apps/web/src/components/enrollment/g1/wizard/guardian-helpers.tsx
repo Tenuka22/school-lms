@@ -29,10 +29,10 @@ import {
   listStaffDetailsOptions,
   listPastPupilDetailsOptions,
   listStudentsOptions,
+  listSchoolsOptions,
   createWorkspaceAddressMutation,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import type {
-  SchoolSummary,
   Blacklist,
   Guardian,
 } from "@/lib/api-client/types.gen"
@@ -86,18 +86,10 @@ export function SchoolCombobox({
   const debouncedSearch = useDebounce(search, 300)
 
   const { data: schools = [] } = useQuery({
-    queryKey: ["list-schools", debouncedSearch],
-    queryFn: async () => {
-      const res = await apiClient.get({
-        url: "/api/schools",
-        query: { search: debouncedSearch || undefined },
-      })
-      if (res.error) {
-        console.error("School list error:", res.error)
-        return []
-      }
-      return (res.data ?? []) as SchoolSummary[]
-    },
+    ...listSchoolsOptions({
+      client: apiClient,
+      query: { search: debouncedSearch || undefined },
+    }),
     enabled: open,
   })
 

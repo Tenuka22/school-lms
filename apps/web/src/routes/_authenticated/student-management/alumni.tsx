@@ -1,9 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { AlumniDataGrid } from "@/components/student/alumni-data-grid"
+import { queryClient } from "@/router"
+import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+import { apiClient } from "@/lib/api-client"
 
 export const Route = createFileRoute(
   "/_authenticated/student-management/alumni"
 )({
+  loader: async () => {
+    await queryClient.ensureQueryData(
+      listStudentsOptions({ client: apiClient })
+    )
+  },
   component: AlumniPage,
 })
 

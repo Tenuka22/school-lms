@@ -11,10 +11,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
-import { presignedUploadUrlMutation } from "@/lib/api-client/@tanstack/react-query.gen"
+import { presignedUploadUrlMutation, deleteUploadMutation } from "@/lib/api-client/@tanstack/react-query.gen"
 import { apiClient } from "@/lib/api-client"
 import { IconFileText, IconX, IconCloudUpload } from "@tabler/icons-react"
 import type { Guardian } from "@/lib/api-client/types.gen"
+import { useWizardSaveStatus } from "./use-wizard-save-status"
+import { WizardNextButton } from "./wizard-next-button"
 
 export type DocumentFormData = {
   tempId: string
@@ -38,7 +40,7 @@ interface Props {
   onDocumentsChange?: (docs: DocumentFormData[]) => void
 }
 
-const DOC_TYPES: {
+export const DOC_TYPES: {
   key: string
   label: string
   condition?: (gs: Guardian[]) => boolean
@@ -74,8 +76,13 @@ export function WizardStepDocuments({
     setDocuments(defaultValues)
   }, [defaultValues])
 
+  const { status, executeSave } = useWizardSaveStatus(onNext)
+
   const presignedUrl = useMutation(
     presignedUploadUrlMutation({ client: apiClient })
+  )
+  const deleteUpload = useMutation(
+    deleteUploadMutation({ client: apiClient })
   )
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pendingDocType = useRef<string | null>(null)
@@ -187,8 +194,8 @@ export function WizardStepDocuments({
       if (!doc) return
       if (doc.file_key) {
         try {
-          await apiClient.delete({
-            url: `/api/uploads/${encodeURIComponent(doc.file_key)}`,
+          await deleteUpload.mutateAsync({
+            path: { key: doc.file_key },
           })
         } catch {
           // ignore S3 delete failure
@@ -322,14 +329,11 @@ export function WizardStepDocuments({
             <Button variant="outline" onClick={onBack}>
               Back
             </Button>
-            <Button
-              onClick={async () => {
-                await onSave(documents)
-                onNext()
-              }}
-            >
-              Next
-            </Button>
+            <WizardNextButton
+              status={status}
+              onClick={() => executeSave(() => onSave(documents))}
+              disabled={status !== "idle"}
+            />
           </div>
         </CardContent>
       </Card>

@@ -23,11 +23,11 @@ import {
   listBatchesQueryKey,
   listApplicationsOptions,
   listApplicationsQueryKey,
+  listChildrenOptions,
 } from "@/lib/api-client/@tanstack/react-query.gen"
 import {
   createApplication,
   deleteApplication,
-  listChildren,
   createChild,
   updateChild,
 } from "@/lib/api-client/sdk.gen"
@@ -210,16 +210,12 @@ function ChildCombobox({
 }) {
   const debouncedSearch = useDebounce(search, 300)
 
-  const { data: children = [] } = useQuery({
-    queryKey: ["list-children", debouncedSearch],
-    queryFn: async () => {
-      const res = await listChildren({
-        client: apiClient,
-        query: { search: debouncedSearch || undefined },
-      })
-      return res.data ?? []
-    },
-  })
+  const { data: children = [] } = useQuery(
+    listChildrenOptions({
+      client: apiClient,
+      query: { search: debouncedSearch || undefined },
+    })
+  )
 
   const [open, setOpen] = useState(false)
 

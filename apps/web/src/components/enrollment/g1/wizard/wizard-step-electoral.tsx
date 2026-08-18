@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useRef, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { toastApiError } from "@/lib/api-error"
 import { apiClient } from "@/lib/api-client"
+import { listPollingDivisionsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
+import { useWizardSaveStatus } from "./use-wizard-save-status"
+import { WizardNextButton } from "./wizard-next-button"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -21,8 +23,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  IconLoader2,
-  IconCheck,
   IconPlus,
   IconTrash,
 } from "@tabler/icons-react"
@@ -345,27 +345,12 @@ export function WizardStepElectoral({
   onSave,
   onNext,
 }: Props) {
-  const [status, setStatus] = useState<"idle" | "saving" | "done">("idle")
-  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { status, executeSave } = useWizardSaveStatus(onNext)
 
   const { data: pollingDivisions = [] } = useQuery({
-    queryKey: ["polling-divisions"],
-    queryFn: async () => {
-      const res = await apiClient.get({ url: "/api/polling-divisions" })
-      if (res.error) {
-        console.error("Polling divisions error:", res.error)
-        return []
-      }
-      return (res.data ?? []) as PollingDivisionEntry[]
-    },
+    ...listPollingDivisionsOptions({ client: apiClient }),
     staleTime: 24 * 60 * 60 * 1000,
   })
-
-  useEffect(() => {
-    return () => {
-      if (navigateTimer.current) clearTimeout(navigateTimer.current)
-    }
-  }, [])
 
   const addEntry = () => {
     if (entries.length >= MAX_ELECTORAL_ENTRIES) return
@@ -397,19 +382,6 @@ export function WizardStepElectoral({
 
   const removeEntry = (id: string) => {
     onChange(entries.filter((e) => e.id !== id))
-  }
-
-  const handleNext = async () => {
-    setStatus("saving")
-    try {
-      if (onSave) await onSave(entries)
-      setStatus("done")
-      navigateTimer.current = setTimeout(() => onNext(), 400)
-    } catch (e) {
-      console.error("onSave failed:", e)
-      setStatus("idle")
-      toastApiError(e, "Failed to save. Please try again.")
-    }
   }
 
   const canAddMore = entries.length < MAX_ELECTORAL_ENTRIES
@@ -468,19 +440,13 @@ export function WizardStepElectoral({
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button onClick={handleNext} disabled={status !== "idle"}>
-            {status === "saving" && (
-              <IconLoader2 className="mr-1.5 size-4 animate-spin" />
-            )}
-            {status === "done" && (
-              <IconCheck className="mr-1.5 size-4 text-green-600" />
-            )}
-            {status === "idle"
-              ? "Next"
-              : status === "saving"
-                ? "Saving\u2026"
-                : "Saved"}
-          </Button>
+          <WizardNextButton
+            status={status}
+            onClick={() =>
+              executeSave(() => (onSave ? onSave(entries) : Promise.resolve()))
+            }
+            disabled={status !== "idle"}
+          />
         </div>
       </CardContent>
     </Card>

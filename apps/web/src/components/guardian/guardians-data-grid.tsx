@@ -11,9 +11,9 @@ import {
   IconUser,
 } from "@tabler/icons-react"
 import { apiClient } from "@/lib/api-client"
-import { listGuardians } from "@/lib/api-client/sdk.gen"
 import { getEnumLabel, getEnumStyle } from "@/lib/enum-badge"
 import { useDebounce } from "@/hooks/use-debounce"
+import { listGuardiansOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -130,19 +130,15 @@ export function GuardiansDataGrid(_props: { refreshKey?: number }) {
     pageSize: 20,
   })
 
-  const { data: guardians = [], isLoading } = useQuery({
-    queryKey: ["listGuardians", debouncedSearch, isPastPupilFilter],
-    queryFn: async () => {
-      const { data } = await listGuardians({
-        client: apiClient,
-        query: {
-          search: debouncedSearch || undefined,
-          is_past_pupil: isPastPupilFilter || undefined,
-        },
-      })
-      return data ?? []
-    },
-  })
+  const { data: guardians = [], isLoading } = useQuery(
+    listGuardiansOptions({
+      client: apiClient,
+      query: {
+        search: debouncedSearch || undefined,
+        is_past_pupil: isPastPupilFilter || undefined,
+      },
+    })
+  )
 
   const columns = useMemo<ColumnDef<GuardianWithChildren>[]>(
     () => [
