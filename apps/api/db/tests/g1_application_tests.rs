@@ -1,5 +1,5 @@
-use db::domain::g1_application::*;
 use db::domain::error::TransitionError;
+use db::domain::g1_application::*;
 use db::entity::common::enums::EnrollmentStatus;
 
 fn make_draft_model() -> db::entity::g1::applications::Model {
@@ -222,13 +222,8 @@ fn test_verified_reject() {
         model,
         _state: std::marker::PhantomData,
     };
-    let rejected = verified
-        .reject("not qualified".to_string())
-        .unwrap();
-    assert_eq!(
-        rejected.model.enrollment_status,
-        EnrollmentStatus::Rejected
-    );
+    let rejected = verified.reject("not qualified".to_string()).unwrap();
+    assert_eq!(rejected.model.enrollment_status, EnrollmentStatus::Rejected);
     assert_eq!(
         rejected.model.rejection_reason.as_deref(),
         Some("not qualified")

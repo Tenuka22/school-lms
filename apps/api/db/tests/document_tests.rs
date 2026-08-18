@@ -65,9 +65,7 @@ fn test_document_reject() {
         "uploads/proof.pdf".to_string(),
     );
     let reviewing = doc.start_review().unwrap();
-    let rejected = reviewing
-        .reject("unclear scan".to_string())
-        .unwrap();
+    let rejected = reviewing.reject("unclear scan".to_string()).unwrap();
     assert_eq!(
         rejected.model.verification_status,
         DocumentVerificationStatus::Rejected
@@ -88,9 +86,7 @@ fn test_document_flag() {
         "uploads/other.pdf".to_string(),
     );
     let reviewing = doc.start_review().unwrap();
-    let flagged = reviewing
-        .flag("suspicious".to_string())
-        .unwrap();
+    let flagged = reviewing.flag("suspicious".to_string()).unwrap();
     assert_eq!(
         flagged.model.verification_status,
         DocumentVerificationStatus::Flagged

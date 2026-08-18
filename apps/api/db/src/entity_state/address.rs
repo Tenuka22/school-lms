@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
-use crate::entity::common::addresses;
 use crate::domain::error::TransitionError;
+use crate::entity::common::addresses;
 
 #[derive(Debug)]
 pub enum Active {}

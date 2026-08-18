@@ -212,9 +212,7 @@ pub async fn update_application(
                 "AlumniCertificate" | "PastPupilCertificate" => {
                     db::entity::common::enums::G1DocumentType::PastPupilCertificate
                 }
-                "PastPupilExamCert" => {
-                    db::entity::common::enums::G1DocumentType::PastPupilExamCert
-                }
+                "PastPupilExamCert" => db::entity::common::enums::G1DocumentType::PastPupilExamCert,
                 "GovtServiceCertificate" | "GovtEmployeeCertificate" => {
                     db::entity::common::enums::G1DocumentType::GovtServiceCertificate
                 }
@@ -222,7 +220,9 @@ pub async fn update_application(
                     db::entity::common::enums::G1DocumentType::DisabilityCertificate
                 }
                 "IncomeCertificate" => db::entity::common::enums::G1DocumentType::IncomeCertificate,
-                "BaptismCertificate" => db::entity::common::enums::G1DocumentType::BaptismCertificate,
+                "BaptismCertificate" => {
+                    db::entity::common::enums::G1DocumentType::BaptismCertificate
+                }
                 "Other" => db::entity::common::enums::G1DocumentType::Other,
                 _ => db::entity::common::enums::G1DocumentType::Other,
             };

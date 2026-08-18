@@ -1,6 +1,6 @@
-use db::entity_state::g1_application::*;
-use db::entity::common::enums::EnrollmentStatus;
 use db::domain::error::TransitionError;
+use db::entity::common::enums::EnrollmentStatus;
+use db::entity_state::g1_application::*;
 
 fn make_model(status: EnrollmentStatus) -> db::entity::g1::applications::Model {
     db::entity::g1::applications::Model {
@@ -70,24 +70,21 @@ fn test_lock_if_needed_draft_stays_active() {
 
 #[test]
 fn test_lock_if_needed_pending_stays_active() {
-    let entity =
-        G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Pending));
+    let entity = G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Pending));
     let result = entity.lock_if_needed();
     assert!(result.is_ok());
 }
 
 #[test]
 fn test_lock_if_needed_completed_stays_active() {
-    let entity =
-        G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Completed));
+    let entity = G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Completed));
     let result = entity.lock_if_needed();
     assert!(result.is_ok());
 }
 
 #[test]
 fn test_lock_if_needed_approved_locks() {
-    let entity =
-        G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
+    let entity = G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
     let result = entity.lock_if_needed();
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -101,16 +98,14 @@ fn test_lock_if_needed_approved_locks() {
 
 #[test]
 fn test_lock_if_needed_admitted_locks() {
-    let entity =
-        G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Admitted));
+    let entity = G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Admitted));
     let result = entity.lock_if_needed();
     assert!(result.is_err());
 }
 
 #[test]
 fn test_force_lock() {
-    let entity =
-        G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
+    let entity = G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
     let locked = entity.force_lock();
     assert!(!locked.can_mutate(false));
     assert!(locked.can_mutate(true));
@@ -118,8 +113,7 @@ fn test_force_lock() {
 
 #[test]
 fn test_unlock_with_force() {
-    let entity =
-        G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
+    let entity = G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
     let locked = entity.force_lock();
     let unlocked = locked.unlock(true);
     assert!(unlocked.is_ok());
@@ -127,8 +121,7 @@ fn test_unlock_with_force() {
 
 #[test]
 fn test_unlock_without_force_fails() {
-    let entity =
-        G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
+    let entity = G1ApplicationEntity::<Active>::from_model(make_model(EnrollmentStatus::Approved));
     let locked = entity.force_lock();
     let result = locked.unlock(false);
     assert!(result.is_err());

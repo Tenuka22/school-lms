@@ -8,7 +8,10 @@ use crate::entity::g1::join_guardians;
 pub trait JoinGuardiansRepo: Send + Sync {
     async fn find_by_application(&self, app_id: Uuid) -> Result<Vec<join_guardians::Model>, DbErr>;
     async fn delete_by_application(&self, app_id: Uuid) -> Result<(), DbErr>;
-    async fn insert_many(&self, models: Vec<join_guardians::Model>) -> Result<Vec<join_guardians::Model>, DbErr>;
+    async fn insert_many(
+        &self,
+        models: Vec<join_guardians::Model>,
+    ) -> Result<Vec<join_guardians::Model>, DbErr>;
 }
 
 pub struct SeaOrmJoinGuardiansRepo<'a> {
@@ -34,7 +37,10 @@ impl<'a> JoinGuardiansRepo for SeaOrmJoinGuardiansRepo<'a> {
         Ok(())
     }
 
-    async fn insert_many(&self, models: Vec<join_guardians::Model>) -> Result<Vec<join_guardians::Model>, DbErr> {
+    async fn insert_many(
+        &self,
+        models: Vec<join_guardians::Model>,
+    ) -> Result<Vec<join_guardians::Model>, DbErr> {
         use sea_orm::ActiveModelTrait;
         let mut results = Vec::with_capacity(models.len());
         for model in models {

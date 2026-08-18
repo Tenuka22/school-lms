@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
+use crate::domain::error::TransitionError;
 use crate::entity::common::enrollment_batches;
 use crate::entity::common::enums::BatchStatus;
-use crate::domain::error::TransitionError;
 
 pub enum Active {}
 pub enum Locked {}

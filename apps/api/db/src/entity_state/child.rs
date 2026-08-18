@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
+use crate::domain::error::TransitionError;
 use crate::entity::common::enums::StudentStatus;
 use crate::entity::g1::children;
-use crate::domain::error::TransitionError;
 
 pub enum Active {}
 pub enum Locked {}

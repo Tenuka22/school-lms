@@ -15,22 +15,14 @@ fn test_batch_new() {
 
 #[test]
 fn test_batch_close() {
-    let batch = Batch::<Open>::new(
-        2026,
-        "G1-2026".to_string(),
-        "Grade 1 2026".to_string(),
-    );
+    let batch = Batch::<Open>::new(2026, "G1-2026".to_string(), "Grade 1 2026".to_string());
     let closed = batch.close().unwrap();
     assert_eq!(closed.model.status, BatchStatus::Closed);
 }
 
 #[test]
 fn test_batch_publish_lists() {
-    let batch = Batch::<Open>::new(
-        2026,
-        "G1-2026".to_string(),
-        "Grade 1 2026".to_string(),
-    );
+    let batch = Batch::<Open>::new(2026, "G1-2026".to_string(), "Grade 1 2026".to_string());
     let closed = batch.close().unwrap();
     let published = closed.publish_lists().unwrap();
     assert_eq!(published.model.status, BatchStatus::ListsPublished);
@@ -38,11 +30,7 @@ fn test_batch_publish_lists() {
 
 #[test]
 fn test_batch_open_appeals() {
-    let batch = Batch::<Open>::new(
-        2026,
-        "G1-2026".to_string(),
-        "Grade 1 2026".to_string(),
-    );
+    let batch = Batch::<Open>::new(2026, "G1-2026".to_string(), "Grade 1 2026".to_string());
     let closed = batch.close().unwrap();
     let published = closed.publish_lists().unwrap();
     let deadline = chrono::Utc::now() + chrono::Duration::days(14);
@@ -52,11 +40,7 @@ fn test_batch_open_appeals() {
 
 #[test]
 fn test_batch_archive() {
-    let batch = Batch::<Open>::new(
-        2026,
-        "G1-2026".to_string(),
-        "Grade 1 2026".to_string(),
-    );
+    let batch = Batch::<Open>::new(2026, "G1-2026".to_string(), "Grade 1 2026".to_string());
     let closed = batch.close().unwrap();
     let published = closed.publish_lists().unwrap();
     let deadline = chrono::Utc::now() + chrono::Duration::days(14);
@@ -67,11 +51,7 @@ fn test_batch_archive() {
 
 #[test]
 fn test_inner_and_into_inner() {
-    let batch = Batch::<Open>::new(
-        2026,
-        "G1-2026".to_string(),
-        "Grade 1 2026".to_string(),
-    );
+    let batch = Batch::<Open>::new(2026, "G1-2026".to_string(), "Grade 1 2026".to_string());
     let id = batch.inner().id;
     let inner = batch.into_inner();
     assert_eq!(inner.id, id);

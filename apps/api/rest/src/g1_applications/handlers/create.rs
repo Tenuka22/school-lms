@@ -47,9 +47,7 @@ pub async fn create_application(
         .ok_or_else(|| ApiError::bad_request("batch not found"))?;
 
     if batch.status != BatchStatus::Open {
-        return Err(ApiError::bad_request(
-            "batch is not open for applications",
-        ));
+        return Err(ApiError::bad_request("batch is not open for applications"));
     }
 
     let now = Utc::now();

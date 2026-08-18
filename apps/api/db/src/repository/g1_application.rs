@@ -59,8 +59,8 @@ impl<'a> G1ApplicationRepo for SeaOrmG1ApplicationRepo<'a> {
     }
 
     async fn soft_delete(&self, id: Uuid) -> Result<(), DbErr> {
-        use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
         use chrono::Utc;
+        use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 
         if let Some(existing) = applications::Entity::find_by_id(id)
             .filter(applications::Column::DeletedAt.is_null())
@@ -136,12 +136,10 @@ impl<'a> G1ApplicationRepo for SeaOrmG1ApplicationRepo<'a> {
         page: u64,
         page_size: u64,
     ) -> Result<(Vec<applications::Model>, u64), DbErr> {
-        use sea_orm::{
-            ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
-        };
+        use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder};
 
-        let mut query = applications::Entity::find()
-            .filter(applications::Column::DeletedAt.is_null());
+        let mut query =
+            applications::Entity::find().filter(applications::Column::DeletedAt.is_null());
 
         if let Some(ref category) = filter.category {
             if !category.is_empty() {

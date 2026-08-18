@@ -9,22 +9,34 @@ fn test_email_valid() {
 
 #[test]
 fn test_email_empty() {
-    assert!(matches!(Email::new("".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Email::new("".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
 fn test_email_no_at() {
-    assert!(matches!(Email::new("userexample.com".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Email::new("userexample.com".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
 fn test_email_no_dot() {
-    assert!(matches!(Email::new("user@examplecom".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Email::new("user@examplecom".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
 fn test_email_double_at() {
-    assert!(matches!(Email::new("user@@example.com".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Email::new("user@@example.com".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -53,12 +65,18 @@ fn test_phone_valid_short() {
 
 #[test]
 fn test_phone_empty() {
-    assert!(matches!(Phone::new("".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Phone::new("".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
 fn test_phone_invalid_length() {
-    assert!(matches!(Phone::new("077123".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Phone::new("077123".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -69,12 +87,18 @@ fn test_full_name_valid() {
 
 #[test]
 fn test_full_name_single_word() {
-    assert!(matches!(FullName::new("John".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        FullName::new("John".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
 fn test_full_name_empty() {
-    assert!(matches!(FullName::new("".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        FullName::new("".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -85,7 +109,10 @@ fn test_name_with_initials_valid() {
 
 #[test]
 fn test_name_with_initials_no_uppercase() {
-    assert!(matches!(NameWithInitials::new("john doe".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        NameWithInitials::new("john doe".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -102,7 +129,10 @@ fn test_nic_new_format() {
 
 #[test]
 fn test_nic_invalid() {
-    assert!(matches!(NicNumber::new("123".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        NicNumber::new("123".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -113,7 +143,10 @@ fn test_non_empty_valid() {
 
 #[test]
 fn test_non_empty_blank() {
-    assert!(matches!(NonEmpty::new("   ".into(), "field"), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        NonEmpty::new("   ".into(), "field"),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -124,7 +157,10 @@ fn test_postal_code_valid() {
 
 #[test]
 fn test_postal_code_too_short() {
-    assert!(matches!(PostalCode::new("12".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        PostalCode::new("12".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -136,7 +172,10 @@ fn test_search_query_valid() {
 #[test]
 fn test_search_query_too_long() {
     let long = "a".repeat(201);
-    assert!(matches!(SearchQuery::new(long), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        SearchQuery::new(long),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -147,7 +186,10 @@ fn test_url_valid() {
 
 #[test]
 fn test_url_no_protocol() {
-    assert!(matches!(Url::new("example.com".into()), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Url::new("example.com".into()),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -159,7 +201,10 @@ fn test_address_line_valid() {
 #[test]
 fn test_address_line_too_long() {
     let long = "a".repeat(256);
-    assert!(matches!(AddressLine::new(long, "field"), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        AddressLine::new(long, "field"),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -182,8 +227,14 @@ fn test_longitude_valid() {
 
 #[test]
 fn test_longitude_out_of_range() {
-    assert!(matches!(Longitude::new(181.0), Err(AppError::BadRequest(_))));
-    assert!(matches!(Longitude::new(-181.0), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        Longitude::new(181.0),
+        Err(AppError::BadRequest(_))
+    ));
+    assert!(matches!(
+        Longitude::new(-181.0),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -194,7 +245,10 @@ fn test_distance_km_valid() {
 
 #[test]
 fn test_distance_km_negative() {
-    assert!(matches!(DistanceKm::new(-1.0), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        DistanceKm::new(-1.0),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -252,7 +306,10 @@ fn test_current_grade_valid() {
 #[test]
 fn test_current_grade_out_of_range() {
     assert!(matches!(CurrentGrade::new(0), Err(AppError::BadRequest(_))));
-    assert!(matches!(CurrentGrade::new(14), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        CurrentGrade::new(14),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
@@ -263,10 +320,16 @@ fn test_file_size_valid() {
 
 #[test]
 fn test_file_size_zero() {
-    assert!(matches!(FileSize::new(0, 25 * 1024 * 1024), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        FileSize::new(0, 25 * 1024 * 1024),
+        Err(AppError::BadRequest(_))
+    ));
 }
 
 #[test]
 fn test_file_size_exceeds_limit() {
-    assert!(matches!(FileSize::new(26 * 1024 * 1024, 25 * 1024 * 1024), Err(AppError::BadRequest(_))));
+    assert!(matches!(
+        FileSize::new(26 * 1024 * 1024, 25 * 1024 * 1024),
+        Err(AppError::BadRequest(_))
+    ));
 }

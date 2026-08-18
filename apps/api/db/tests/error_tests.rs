@@ -18,10 +18,7 @@ fn test_transition_error_display_missing_field() {
 #[test]
 fn test_transition_error_display_business_rule() {
     let err = TransitionError::BusinessRule("batch is closed".to_string());
-    assert_eq!(
-        err.to_string(),
-        "Business rule violation: batch is closed"
-    );
+    assert_eq!(err.to_string(), "Business rule violation: batch is closed");
 }
 
 #[test]

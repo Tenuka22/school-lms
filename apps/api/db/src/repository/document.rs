@@ -7,7 +7,10 @@ use crate::entity::g1::documents;
 #[async_trait]
 pub trait DocumentRepo: Send + Sync {
     async fn find_by_application(&self, app_id: Uuid) -> Result<Vec<documents::Model>, DbErr>;
-    async fn insert_many(&self, models: Vec<documents::Model>) -> Result<Vec<documents::Model>, DbErr>;
+    async fn insert_many(
+        &self,
+        models: Vec<documents::Model>,
+    ) -> Result<Vec<documents::Model>, DbErr>;
     async fn delete_by_application(&self, app_id: Uuid) -> Result<(), DbErr>;
 }
 
@@ -25,7 +28,10 @@ impl<'a> DocumentRepo for SeaOrmDocumentRepo<'a> {
             .await
     }
 
-    async fn insert_many(&self, models: Vec<documents::Model>) -> Result<Vec<documents::Model>, DbErr> {
+    async fn insert_many(
+        &self,
+        models: Vec<documents::Model>,
+    ) -> Result<Vec<documents::Model>, DbErr> {
         use sea_orm::ActiveModelTrait;
         let mut results = Vec::with_capacity(models.len());
         for model in models {

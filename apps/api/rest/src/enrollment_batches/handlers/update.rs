@@ -146,9 +146,7 @@ pub async fn update_batch(
                     if new_status == BatchStatus::ListsPublished {
                         batch.publish_lists()?.into_inner()
                     } else {
-                        return Err(ApiError::bad_request(
-                            "invalid transition from Closed",
-                        ));
+                        return Err(ApiError::bad_request("invalid transition from Closed"));
                     }
                 }
                 BatchStatus::ListsPublished => {
@@ -181,9 +179,7 @@ pub async fn update_batch(
                     }
                 }
                 BatchStatus::Archived => {
-                    return Err(ApiError::bad_request(
-                        "cannot transition from Archived",
-                    ));
+                    return Err(ApiError::bad_request("cannot transition from Archived"));
                 }
             }
         }

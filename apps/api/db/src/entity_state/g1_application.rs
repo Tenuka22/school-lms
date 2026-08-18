@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
+use crate::domain::error::TransitionError;
 use crate::entity::common::enums::EnrollmentStatus;
 use crate::entity::g1::applications;
-use crate::domain::error::TransitionError;
 
 #[derive(Debug)]
 pub enum Active {}

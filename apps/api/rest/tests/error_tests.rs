@@ -118,12 +118,21 @@ fn test_api_error_helper_methods() {
 fn test_api_error_status_codes() {
     use actix_web::http::StatusCode;
 
-    assert_eq!(ApiError::bad_request("").status_code(), StatusCode::BAD_REQUEST);
-    assert_eq!(ApiError::unauthorized("").status_code(), StatusCode::UNAUTHORIZED);
+    assert_eq!(
+        ApiError::bad_request("").status_code(),
+        StatusCode::BAD_REQUEST
+    );
+    assert_eq!(
+        ApiError::unauthorized("").status_code(),
+        StatusCode::UNAUTHORIZED
+    );
     assert_eq!(ApiError::forbidden("").status_code(), StatusCode::FORBIDDEN);
     assert_eq!(ApiError::not_found("").status_code(), StatusCode::NOT_FOUND);
     assert_eq!(ApiError::conflict("").status_code(), StatusCode::CONFLICT);
-    assert_eq!(ApiError::internal("").status_code(), StatusCode::INTERNAL_SERVER_ERROR);
+    assert_eq!(
+        ApiError::internal("").status_code(),
+        StatusCode::INTERNAL_SERVER_ERROR
+    );
 
     let dup = ApiError::ConflictWithDuplicates(vec![]);
     assert_eq!(dup.status_code(), StatusCode::CONFLICT);

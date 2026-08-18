@@ -8,7 +8,10 @@ use crate::entity::g1::join_siblings;
 pub trait JoinSiblingsRepo: Send + Sync {
     async fn find_by_application(&self, app_id: Uuid) -> Result<Vec<join_siblings::Model>, DbErr>;
     async fn delete_by_application(&self, app_id: Uuid) -> Result<(), DbErr>;
-    async fn insert_many(&self, models: Vec<join_siblings::Model>) -> Result<Vec<join_siblings::Model>, DbErr>;
+    async fn insert_many(
+        &self,
+        models: Vec<join_siblings::Model>,
+    ) -> Result<Vec<join_siblings::Model>, DbErr>;
 }
 
 pub struct SeaOrmJoinSiblingsRepo<'a> {
@@ -34,7 +37,10 @@ impl<'a> JoinSiblingsRepo for SeaOrmJoinSiblingsRepo<'a> {
         Ok(())
     }
 
-    async fn insert_many(&self, models: Vec<join_siblings::Model>) -> Result<Vec<join_siblings::Model>, DbErr> {
+    async fn insert_many(
+        &self,
+        models: Vec<join_siblings::Model>,
+    ) -> Result<Vec<join_siblings::Model>, DbErr> {
         use sea_orm::ActiveModelTrait;
         let mut results = Vec::with_capacity(models.len());
         for model in models {
