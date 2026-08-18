@@ -22,11 +22,7 @@ import {
 import { apiClient } from "@/lib/api-client"
 import { listAddressesOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { Address } from "@/lib/api-client/types.gen"
-import {
-  IconMapPin,
-  IconX,
-  IconFile,
-} from "@tabler/icons-react"
+import { IconMapPin, IconX, IconFile } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import { OwnershipProofDialog } from "./ownership-proof-dialog"
 import type { OwnershipProofEntry } from "./ownership-proof-dialog"
@@ -286,11 +282,7 @@ export function WizardStepAddress({
               ?.ownership_proofs ?? []
           }
           onSave={(proofs) => {
-            onUpdate(
-              proofDialogAddressId,
-              "ownership_proofs",
-              proofs
-            )
+            onUpdate(proofDialogAddressId, "ownership_proofs", proofs)
             setProofDialogAddressId(null)
           }}
         />

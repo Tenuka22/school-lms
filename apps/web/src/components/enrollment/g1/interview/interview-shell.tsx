@@ -394,8 +394,7 @@ export function InterviewShell() {
     [enrollmentId, updateApplication]
   )
 
-  const isDisqualified =
-    application?.enrollment_status === "Disqualified"
+  const isDisqualified = application?.enrollment_status === "Disqualified"
 
   if (!application || !childData) {
     return (
@@ -411,7 +410,9 @@ export function InterviewShell() {
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
-            onClick={() => navigate({ to: "/student-management/enrollment/g1" })}
+            onClick={() =>
+              navigate({ to: "/student-management/enrollment/g1" })
+            }
           >
             <IconArrowLeft className="mr-2 size-4" /> Back to Pipeline
           </Button>
@@ -425,8 +426,8 @@ export function InterviewShell() {
             </p>
             <p className="mt-1 text-sm text-red-700 dark:text-red-300">
               Per circular 7.1.3, this application has been disqualified from
-              all categories at this school due to a forged document. No
-              further action can be taken on this application.
+              all categories at this school due to a forged document. No further
+              action can be taken on this application.
             </p>
             <p className="mt-2 text-xs text-red-600 dark:text-red-400">
               Per circular 13.0, accepting or giving money or gifts for

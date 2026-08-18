@@ -152,7 +152,9 @@ export const studentFormConfig: FormConfig<StudentFormValues> = {
 
 export type StudentEditFormValues = UpdateStudentRequest
 
-export function buildStudentEditDefaults(student: Student): StudentEditFormValues {
+export function buildStudentEditDefaults(
+  student: Student
+): StudentEditFormValues {
   return {
     full_name: student.full_name,
     name_with_initials: student.name_with_initials,

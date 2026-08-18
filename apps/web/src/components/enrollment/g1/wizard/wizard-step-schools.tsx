@@ -286,12 +286,7 @@ export function WizardStepSchools({
             <WizardNextButton
               status={status}
               variant="outline"
-              onClick={() =>
-                executeSave(
-                  () => onSave(),
-                  "Failed to save"
-                )
-              }
+              onClick={() => executeSave(() => onSave(), "Failed to save")}
               disabled={status === "saving"}
               label="Save Progress"
             />

@@ -52,15 +52,14 @@ export function useChildUniqueness(
     return {}
   }
 
-  const { data: childDuplicates = [], isLoading: childLoading } =
-    useQuery({
-      ...listChildrenOptions({
-        client: apiClient,
-        query: buildChildQuery(),
-      }),
-      enabled: enabled && (shouldCheckName || shouldCheckNic || shouldCheckBc),
-      staleTime: 30_000,
-    })
+  const { data: childDuplicates = [], isLoading: childLoading } = useQuery({
+    ...listChildrenOptions({
+      client: apiClient,
+      query: buildChildQuery(),
+    }),
+    enabled: enabled && (shouldCheckName || shouldCheckNic || shouldCheckBc),
+    staleTime: 30_000,
+  })
 
   const { data: guardianDuplicates = [], isLoading: guardianLoading } =
     useQuery({

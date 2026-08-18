@@ -337,7 +337,8 @@ export function InterviewStepDocuments({
                                     className="h-7 text-xs"
                                     onClick={() => handleForgeryClick(docType)}
                                   >
-                                    <IconX className="mr-1 size-3" /> Flag as Forged
+                                    <IconX className="mr-1 size-3" /> Flag as
+                                    Forged
                                   </Button>
                                 )}
                               </div>
@@ -553,7 +554,10 @@ export function InterviewStepDocuments({
       </AlertDialog>
 
       {/* Forgery Confirmation Dialog */}
-      <AlertDialog open={showForgeryConfirm} onOpenChange={setShowForgeryConfirm}>
+      <AlertDialog
+        open={showForgeryConfirm}
+        onOpenChange={setShowForgeryConfirm}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-700 dark:text-red-300">
@@ -563,8 +567,8 @@ export function InterviewStepDocuments({
               You are about to flag{" "}
               <strong>
                 {forgedDocType
-                  ? DOC_TYPES.find((d) => d.key === forgedDocType)?.label ??
-                    forgedDocType
+                  ? (DOC_TYPES.find((d) => d.key === forgedDocType)?.label ??
+                    forgedDocType)
                   : "this document"}
               </strong>{" "}
               as forged or falsified. Per circular 7.1.3, this will
@@ -578,7 +582,7 @@ export function InterviewStepDocuments({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleForgeryConfirm}
-              className="bg-red-600 text-destructive-foreground hover:bg-red-700"
+              className="text-destructive-foreground bg-red-600 hover:bg-red-700"
             >
               Yes, Flag as Forged
             </AlertDialogAction>

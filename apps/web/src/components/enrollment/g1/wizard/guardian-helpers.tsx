@@ -32,10 +32,7 @@ import {
   listSchoolsOptions,
   createWorkspaceAddressMutation,
 } from "@/lib/api-client/@tanstack/react-query.gen"
-import type {
-  Blacklist,
-  Guardian,
-} from "@/lib/api-client/types.gen"
+import type { Blacklist, Guardian } from "@/lib/api-client/types.gen"
 import { useDebounce } from "@/hooks/use-debounce"
 import { queryClient } from "@/router"
 import { toastApiError } from "@/lib/api-error"

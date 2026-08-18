@@ -11,7 +11,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
-import { presignedUploadUrlMutation, deleteUploadMutation } from "@/lib/api-client/@tanstack/react-query.gen"
+import {
+  presignedUploadUrlMutation,
+  deleteUploadMutation,
+} from "@/lib/api-client/@tanstack/react-query.gen"
 import { apiClient } from "@/lib/api-client"
 import { IconFileText, IconX, IconCloudUpload } from "@tabler/icons-react"
 import type { Guardian } from "@/lib/api-client/types.gen"
@@ -81,9 +84,7 @@ export function WizardStepDocuments({
   const presignedUrl = useMutation(
     presignedUploadUrlMutation({ client: apiClient })
   )
-  const deleteUpload = useMutation(
-    deleteUploadMutation({ client: apiClient })
-  )
+  const deleteUpload = useMutation(deleteUploadMutation({ client: apiClient }))
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pendingDocType = useRef<string | null>(null)
   const [dragOverKey, setDragOverKey] = useState<string | null>(null)

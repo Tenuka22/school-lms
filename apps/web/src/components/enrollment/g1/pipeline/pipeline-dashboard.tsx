@@ -1102,7 +1102,8 @@ export function PipeDashboard() {
               ? {
                   full_name: editingChild.full_name,
                   name_with_initials: editingChild.name_with_initials,
-                  name_with_initials_en: editingChild.name_with_initials_en ?? "",
+                  name_with_initials_en:
+                    editingChild.name_with_initials_en ?? "",
                   date_of_birth: editingChild.date_of_birth,
                   gender: editingChild.gender,
                   nationality: editingChild.nationality,

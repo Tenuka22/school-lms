@@ -22,10 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  IconPlus,
-  IconTrash,
-} from "@tabler/icons-react"
+import { IconPlus, IconTrash } from "@tabler/icons-react"
 import type { ElectoralDistrict } from "@/lib/api-client/types.gen"
 import { GnDivisionSelect } from "./gn-division-select"
 import { ELECTORAL_DISTRICTS, ELECTORAL_YEARS } from "./electoral-constants"

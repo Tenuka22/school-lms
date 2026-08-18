@@ -20,18 +20,18 @@ export function WizardNextButton({
   variant = "default",
 }: WizardNextButtonProps) {
   return (
-    <Button variant={variant} onClick={onClick} disabled={disabled ?? status !== "idle"}>
+    <Button
+      variant={variant}
+      onClick={onClick}
+      disabled={disabled ?? status !== "idle"}
+    >
       {status === "saving" && (
         <IconLoader2 className="mr-1.5 size-4 animate-spin" />
       )}
       {status === "done" && (
         <IconCheck className="mr-1.5 size-4 text-green-600" />
       )}
-      {status === "idle"
-        ? label
-        : status === "saving"
-          ? "Saving…"
-          : "Saved"}
+      {status === "idle" ? label : status === "saving" ? "Saving…" : "Saved"}
     </Button>
   )
 }

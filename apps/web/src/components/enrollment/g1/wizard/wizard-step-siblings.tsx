@@ -15,11 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { apiClient } from "@/lib/api-client"
 import { listStudentsOptions } from "@/lib/api-client/@tanstack/react-query.gen"
 import type { StudentResponse as Student } from "@/lib/api-client/types.gen"
-import {
-  IconSchool,
-  IconX,
-  IconGripVertical,
-} from "@tabler/icons-react"
+import { IconSchool, IconX, IconGripVertical } from "@tabler/icons-react"
 import { useWizardSaveStatus } from "./use-wizard-save-status"
 import { WizardNextButton } from "./wizard-next-button"
 

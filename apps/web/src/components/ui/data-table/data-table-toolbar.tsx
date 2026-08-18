@@ -75,8 +75,7 @@ function DataTableToolbarFilter<TData>({
   column,
 }: DataTableToolbarFilterProps<TData>) {
   const columnMeta = column.columnDef.meta as
-    | Record<string, unknown>
-    | undefined
+    Record<string, unknown> | undefined
 
   if (!columnMeta?.variant) return null
 
@@ -84,8 +83,7 @@ function DataTableToolbarFilter<TData>({
   const placeholder = columnMeta.placeholder as string | undefined
   const unit = columnMeta.unit as string | undefined
   const options = columnMeta.options as
-    | { value: string; label: string }[]
-    | undefined
+    { value: string; label: string }[] | undefined
 
   switch (columnMeta.variant) {
     case "text":
@@ -119,10 +117,7 @@ function DataTableToolbarFilter<TData>({
 
     case "range":
       return (
-        <DataTableSliderFilter
-          column={column}
-          title={label ?? column.id}
-        />
+        <DataTableSliderFilter column={column} title={label ?? column.id} />
       )
 
     case "date":

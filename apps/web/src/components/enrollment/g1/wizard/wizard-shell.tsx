@@ -568,7 +568,8 @@ export function WizardShell() {
                     religion: data.religion || null,
                     birth_certificate_number:
                       data.birth_certificate_number || null,
-                    medium_of_instruction: data.medium_of_instruction || "Sinhala",
+                    medium_of_instruction:
+                      data.medium_of_instruction || "Sinhala",
                     status: "Active" as const,
                   } satisfies Omit<
                     Child,
