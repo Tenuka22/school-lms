@@ -3,10 +3,12 @@ use apistos::ApiComponent;
 use apistos::api_operation;
 use chrono::Utc;
 use db::entity::common::enrollment_batches;
-use db::entity::common::enums::{AuditOperation, EnrollmentStatus};
+use db::entity::common::enums::{AuditOperation, DocumentVerificationStatus, EnrollmentStatus};
 use db::entity::g1::applications;
+use db::entity::g1::documents;
 use log::info;
 use schemars::JsonSchema;
+use sea_orm::sea_query::Expr;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use serde::Deserialize;
 use uuid::Uuid;
@@ -46,6 +48,8 @@ pub struct UpdateApplicationBody {
     pub declaration_agreed: Option<bool>,
     pub preferred_school_ids: Option<serde_json::Value>,
     pub closer_school_exists: Option<bool>,
+    pub fraud_flag: Option<bool>,
+    pub forged_document_type: Option<String>,
 }
 
 #[api_operation(tag = "g1-applications", operation_id = "update-application")]
@@ -69,27 +73,6 @@ pub async fn update_application(
         .await?
         .ok_or_else(|| ApiError::not_found("application not found"))?;
 
-    match existing.enrollment_status {
-        EnrollmentStatus::Draft | EnrollmentStatus::Pending | EnrollmentStatus::Completed => {}
-        _ => {
-            return Err(ApiError::bad_request(
-                "cannot update application in current status",
-            ));
-        }
-    }
-
-    let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
-        .one(db.as_ref())
-        .await?
-        .ok_or_else(|| ApiError::bad_request("enrollment batch not found"))?;
-
-    let now = Utc::now();
-    if batch.status != db::entity::common::enums::BatchStatus::Open || batch.closed_at <= now {
-        return Err(ApiError::bad_request(
-            "cannot edit application after enrollment batch closed",
-        ));
-    }
-
     info!(
         "[update_application] found existing app status={:?} wizard_step={:?}",
         existing.enrollment_status, existing.wizard_step
@@ -98,6 +81,42 @@ pub async fn update_application(
     let old_json = serde_json::to_value(&existing).ok();
 
     let m = body.into_inner();
+
+    let is_fraud_flag = m.fraud_flag == Some(true);
+
+    match existing.enrollment_status {
+        EnrollmentStatus::Draft
+        | EnrollmentStatus::Pending
+        | EnrollmentStatus::Completed
+        | EnrollmentStatus::Disqualified => {}
+        _ if is_fraud_flag => {}
+        _ => {
+            return Err(ApiError::bad_request(
+                "cannot update application in current status",
+            ));
+        }
+    }
+
+    if !is_fraud_flag {
+        let batch = enrollment_batches::Entity::find_by_id(existing.batch_id)
+            .one(db.as_ref())
+            .await?
+            .ok_or_else(|| ApiError::bad_request("enrollment batch not found"))?;
+
+        let now = Utc::now();
+        if batch.status != db::entity::common::enums::BatchStatus::Open || batch.closed_at <= now {
+            return Err(ApiError::bad_request(
+                "cannot edit application after enrollment batch closed",
+            ));
+        }
+    }
+
+    info!(
+        "[update_application] found existing app status={:?} wizard_step={:?}",
+        existing.enrollment_status, existing.wizard_step
+    );
+
+    let old_json = serde_json::to_value(&existing).ok();
 
     info!(
         "[update_application] incoming school_id={:?} wizard_step={:?}",
@@ -122,7 +141,11 @@ pub async fn update_application(
         child_id: Set(m.child_id.unwrap_or(existing.child_id)),
         guardian_id: Set(m.guardian_id.unwrap_or(existing.guardian_id)),
         batch_id: Set(existing.batch_id),
-        enrollment_status: Set(existing.enrollment_status),
+        enrollment_status: Set(if is_fraud_flag {
+            EnrollmentStatus::Disqualified
+        } else {
+            existing.enrollment_status
+        }),
         category: Set(m.category.or(existing.category)),
         overseas_arrival_date: Set(m.overseas_arrival_date.or(existing.overseas_arrival_date)),
         submission_method: Set(m.submission_method.or(existing.submission_method)),
@@ -166,9 +189,74 @@ pub async fn update_application(
 
     let saved = active.update(db.as_ref()).await?;
     info!(
-        "[update_application] updated successfully wizard_step={:?}",
-        saved.wizard_step
+        "[update_application] updated successfully wizard_step={:?} status={:?}",
+        saved.wizard_step, saved.enrollment_status
     );
+
+    if is_fraud_flag {
+        if let Some(doc_type_str) = &m.forged_document_type {
+            let doc_type = match doc_type_str.as_str() {
+                "BirthCertificate" => db::entity::common::enums::G1DocumentType::BirthCertificate,
+                "GuardianNIC" => db::entity::common::enums::G1DocumentType::GuardianNIC,
+                "ResidenceProof" => db::entity::common::enums::G1DocumentType::ResidenceProof,
+                "ElectoralProof" => db::entity::common::enums::G1DocumentType::ElectoralProof,
+                "SiblingSchoolCertificate" => {
+                    db::entity::common::enums::G1DocumentType::SiblingSchoolCertificate
+                }
+                "StaffAppointmentLetter" => {
+                    db::entity::common::enums::G1DocumentType::StaffAppointmentLetter
+                }
+                "StaffServiceCertificate" => {
+                    db::entity::common::enums::G1DocumentType::StaffServiceCertificate
+                }
+                "AlumniCertificate" | "PastPupilCertificate" => {
+                    db::entity::common::enums::G1DocumentType::PastPupilCertificate
+                }
+                "PastPupilExamCert" => {
+                    db::entity::common::enums::G1DocumentType::PastPupilExamCert
+                }
+                "GovtServiceCertificate" | "GovtEmployeeCertificate" => {
+                    db::entity::common::enums::G1DocumentType::GovtServiceCertificate
+                }
+                "DisabilityCertificate" => {
+                    db::entity::common::enums::G1DocumentType::DisabilityCertificate
+                }
+                "IncomeCertificate" => db::entity::common::enums::G1DocumentType::IncomeCertificate,
+                "BaptismCertificate" => db::entity::common::enums::G1DocumentType::BaptismCertificate,
+                "Other" => db::entity::common::enums::G1DocumentType::Other,
+                _ => db::entity::common::enums::G1DocumentType::Other,
+            };
+            let _ = documents::Entity::update_many()
+                .col_expr(documents::Column::FraudFlag, Expr::value(true).into())
+                .col_expr(
+                    documents::Column::VerificationStatus,
+                    Expr::value(DocumentVerificationStatus::Flagged).into(),
+                )
+                .filter(documents::Column::ApplicationId.eq(id))
+                .filter(documents::Column::DocumentType.eq(doc_type))
+                .exec(db.as_ref())
+                .await;
+        }
+
+        let _ = crate::audit::log_application_change(
+            db.as_ref(),
+            id,
+            AuditOperation::Update,
+            None,
+            Some(serde_json::json!({
+                "fraud_flag": true,
+                "forged_document_type": m.forged_document_type,
+                "disqualified": true
+            })),
+            &auth,
+            Some(format!(
+                "application disqualified due to forged document: {:?}",
+                m.forged_document_type
+            )),
+        )
+        .await;
+    }
+
     let new_json = serde_json::to_value(&saved).ok();
 
     db::entity::audit_logs::ActiveModel {

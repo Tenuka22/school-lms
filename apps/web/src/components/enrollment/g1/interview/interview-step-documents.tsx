@@ -39,6 +39,7 @@ import {
   IconClipboardCheck,
   IconCloudUpload,
   IconEye,
+  IconX,
 } from "@tabler/icons-react"
 
 const DOC_TYPES: { key: string; label: string }[] = [
@@ -69,6 +70,8 @@ interface Props {
   onDocumentsChange?: (docs: DocumentFormData[]) => void
   onBack: () => void
   onNext: () => void
+  isDisqualified?: boolean
+  onFlagForForge?: (docType: string) => void
 }
 
 export function InterviewStepDocuments({
@@ -76,6 +79,8 @@ export function InterviewStepDocuments({
   onDocumentsChange,
   onBack,
   onNext,
+  isDisqualified,
+  onFlagForForge,
 }: Props) {
   const [verificationState, setVerificationState] = useState<
     Record<string, boolean>
@@ -84,6 +89,8 @@ export function InterviewStepDocuments({
   const [showSkipConfirm, setShowSkipConfirm] = useState(false)
   const [dragOverKey, setDragOverKey] = useState<string | null>(null)
   const [uploadingKey, setUploadingKey] = useState<string | null>(null)
+  const [forgedDocType, setForgedDocType] = useState<string | null>(null)
+  const [showForgeryConfirm, setShowForgeryConfirm] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pendingDocType = useRef<string | null>(null)
   const docsRef = useRef(documents)
@@ -180,6 +187,19 @@ export function InterviewStepDocuments({
 
   const handleVerify = (docType: string, verified: boolean) => {
     setVerificationState((prev) => ({ ...prev, [docType]: verified }))
+  }
+
+  const handleForgeryClick = (docType: string) => {
+    setForgedDocType(docType)
+    setShowForgeryConfirm(true)
+  }
+
+  const handleForgeryConfirm = () => {
+    if (forgedDocType && onFlagForForge) {
+      onFlagForForge(forgedDocType)
+    }
+    setShowForgeryConfirm(false)
+    setForgedDocType(null)
   }
 
   const allRequiredVerified = REQUIRED_TYPES.every((docType) => {
@@ -300,14 +320,26 @@ export function InterviewStepDocuments({
                                 >
                                   <IconEye className="mr-1 size-3" /> View
                                 </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-7 text-xs"
-                                  onClick={() => triggerUpload(docType)}
-                                >
-                                  Replace
-                                </Button>
+                                {!isDisqualified && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-7 text-xs"
+                                    onClick={() => triggerUpload(docType)}
+                                  >
+                                    Replace
+                                  </Button>
+                                )}
+                                {!isDisqualified && (
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="h-7 text-xs"
+                                    onClick={() => handleForgeryClick(docType)}
+                                  >
+                                    <IconX className="mr-1 size-3" /> Flag as Forged
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -415,13 +447,35 @@ export function InterviewStepDocuments({
           </div>
         </div>
 
+        {/* Disqualified Notice */}
+        {isDisqualified && (
+          <div className="flex items-start gap-3 rounded-lg border border-red-300 bg-red-100 p-4 dark:border-red-700 dark:bg-red-900/30">
+            <IconX className="size-5 shrink-0 text-red-700 dark:text-red-400" />
+            <div>
+              <p className="text-sm font-semibold text-red-800 dark:text-red-200">
+                Application Disqualified
+              </p>
+              <p className="mt-0.5 text-xs text-red-700 dark:text-red-300">
+                Per circular 7.1.3, this application has been disqualified from
+                all categories due to a forged document. No further action can
+                be taken on this application. Per circular 13.0, note that
+                accepting or giving money or gifts for admission is prohibited.
+              </p>
+            </div>
+          </div>
+        )}
+
         <Separator />
 
         <div className="flex items-center justify-between border-t pt-4">
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onClick={onBack} disabled={isDisqualified}>
             Back
           </Button>
-          {allRequiredVerified ? (
+          {isDisqualified ? (
+            <Button disabled variant="secondary">
+              Application Disqualified
+            </Button>
+          ) : allRequiredVerified ? (
             <Button onClick={onNext}>Proceed to Category Scoring</Button>
           ) : (
             <Button onClick={() => setShowSkipConfirm(true)}>
@@ -493,6 +547,40 @@ export function InterviewStepDocuments({
               className="text-destructive-foreground bg-destructive hover:bg-destructive/90"
             >
               Proceed Anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Forgery Confirmation Dialog */}
+      <AlertDialog open={showForgeryConfirm} onOpenChange={setShowForgeryConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-700 dark:text-red-300">
+              Flag Document as Forged?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to flag{" "}
+              <strong>
+                {forgedDocType
+                  ? DOC_TYPES.find((d) => d.key === forgedDocType)?.label ??
+                    forgedDocType
+                  : "this document"}
+              </strong>{" "}
+              as forged or falsified. Per circular 7.1.3, this will
+              automatically disqualify the applicant from ALL categories at this
+              school. Per circular 13.0, accepting or giving money or gifts for
+              admission is strictly prohibited. This action will be logged in
+              the audit trail.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleForgeryConfirm}
+              className="bg-red-600 text-destructive-foreground hover:bg-red-700"
+            >
+              Yes, Flag as Forged
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

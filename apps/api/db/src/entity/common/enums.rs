@@ -151,6 +151,8 @@ pub enum EnrollmentStatus {
     Rejected,
     #[sea_orm(string_value = "Withdrawn")]
     Withdrawn,
+    #[sea_orm(string_value = "Disqualified")]
+    Disqualified,
 }
 
 #[derive(

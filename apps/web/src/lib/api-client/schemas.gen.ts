@@ -1459,6 +1459,7 @@ export const EnrollmentStatusSchema = {
     "Admitted",
     "Rejected",
     "Withdrawn",
+    "Disqualified",
   ],
 } as const
 
@@ -2747,6 +2748,14 @@ export const UpdateApplicationBodySchema = {
     electoral_year: {
       type: "integer",
       format: "int16",
+      nullable: true,
+    },
+    forged_document_type: {
+      type: "string",
+      nullable: true,
+    },
+    fraud_flag: {
+      type: "boolean",
       nullable: true,
     },
     gn_name: {

@@ -228,6 +228,7 @@ export const vEnrollmentStatus = v.picklist([
   "Admitted",
   "Rejected",
   "Withdrawn",
+  "Disqualified",
 ])
 
 export const vEnrollmentType = v.picklist(["G1"])
@@ -1407,6 +1408,8 @@ export const vUpdateApplicationBody = v.object({
       v.maxValue(32767, "Invalid value: Expected int16 to be <= 32767")
     )
   ),
+  forged_document_type: v.nullish(v.string()),
+  fraud_flag: v.nullish(v.boolean()),
   gn_name: v.nullish(v.string()),
   gn_number: v.nullish(v.string()),
   guardian_id: v.nullish(v.pipe(v.string(), v.uuid())),

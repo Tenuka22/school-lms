@@ -35,6 +35,7 @@ import {
   IconBuilding,
   IconClipboard,
   IconPlane,
+  IconX,
 } from "@tabler/icons-react"
 import { InterviewStepOverview } from "./interview-step-overview"
 import { InterviewStepDocuments } from "./interview-step-documents"
@@ -370,10 +371,69 @@ export function InterviewShell() {
     }
   }, [interviewDate, enrollmentId, updateApplication, navigate])
 
+  const handleFlagForForge = useCallback(
+    async (docType: string) => {
+      try {
+        await updateApplication.mutateAsync({
+          path: { id: enrollmentId },
+          body: {
+            fraud_flag: true,
+            forged_document_type: docType,
+          },
+        })
+        queryClient.invalidateQueries({
+          queryKey: listApplicationsQueryKey({ client: apiClient }),
+        })
+        toast.error(
+          "Document flagged as forged. Application disqualified from all categories per circular 7.1.3."
+        )
+      } catch (err) {
+        toastApiError(err, "Failed to flag document")
+      }
+    },
+    [enrollmentId, updateApplication]
+  )
+
+  const isDisqualified =
+    application?.enrollment_status === "Disqualified"
+
   if (!application || !childData) {
     return (
       <div className="flex size-full items-center justify-center">
         <p className="text-muted-foreground">Loading application data...</p>
+      </div>
+    )
+  }
+
+  if (isDisqualified) {
+    return (
+      <div className="flex size-full flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            onClick={() => navigate({ to: "/student-management/enrollment/g1" })}
+          >
+            <IconArrowLeft className="mr-2 size-4" /> Back to Pipeline
+          </Button>
+          <h1 className="text-xl font-bold">Interview Procedure</h1>
+        </div>
+        <div className="flex items-start gap-3 rounded-lg border border-red-300 bg-red-50 p-6 dark:border-red-700 dark:bg-red-900/30">
+          <IconX className="size-6 shrink-0 text-red-700 dark:text-red-400" />
+          <div>
+            <p className="text-base font-semibold text-red-800 dark:text-red-200">
+              Application Disqualified
+            </p>
+            <p className="mt-1 text-sm text-red-700 dark:text-red-300">
+              Per circular 7.1.3, this application has been disqualified from
+              all categories at this school due to a forged document. No
+              further action can be taken on this application.
+            </p>
+            <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+              Per circular 13.0, accepting or giving money or gifts for
+              admission is strictly prohibited.
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -487,6 +547,8 @@ export function InterviewShell() {
               onDocumentsChange={(docs) => setDocuments(docs)}
               onBack={() => saveStep(1)}
               onNext={() => saveStep(3)}
+              isDisqualified={isDisqualified}
+              onFlagForForge={handleFlagForForge}
             />
           )}
           {step === 3 && (

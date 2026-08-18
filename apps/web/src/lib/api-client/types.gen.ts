@@ -463,6 +463,7 @@ export type EnrollmentStatus =
   | "Admitted"
   | "Rejected"
   | "Withdrawn"
+  | "Disqualified"
 
 export type EnrollmentType = "G1"
 
@@ -908,6 +909,8 @@ export type UpdateApplicationBody = {
   closer_school_exists?: boolean | null
   declaration_agreed?: boolean | null
   electoral_year?: number | null
+  forged_document_type?: string | null
+  fraud_flag?: boolean | null
   gn_name?: string | null
   gn_number?: string | null
   guardian_id?: string | null
